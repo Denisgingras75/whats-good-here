@@ -29,5 +29,8 @@ export const DEFAULT_DISH_IMAGE = 'https://images.unsplash.com/photo-15046749002
 
 // Get image URL for a category
 export function getCategoryImage(category) {
-  return CATEGORY_IMAGES[category?.toLowerCase()] || DEFAULT_DISH_IMAGE
+  const lowerCategory = category?.toLowerCase()
+  const imageUrl = CATEGORY_IMAGES[lowerCategory] || DEFAULT_DISH_IMAGE
+  console.log(`getCategoryImage: category="${category}", lower="${lowerCategory}", url="${imageUrl}"`)
+  return imageUrl
 }

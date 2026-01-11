@@ -16,13 +16,17 @@ export function DishCard({ dish, onVote, onLoginRequired }) {
   } = dish
 
   const confidence = getConfidenceIndicator(total_votes || 0)
+  const imageUrl = photo_url || getCategoryImage(category)
+
+  // Debug logging
+  console.log(`Dish: ${dish_name}, Category: ${category}, Image: ${imageUrl}`)
 
   return (
     <article className="card-elevated overflow-hidden mb-6 stagger-item">
       {/* Dish Photo - Hero Element */}
       <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden group">
         <img
-          src={photo_url || getCategoryImage(category)}
+          src={imageUrl}
           alt={dish_name}
           className="w-full h-full object-cover image-zoom"
           loading="lazy"
