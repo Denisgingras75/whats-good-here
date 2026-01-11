@@ -1,6 +1,7 @@
-// Category to image URL mapping
+// Category to image URL mapping - v2.0
 // ONE consistent, high-quality photo per category
 // ALL dishes in the same category show the EXACT SAME image
+// CACHE BUST: 2026-01-11-v2
 export const CATEGORY_IMAGES = {
   'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80',
   'sandwich': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80',
