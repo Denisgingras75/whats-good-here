@@ -25,8 +25,8 @@ export const CATEGORY_IMAGES = {
   'entree': 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=800&q=80',
 }
 
-// Fallback image if category not found
-export const DEFAULT_DISH_IMAGE = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80'
+// Fallback image if category not found - TEMPORARY TEST: Using pizza as default
+export const DEFAULT_DISH_IMAGE = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80'
 
 // Get image URL for a category
 export function getCategoryImage(category) {
