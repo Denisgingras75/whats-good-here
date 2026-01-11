@@ -1,25 +1,25 @@
 const CATEGORIES = [
-  { id: null, label: 'All Dishes', emoji: '🍽️' },
-  { id: 'burger', label: 'Burgers', emoji: '🍔' },
-  { id: 'sandwich', label: 'Sandwiches', emoji: '🥪' },
-  { id: 'breakfast sandwich', label: 'Breakfast Sandwiches', emoji: '🥪' },
-  { id: 'pizza', label: 'Pizza', emoji: '🍕' },
-  { id: 'pasta', label: 'Pasta', emoji: '🍝' },
-  { id: 'sushi', label: 'Sushi', emoji: '🍣' },
-  { id: 'pokebowl', label: 'Poke Bowls', emoji: '🥙' },
-  { id: 'taco', label: 'Tacos', emoji: '🌮' },
-  { id: 'wings', label: 'Wings', emoji: '🍗' },
-  { id: 'tendys', label: 'Tendys', emoji: '🐔' },
-  { id: 'lobster roll', label: 'Lobster Rolls', emoji: '🦞' },
-  { id: 'lobster', label: 'Lobster', emoji: '🦞' },
-  { id: 'fish', label: 'Fish', emoji: '🐟' },
-  { id: 'chowder', label: 'Chowder', emoji: '🥣' },
-  { id: 'breakfast', label: 'Breakfast', emoji: '🥞' },
-  { id: 'salad', label: 'Salads', emoji: '🥗' },
-  { id: 'fries', label: 'Fries', emoji: '🍟' },
-  { id: 'apps', label: 'Apps', emoji: '🍴' },
-  { id: 'fried chicken', label: 'Fried Chicken', emoji: '🍗' },
-  { id: 'entree', label: 'Entrees', emoji: '🍖' },
+  { id: null, label: 'All Dishes', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop&q=80' },
+  { id: 'burger', label: 'Burgers', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100&h=100&fit=crop&q=80' },
+  { id: 'sandwich', label: 'Sandwiches', image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=100&h=100&fit=crop&q=80' },
+  { id: 'breakfast sandwich', label: 'Breakfast Sandwiches', image: 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=100&h=100&fit=crop&q=80' },
+  { id: 'pizza', label: 'Pizza', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=100&h=100&fit=crop&q=80' },
+  { id: 'pasta', label: 'Pasta', image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=100&h=100&fit=crop&q=80' },
+  { id: 'sushi', label: 'Sushi', image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=100&h=100&fit=crop&q=80' },
+  { id: 'pokebowl', label: 'Poke Bowls', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop&q=80' },
+  { id: 'taco', label: 'Tacos', image: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=100&h=100&fit=crop&q=80' },
+  { id: 'wings', label: 'Wings', image: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=100&h=100&fit=crop&q=80' },
+  { id: 'tendys', label: 'Tendys', image: 'https://images.unsplash.com/photo-1562967914-608f82629710?w=100&h=100&fit=crop&q=80' },
+  { id: 'lobster roll', label: 'Lobster Rolls', image: 'https://images.unsplash.com/photo-1625595117865-037d82c7cac3?w=100&h=100&fit=crop&q=80' },
+  { id: 'lobster', label: 'Lobster', image: 'https://images.unsplash.com/photo-1559737558-2f5a767d75e2?w=100&h=100&fit=crop&q=80' },
+  { id: 'fish', label: 'Fish', image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=100&h=100&fit=crop&q=80' },
+  { id: 'chowder', label: 'Chowder', image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=100&h=100&fit=crop&q=80' },
+  { id: 'breakfast', label: 'Breakfast', image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=100&h=100&fit=crop&q=80' },
+  { id: 'salad', label: 'Salads', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=100&h=100&fit=crop&q=80' },
+  { id: 'fries', label: 'Fries', image: 'https://images.unsplash.com/photo-1630431341973-02e1d0c417ee?w=100&h=100&fit=crop&q=80' },
+  { id: 'apps', label: 'Apps', image: 'https://images.unsplash.com/photo-1541529086526-db283c563270?w=100&h=100&fit=crop&q=80' },
+  { id: 'fried chicken', label: 'Fried Chicken', image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=100&h=100&fit=crop&q=80' },
+  { id: 'entree', label: 'Entrees', image: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=100&h=100&fit=crop&q=80' },
 ]
 
 export function CategoryFilter({ selectedCategory, onSelectCategory }) {
@@ -38,7 +38,8 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }) {
                 key={category.id || 'all'}
                 onClick={() => onSelectCategory(category.id)}
                 className={`
-                  px-5 py-2.5 rounded-full
+                  flex items-center gap-2
+                  px-4 py-2 rounded-full
                   font-semibold text-sm whitespace-nowrap
                   transition-all duration-200 ease-out
                   focus-ring
@@ -52,7 +53,12 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }) {
                   animationDelay: `${index * 0.03}s`,
                 }}
               >
-                <span className="mr-2 text-base">{category.emoji}</span>
+                <img
+                  src={category.image}
+                  alt={category.label}
+                  className="w-6 h-6 rounded-full object-cover"
+                  loading="lazy"
+                />
                 {category.label}
               </button>
             ))}
