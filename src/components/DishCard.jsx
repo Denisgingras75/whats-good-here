@@ -16,10 +16,13 @@ export function DishCard({ dish, onVote, onLoginRequired }) {
   } = dish
 
   const confidence = getConfidenceIndicator(total_votes || 0)
-  const imageUrl = photo_url || getCategoryImage(category)
+
+  // HARD-CODE PIZZA FOR TESTING - BYPASSING EVERYTHING
+  const PIZZA_URL = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80&test=hardcoded'
+  const imageUrl = PIZZA_URL
 
   // Debug logging
-  console.log(`Dish: ${dish_name}, Category: ${category}, Image: ${imageUrl}`)
+  console.log(`HARD-CODED TEST: Dish: ${dish_name}, Image: ${imageUrl}`)
 
   return (
     <article className="card-elevated overflow-hidden mb-6 stagger-item">
