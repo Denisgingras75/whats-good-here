@@ -17,6 +17,7 @@ export const CATEGORY_IMAGES = {
   'lobster': `https://images.unsplash.com/photo-1559737558-2f5a767d75e2?w=800&q=80&${CACHE_BUST}`,
   'fish': `https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80&${CACHE_BUST}`,
   'chowder': `https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&q=80&${CACHE_BUST}`,
+  'soup': `https://images.unsplash.com/photo-1603105037880-880cd4edfb0d?w=800&q=80&${CACHE_BUST}`,
   'breakfast': `https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&q=80&${CACHE_BUST}`,
   'salad': `https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80&${CACHE_BUST}`,
   'fries': `https://images.unsplash.com/photo-1630431341973-02e1d0c417ee?w=800&q=80&${CACHE_BUST}`,

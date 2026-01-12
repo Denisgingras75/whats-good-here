@@ -16,6 +16,7 @@ const CATEGORIES = [
   { id: 'lobster', label: 'Lobster' },
   { id: 'fish', label: 'Fish' },
   { id: 'chowder', label: 'Chowder' },
+  { id: 'soup', label: 'Soups' },
   { id: 'breakfast', label: 'Breakfast' },
   { id: 'salad', label: 'Salads' },
   { id: 'fries', label: 'Fries' },
