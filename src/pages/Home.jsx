@@ -2,16 +2,12 @@ import { useState } from 'react'
 import { useLocation } from '../hooks/useLocation'
 import { useDishes } from '../hooks/useDishes'
 import { LocationPicker } from '../components/LocationPicker'
-import { CategoryFilter } from '../components/CategoryFilter'
 import { DishFeed } from '../components/DishFeed'
 import { LoginModal } from '../components/Auth/LoginModal'
-import { RestaurantSearch } from '../components/RestaurantSearch'
 import { isSoundMuted, toggleSoundMute } from '../lib/sounds'
 
 export function Home() {
   const { location, radius, setRadius, loading: locationLoading, error: locationError } = useLocation()
-  const [selectedCategory, setSelectedCategory] = useState(null)
-  const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [soundMuted, setSoundMuted] = useState(isSoundMuted())
 
@@ -23,12 +19,11 @@ export function Home() {
   const { dishes, loading: dishesLoading, error: dishesError, refetch } = useDishes(
     location,
     radius,
-    selectedCategory,
-    selectedRestaurant?.id
+    null, // No category filter on home
+    null  // No restaurant filter on home
   )
 
   const handleVote = () => {
-    // Refetch dishes to get updated vote counts
     refetch()
   }
 
@@ -37,8 +32,8 @@ export function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Header with beautiful design */}
+    <div className="bg-stone-50">
+      {/* Header */}
       <header className="relative bg-white border-b border-neutral-200 overflow-hidden">
         {/* Decorative gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 opacity-50" />
@@ -95,19 +90,6 @@ export function Home() {
         error={locationError}
       />
 
-      {/* Restaurant Search */}
-      <RestaurantSearch
-        selectedRestaurant={selectedRestaurant}
-        onSelectRestaurant={setSelectedRestaurant}
-        onClearRestaurant={() => setSelectedRestaurant(null)}
-      />
-
-      {/* Category Filter */}
-      <CategoryFilter
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-      />
-
       {/* Dish Feed */}
       <main>
         <DishFeed
@@ -116,7 +98,6 @@ export function Home() {
           error={dishesError}
           onVote={handleVote}
           onLoginRequired={handleLoginRequired}
-          selectedRestaurant={selectedRestaurant}
         />
       </main>
 
