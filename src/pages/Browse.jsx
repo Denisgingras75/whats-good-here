@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useLocation } from '../hooks/useLocation'
 import { useDishes } from '../hooks/useDishes'
 import { DishFeed } from '../components/DishFeed'
@@ -30,9 +31,18 @@ const CATEGORIES = [
 ]
 
 export function Browse() {
+  const [searchParams] = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [loginModalOpen, setLoginModalOpen] = useState(false)
+
+  // Handle category from URL params (when coming from home page)
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category')
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl)
+    }
+  }, [searchParams])
 
   const { location, radius } = useLocation()
   const { dishes, loading, error, refetch } = useDishes(
