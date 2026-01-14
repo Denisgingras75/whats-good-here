@@ -42,11 +42,11 @@ export function Home() {
   const { isSaved, toggleSave } = useSavedDishes(user?.id)
 
   // Get top dishes overall
-  const topDishes = dishes?.slice(0, 10) || []
+  const topDishes = dishes?.slice(0, 3) || []
 
-  // Get top 3 dishes per category
+  // Get top 2 dishes per category
   const getTopByCategory = (categoryId) => {
-    return dishes?.filter(d => d.category === categoryId).slice(0, 3) || []
+    return dishes?.filter(d => d.category === categoryId).slice(0, 2) || []
   }
 
   const handleCategoryClick = (categoryId) => {
@@ -70,19 +70,19 @@ export function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
       {/* Hero Section */}
-      <header className="bg-white border-b border-neutral-200 px-4 py-6">
+      <header className="px-4 py-6" style={{ background: 'var(--color-bg)', borderBottom: '1px solid var(--color-divider)' }}>
         <div className="flex flex-col items-center text-center">
           <img
             src="/logo.png"
             alt="What's Good Here"
             className="h-16 w-auto mb-4"
           />
-          <h1 className="text-2xl font-bold text-neutral-900 font-serif mb-2">
+          <h1 className="text-2xl font-bold font-serif mb-2" style={{ color: 'var(--color-text-primary)' }}>
             Find the best dishes near you.
           </h1>
-          <p className="text-neutral-600 mb-6 max-w-xs">
+          <p className="mb-6 max-w-xs" style={{ color: 'var(--color-text-secondary)' }}>
             Real ratings by people on Martha's Vineyard.
           </p>
 
@@ -106,27 +106,24 @@ export function Home() {
       />
 
       {/* Main Content */}
-      <main className="pb-8">
+      <main className="px-4 py-6 space-y-8">
         {/* Trending Now */}
-        <section className="py-5">
-          <div className="flex items-center justify-between px-4 mb-3">
-            <h2 className="text-lg font-bold text-neutral-900 font-serif flex items-center gap-2">
-              <span>🔥</span> Trending Now
-            </h2>
-          </div>
+        <section>
+          <SectionHeader
+            emoji="🔥"
+            title="Trending Now"
+            onSeeAll={() => navigate('/browse')}
+          />
 
           {loading ? (
-            <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-64 h-40 bg-neutral-200 rounded-xl animate-pulse" />
-              ))}
-            </div>
+            <LoadingCards count={3} />
           ) : (
-            <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide">
-              {topDishes.slice(0, 5).map((dish) => (
-                <DishCard
+            <div className="space-y-3">
+              {topDishes.map((dish, index) => (
+                <VerticalDishCard
                   key={dish.dish_id}
                   dish={dish}
+                  rank={index + 1}
                   onClick={() => setSelectedDish(dish)}
                 />
               ))}
@@ -134,87 +131,36 @@ export function Home() {
           )}
         </section>
 
-        {/* Best by Category */}
+        {/* Category Sections */}
         {FEATURED_CATEGORIES.map((category) => {
           const categoryDishes = getTopByCategory(category.id)
           if (categoryDishes.length === 0 && !loading) return null
 
           return (
-            <section key={category.id} className="py-5 border-t border-neutral-100">
-              <div className="flex items-center justify-between px-4 mb-3">
-                <h2 className="text-lg font-bold text-neutral-900 font-serif flex items-center gap-2">
-                  <span>{category.emoji}</span> Best {category.label}
-                </h2>
-                <button
-                  onClick={() => handleCategoryClick(category.id)}
-                  className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}
-                >
-                  See all →
-                </button>
-              </div>
+            <section key={category.id}>
+              <SectionHeader
+                emoji={category.emoji}
+                title={`Best ${category.label}`}
+                onSeeAll={() => handleCategoryClick(category.id)}
+              />
 
               {loading ? (
-                <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex-shrink-0 w-64 h-40 bg-neutral-200 rounded-xl animate-pulse" />
-                  ))}
-                </div>
+                <LoadingCards count={2} />
               ) : (
-                <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide">
-                  {categoryDishes.map((dish) => (
-                    <DishCard
+                <div className="space-y-3">
+                  {categoryDishes.map((dish, index) => (
+                    <VerticalDishCard
                       key={dish.dish_id}
                       dish={dish}
+                      rank={index + 1}
                       onClick={() => setSelectedDish(dish)}
                     />
                   ))}
-                  {categoryDishes.length > 0 && (
-                    <button
-                      onClick={() => handleCategoryClick(category.id)}
-                      className="flex-shrink-0 w-32 h-40 bg-neutral-100 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-neutral-200 transition-colors"
-                    >
-                      <span className="text-2xl">{category.emoji}</span>
-                      <span className="text-sm font-medium text-neutral-600">See all</span>
-                    </button>
-                  )}
                 </div>
               )}
             </section>
           )
         })}
-
-        {/* Top Rated Overall */}
-        <section className="py-5 border-t border-neutral-100">
-          <div className="flex items-center justify-between px-4 mb-3">
-            <h2 className="text-lg font-bold text-neutral-900 font-serif flex items-center gap-2">
-              <span>⭐</span> Top Rated Overall
-            </h2>
-            <button
-              onClick={() => navigate('/browse')}
-              className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}
-            >
-              See all →
-            </button>
-          </div>
-
-          {loading ? (
-            <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-64 h-40 bg-neutral-200 rounded-xl animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide">
-              {topDishes.map((dish) => (
-                <DishCard
-                  key={dish.dish_id}
-                  dish={dish}
-                  onClick={() => setSelectedDish(dish)}
-                />
-              ))}
-            </div>
-          )}
-        </section>
       </main>
 
       {/* Dish Detail Modal */}
@@ -227,7 +173,7 @@ export function Home() {
           />
 
           {/* Modal Content */}
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-stone-50 rounded-t-3xl animate-slide-up">
+          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl animate-slide-up" style={{ background: 'var(--color-surface)' }}>
             {/* Close button */}
             <button
               onClick={() => setSelectedDish(null)}
@@ -260,64 +206,129 @@ export function Home() {
   )
 }
 
-// Compact horizontal dish card
-function DishCard({ dish, onClick }) {
+// Section header component
+function SectionHeader({ emoji, title, onSeeAll }) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-lg font-bold font-serif flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+        <span>{emoji}</span> {title}
+      </h2>
+      <button
+        onClick={onSeeAll}
+        className="text-sm font-semibold"
+        style={{ color: 'var(--color-text-secondary)' }}
+      >
+        See all →
+      </button>
+    </div>
+  )
+}
+
+// Loading placeholder cards
+function LoadingCards({ count }) {
+  return (
+    <div className="space-y-3">
+      {[...Array(count)].map((_, i) => (
+        <div
+          key={i}
+          className="h-24 rounded-xl animate-pulse"
+          style={{ background: 'var(--color-divider)' }}
+        />
+      ))}
+    </div>
+  )
+}
+
+// Vertical dish card - compact and clean
+function VerticalDishCard({ dish, rank, onClick }) {
   const {
-    dish_id,
     dish_name,
     category,
-    image_url,
     photo_url,
     restaurant_name,
     percent_worth_it,
     total_votes,
   } = dish
 
-  // Use photo_url if available, otherwise use category-based image
   const imgSrc = photo_url || getCategoryImage(category)
 
   return (
     <button
       onClick={onClick}
-      className="flex-shrink-0 w-64 bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden text-left hover:shadow-md hover:border-orange-200 transition-all active:scale-[0.98]"
+      className="w-full flex items-center gap-4 p-3 rounded-xl border transition-all hover:shadow-md active:scale-[0.99]"
+      style={{
+        background: 'var(--color-bg)',
+        borderColor: 'var(--color-divider)'
+      }}
     >
+      {/* Rank Badge */}
+      <div
+        className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+        style={{
+          background: rank === 1 ? 'var(--color-primary)' : 'var(--color-surface)',
+          color: rank === 1 ? 'white' : 'var(--color-text-secondary)',
+          border: rank === 1 ? 'none' : '1px solid var(--color-divider)'
+        }}
+      >
+        {rank}
+      </div>
+
       {/* Image */}
-      <div className="relative h-28 bg-neutral-100">
+      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0" style={{ background: 'var(--color-surface)' }}>
         <img
           src={imgSrc}
           alt={dish_name}
           className="w-full h-full object-cover"
         />
-
-        {/* Rating Badge */}
-        {total_votes > 0 ? (
-          <div className="absolute top-2 right-2 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 shadow-sm" style={{ background: 'color-mix(in srgb, var(--color-rating) 18%, white)', border: '1px solid color-mix(in srgb, var(--color-rating) 35%, transparent)' }}>
-            <span className="text-xs">👍</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--color-text-primary)' }}>
-              {Math.round(percent_worth_it)}%
-            </span>
-          </div>
-        ) : (
-          <div className="absolute top-2 right-2 px-2 py-1 rounded-full shadow-sm" style={{ background: 'var(--color-primary)' }}>
-            <span className="text-xs font-medium text-white">Be first to rate!</span>
-          </div>
-        )}
       </div>
 
       {/* Info */}
-      <div className="p-3">
-        <h3 className="font-semibold text-neutral-900 text-sm truncate">
+      <div className="flex-1 min-w-0 text-left">
+        <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
           {dish_name}
         </h3>
-        <p className="text-xs text-neutral-500 truncate mt-0.5">
+        <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
           {restaurant_name}
         </p>
-        {total_votes > 0 && (
-          <p className="text-xs text-neutral-400 mt-1">
-            {total_votes} {total_votes === 1 ? 'vote' : 'votes'}
-          </p>
+      </div>
+
+      {/* Rating */}
+      <div className="flex-shrink-0 text-right">
+        {total_votes > 0 ? (
+          <>
+            <div
+              className="text-sm font-bold"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              {Math.round(percent_worth_it)}%
+            </div>
+            <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+              {total_votes} {total_votes === 1 ? 'vote' : 'votes'}
+            </div>
+          </>
+        ) : (
+          <span
+            className="text-xs font-medium px-2 py-1 rounded-full"
+            style={{
+              background: 'color-mix(in srgb, var(--color-primary) 15%, white)',
+              color: 'var(--color-primary)'
+            }}
+          >
+            New
+          </span>
         )}
       </div>
+
+      {/* Arrow */}
+      <svg
+        className="w-5 h-5 flex-shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        style={{ color: 'var(--color-text-tertiary)' }}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
     </button>
   )
 }
