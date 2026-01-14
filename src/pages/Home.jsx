@@ -38,7 +38,10 @@ export function Home() {
 
   // Split dishes into ranked (enough votes) and unrated (not enough votes)
   const rankedDishes = dishes?.filter(d => (d.total_votes || 0) >= MIN_VOTES_FOR_RANKING) || []
-  const unratedDishes = dishes?.filter(d => (d.total_votes || 0) < MIN_VOTES_FOR_RANKING) || []
+  // Sort unranked by most votes desc, then by most recent (created_at would be ideal, fallback to dish_id)
+  const unratedDishes = dishes
+    ?.filter(d => (d.total_votes || 0) < MIN_VOTES_FOR_RANKING)
+    .sort((a, b) => (b.total_votes || 0) - (a.total_votes || 0)) || []
 
   // Build the Top 10 list: ranked first, fill remaining with unrated
   const topRanked = rankedDishes.slice(0, TOP_COUNT)
@@ -97,10 +100,10 @@ export function Home() {
         {/* Title + Ranking Explanation */}
         <div className="mb-4">
           <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            Top 10 within {radius} {radius === 1 ? 'mile' : 'miles'}
+            Help shape the Top 10 within {radius} {radius === 1 ? 'mile' : 'miles'}
           </h1>
           <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-            Ranked by % who would order again · Min {MIN_VOTES_FOR_RANKING} votes to qualify
+            Beta — rankings unlock as dishes reach {MIN_VOTES_FOR_RANKING}+ votes · Ranked by % who would order again
           </p>
         </div>
 
@@ -150,7 +153,7 @@ export function Home() {
               <div className="flex items-center gap-3 py-3">
                 <div className="flex-1 h-px" style={{ background: 'var(--color-divider)' }} />
                 <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
-                  New — be first to rate
+                  Needs votes to rank
                 </span>
                 <div className="flex-1 h-px" style={{ background: 'var(--color-divider)' }} />
               </div>
@@ -311,11 +314,11 @@ function DishRow({ dish, rank, onClick, isRanked }) {
       </div>
 
       {/* Rating + Votes + Distance */}
-      <div className="flex-shrink-0 text-right">
+      <div className="flex-shrink-0 text-right max-w-[100px]">
         {isRanked ? (
           <>
-            <div className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
-              {Math.round(percent_worth_it)}%
+            <div className="text-sm font-bold" style={{ color: 'var(--color-rating)' }}>
+              👍 {Math.round(percent_worth_it)}%
             </div>
             <div className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
               {votes} votes{distance_miles ? ` · ${Number(distance_miles).toFixed(1)}mi` : ''}
@@ -323,30 +326,31 @@ function DishRow({ dish, rank, onClick, isRanked }) {
           </>
         ) : (
           <>
+            {/* "Needs votes" badge - subtle, not orange */}
             <div
-              className="text-xs font-medium px-2 py-0.5 rounded-full"
+              className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-block"
               style={{
-                background: 'color-mix(in srgb, var(--color-primary) 12%, white)',
-                color: 'var(--color-primary)'
+                background: 'var(--color-surface)',
+                color: 'var(--color-text-secondary)',
+                border: '1px solid var(--color-divider)'
               }}
             >
-              New
+              Needs votes
             </div>
-            {distance_miles && (
-              <div className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                {Number(distance_miles).toFixed(1)} mi
-              </div>
-            )}
+            <div className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+              {votes > 0 ? `${votes} vote${votes === 1 ? '' : 's'} (need ${MIN_VOTES_FOR_RANKING})` : `0 of ${MIN_VOTES_FOR_RANKING} votes`}
+              {distance_miles ? ` · ${Number(distance_miles).toFixed(1)}mi` : ''}
+            </div>
           </>
         )}
       </div>
 
-      {/* Tap indicator */}
+      {/* Tap indicator - neutral gray */}
       <div
         className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center transition-all group-hover:scale-110"
         style={{
-          background: 'color-mix(in srgb, var(--color-primary) 10%, white)',
-          color: 'var(--color-primary)'
+          background: 'var(--color-surface)',
+          color: 'var(--color-text-tertiary)'
         }}
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
