@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router-dom'
 import { useLocation } from '../hooks/useLocation'
 import { useDishes } from '../hooks/useDishes'
 import { useSavedDishes } from '../hooks/useSavedDishes'
-import { DishFeed } from '../components/DishFeed'
+import { BrowseCard } from '../components/BrowseCard'
+import { DishCard } from '../components/DishCard'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { supabase } from '../lib/supabase'
 
@@ -36,6 +37,7 @@ export function Browse() {
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [selectedDish, setSelectedDish] = useState(null)
   const [user, setUser] = useState(null)
   const categoryScrollRef = useRef(null)
 
@@ -192,16 +194,105 @@ export function Browse() {
         </p>
       </div>
 
-      {/* Dish Feed */}
-      <DishFeed
-        dishes={filteredDishes}
-        loading={loading}
-        error={error}
-        onVote={handleVote}
-        onLoginRequired={handleLoginRequired}
-        isSaved={isSaved}
-        onToggleSave={handleToggleSave}
-      />
+      {/* Dish Grid */}
+      <div className="px-4 py-4">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="relative w-16 h-16 mb-4">
+              <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: 'var(--color-primary)' }} />
+              <div className="absolute inset-2 rounded-full bg-white flex items-center justify-center">
+                <span className="text-2xl">🍽️</span>
+              </div>
+            </div>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Finding dishes...</p>
+          </div>
+        ) : error ? (
+          <div className="py-16 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <p className="text-sm text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium"
+            >
+              Retry
+            </button>
+          </div>
+        ) : filteredDishes.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface)' }}>
+              <span className="text-2xl">🔍</span>
+            </div>
+            <p className="font-medium mb-1" style={{ color: 'var(--color-text-primary)' }}>No dishes found</p>
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Try a different category or search</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filteredDishes.map((dish) => (
+              <BrowseCard
+                key={dish.dish_id}
+                dish={dish}
+                onClick={() => setSelectedDish(dish)}
+                isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+                onToggleFavorite={handleToggleSave}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Footer */}
+        {!loading && filteredDishes.length > 0 && (
+          <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: 'var(--color-divider)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+              {filteredDishes.length} {filteredDishes.length === 1 ? 'dish' : 'dishes'} found
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Dish Detail Modal */}
+      {selectedDish && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSelectedDish(null)}
+          />
+
+          {/* Modal Content */}
+          <div
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl animate-slide-up"
+            style={{ background: 'var(--color-surface)' }}
+          >
+            {/* Handle */}
+            <div className="sticky top-0 z-10 flex justify-center pt-3 pb-2" style={{ background: 'var(--color-surface)' }}>
+              <div className="w-10 h-1 rounded-full" style={{ background: 'var(--color-divider)' }} />
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={() => setSelectedDish(null)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Dish Card */}
+            <div className="px-4 pb-8">
+              <DishCard
+                dish={selectedDish}
+                onVote={handleVote}
+                onLoginRequired={handleLoginRequired}
+                isFavorite={isSaved ? isSaved(selectedDish.dish_id) : false}
+                onToggleFavorite={handleToggleSave}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <LoginModal
         isOpen={loginModalOpen}
