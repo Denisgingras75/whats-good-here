@@ -1,6 +1,6 @@
 import { DishCard } from './DishCard'
 
-export function DishFeed({ dishes, loading, error, onVote, onLoginRequired, selectedRestaurant }) {
+export function DishFeed({ dishes, loading, error, onVote, onLoginRequired, selectedRestaurant, isSaved, onToggleSave }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
@@ -93,6 +93,8 @@ export function DishFeed({ dishes, loading, error, onVote, onLoginRequired, sele
             dish={dish}
             onVote={onVote}
             onLoginRequired={onLoginRequired}
+            isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+            onToggleFavorite={onToggleSave}
           />
         ))}
       </div>

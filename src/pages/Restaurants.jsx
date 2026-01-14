@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useLocation } from '../hooks/useLocation'
 import { useDishes } from '../hooks/useDishes'
+import { useSavedDishes } from '../hooks/useSavedDishes'
 import { DishFeed } from '../components/DishFeed'
 import { LoginModal } from '../components/Auth/LoginModal'
 
@@ -11,6 +12,16 @@ export function Restaurants() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [user, setUser] = useState(null)
+
+  // Get current user
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   const { location, radius } = useLocation()
   const { dishes, loading: dishesLoading, error: dishesError, refetch } = useDishes(
@@ -19,6 +30,7 @@ export function Restaurants() {
     null,
     selectedRestaurant?.id
   )
+  const { isSaved, toggleSave } = useSavedDishes(user?.id)
 
   // Fetch restaurants with dish counts and details
   useEffect(() => {
@@ -55,6 +67,14 @@ export function Restaurants() {
 
   const handleLoginRequired = () => {
     setLoginModalOpen(true)
+  }
+
+  const handleToggleSave = async (dishId) => {
+    if (!user) {
+      setLoginModalOpen(true)
+      return
+    }
+    await toggleSave(dishId)
   }
 
   // Filter restaurants by search
@@ -243,6 +263,8 @@ export function Restaurants() {
             onVote={handleVote}
             onLoginRequired={handleLoginRequired}
             selectedRestaurant={selectedRestaurant}
+            isSaved={isSaved}
+            onToggleSave={handleToggleSave}
           />
         </>
       )}

@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useLocation } from '../hooks/useLocation'
 import { useDishes } from '../hooks/useDishes'
+import { useSavedDishes } from '../hooks/useSavedDishes'
 import { DishFeed } from '../components/DishFeed'
 import { LoginModal } from '../components/Auth/LoginModal'
+import { supabase } from '../lib/supabase'
 
 const CATEGORIES = [
   { id: null, label: 'All', emoji: '🍽️' },
@@ -34,7 +36,17 @@ export function Browse() {
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [user, setUser] = useState(null)
   const categoryScrollRef = useRef(null)
+
+  // Get current user
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   // Handle category from URL params (when coming from home page)
   useEffect(() => {
@@ -51,6 +63,7 @@ export function Browse() {
     selectedCategory,
     null
   )
+  const { isSaved, toggleSave } = useSavedDishes(user?.id)
 
   const handleVote = () => {
     refetch()
@@ -58,6 +71,14 @@ export function Browse() {
 
   const handleLoginRequired = () => {
     setLoginModalOpen(true)
+  }
+
+  const handleToggleSave = async (dishId) => {
+    if (!user) {
+      setLoginModalOpen(true)
+      return
+    }
+    await toggleSave(dishId)
   }
 
   const handleCategoryChange = (categoryId) => {
@@ -176,6 +197,8 @@ export function Browse() {
         error={error}
         onVote={handleVote}
         onLoginRequired={handleLoginRequired}
+        isSaved={isSaved}
+        onToggleSave={handleToggleSave}
       />
 
       <LoginModal

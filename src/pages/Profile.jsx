@@ -1,16 +1,31 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useProfile } from '../hooks/useProfile'
+import { useUserVotes } from '../hooks/useUserVotes'
+import { useSavedDishes } from '../hooks/useSavedDishes'
 import { isSoundMuted, toggleSoundMute } from '../lib/sounds'
+import { getCategoryImage } from '../constants/categoryImages'
+
+const TABS = [
+  { id: 'worth-it', label: 'Worth It', emoji: '👍' },
+  { id: 'avoid', label: 'Avoid', emoji: '👎' },
+  { id: 'saved', label: 'Saved', emoji: '❤️' },
+]
 
 export function Profile() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [votes, setVotes] = useState([])
-  const [votesLoading, setVotesLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState('worth-it')
   const [soundMuted, setSoundMuted] = useState(isSoundMuted())
   const [authLoading, setAuthLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState(null)
+  const [editingName, setEditingName] = useState(false)
+  const [newName, setNewName] = useState('')
+
+  const { profile, updateProfile } = useProfile(user?.id)
+  const { worthItDishes, avoidDishes, stats, loading: votesLoading } = useUserVotes(user?.id)
+  const { savedDishes, loading: savedLoading, unsaveDish } = useSavedDishes(user?.id)
 
   // Check auth state
   useEffect(() => {
@@ -26,40 +41,12 @@ export function Profile() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Fetch user's votes when logged in
+  // Set initial name for editing
   useEffect(() => {
-    if (!user) {
-      setVotes([])
-      return
+    if (profile?.display_name) {
+      setNewName(profile.display_name)
     }
-
-    async function fetchVotes() {
-      setVotesLoading(true)
-      const { data, error } = await supabase
-        .from('votes')
-        .select(`
-          id,
-          would_order_again,
-          rating_10,
-          created_at,
-          dishes (
-            id,
-            dish_name,
-            restaurants (name)
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20)
-
-      if (!error && data) {
-        setVotes(data)
-      }
-      setVotesLoading(false)
-    }
-
-    fetchVotes()
-  }, [user])
+  }, [profile])
 
   const handleToggleSound = () => {
     const newMutedState = toggleSoundMute()
@@ -102,6 +89,35 @@ export function Profile() {
     setAuthLoading(false)
   }
 
+  const handleSaveName = async () => {
+    if (newName.trim()) {
+      await updateProfile({ display_name: newName.trim() })
+    }
+    setEditingName(false)
+  }
+
+  // Get dishes for current tab
+  const getTabDishes = () => {
+    switch (activeTab) {
+      case 'worth-it':
+        return worthItDishes
+      case 'avoid':
+        return avoidDishes
+      case 'saved':
+        return savedDishes
+      default:
+        return []
+    }
+  }
+
+  const tabDishes = getTabDishes()
+  const isLoading = activeTab === 'saved' ? savedLoading : votesLoading
+
+  // Format member since date
+  const memberSince = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    : null
+
   if (loading) {
     return (
       <div className="min-h-screen bg-stone-50 flex items-center justify-center">
@@ -115,80 +131,193 @@ export function Profile() {
       {/* Header */}
       <header className="bg-white border-b border-neutral-200 px-4 py-4">
         <div className="flex flex-col items-center">
-          <img src="/logo.png" alt="What's Good Here" className="h-28 w-auto" />
+          <img src="/logo.png" alt="What's Good Here" className="h-20 w-auto" />
         </div>
       </header>
 
-      <div className="p-4 space-y-4">
-        {/* User Info or Sign In */}
-        {user ? (
-          <>
-            {/* User Card */}
-            <div className="bg-white rounded-2xl border border-neutral-200 p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-xl font-bold">
-                  {user.email?.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-neutral-900 truncate">
-                    {user.email}
-                  </p>
-                  <p className="text-sm text-neutral-500">
-                    {votes.length} votes
-                  </p>
-                </div>
+      {user ? (
+        <>
+          {/* Profile Header */}
+          <div className="bg-white border-b border-neutral-200 px-4 py-6">
+            <div className="flex items-center gap-4">
+              {/* Avatar */}
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                {profile?.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                {/* Display Name */}
+                {editingName ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="flex-1 px-3 py-1.5 border border-neutral-300 rounded-lg text-lg font-bold focus:border-orange-400 focus:outline-none"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      className="px-3 py-1.5 bg-orange-500 text-white rounded-lg text-sm font-medium"
+                    >
+                      Save
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setEditingName(true)}
+                    className="text-xl font-bold text-neutral-900 hover:text-orange-600 transition-colors flex items-center gap-2"
+                  >
+                    {profile?.display_name || 'Set your name'}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-neutral-400">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Stats Row */}
+                <p className="text-sm text-neutral-500 mt-1">
+                  {stats.totalVotes} votes · {savedDishes.length} saved
+                  {memberSince && ` · Since ${memberSince}`}
+                </p>
+
+                {/* Local Badge */}
+                {stats.totalVotes >= 10 && (
+                  <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 rounded-full text-xs font-semibold">
+                    <span>🏝️</span>
+                    <span>Martha's Vineyard Local</span>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* My Votes */}
+            {/* Quick Stats Cards */}
+            {stats.totalVotes > 0 && (
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-emerald-600">{stats.worthItCount}</div>
+                  <div className="text-xs text-neutral-500">Worth It</div>
+                </div>
+                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-red-500">{stats.avoidCount}</div>
+                  <div className="text-xs text-neutral-500">Avoid</div>
+                </div>
+                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-orange-500">
+                    {stats.avgRating ? stats.avgRating.toFixed(1) : '—'}
+                  </div>
+                  <div className="text-xs text-neutral-500">Avg Rating</div>
+                </div>
+              </div>
+            )}
+
+            {/* Top Category & Restaurant */}
+            {(stats.topCategory || stats.favoriteRestaurant) && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {stats.topCategory && (
+                  <div className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs font-medium text-neutral-600">
+                    Fave category: <span className="text-neutral-900">{stats.topCategory}</span>
+                  </div>
+                )}
+                {stats.favoriteRestaurant && (
+                  <div className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs font-medium text-neutral-600">
+                    Top spot: <span className="text-neutral-900">{stats.favoriteRestaurant}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Tabs */}
+          <div className="bg-white border-b border-neutral-200 px-4 py-2">
+            <div className="flex gap-2">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    activeTab === tab.id
+                      ? 'bg-orange-500 text-white shadow-md'
+                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  }`}
+                >
+                  <span>{tab.emoji}</span>
+                  <span>{tab.label}</span>
+                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
+                    activeTab === tab.id ? 'bg-white/20' : 'bg-neutral-200'
+                  }`}>
+                    {tab.id === 'worth-it' ? worthItDishes.length :
+                     tab.id === 'avoid' ? avoidDishes.length :
+                     savedDishes.length}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-4">
+            {isLoading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-24 bg-neutral-200 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : tabDishes.length > 0 ? (
+              <div className="space-y-3">
+                {tabDishes.map((dish) => (
+                  <ProfileDishCard
+                    key={dish.dish_id}
+                    dish={dish}
+                    tab={activeTab}
+                    onUnsave={activeTab === 'saved' ? () => unsaveDish(dish.dish_id) : null}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState tab={activeTab} />
+            )}
+          </div>
+
+          {/* Settings */}
+          <div className="p-4 pt-0">
             <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-neutral-100">
-                <h2 className="font-semibold text-neutral-900">My Votes</h2>
+                <h2 className="font-semibold text-neutral-900">Settings</h2>
               </div>
 
-              {votesLoading ? (
-                <div className="p-4 space-y-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-16 bg-neutral-100 rounded-lg animate-pulse" />
-                  ))}
+              {/* Sound Toggle */}
+              <button
+                onClick={handleToggleSound}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                    {soundMuted ? '🔇' : '🔊'}
+                  </div>
+                  <span className="font-medium text-neutral-900">Bite Sounds</span>
                 </div>
-              ) : votes.length > 0 ? (
-                <div className="divide-y divide-neutral-100">
-                  {votes.map((vote) => (
-                    <div key={vote.id} className="px-4 py-3 flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        vote.would_order_again
-                          ? 'bg-emerald-100 text-emerald-600'
-                          : 'bg-red-100 text-red-600'
-                      }`}>
-                        {vote.would_order_again ? '👍' : '👎'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-neutral-900 truncate">
-                          {vote.dishes?.dish_name}
-                        </p>
-                        <p className="text-sm text-neutral-500 truncate">
-                          {vote.dishes?.restaurants?.name}
-                        </p>
-                      </div>
-                      {vote.rating_10 && (
-                        <div className="text-sm font-semibold text-orange-500">
-                          {vote.rating_10}/10
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div className={`w-12 h-7 rounded-full transition-colors ${soundMuted ? 'bg-neutral-200' : 'bg-orange-500'}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform mt-1 ${soundMuted ? 'ml-1' : 'ml-6'}`} />
                 </div>
-              ) : (
-                <div className="p-8 text-center text-neutral-500">
-                  <p>No votes yet</p>
-                  <p className="text-sm mt-1">Rate some dishes to see them here!</p>
+              </button>
+
+              {/* Sign Out */}
+              <button
+                onClick={handleSignOut}
+                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+              >
+                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                  🚪
                 </div>
-              )}
+                <span className="font-medium text-red-600">Sign Out</span>
+              </button>
             </div>
-          </>
-        ) : (
-          /* Sign In Card */
+          </div>
+        </>
+      ) : (
+        /* Sign In Card */
+        <div className="p-4">
           <div className="bg-white rounded-2xl border border-neutral-200 p-6">
             <div className="text-center mb-6">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center mx-auto mb-4">
@@ -198,7 +327,7 @@ export function Profile() {
               </div>
               <h2 className="text-xl font-bold text-neutral-900">Sign in to vote</h2>
               <p className="text-sm text-neutral-500 mt-1">
-                Track your votes and help others find great food
+                Track your votes, save favorites, and help others find great food
               </p>
             </div>
 
@@ -255,54 +384,90 @@ export function Profile() {
               </button>
             </form>
           </div>
-        )}
+        </div>
+      )}
+    </div>
+  )
+}
 
-        {/* Settings */}
-        <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-neutral-100">
-            <h2 className="font-semibold text-neutral-900">Settings</h2>
-          </div>
+// Compact dish card for profile tabs
+function ProfileDishCard({ dish, tab, onUnsave }) {
+  const imageUrl = dish.photo_url || getCategoryImage(dish.category)
 
-          {/* Sound Toggle */}
-          <button
-            onClick={handleToggleSound}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-                {soundMuted ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-neutral-400">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
-                  </svg>
-                )}
-              </div>
-              <span className="font-medium text-neutral-900">Bite Sounds</span>
-            </div>
-            <div className={`w-12 h-7 rounded-full transition-colors ${soundMuted ? 'bg-neutral-200' : 'bg-orange-500'}`}>
-              <div className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform mt-1 ${soundMuted ? 'ml-1' : 'ml-6'}`} />
-            </div>
-          </button>
+  return (
+    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden flex">
+      {/* Image */}
+      <div className="w-24 h-24 flex-shrink-0 bg-neutral-100">
+        <img
+          src={imageUrl}
+          alt={dish.dish_name}
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-          {/* Sign Out */}
-          {user && (
+      {/* Info */}
+      <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
+        <div>
+          <h3 className="font-semibold text-neutral-900 truncate">{dish.dish_name}</h3>
+          <p className="text-sm text-neutral-500 truncate">{dish.restaurant_name}</p>
+        </div>
+
+        <div className="flex items-center justify-between">
+          {/* Rating if available */}
+          {dish.rating_10 && (
+            <span className="text-sm font-semibold text-orange-500">{dish.rating_10}/10</span>
+          )}
+
+          {/* Tab-specific indicator */}
+          {tab === 'worth-it' && (
+            <span className="text-emerald-500 text-lg">👍</span>
+          )}
+          {tab === 'avoid' && (
+            <span className="text-red-500 text-lg">👎</span>
+          )}
+          {tab === 'saved' && onUnsave && (
             <button
-              onClick={handleSignOut}
-              className="w-full px-4 py-3 flex items-center gap-3 hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+              onClick={onUnsave}
+              className="text-red-500 hover:text-red-600 transition-colors"
             >
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-red-500">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
-                </svg>
-              </div>
-              <span className="font-medium text-red-600">Sign Out</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+              </svg>
             </button>
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+// Empty state for tabs
+function EmptyState({ tab }) {
+  const content = {
+    'worth-it': {
+      emoji: '👍',
+      title: 'No favorites yet',
+      description: 'Dishes you rate as "Worth It" will appear here',
+    },
+    'avoid': {
+      emoji: '👎',
+      title: 'Nothing to avoid',
+      description: 'Dishes you think others should skip will appear here',
+    },
+    'saved': {
+      emoji: '❤️',
+      title: 'No saved dishes',
+      description: 'Tap the heart on dishes you want to try later',
+    },
+  }
+
+  const { emoji, title, description } = content[tab]
+
+  return (
+    <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center">
+      <div className="text-4xl mb-3">{emoji}</div>
+      <h3 className="font-semibold text-neutral-900">{title}</h3>
+      <p className="text-sm text-neutral-500 mt-1">{description}</p>
     </div>
   )
 }
