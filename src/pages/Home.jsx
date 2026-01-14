@@ -255,7 +255,7 @@ function VerticalDishCard({ dish, rank, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-4 p-3 rounded-xl border transition-all hover:shadow-md active:scale-[0.99]"
+      className="w-full flex items-center gap-3 p-3 rounded-xl border shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] active:shadow-sm group"
       style={{
         background: 'var(--color-bg)',
         borderColor: 'var(--color-divider)'
@@ -278,7 +278,7 @@ function VerticalDishCard({ dish, rank, onClick }) {
         <img
           src={imgSrc}
           alt={dish_name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
       </div>
 
@@ -301,16 +301,18 @@ function VerticalDishCard({ dish, rank, onClick }) {
         </p>
       </div>
 
-      {/* Arrow */}
-      <svg
-        className="w-5 h-5 flex-shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        style={{ color: 'var(--color-text-tertiary)' }}
+      {/* Tap indicator */}
+      <div
+        className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center transition-all group-hover:scale-110"
+        style={{
+          background: 'color-mix(in srgb, var(--color-primary) 12%, white)',
+          color: 'var(--color-primary)'
+        }}
       >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-      </svg>
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
     </button>
   )
 }

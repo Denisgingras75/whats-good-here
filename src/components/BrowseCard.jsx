@@ -19,7 +19,7 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
   return (
     <button
       onClick={onClick}
-      className="w-full bg-white rounded-2xl overflow-hidden border transition-all hover:shadow-lg hover:border-neutral-300 active:scale-[0.99] text-left group"
+      className="w-full bg-white rounded-2xl overflow-hidden border shadow-sm transition-all duration-200 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] active:shadow-md text-left group"
       style={{ borderColor: 'var(--color-divider)' }}
     >
       {/* Image with rating badge */}
@@ -120,14 +120,25 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
             </p>
           </div>
 
-          {/* Tap indicator */}
-          <div
-            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all group-hover:bg-neutral-100"
-            style={{ color: 'var(--color-text-tertiary)' }}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+          {/* Tap indicator - prominent affordance */}
+          <div className="flex-shrink-0 flex flex-col items-center gap-1">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+              style={{
+                background: 'color-mix(in srgb, var(--color-primary) 12%, white)',
+                color: 'var(--color-primary)'
+              }}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            <span
+              className="text-[10px] font-medium"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
+              View
+            </span>
           </div>
         </div>
       </div>
