@@ -13,25 +13,17 @@ export function LocationPicker({ radius, onRadiusChange, location, error }) {
             </div>
           ) : location ? (
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-md">
-                <span className="text-white text-lg">📍</span>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-sm">
+                <span className="text-white text-sm">📍</span>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-neutral-900">Near you</p>
-                <p className="text-xs text-neutral-500">
-                  {location.lat.toFixed(4)}°, {location.lng.toFixed(4)}°
-                </p>
-              </div>
+              <p className="text-sm font-semibold text-neutral-900">Near you</p>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center animate-pulse">
-                <span className="text-neutral-400 text-lg">📍</span>
+              <div className="w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center animate-pulse">
+                <span className="text-neutral-400 text-sm">📍</span>
               </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-500">Getting location...</p>
-                <p className="text-xs text-neutral-400">Please wait</p>
-              </div>
+              <p className="text-sm font-medium text-neutral-500">Getting location...</p>
             </div>
           )}
         </div>
