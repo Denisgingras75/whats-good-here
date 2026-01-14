@@ -19,6 +19,7 @@ export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVote
 
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [confirmationType, setConfirmationType] = useState(null)
+  const [awaitingLogin, setAwaitingLogin] = useState(false)
 
   const noVotes = localTotalVotes - localYesVotes
   const yesPercent = localTotalVotes > 0 ? Math.round((localYesVotes / localTotalVotes) * 100) : 0
@@ -59,6 +60,24 @@ export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVote
     fetchUserVote()
   }, [dishId, user])
 
+  // Continue flow after successful login
+  useEffect(() => {
+    if (user && awaitingLogin && pendingVote !== null) {
+      // User just logged in and we have a pending vote - continue to rating step
+      setAwaitingLogin(false)
+      setStep(2)
+    }
+  }, [user, awaitingLogin, pendingVote])
+
+  // Auth guard: if on step 2+ without auth, kick back to step 1
+  useEffect(() => {
+    if ((step === 2 || step === 3) && !user) {
+      setStep(1)
+      setAwaitingLogin(true)
+      onLoginRequired?.()
+    }
+  }, [step, user, onLoginRequired])
+
   const handleVoteClick = (wouldOrderAgain) => {
     setConfirmationType(wouldOrderAgain ? 'yes' : 'no')
     setShowConfirmation(true)
@@ -66,6 +85,16 @@ export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVote
 
     setTimeout(() => {
       setShowConfirmation(false)
+
+      // Auth gate: check if user is logged in BEFORE going to rating step
+      if (!user) {
+        setAwaitingLogin(true)
+        onLoginRequired?.()
+        // Don't advance to step 2 - wait for login
+        return
+      }
+
+      // User is authenticated - proceed to rating
       setStep(2)
     }, 350)
   }
@@ -151,10 +180,22 @@ export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVote
 
   // Step 1: Yes/No
   if (step === 1) {
+    // Show pending selection state when awaiting login
+    const showPendingYes = awaitingLogin && pendingVote === true
+    const showPendingNo = awaitingLogin && pendingVote === false
+
     return (
       <div className="space-y-3">
         <p className="text-sm font-medium text-neutral-600 text-center">Would you order this again?</p>
-        {localTotalVotes > 0 ? (
+
+        {/* Show "sign in to continue" note when awaiting login */}
+        {awaitingLogin && pendingVote !== null && (
+          <p className="text-xs text-center" style={{ color: 'var(--color-primary)' }}>
+            Sign in to continue rating
+          </p>
+        )}
+
+        {localTotalVotes > 0 && !awaitingLogin ? (
           <div className="flex items-center justify-center gap-4 text-sm">
             <span className="flex items-center gap-1.5 text-emerald-600 font-semibold">
               <span>👍</span> {localYesVotes} <span className="text-emerald-500 font-normal">({yesPercent}%)</span>
@@ -164,20 +205,23 @@ export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVote
               <span>👎</span> {noVotes} <span className="text-red-400 font-normal">({noPercent}%)</span>
             </span>
           </div>
-        ) : (
+        ) : !awaitingLogin ? (
           <p className="text-xs text-neutral-400 text-center">No votes yet — be the first!</p>
-        )}
+        ) : null}
+
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => handleVoteClick(true)}
             disabled={showConfirmation}
             className={`relative overflow-hidden flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95
-              ${showConfirmation && confirmationType === 'yes'
+              ${(showConfirmation && confirmationType === 'yes') || showPendingYes
                 ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 scale-105'
                 : 'bg-white text-neutral-700 border-2 border-neutral-200 hover:border-emerald-400 hover:bg-emerald-50 shadow-sm'}`}
           >
             {showConfirmation && confirmationType === 'yes' ? (
               <span className="text-2xl text-white animate-pulse">✓</span>
+            ) : showPendingYes ? (
+              <><span className="text-xl">👍</span><span>Yes</span></>
             ) : (
               <><span className="text-xl">👍</span><span>Yes</span></>
             )}
@@ -186,12 +230,14 @@ export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVote
             onClick={() => handleVoteClick(false)}
             disabled={showConfirmation}
             className={`relative overflow-hidden flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95
-              ${showConfirmation && confirmationType === 'no'
+              ${(showConfirmation && confirmationType === 'no') || showPendingNo
                 ? 'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/30 scale-105'
                 : 'bg-white text-neutral-700 border-2 border-neutral-200 hover:border-red-400 hover:bg-red-50 shadow-sm'}`}
           >
             {showConfirmation && confirmationType === 'no' ? (
               <span className="text-2xl text-white animate-pulse">✓</span>
+            ) : showPendingNo ? (
+              <><span className="text-xl">👎</span><span>No</span></>
             ) : (
               <><span className="text-xl">👎</span><span>No</span></>
             )}
