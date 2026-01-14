@@ -5,7 +5,7 @@ const CACHE_BUST = 'v20260111'
 export const CATEGORY_IMAGES = {
   'burger': `https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80&${CACHE_BUST}`,
   'sandwich': `https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80&${CACHE_BUST}`,
-  'breakfast sandwich': `https://images.unsplash.com/photo-1550507992-eb63ffee0847?w=800&q=80&${CACHE_BUST}`,
+  'breakfast sandwich': `https://fzgbxwonitnqmeguqixn.supabase.co/storage/v1/object/public/dish-photos/breakfast-sandwich.jpg`,
   'pizza': `https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80&${CACHE_BUST}`,
   'pasta': `https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&q=80&${CACHE_BUST}`,
   'sushi': `https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800&q=80&${CACHE_BUST}`,
