@@ -9,13 +9,8 @@ import { LoginModal } from '../components/Auth/LoginModal'
 import { getCategoryImage } from '../constants/categoryImages'
 import { supabase } from '../lib/supabase'
 
-const FEATURED_CATEGORIES = [
-  { id: 'pizza', label: 'Pizza', emoji: '🍕' },
-  { id: 'burger', label: 'Burgers', emoji: '🍔' },
-  { id: 'lobster roll', label: 'Lobster Rolls', emoji: '🦞' },
-  { id: 'taco', label: 'Tacos', emoji: '🌮' },
-  { id: 'sushi', label: 'Sushi', emoji: '🍣' },
-]
+const TOP_COUNT = 10
+const MIN_VOTES_FOR_RANKING = 5
 
 export function Home() {
   const navigate = useNavigate()
@@ -41,17 +36,14 @@ export function Home() {
   )
   const { isSaved, toggleSave } = useSavedDishes(user?.id)
 
-  // Get top dishes overall
-  const topDishes = dishes?.slice(0, 3) || []
+  // Split dishes into ranked (enough votes) and unrated (not enough votes)
+  const rankedDishes = dishes?.filter(d => (d.total_votes || 0) >= MIN_VOTES_FOR_RANKING) || []
+  const unratedDishes = dishes?.filter(d => (d.total_votes || 0) < MIN_VOTES_FOR_RANKING) || []
 
-  // Get top 2 dishes per category
-  const getTopByCategory = (categoryId) => {
-    return dishes?.filter(d => d.category === categoryId).slice(0, 2) || []
-  }
-
-  const handleCategoryClick = (categoryId) => {
-    navigate(`/browse?category=${categoryId}`)
-  }
+  // Build the Top 10 list: ranked first, fill remaining with unrated
+  const topRanked = rankedDishes.slice(0, TOP_COUNT)
+  const spotsRemaining = TOP_COUNT - topRanked.length
+  const fillerDishes = unratedDishes.slice(0, spotsRemaining)
 
   const handleVote = () => {
     refetch()
@@ -71,28 +63,23 @@ export function Home() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
-      {/* Hero Section */}
-      <header className="px-4 py-6" style={{ background: 'var(--color-bg)', borderBottom: '1px solid var(--color-divider)' }}>
-        <div className="flex flex-col items-center text-center">
+      {/* Header */}
+      <header className="px-4 pt-4 pb-2" style={{ background: 'var(--color-bg)' }}>
+        <div className="flex items-center justify-between">
           <img
             src="/logo.png"
             alt="What's Good Here"
-            className="h-16 w-auto mb-4"
+            className="h-12 w-auto"
           />
-          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            Find the best dishes near you.
-          </h1>
-          <p className="mb-6 max-w-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            Real ratings by people on Martha's Vineyard.
-          </p>
-
-          {/* CTA Button */}
           <button
             onClick={() => navigate('/browse')}
-            className="w-full max-w-xs px-6 py-3 text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
-            style={{ background: 'var(--color-primary)' }}
+            className="px-4 py-2 text-sm font-semibold rounded-lg transition-all"
+            style={{
+              background: 'color-mix(in srgb, var(--color-primary) 10%, white)',
+              color: 'var(--color-primary)'
+            }}
           >
-            Find food near me
+            Browse All
           </button>
         </div>
       </header>
@@ -106,61 +93,112 @@ export function Home() {
       />
 
       {/* Main Content */}
-      <main className="px-4 py-6 space-y-8">
-        {/* Trending Now */}
-        <section>
-          <SectionHeader
-            emoji="🔥"
-            title="Trending Now"
-            onSeeAll={() => navigate('/browse')}
-          />
+      <main className="px-4 py-4">
+        {/* Title + Ranking Explanation */}
+        <div className="mb-4">
+          <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            Top 10 within {radius} {radius === 1 ? 'mile' : 'miles'}
+          </h1>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+            Ranked by % who would order again · Min {MIN_VOTES_FOR_RANKING} votes to qualify
+          </p>
+        </div>
 
-          {loading ? (
-            <LoadingCards count={3} />
-          ) : (
-            <div className="space-y-3">
-              {topDishes.map((dish, index) => (
-                <VerticalDishCard
-                  key={dish.dish_id}
-                  dish={dish}
-                  rank={index + 1}
-                  onClick={() => setSelectedDish(dish)}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Category Sections */}
-        {FEATURED_CATEGORIES.map((category) => {
-          const categoryDishes = getTopByCategory(category.id)
-          if (categoryDishes.length === 0 && !loading) return null
-
-          return (
-            <section key={category.id}>
-              <SectionHeader
-                emoji={category.emoji}
-                title={`Best ${category.label}`}
-                onSeeAll={() => handleCategoryClick(category.id)}
+        {/* Loading State */}
+        {loading && (
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="h-16 rounded-xl animate-pulse"
+                style={{ background: 'var(--color-divider)' }}
               />
+            ))}
+          </div>
+        )}
 
-              {loading ? (
-                <LoadingCards count={2} />
-              ) : (
-                <div className="space-y-3">
-                  {categoryDishes.map((dish, index) => (
-                    <VerticalDishCard
-                      key={dish.dish_id}
-                      dish={dish}
-                      rank={index + 1}
-                      onClick={() => setSelectedDish(dish)}
-                    />
-                  ))}
+        {/* Error State */}
+        {error && (
+          <div className="py-12 text-center">
+            <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 text-sm font-medium rounded-lg"
+              style={{ background: 'var(--color-primary)', color: 'white' }}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Top 10 List */}
+        {!loading && !error && (
+          <div className="space-y-2">
+            {/* Ranked dishes */}
+            {topRanked.map((dish, index) => (
+              <DishRow
+                key={dish.dish_id}
+                dish={dish}
+                rank={index + 1}
+                onClick={() => setSelectedDish(dish)}
+                isRanked={true}
+              />
+            ))}
+
+            {/* Divider if we have filler dishes */}
+            {fillerDishes.length > 0 && topRanked.length > 0 && (
+              <div className="flex items-center gap-3 py-3">
+                <div className="flex-1 h-px" style={{ background: 'var(--color-divider)' }} />
+                <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                  New — be first to rate
+                </span>
+                <div className="flex-1 h-px" style={{ background: 'var(--color-divider)' }} />
+              </div>
+            )}
+
+            {/* Unrated filler dishes */}
+            {fillerDishes.map((dish, index) => (
+              <DishRow
+                key={dish.dish_id}
+                dish={dish}
+                rank={topRanked.length + index + 1}
+                onClick={() => setSelectedDish(dish)}
+                isRanked={false}
+              />
+            ))}
+
+            {/* Empty state */}
+            {topRanked.length === 0 && fillerDishes.length === 0 && (
+              <div className="py-12 text-center">
+                <div
+                  className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--color-surface)' }}
+                >
+                  <span className="text-2xl">🔍</span>
                 </div>
-              )}
-            </section>
-          )
-        })}
+                <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                  No dishes found nearby
+                </p>
+                <p className="text-sm mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Try increasing your search radius
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Footer */}
+        {!loading && (topRanked.length > 0 || fillerDishes.length > 0) && (
+          <div className="mt-6 pt-4 border-t text-center" style={{ borderColor: 'var(--color-divider)' }}>
+            <button
+              onClick={() => navigate('/browse')}
+              className="text-sm font-semibold"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              View all {dishes?.length || 0} dishes →
+            </button>
+          </div>
+        )}
       </main>
 
       {/* Dish Detail Modal */}
@@ -173,7 +211,15 @@ export function Home() {
           />
 
           {/* Modal Content */}
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl animate-slide-up" style={{ background: 'var(--color-surface)' }}>
+          <div
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl animate-slide-up"
+            style={{ background: 'var(--color-surface)' }}
+          >
+            {/* Handle */}
+            <div className="sticky top-0 z-10 flex justify-center pt-3 pb-2" style={{ background: 'var(--color-surface)' }}>
+              <div className="w-10 h-1 rounded-full" style={{ background: 'var(--color-divider)' }} />
+            </div>
+
             {/* Close button */}
             <button
               onClick={() => setSelectedDish(null)}
@@ -185,7 +231,7 @@ export function Home() {
             </button>
 
             {/* Dish Card */}
-            <div className="p-4 pt-2">
+            <div className="px-4 pb-8">
               <FullDishCard
                 dish={selectedDish}
                 onVote={handleVote}
@@ -206,75 +252,47 @@ export function Home() {
   )
 }
 
-// Section header component
-function SectionHeader({ emoji, title, onSeeAll }) {
-  return (
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-        <span>{emoji}</span> {title}
-      </h2>
-      <button
-        onClick={onSeeAll}
-        className="text-sm font-semibold"
-        style={{ color: 'var(--color-text-secondary)' }}
-      >
-        See all →
-      </button>
-    </div>
-  )
-}
-
-// Loading placeholder cards
-function LoadingCards({ count }) {
-  return (
-    <div className="space-y-3">
-      {[...Array(count)].map((_, i) => (
-        <div
-          key={i}
-          className="h-24 rounded-xl animate-pulse"
-          style={{ background: 'var(--color-divider)' }}
-        />
-      ))}
-    </div>
-  )
-}
-
-// Vertical dish card - compact and clean
-function VerticalDishCard({ dish, rank, onClick }) {
+// Scannable dish row: # | photo | dish + restaurant | rating | votes | distance
+function DishRow({ dish, rank, onClick, isRanked }) {
   const {
     dish_name,
+    restaurant_name,
     category,
     photo_url,
-    restaurant_name,
     percent_worth_it,
     total_votes,
+    distance_miles,
   } = dish
 
   const imgSrc = photo_url || getCategoryImage(category)
+  const votes = total_votes || 0
 
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 p-3 rounded-xl border shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] active:shadow-sm group"
+      className="w-full flex items-center gap-3 p-2.5 rounded-xl border shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] group"
       style={{
         background: 'var(--color-bg)',
         borderColor: 'var(--color-divider)'
       }}
     >
-      {/* Rank Badge */}
+      {/* Rank */}
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+        className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
         style={{
-          background: rank === 1 ? 'var(--color-primary)' : 'var(--color-surface)',
-          color: rank === 1 ? 'white' : 'var(--color-text-secondary)',
-          border: rank === 1 ? 'none' : '1px solid var(--color-divider)'
+          background: rank <= 3 && isRanked ? 'var(--color-primary)' : 'var(--color-surface)',
+          color: rank <= 3 && isRanked ? 'white' : 'var(--color-text-tertiary)',
+          border: rank <= 3 && isRanked ? 'none' : '1px solid var(--color-divider)'
         }}
       >
         {rank}
       </div>
 
-      {/* Image */}
-      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0" style={{ background: 'var(--color-surface)' }}>
+      {/* Photo */}
+      <div
+        className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0"
+        style={{ background: 'var(--color-surface)' }}
+      >
         <img
           src={imgSrc}
           alt={dish_name}
@@ -282,34 +300,56 @@ function VerticalDishCard({ dish, rank, onClick }) {
         />
       </div>
 
-      {/* Info */}
+      {/* Dish + Restaurant */}
       <div className="flex-1 min-w-0 text-left">
-        <h3 className="font-semibold text-sm line-clamp-2" style={{ color: 'var(--color-text-primary)' }}>
+        <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
           {dish_name}
         </h3>
-        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
           {restaurant_name}
         </p>
-        {/* Rating info - subtle secondary line */}
-        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-          {total_votes === 0
-            ? 'Be first to rate'
-            : total_votes < 10
-              ? `${total_votes} ${total_votes === 1 ? 'vote' : 'votes'}`
-              : `👍 ${Math.round(percent_worth_it)}% · ${total_votes} votes`
-          }
-        </p>
+      </div>
+
+      {/* Rating + Votes + Distance */}
+      <div className="flex-shrink-0 text-right">
+        {isRanked ? (
+          <>
+            <div className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              {Math.round(percent_worth_it)}%
+            </div>
+            <div className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+              {votes} votes{distance_miles ? ` · ${Number(distance_miles).toFixed(1)}mi` : ''}
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              className="text-xs font-medium px-2 py-0.5 rounded-full"
+              style={{
+                background: 'color-mix(in srgb, var(--color-primary) 12%, white)',
+                color: 'var(--color-primary)'
+              }}
+            >
+              New
+            </div>
+            {distance_miles && (
+              <div className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                {Number(distance_miles).toFixed(1)} mi
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Tap indicator */}
       <div
-        className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center transition-all group-hover:scale-110"
+        className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center transition-all group-hover:scale-110"
         style={{
-          background: 'color-mix(in srgb, var(--color-primary) 12%, white)',
+          background: 'color-mix(in srgb, var(--color-primary) 10%, white)',
           color: 'var(--color-primary)'
         }}
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </div>
