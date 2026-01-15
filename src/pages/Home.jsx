@@ -126,6 +126,8 @@ export function Home() {
       setPendingVoteData(beforeVoteRef.current)
       beforeVoteRef.current = null
     }
+    // Close the modal first, then refetch so toast appears on clean screen
+    setSelectedDish(null)
     refetch()
   }
 
