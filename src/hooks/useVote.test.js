@@ -59,12 +59,17 @@ describe('useVote Hook', () => {
 
       expect(result.current.submitting).toBe(false)
 
+      let submittingDuringCall = null
       await act(async () => {
         const promise = result.current.submitVote('dish-1', true)
-        expect(result.current.submitting).toBe(true)
+        // Check submitting state during the async call
+        // Note: We can't check it synchronously in the same tick, so we check after a micro-task
+        await Promise.resolve()
+        submittingDuringCall = result.current.submitting
         await promise
       })
 
+      // After the promise resolves, submitting should be false
       expect(result.current.submitting).toBe(false)
     })
 

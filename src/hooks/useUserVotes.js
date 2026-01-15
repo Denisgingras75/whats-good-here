@@ -82,9 +82,17 @@ export function useUserVotes(userId) {
   const processVotes = useCallback((data) => {
     setVotes(data)
 
-    // Split into worth it and avoid
-    const worthIt = data.filter(v => v.would_order_again).map(transformVote)
-    const avoid = data.filter(v => !v.would_order_again).map(transformVote)
+    // Split into worth it and avoid, then sort by rating (highest first)
+    // Dishes without ratings go to the end
+    const sortByRating = (a, b) => {
+      if (a.rating_10 == null && b.rating_10 == null) return 0
+      if (a.rating_10 == null) return 1
+      if (b.rating_10 == null) return -1
+      return b.rating_10 - a.rating_10
+    }
+
+    const worthIt = data.filter(v => v.would_order_again).map(transformVote).sort(sortByRating)
+    const avoid = data.filter(v => !v.would_order_again).map(transformVote).sort(sortByRating)
 
     setWorthItDishes(worthIt)
     setAvoidDishes(avoid)
