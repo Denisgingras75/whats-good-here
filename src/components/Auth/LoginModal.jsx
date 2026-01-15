@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { getPendingVoteFromStorage } from '../ReviewFlow'
 
 export function LoginModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false)
@@ -12,11 +13,18 @@ export function LoginModal({ isOpen, onClose }) {
     e.preventDefault()
     try {
       setLoading(true)
-      // Use current page URL so user returns to the same place after login
+
+      // Build redirect URL with pending dish ID so we can reopen the modal after login
+      const redirectUrl = new URL(window.location.href)
+      const pending = getPendingVoteFromStorage()
+      if (pending?.dishId) {
+        redirectUrl.searchParams.set('votingDish', pending.dishId)
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: window.location.href,
+          emailRedirectTo: redirectUrl.toString(),
         },
       })
 

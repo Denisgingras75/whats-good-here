@@ -72,12 +72,24 @@ export function Browse() {
   // Auto-reopen modal after OAuth/magic link login if there's a pending vote
   useEffect(() => {
     if (user && dishes?.length > 0 && !selectedDish) {
+      // Check URL for votingDish param (from magic link redirect)
+      const params = new URLSearchParams(window.location.search)
+      const votingDishId = params.get('votingDish')
+
+      // Also check localStorage as fallback
       const pending = getPendingVoteFromStorage()
-      if (pending) {
-        // Find the dish they were voting on
-        const dish = dishes.find(d => d.dish_id === pending.dishId)
+      const dishIdToOpen = votingDishId || pending?.dishId
+
+      if (dishIdToOpen) {
+        const dish = dishes.find(d => d.dish_id === dishIdToOpen)
         if (dish) {
-          // Small delay to ensure page is fully loaded after redirect
+          // Clean up the URL param
+          if (votingDishId) {
+            const newUrl = new URL(window.location.href)
+            newUrl.searchParams.delete('votingDish')
+            window.history.replaceState({}, '', newUrl.pathname + newUrl.search)
+          }
+          // Open the modal
           setTimeout(() => {
             setSelectedDish(dish)
           }, 100)
