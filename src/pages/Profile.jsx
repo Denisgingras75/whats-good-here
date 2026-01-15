@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { useProfile } from '../hooks/useProfile'
@@ -14,6 +15,7 @@ const TABS = [
 ]
 
 export function Profile() {
+  const navigate = useNavigate()
   const { user, loading, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('worth-it')
   const [soundMuted, setSoundMuted] = useState(isSoundMuted())
@@ -41,6 +43,7 @@ export function Profile() {
 
   const handleSignOut = async () => {
     await signOut()
+    navigate('/login')
   }
 
   const handleGoogleSignIn = async () => {
