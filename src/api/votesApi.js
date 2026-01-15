@@ -83,6 +83,47 @@ export const votesApi = {
   },
 
   /**
+   * Get detailed votes for a user with dish and restaurant info
+   * @param {string} userId - User ID
+   * @returns {Promise<Array>} Array of votes with dish details
+   */
+  async getDetailedVotesForUser(userId) {
+    try {
+      if (!userId) {
+        return []
+      }
+
+      const { data, error } = await supabase
+        .from('votes')
+        .select(`
+          id,
+          would_order_again,
+          rating_10,
+          created_at,
+          dishes (
+            id,
+            name,
+            category,
+            price,
+            photo_url,
+            restaurants (name)
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw error
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Error fetching detailed votes:', error)
+      throw error
+    }
+  },
+
+  /**
    * Delete a vote for a dish
    * @param {string} dishId - Dish ID
    * @returns {Promise<Object>} Success status

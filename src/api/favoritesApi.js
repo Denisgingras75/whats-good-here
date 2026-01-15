@@ -6,6 +6,89 @@ import { supabase } from '../lib/supabase'
 
 export const favoritesApi = {
   /**
+   * Get favorite dish IDs for a user
+   * @param {string} userId - User ID
+   * @returns {Promise<Array>} Array of dish IDs
+   */
+  async getFavoriteIds(userId) {
+    try {
+      if (!userId) {
+        return []
+      }
+
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('dish_id')
+        .eq('user_id', userId)
+
+      if (error) {
+        throw error
+      }
+
+      return (data || []).map(f => f.dish_id)
+    } catch (error) {
+      console.error('Error fetching favorite IDs:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Add a dish to favorites
+   * @param {string} userId - User ID
+   * @param {string} dishId - Dish ID
+   * @returns {Promise<Object>} Success status
+   */
+  async addFavorite(userId, dishId) {
+    try {
+      if (!userId) {
+        throw new Error('Not logged in')
+      }
+
+      const { error } = await supabase
+        .from('favorites')
+        .insert({ user_id: userId, dish_id: dishId })
+
+      if (error) {
+        throw error
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error adding favorite:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Remove a dish from favorites
+   * @param {string} userId - User ID
+   * @param {string} dishId - Dish ID
+   * @returns {Promise<Object>} Success status
+   */
+  async removeFavorite(userId, dishId) {
+    try {
+      if (!userId) {
+        throw new Error('Not logged in')
+      }
+
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('dish_id', dishId)
+
+      if (error) {
+        throw error
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error removing favorite:', error)
+      throw error
+    }
+  },
+
+  /**
    * Get all saved dishes for the current user
    * @returns {Promise<Object>} Object with savedDishIds array and savedDishes array
    */

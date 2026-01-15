@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { favoritesApi } from '../api'
 
 export function useFavorites(userId) {
   const [favorites, setFavorites] = useState([])
@@ -15,13 +15,12 @@ export function useFavorites(userId) {
 
     async function fetchFavorites() {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('dish_id')
-        .eq('user_id', userId)
-
-      if (!error && data) {
-        setFavorites(data.map(f => f.dish_id))
+      try {
+        const dishIds = await favoritesApi.getFavoriteIds(userId)
+        setFavorites(dishIds)
+      } catch (error) {
+        console.error('Error fetching favorites:', error)
+        setFavorites([])
       }
       setLoading(false)
     }
@@ -34,27 +33,16 @@ export function useFavorites(userId) {
   const toggleFavorite = async (dishId) => {
     if (!userId) return { error: 'Not logged in' }
 
-    if (isFavorite(dishId)) {
-      // Remove favorite
-      const { error } = await supabase
-        .from('favorites')
-        .delete()
-        .eq('user_id', userId)
-        .eq('dish_id', dishId)
-
-      if (!error) {
+    try {
+      if (isFavorite(dishId)) {
+        await favoritesApi.removeFavorite(userId, dishId)
         setFavorites(prev => prev.filter(id => id !== dishId))
-      }
-      return { error }
-    } else {
-      // Add favorite
-      const { error } = await supabase
-        .from('favorites')
-        .insert({ user_id: userId, dish_id: dishId })
-
-      if (!error) {
+      } else {
+        await favoritesApi.addFavorite(userId, dishId)
         setFavorites(prev => [...prev, dishId])
       }
+      return { error: null }
+    } catch (error) {
       return { error }
     }
   }

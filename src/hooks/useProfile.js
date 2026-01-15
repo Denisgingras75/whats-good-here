@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { useState, useEffect, useCallback } from 'react'
+import { profileApi } from '../api'
 
 export function useProfile(userId) {
   const [profile, setProfile] = useState(null)
@@ -14,32 +14,12 @@ export function useProfile(userId) {
 
     async function fetchProfile() {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (!error && data) {
+      try {
+        const data = await profileApi.getOrCreateProfile(userId)
         setProfile(data)
-      } else if (error?.code === 'PGRST116') {
-        // Profile doesn't exist, create one
-        const { data: userData } = await supabase.auth.getUser()
-        const email = userData?.user?.email || ''
-        const displayName = email.split('@')[0]
-
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            id: userId,
-            display_name: displayName
-          })
-          .select()
-          .single()
-
-        if (!insertError && newProfile) {
-          setProfile(newProfile)
-        }
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+        setProfile(null)
       }
       setLoading(false)
     }
@@ -47,21 +27,17 @@ export function useProfile(userId) {
     fetchProfile()
   }, [userId])
 
-  const updateProfile = async (updates) => {
+  const updateProfile = useCallback(async (updates) => {
     if (!userId) return { error: 'Not logged in' }
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', userId)
-      .select()
-      .single()
-
-    if (!error && data) {
+    try {
+      const data = await profileApi.updateProfile(userId, updates)
       setProfile(data)
+      return { data, error: null }
+    } catch (error) {
+      return { data: null, error }
     }
-    return { data, error }
-  }
+  }, [userId])
 
   return {
     profile,
