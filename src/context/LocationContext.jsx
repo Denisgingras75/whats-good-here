@@ -11,9 +11,10 @@ const STORAGE_KEY = 'whats-good-here-location-permission'
 const LocationContext = createContext(null)
 
 export function LocationProvider({ children }) {
-  const [location, setLocation] = useState(null)
+  // Start with default location immediately - don't block on geolocation
+  const [location, setLocation] = useState(DEFAULT_LOCATION)
   const [radius, setRadius] = useState(5) // Default 5 miles
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [permissionState, setPermissionState] = useState('prompt') // 'prompt' | 'granted' | 'denied' | 'unsupported'
   const [hasAskedBefore, setHasAskedBefore] = useState(false)
@@ -58,18 +59,16 @@ export function LocationProvider({ children }) {
       },
       {
         enableHighAccuracy: false,
-        timeout: 10000,
+        timeout: 5000, // 5 second timeout - don't make users wait
         maximumAge: 300000, // Cache for 5 minutes
       }
     )
   }, [])
 
-  // Check permission state on mount
+  // Check permission state on mount (non-blocking - dishes load with default location immediately)
   useEffect(() => {
     if (!navigator.geolocation) {
       setPermissionState('unsupported')
-      setLocation(DEFAULT_LOCATION)
-      setLoading(false)
       return
     }
 
@@ -78,33 +77,31 @@ export function LocationProvider({ children }) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         setPermissionState(result.state)
 
-        // If already granted, get location automatically
+        // If already granted, try to get real location (will update dishes when ready)
         if (result.state === 'granted') {
           requestLocation()
-        } else if (result.state === 'denied') {
-          // Already denied, use default
-          setLocation(DEFAULT_LOCATION)
-          setLoading(false)
-        } else {
-          // Prompt state - wait for user action
-          setLoading(false)
         }
+        // If denied or prompt, we already have default location - no action needed
 
-        // Listen for permission changes
-        result.onchange = () => {
+        // Listen for permission changes - with proper cleanup
+        const handlePermissionChange = () => {
           setPermissionState(result.state)
           if (result.state === 'granted') {
             requestLocation()
           }
         }
+
+        result.addEventListener('change', handlePermissionChange)
+
+        // Cleanup function to remove listener when component unmounts
+        return () => {
+          result.removeEventListener('change', handlePermissionChange)
+        }
       }).catch(() => {
         // Permission API not supported, will prompt on request
-        setLoading(false)
       })
-    } else {
-      // No permission API, just stop loading
-      setLoading(false)
     }
+    // No else needed - we already have default location and loading is false
   }, [requestLocation])
 
   const useDefaultLocation = useCallback(() => {

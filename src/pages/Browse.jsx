@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useLocationContext } from '../context/LocationContext'
@@ -71,32 +71,32 @@ export function Browse() {
 
   // Auto-reopen modal after OAuth/magic link login if there's a pending vote
   useEffect(() => {
-    if (user && dishes?.length > 0 && !selectedDish) {
-      // Check URL for votingDish param (from magic link redirect)
-      const params = new URLSearchParams(window.location.search)
-      const votingDishId = params.get('votingDish')
+    if (!user || !dishes?.length || selectedDish) return
 
-      // Also check localStorage as fallback
-      const pending = getPendingVoteFromStorage()
-      const dishIdToOpen = votingDishId || pending?.dishId
+    // Check URL for votingDish param (from magic link redirect)
+    const params = new URLSearchParams(window.location.search)
+    const votingDishId = params.get('votingDish')
 
-      if (dishIdToOpen) {
-        const dish = dishes.find(d => d.dish_id === dishIdToOpen)
-        if (dish) {
-          // Clean up the URL param
-          if (votingDishId) {
-            const newUrl = new URL(window.location.href)
-            newUrl.searchParams.delete('votingDish')
-            window.history.replaceState({}, '', newUrl.pathname + newUrl.search)
-          }
-          // Open the modal
-          setTimeout(() => {
-            setSelectedDish(dish)
-          }, 100)
-        }
-      }
+    // Also check localStorage as fallback
+    const pending = getPendingVoteFromStorage()
+    const dishIdToOpen = votingDishId || pending?.dishId
+
+    if (!dishIdToOpen) return
+
+    // Find the dish in current list
+    const dish = dishes.find(d => d.dish_id === dishIdToOpen)
+    if (!dish) return
+
+    // Clean up the URL param first
+    if (votingDishId) {
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('votingDish')
+      window.history.replaceState({}, '', newUrl.pathname + newUrl.search)
     }
-  }, [user, dishes, selectedDish])
+
+    // Open modal immediately - dishes are guaranteed ready now
+    setSelectedDish(dish)
+  }, [user, dishes])
 
   const handleVote = () => {
     refetch()
@@ -125,14 +125,17 @@ export function Browse() {
   }
 
   // Filter dishes by search query (dish name or restaurant name)
-  const filteredDishes = dishes.filter(dish => {
-    if (!debouncedSearchQuery.trim()) return true
-    const query = debouncedSearchQuery.toLowerCase()
-    return (
-      dish.dish_name?.toLowerCase().includes(query) ||
-      dish.restaurant_name?.toLowerCase().includes(query)
-    )
-  })
+  // Use useMemo to prevent stale closures and ensure proper dependency tracking
+  const filteredDishes = useMemo(() => {
+    return dishes.filter(dish => {
+      if (!debouncedSearchQuery.trim()) return true
+      const query = debouncedSearchQuery.toLowerCase()
+      return (
+        dish.dish_name?.toLowerCase().includes(query) ||
+        dish.restaurant_name?.toLowerCase().includes(query)
+      )
+    })
+  }, [dishes, debouncedSearchQuery])
 
   // Clear search
   const clearSearch = () => {
