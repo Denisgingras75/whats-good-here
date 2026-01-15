@@ -24,6 +24,9 @@ A shared log of what each contributor worked on. Add your entries at the top.
 - Added `authApi.test.js` for auth API coverage
 - Upgraded `@testing-library/react` to v16 for React 19 support
 
+### UX Improvements
+- Profile tabs now sort dishes by rating (highest first), unrated dishes at end
+
 ---
 
 ## 2025-01-14 - Daniel (Session 2)
