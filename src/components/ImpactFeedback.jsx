@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 
 /**
  * Calculate impact message based on before/after vote data
@@ -60,53 +61,46 @@ export function getImpactMessage(before, after, beforeRank, afterRank) {
 }
 
 /**
- * Impact feedback toast shown after voting
- * Made prominent so users FEEL their impact
+ * Show impact feedback toast using Sonner
+ * Beautiful toast with progress bar like PostHog
+ */
+export function showImpactToast(impact) {
+  if (!impact) return
+
+  const toastType = impact.type === 'milestone' ? 'success' : 'success'
+
+  toast[toastType](
+    <div className="flex items-center gap-3">
+      <span className="text-2xl">{impact.emoji}</span>
+      <div>
+        <p className="font-semibold">{impact.message}</p>
+        <p className="text-sm opacity-80">Your vote made a difference!</p>
+      </div>
+    </div>,
+    {
+      duration: 4000,
+    }
+  )
+}
+
+/**
+ * Legacy component for backward compatibility
+ * Now uses Sonner under the hood
  */
 export function ImpactFeedback({ impact, onClose }) {
-  const [visible, setVisible] = useState(false)
+  const shownRef = useRef(false)
 
   useEffect(() => {
-    if (impact) {
-      // Animate in
-      requestAnimationFrame(() => setVisible(true))
-
-      // Auto-close after 4 seconds (longer so user can read it)
-      const timer = setTimeout(() => {
-        setVisible(false)
-        setTimeout(onClose, 400) // Wait for fade out
-      }, 4000)
-
-      return () => clearTimeout(timer)
+    if (impact && !shownRef.current) {
+      shownRef.current = true
+      showImpactToast(impact)
+      // Reset state after toast is shown
+      setTimeout(() => {
+        onClose?.()
+        shownRef.current = false
+      }, 100)
     }
   }, [impact, onClose])
 
-  if (!impact) return null
-
-  const bgColor = impact.type === 'milestone'
-    ? 'from-emerald-500 to-teal-600'
-    : impact.type === 'movement'
-    ? 'from-blue-500 to-indigo-600'
-    : 'from-amber-500 to-orange-600'
-
-  return (
-    <div
-      className={`fixed inset-x-0 top-0 z-[9999] flex items-start justify-center pt-6 px-4 transition-all duration-400 ease-out ${
-        visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95'
-      }`}
-    >
-      <div
-        className={`bg-gradient-to-r ${bgColor} rounded-2xl shadow-2xl p-5 w-full max-w-md border-2 border-white/20`}
-        style={{ boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}
-      >
-        <div className="flex items-center gap-4 text-white">
-          <div className="text-5xl animate-bounce">{impact.emoji}</div>
-          <div className="flex-1">
-            <p className="font-bold text-xl">{impact.message}</p>
-            <p className="text-base text-white/90 mt-1">Your vote made a difference!</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+  return null
 }

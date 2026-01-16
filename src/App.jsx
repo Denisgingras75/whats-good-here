@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { AuthProvider } from './context/AuthContext'
 import { LocationProvider } from './context/LocationContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -20,6 +21,19 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <Toaster
+        position="top-center"
+        richColors
+        expand={false}
+        duration={4000}
+        closeButton
+        toastOptions={{
+          style: {
+            padding: '16px',
+            borderRadius: '12px',
+          },
+        }}
+      />
       <AuthProvider>
       <LocationProvider>
         <BrowserRouter>
