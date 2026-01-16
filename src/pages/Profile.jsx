@@ -197,6 +197,7 @@ export function Profile() {
                     ? `${stats.totalVotes} ${stats.totalVotes === 1 ? 'dish' : 'dishes'} rated`
                     : 'Start rating to help others'
                   }
+                  {stats.dishesHelpedRank > 0 && ` · Helped rank ${stats.dishesHelpedRank}`}
                   {stats.uniqueRestaurants > 0 && ` · ${stats.uniqueRestaurants} spots`}
                   {memberSince && ` · Since ${memberSince}`}
                 </p>

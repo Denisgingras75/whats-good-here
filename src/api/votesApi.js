@@ -152,4 +152,49 @@ export const votesApi = {
       throw error
     }
   },
+
+  /**
+   * Get count of ranked dishes (5+ votes) that a user has voted on
+   * @param {string} userId - User ID
+   * @returns {Promise<number>} Count of dishes helped rank
+   */
+  async getDishesHelpedRank(userId) {
+    try {
+      if (!userId) {
+        return 0
+      }
+
+      // Get all dish IDs the user voted on
+      const { data: userVotes, error: votesError } = await supabase
+        .from('votes')
+        .select('dish_id')
+        .eq('user_id', userId)
+
+      if (votesError) throw votesError
+      if (!userVotes?.length) return 0
+
+      const dishIds = userVotes.map(v => v.dish_id)
+
+      // Count votes for each of those dishes
+      const { data: voteCounts, error: countError } = await supabase
+        .from('votes')
+        .select('dish_id')
+        .in('dish_id', dishIds)
+
+      if (countError) throw countError
+
+      // Group by dish_id and count those with 5+
+      const counts = {}
+      voteCounts?.forEach(v => {
+        counts[v.dish_id] = (counts[v.dish_id] || 0) + 1
+      })
+
+      // Count dishes with 5+ votes
+      const rankedCount = Object.values(counts).filter(c => c >= 5).length
+      return rankedCount
+    } catch (error) {
+      console.error('Error getting dishes helped rank:', error)
+      return 0
+    }
+  },
 }

@@ -237,6 +237,7 @@ export function useUserVotes(userId) {
   const [worthItDishes, setWorthItDishes] = useState([])
   const [avoidDishes, setAvoidDishes] = useState([])
   const [loading, setLoading] = useState(true)
+  const [dishesHelpedRank, setDishesHelpedRank] = useState(0)
   const [stats, setStats] = useState({
     totalVotes: 0,
     worthItCount: 0,
@@ -249,10 +250,12 @@ export function useUserVotes(userId) {
     categoryProgress: [],
     ratingPersonality: null,
     categoryCounts: {},
+    dishesHelpedRank: 0,
   })
 
-  const processVotes = useCallback((data) => {
+  const processVotes = useCallback((data, helpedCount = 0) => {
     setVotes(data)
+    setDishesHelpedRank(helpedCount)
 
     // Split into worth it and avoid, then sort by rating (highest first)
     // Dishes without ratings go to the end
@@ -268,7 +271,7 @@ export function useUserVotes(userId) {
 
     setWorthItDishes(worthIt)
     setAvoidDishes(avoid)
-    setStats(calculateStats(data))
+    setStats({ ...calculateStats(data), dishesHelpedRank: helpedCount })
   }, [])
 
   useEffect(() => {
@@ -276,6 +279,7 @@ export function useUserVotes(userId) {
       setVotes([])
       setWorthItDishes([])
       setAvoidDishes([])
+      setDishesHelpedRank(0)
       setStats({
         totalVotes: 0,
         worthItCount: 0,
@@ -288,6 +292,7 @@ export function useUserVotes(userId) {
         categoryProgress: [],
         ratingPersonality: null,
         categoryCounts: {},
+        dishesHelpedRank: 0,
       })
       setLoading(false)
       return
@@ -296,8 +301,11 @@ export function useUserVotes(userId) {
     async function fetchVotes() {
       setLoading(true)
       try {
-        const data = await votesApi.getDetailedVotesForUser(userId)
-        processVotes(data)
+        const [data, helpedCount] = await Promise.all([
+          votesApi.getDetailedVotesForUser(userId),
+          votesApi.getDishesHelpedRank(userId)
+        ])
+        processVotes(data, helpedCount)
       } catch (error) {
         console.error('Error fetching votes:', error)
       }
@@ -311,8 +319,11 @@ export function useUserVotes(userId) {
     if (!userId) return
     setLoading(true)
     try {
-      const data = await votesApi.getDetailedVotesForUser(userId)
-      processVotes(data)
+      const [data, helpedCount] = await Promise.all([
+        votesApi.getDetailedVotesForUser(userId),
+        votesApi.getDishesHelpedRank(userId)
+      ])
+      processVotes(data, helpedCount)
     } catch (error) {
       console.error('Error refetching votes:', error)
     }
