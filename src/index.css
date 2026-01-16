@@ -94,6 +94,32 @@
   .image-zoom:hover {
     transform: scale(1.05);
   }
+
+  /* TopBar - Subtle brand anchor in safe-area region */
+  .top-bar {
+    position: relative;
+    width: 100%;
+    background: color-mix(in srgb, var(--color-primary) 5%, white);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .top-bar-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 28px;
+  }
+
+  .top-bar-icon {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--color-primary);
+    opacity: 0.6;
+  }
 }
 
 @layer utilities {

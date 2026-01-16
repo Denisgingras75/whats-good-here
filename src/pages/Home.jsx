@@ -139,23 +139,13 @@ export function Home() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
       {/* Header */}
-      <header className="px-4 pt-4 pb-2" style={{ background: 'var(--color-bg)' }}>
-        <div className="flex items-center justify-between">
+      <header className="py-3" style={{ background: 'var(--color-bg)' }}>
+        <div className="flex justify-center">
           <img
             src="/logo.png"
             alt="What's Good Here"
             className="h-14 w-auto"
           />
-          <button
-            onClick={() => navigate('/browse')}
-            className="px-4 py-2 text-sm font-semibold rounded-lg transition-all"
-            style={{
-              background: 'color-mix(in srgb, var(--color-primary) 10%, white)',
-              color: 'var(--color-primary)'
-            }}
-          >
-            Browse All
-          </button>
         </div>
       </header>
 
