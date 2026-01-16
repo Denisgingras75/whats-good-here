@@ -122,6 +122,7 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
           <PhotoUploadConfirmation
             dishName={dish.dish_name}
             photoUrl={photoUploaded.photo_url}
+            status={photoUploaded.analysisResults?.status}
             onRateNow={handleRateNow}
             onLater={handleLater}
           />

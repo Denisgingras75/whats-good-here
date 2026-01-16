@@ -402,6 +402,89 @@
   margin-bottom: 0;
 }
 
+/* Photo tier badge */
+.photo-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: color-mix(in srgb, var(--tier-color) 15%, white);
+  border: 1px solid color-mix(in srgb, var(--tier-color) 30%, white);
+  border-radius: 20px;
+  margin: 8px 0 12px;
+}
+
+.photo-tier-badge .tier-icon {
+  font-size: 16px;
+}
+
+.photo-tier-badge .tier-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tier-color);
+}
+
+.photo-upload-confirmation .tier-description {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.photo-upload-confirmation .tier-tip {
+  font-size: 12px;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, white);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.photo-upload-confirmation .photo-info-link {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  transition: color 0.2s ease;
+}
+
+.photo-upload-confirmation .photo-info-link:hover {
+  color: var(--color-text-secondary);
+}
+
+.photo-upload-confirmation .photo-info-content {
+  background: var(--color-surface);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.photo-upload-confirmation .photo-info-content ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.photo-upload-confirmation .photo-info-content li {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.photo-upload-confirmation .photo-info-content li:last-child {
+  margin-bottom: 0;
+}
+
+.photo-upload-confirmation .rate-prompt {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
 /* ===========================
    Dish Photo Gallery Components
    =========================== */
