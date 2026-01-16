@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useSavedDishes } from '../hooks/useSavedDishes'
+import { restaurantsApi } from '../api'
 import { BrowseCard } from '../components/BrowseCard'
 import { DishModal } from '../components/DishModal'
 import { getPendingVoteFromStorage } from '../components/ReviewFlow'
@@ -44,6 +45,7 @@ const CATEGORIES = [
 
 export function Browse() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const { user } = useAuth()
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -56,8 +58,16 @@ export function Browse() {
     return localStorage.getItem('browse_sort') || 'top_rated'
   })
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
+
+  // Autocomplete state
+  const [autocompleteOpen, setAutocompleteOpen] = useState(false)
+  const [autocompleteIndex, setAutocompleteIndex] = useState(-1)
+  const [restaurantSuggestions, setRestaurantSuggestions] = useState([])
+
   const beforeVoteRef = useRef(null)
   const sortDropdownRef = useRef(null)
+  const searchInputRef = useRef(null)
+  const autocompleteRef = useRef(null)
 
   // Handle category from URL params (when coming from home page)
   useEffect(() => {
@@ -92,6 +102,37 @@ export function Browse() {
     localStorage.setItem('browse_sort', sortId)
     setSortDropdownOpen(false)
   }
+
+  // Fetch restaurant suggestions for autocomplete
+  useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.length < 2) {
+      setRestaurantSuggestions([])
+      return
+    }
+
+    const fetchRestaurants = async () => {
+      const results = await restaurantsApi.search(searchQuery, 3)
+      setRestaurantSuggestions(results)
+    }
+
+    const timer = setTimeout(fetchRestaurants, 150)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Close autocomplete when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        autocompleteRef.current &&
+        !autocompleteRef.current.contains(e.target) &&
+        !searchInputRef.current?.contains(e.target)
+      ) {
+        setAutocompleteOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const { location, radius } = useLocationContext()
 
@@ -251,7 +292,93 @@ export function Browse() {
   // Clear search
   const clearSearch = () => {
     setSearchQuery('')
+    setAutocompleteOpen(false)
   }
+
+  // Autocomplete suggestions (dishes from current results + restaurants)
+  const autocompleteSuggestions = useMemo(() => {
+    if (!searchQuery.trim() || searchQuery.length < 2) return []
+
+    const query = searchQuery.toLowerCase()
+
+    // Get matching dishes (limit to 5)
+    const dishMatches = dishes
+      .filter(d =>
+        d.dish_name?.toLowerCase().includes(query) ||
+        d.restaurant_name?.toLowerCase().includes(query)
+      )
+      .slice(0, 5)
+      .map(d => ({
+        type: 'dish',
+        id: d.dish_id,
+        name: d.dish_name,
+        subtitle: d.restaurant_name,
+        data: d,
+      }))
+
+    // Get matching restaurants
+    const restaurantMatches = restaurantSuggestions.map(r => ({
+      type: 'restaurant',
+      id: r.id,
+      name: r.name,
+      subtitle: r.address,
+      data: r,
+    }))
+
+    return [...dishMatches, ...restaurantMatches]
+  }, [searchQuery, dishes, restaurantSuggestions])
+
+  // Handle autocomplete selection
+  const handleAutocompleteSelect = useCallback((suggestion) => {
+    setAutocompleteOpen(false)
+    setAutocompleteIndex(-1)
+
+    if (suggestion.type === 'dish') {
+      // Open the dish modal
+      openDishModal(suggestion.data)
+      setSearchQuery('')
+    } else if (suggestion.type === 'restaurant') {
+      // Navigate to restaurant page
+      navigate(`/restaurants/${suggestion.id}`)
+    }
+  }, [navigate])
+
+  // Handle keyboard navigation in autocomplete
+  const handleSearchKeyDown = useCallback((e) => {
+    if (!autocompleteOpen || autocompleteSuggestions.length === 0) {
+      if (e.key === 'ArrowDown' && searchQuery.trim().length >= 2) {
+        setAutocompleteOpen(true)
+        setAutocompleteIndex(0)
+        e.preventDefault()
+      }
+      return
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setAutocompleteIndex(prev =>
+          prev < autocompleteSuggestions.length - 1 ? prev + 1 : 0
+        )
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setAutocompleteIndex(prev =>
+          prev > 0 ? prev - 1 : autocompleteSuggestions.length - 1
+        )
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (autocompleteIndex >= 0 && autocompleteSuggestions[autocompleteIndex]) {
+          handleAutocompleteSelect(autocompleteSuggestions[autocompleteIndex])
+        }
+        break
+      case 'Escape':
+        setAutocompleteOpen(false)
+        setAutocompleteIndex(-1)
+        break
+    }
+  }, [autocompleteOpen, autocompleteSuggestions, autocompleteIndex, handleAutocompleteSelect, searchQuery])
 
   // Are we showing dishes or the category grid?
   const showingDishes = selectedCategory || debouncedSearchQuery.trim()
@@ -264,7 +391,7 @@ export function Browse() {
           <img src="/logo.png" alt="What's Good Here" className="h-20 w-auto" />
         </div>
 
-        {/* Search bar */}
+        {/* Search bar with autocomplete */}
         <div className="px-4 pb-3">
           <div className="relative">
             <svg
@@ -273,27 +400,107 @@ export function Browse() {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+              className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 z-10"
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search dishes or restaurants..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                if (e.target.value.length >= 2) {
+                  setAutocompleteOpen(true)
+                } else {
+                  setAutocompleteOpen(false)
+                }
+                setAutocompleteIndex(-1)
+              }}
+              onFocus={() => {
+                if (searchQuery.length >= 2 && autocompleteSuggestions.length > 0) {
+                  setAutocompleteOpen(true)
+                }
+              }}
+              onKeyDown={handleSearchKeyDown}
               className="w-full pl-10 pr-10 py-3 bg-neutral-100 rounded-xl border-0 focus:ring-2 focus:bg-white transition-all"
               style={{ '--tw-ring-color': 'var(--color-primary)' }}
             />
             {searchQuery && (
               <button
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center hover:bg-neutral-400 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center hover:bg-neutral-400 transition-colors z-10"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-neutral-600">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
               </button>
+            )}
+
+            {/* Autocomplete dropdown */}
+            {autocompleteOpen && autocompleteSuggestions.length > 0 && (
+              <div
+                ref={autocompleteRef}
+                className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden z-50"
+              >
+                {autocompleteSuggestions.map((suggestion, index) => (
+                  <button
+                    key={`${suggestion.type}-${suggestion.id}`}
+                    onClick={() => handleAutocompleteSelect(suggestion)}
+                    className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors ${
+                      index === autocompleteIndex
+                        ? 'bg-orange-50'
+                        : 'hover:bg-neutral-50'
+                    }`}
+                  >
+                    {/* Icon */}
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        suggestion.type === 'dish'
+                          ? 'bg-orange-100 text-orange-600'
+                          : 'bg-blue-100 text-blue-600'
+                      }`}
+                    >
+                      {suggestion.type === 'dish' ? (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      )}
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-neutral-900 truncate">
+                        {suggestion.name}
+                      </p>
+                      <p className="text-xs text-neutral-500 truncate">
+                        {suggestion.type === 'dish' ? `at ${suggestion.subtitle}` : suggestion.subtitle}
+                      </p>
+                    </div>
+
+                    {/* Type badge */}
+                    <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
+                      suggestion.type === 'dish'
+                        ? 'bg-orange-100 text-orange-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {suggestion.type === 'dish' ? 'Dish' : 'Spot'}
+                    </span>
+                  </button>
+                ))}
+
+                {/* Hint */}
+                <div className="px-4 py-2 bg-neutral-50 border-t border-neutral-100">
+                  <p className="text-xs text-neutral-400">
+                    Press Enter to search all, or select a suggestion
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </div>

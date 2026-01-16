@@ -64,6 +64,34 @@ export const restaurantsApi = {
   },
 
   /**
+   * Search restaurants by name
+   * @param {string} query - Search query
+   * @param {number} limit - Max results
+   * @returns {Promise<Array>} Array of matching restaurants
+   */
+  async search(query, limit = 5) {
+    try {
+      if (!query?.trim()) return []
+
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('id, name, address')
+        .eq('is_open', true)
+        .ilike('name', `%${query}%`)
+        .limit(limit)
+
+      if (error) {
+        throw error
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Error searching restaurants:', error)
+      return []
+    }
+  },
+
+  /**
    * Get a single restaurant by ID
    * @param {string} restaurantId - Restaurant ID
    * @returns {Promise<Object>} Restaurant object
