@@ -4,6 +4,54 @@ A living reference document. Updated as the project evolves.
 
 ---
 
+## Build Order Tracker
+
+What we actually did (left) vs. ideal order (right). Left side updated as work continues.
+
+```
+WHAT WE DID                             IDEAL ORDER (for next time)
+────────────────────────────────────    ────────────────────────────────────
+Jan 6-7 (Week 1)                        Week 1: Foundation
+├─ Schema + Auth + UI + Data            ├─ Discovery & spec document
+│  (all in one commit)                  ├─ Define MVP scope + metrics
+├─ Category additions (14 commits)      ├─ Architecture decisions
+└─ No design system                     └─ Design tokens & patterns
+
+Jan 11-14 (Week 2)                      Week 2: Data & Core
+├─ Image debugging (10+ commits)        ├─ Schema (with room to grow)
+├─ Pizza animations (premature)         ├─ API layer structure
+├─ Navigation structure (late)          ├─ Auth flow (properly tested)
+├─ 20+ redesign commits                 └─ Seed data strategy
+└─ Design tokens (finally)
+
+Jan 14-15 (Week 3)                      Week 3: Core Flow
+├─ Auth bug fixes (6+ commits)          ├─ Core screens (Home, Browse)
+├─ Refactor: AuthContext, API layer     ├─ Primary user flow
+├─ Analytics added (late)               ├─ Analytics instrumentation
+└─ Testing setup                        └─ Error handling
+
+Jan 15-16 (Week 4)                      Week 4: Polish
+├─ Gamification & impact feedback       ├─ Secondary features
+├─ Photo quality system                 ├─ Polish & animations
+├─ TopBar brand anchor                  ├─ Onboarding flows
+├─ Welcome splash for first-timers      └─ Testing & QA
+└─ Build retrospective
+────────────────────────────────────    ────────────────────────────────────
+```
+
+### Recent Work (update this as you go)
+| Date | What Changed | Category |
+|------|--------------|----------|
+| Jan 16 | Welcome splash (tap to dismiss) | Onboarding |
+| Jan 16 | TopBar with brand tint | Polish |
+| Jan 16 | Responsive logo scaling | Polish |
+| Jan 16 | Photo quality + tiers | Feature |
+| Jan 15 | Gamification phase 1 | Feature |
+| Jan 15 | Sentry + PostHog | Infrastructure |
+| Jan 15 | API layer refactor | Architecture |
+
+---
+
 ## Design Tokens
 
 Current design system values defined in `src/index.css`:
