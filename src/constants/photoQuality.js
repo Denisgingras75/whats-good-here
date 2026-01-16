@@ -51,6 +51,42 @@ export const PHOTO_QUALITY = {
   },
 }
 
+/**
+ * Photo Tier Configuration
+ * Single source of truth for tier display (icons, labels, descriptions, colors)
+ */
+export const PHOTO_TIERS = {
+  featured: {
+    icon: '⭐',
+    label: 'Featured',
+    description: 'May be used as the main image for a dish',
+    uploadDescription: 'Your photo may be shown as the main image for this dish.',
+    color: '#F59E0B', // amber
+  },
+  community: {
+    icon: '👥',
+    label: 'Community',
+    description: 'Appears in the Community Photos section',
+    uploadDescription: 'Your photo is visible under Community Photos for this dish.',
+    color: '#3B82F6', // blue
+  },
+  hidden: {
+    icon: '📁',
+    label: 'Saved',
+    description: 'Only shown under "See all photos"',
+    uploadDescription: 'Your photo is saved and visible under "See all photos."',
+    color: '#6B7280', // gray
+    tip: 'Tip: Better lighting or a closer shot can help it become Featured.',
+  },
+}
+
+// Ordered array for displaying tiers in lists
+export const PHOTO_TIERS_LIST = [
+  PHOTO_TIERS.featured,
+  PHOTO_TIERS.community,
+  PHOTO_TIERS.hidden,
+]
+
 // User-friendly rejection messages with actionable advice
 export const REJECTION_MESSAGES = {
   INVALID_TYPE: 'Please upload a JPEG, PNG, or WebP image',

@@ -1,26 +1,5 @@
 import { useState } from 'react'
-
-const TIER_CONFIG = {
-  featured: {
-    icon: '⭐',
-    label: 'Featured',
-    description: 'Your photo may be shown as the main image for this dish.',
-    color: '#F59E0B', // amber
-  },
-  community: {
-    icon: '👥',
-    label: 'Community',
-    description: 'Your photo is visible under Community Photos for this dish.',
-    color: '#3B82F6', // blue
-  },
-  hidden: {
-    icon: '📁',
-    label: 'Saved',
-    description: 'Your photo is saved and visible under "See all photos."',
-    color: '#6B7280', // gray
-    tip: 'Tip: Better lighting or a closer shot can help it become Featured.',
-  },
-}
+import { PHOTO_TIERS } from '../constants/photoQuality'
 
 export function PhotoUploadConfirmation({
   dishName,
@@ -30,7 +9,7 @@ export function PhotoUploadConfirmation({
   onLater,
 }) {
   const [showInfo, setShowInfo] = useState(false)
-  const tier = TIER_CONFIG[status] || TIER_CONFIG.community
+  const tier = PHOTO_TIERS[status] || PHOTO_TIERS.community
 
   return (
     <div className="photo-upload-confirmation">
@@ -51,7 +30,7 @@ export function PhotoUploadConfirmation({
       </div>
 
       {/* Tier explanation */}
-      <p className="tier-description">{tier.description}</p>
+      <p className="tier-description">{tier.uploadDescription}</p>
 
       {/* Tip for hidden photos */}
       {status === 'hidden' && tier.tip && (

@@ -8,6 +8,7 @@ import { useSavedDishes } from '../hooks/useSavedDishes'
 import { useUnratedDishes } from '../hooks/useUnratedDishes'
 import { isSoundMuted, toggleSoundMute } from '../lib/sounds'
 import { getCategoryImage } from '../constants/categoryImages'
+import { PHOTO_TIERS_LIST } from '../constants/photoQuality'
 import { DishModal } from '../components/DishModal'
 import { LoginModal } from '../components/Auth/LoginModal'
 
@@ -785,24 +786,6 @@ function RanksInfoSection() {
 function PhotosInfoSection() {
   const [expanded, setExpanded] = useState(false)
 
-  const tiers = [
-    {
-      icon: '⭐',
-      title: 'Featured',
-      description: 'May be used as the main image for a dish',
-    },
-    {
-      icon: '👥',
-      title: 'Community',
-      description: 'Appears in the Community Photos section',
-    },
-    {
-      icon: '📁',
-      title: 'Saved',
-      description: 'Only shown under "See all photos"',
-    },
-  ]
-
   return (
     <div className="border-t border-neutral-100">
       <button
@@ -832,14 +815,14 @@ function PhotosInfoSection() {
           </p>
 
           <div className="space-y-2">
-            {tiers.map((tier) => (
+            {PHOTO_TIERS_LIST.map((tier) => (
               <div
-                key={tier.title}
+                key={tier.label}
                 className="flex items-center gap-3 p-2 rounded-lg bg-neutral-50"
               >
                 <span className="text-xl">{tier.icon}</span>
                 <div className="flex-1">
-                  <span className="font-semibold text-neutral-900">{tier.title}</span>
+                  <span className="font-semibold text-neutral-900">{tier.label}</span>
                   <p className="text-xs text-neutral-500">{tier.description}</p>
                 </div>
               </div>
