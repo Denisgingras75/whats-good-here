@@ -92,6 +92,7 @@ Ideas and features for future versions. Not prioritized yet.
 **Future measures (if needed):**
 - Rate limiting: Max 20 votes per hour per user
 - New account cooldown: Can't vote for first 10 minutes after signup
+- Negative vote streak limit: Can't rate 5 dishes in a row below 3 (prevents brigading/tanking a restaurant)
 - Suspicious pattern detection: Flag accounts that vote on same restaurant repeatedly
 - Phone verification: Optional, unlocks "verified voter" badge
 - Device fingerprinting: Detect multiple accounts from same device
