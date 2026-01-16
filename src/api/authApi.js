@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import posthog from 'posthog-js'
 
 /**
  * Auth API - Centralized authentication operations
@@ -12,6 +13,8 @@ export const authApi = {
    */
   async signInWithGoogle(redirectUrl = null) {
     try {
+      posthog.capture('login_started', { method: 'google' })
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -19,6 +22,7 @@ export const authApi = {
         },
       })
       if (error) {
+        posthog.capture('login_failed', { method: 'google', error: error.message })
         throw error
       }
       return { success: true }
@@ -36,6 +40,8 @@ export const authApi = {
    */
   async signInWithMagicLink(email, redirectUrl = null) {
     try {
+      posthog.capture('login_started', { method: 'magic_link' })
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -43,8 +49,10 @@ export const authApi = {
         },
       })
       if (error) {
+        posthog.capture('login_failed', { method: 'magic_link', error: error.message })
         throw error
       }
+      posthog.capture('magic_link_sent')
       return { success: true }
     } catch (error) {
       console.error('Error sending magic link:', error)

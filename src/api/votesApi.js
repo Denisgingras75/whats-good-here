@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import posthog from 'posthog-js'
 
 /**
  * Votes API - Centralized data fetching and mutation for votes
@@ -40,6 +41,12 @@ export const votesApi = {
       if (error) {
         throw error
       }
+
+      posthog.capture('vote_submitted', {
+        dish_id: dishId,
+        would_order_again: wouldOrderAgain,
+        rating: rating10,
+      })
 
       return { success: true }
     } catch (error) {

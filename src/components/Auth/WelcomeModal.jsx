@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useProfile } from '../../hooks/useProfile'
+import posthog from 'posthog-js'
 
 const STEPS = [
   {
@@ -40,6 +41,7 @@ export function WelcomeModal() {
       // Show if no display_name OR hasn't completed onboarding
       if (!profile.display_name || !profile.has_onboarded) {
         setIsOpen(true)
+        posthog.capture('onboarding_started')
       }
     }
   }, [user, profile, loading])
@@ -65,6 +67,7 @@ export function WelcomeModal() {
       display_name: name.trim(),
       has_onboarded: true
     })
+    posthog.capture('onboarding_completed', { name_set: true })
     setSaving(false)
     setIsOpen(false)
   }
@@ -72,6 +75,7 @@ export function WelcomeModal() {
   const handleSkipName = async () => {
     setSaving(true)
     await updateProfile({ has_onboarded: true })
+    posthog.capture('onboarding_completed', { name_set: false })
     setSaving(false)
     setIsOpen(false)
   }
