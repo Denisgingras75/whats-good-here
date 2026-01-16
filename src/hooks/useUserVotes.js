@@ -18,6 +18,100 @@ function transformVote(vote) {
 }
 
 /**
+ * Category tier thresholds and titles
+ */
+const TIER_THRESHOLDS = [
+  { min: 50, level: 5, title: 'Master', icon: '👑' },
+  { min: 30, level: 4, title: 'Expert', icon: '⭐' },
+  { min: 20, level: 3, title: 'Connoisseur', icon: '🥇' },
+  { min: 10, level: 2, title: 'Fan', icon: '🥈' },
+  { min: 5, level: 1, title: 'Explorer', icon: '🥉' },
+]
+
+/**
+ * Category display info
+ */
+const CATEGORY_INFO = {
+  'pizza': { emoji: '🍕', label: 'Pizza' },
+  'burger': { emoji: '🍔', label: 'Burger' },
+  'taco': { emoji: '🌮', label: 'Taco' },
+  'wings': { emoji: '🍗', label: 'Wings' },
+  'sushi': { emoji: '🍣', label: 'Sushi' },
+  'sandwich': { emoji: '🥪', label: 'Sandwich' },
+  'breakfast sandwich': { emoji: '🥯', label: 'Breakfast Sandwich' },
+  'pasta': { emoji: '🍝', label: 'Pasta' },
+  'pokebowl': { emoji: '🥗', label: 'Poke' },
+  'lobster roll': { emoji: '🦞', label: 'Lobster Roll' },
+  'seafood': { emoji: '🦐', label: 'Seafood' },
+  'chowder': { emoji: '🍲', label: 'Chowder' },
+  'soup': { emoji: '🍜', label: 'Soup' },
+  'breakfast': { emoji: '🍳', label: 'Breakfast' },
+  'salad': { emoji: '🥗', label: 'Salad' },
+  'fries': { emoji: '🍟', label: 'Fries' },
+  'tendys': { emoji: '🍗', label: 'Tendys' },
+  'fried chicken': { emoji: '🍗', label: 'Fried Chicken' },
+  'apps': { emoji: '🧆', label: 'Apps' },
+  'entree': { emoji: '🥩', label: 'Entree' },
+}
+
+/**
+ * Get tier for a vote count
+ */
+function getTierForCount(count) {
+  for (const tier of TIER_THRESHOLDS) {
+    if (count >= tier.min) {
+      return tier
+    }
+  }
+  return null
+}
+
+/**
+ * Get rating personality based on average rating
+ */
+function getRatingPersonality(avgRating) {
+  if (avgRating === null) return null
+
+  if (avgRating < 6.0) {
+    return { title: 'Tough Critic', emoji: '🧐', description: 'You have high standards' }
+  } else if (avgRating < 7.5) {
+    return { title: 'Fair Judge', emoji: '⚖️', description: 'You call it like you see it' }
+  } else if (avgRating < 8.5) {
+    return { title: 'Generous Rater', emoji: '😊', description: 'You find the good in most dishes' }
+  } else {
+    return { title: 'Loves Everything', emoji: '🥰', description: 'You\'re easy to please!' }
+  }
+}
+
+/**
+ * Calculate category tiers from vote counts
+ */
+function calculateCategoryTiers(categoryCounts) {
+  const tiers = []
+
+  for (const [category, count] of Object.entries(categoryCounts)) {
+    const tier = getTierForCount(count)
+    if (tier) {
+      const info = CATEGORY_INFO[category] || { emoji: '🍽️', label: category }
+      tiers.push({
+        category,
+        count,
+        ...tier,
+        ...info,
+      })
+    }
+  }
+
+  // Sort by level (highest first), then by count
+  tiers.sort((a, b) => {
+    if (b.level !== a.level) return b.level - a.level
+    return b.count - a.count
+  })
+
+  return tiers
+}
+
+/**
  * Calculate stats from votes data
  */
 function calculateStats(data) {
@@ -31,7 +125,7 @@ function calculateStats(data) {
     ? ratingsWithValue.reduce((sum, v) => sum + v.rating_10, 0) / ratingsWithValue.length
     : null
 
-  // Top category
+  // Category counts
   const categoryCounts = {}
   data.forEach(v => {
     const cat = v.dishes.category
@@ -42,6 +136,12 @@ function calculateStats(data) {
   const topCategory = Object.entries(categoryCounts).length > 0
     ? Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0][0]
     : null
+
+  // Category tiers (only categories with 5+ votes)
+  const categoryTiers = calculateCategoryTiers(categoryCounts)
+
+  // Rating personality
+  const ratingPersonality = getRatingPersonality(avgRating)
 
   // Favorite restaurant (most votes)
   const restaurantCounts = {}
@@ -55,6 +155,9 @@ function calculateStats(data) {
     ? Object.entries(restaurantCounts).sort((a, b) => b[1] - a[1])[0][0]
     : null
 
+  // Count unique restaurants
+  const uniqueRestaurants = Object.keys(restaurantCounts).length
+
   return {
     totalVotes,
     worthItCount,
@@ -62,6 +165,10 @@ function calculateStats(data) {
     avgRating,
     topCategory,
     favoriteRestaurant,
+    uniqueRestaurants,
+    categoryTiers,
+    ratingPersonality,
+    categoryCounts,
   }
 }
 
@@ -77,6 +184,10 @@ export function useUserVotes(userId) {
     avgRating: null,
     topCategory: null,
     favoriteRestaurant: null,
+    uniqueRestaurants: 0,
+    categoryTiers: [],
+    ratingPersonality: null,
+    categoryCounts: {},
   })
 
   const processVotes = useCallback((data) => {
@@ -111,6 +222,10 @@ export function useUserVotes(userId) {
         avgRating: null,
         topCategory: null,
         favoriteRestaurant: null,
+        uniqueRestaurants: 0,
+        categoryTiers: [],
+        ratingPersonality: null,
+        categoryCounts: {},
       })
       setLoading(false)
       return

@@ -181,13 +181,23 @@ export function Profile() {
                   </button>
                 )}
 
+                {/* Rating Personality */}
+                {stats.ratingPersonality && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span>{stats.ratingPersonality.emoji}</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
+                      {stats.ratingPersonality.title}
+                    </span>
+                  </div>
+                )}
+
                 {/* Contribution Stats */}
                 <p className="text-sm text-neutral-500 mt-1">
                   {stats.totalVotes > 0
-                    ? `You've rated ${stats.totalVotes} ${stats.totalVotes === 1 ? 'dish' : 'dishes'}`
+                    ? `${stats.totalVotes} ${stats.totalVotes === 1 ? 'dish' : 'dishes'} rated`
                     : 'Start rating to help others'
                   }
-                  {savedDishes.length > 0 && ` · ${savedDishes.length} saved`}
+                  {stats.uniqueRestaurants > 0 && ` · ${stats.uniqueRestaurants} spots`}
                   {memberSince && ` · Since ${memberSince}`}
                 </p>
 
@@ -221,19 +231,40 @@ export function Profile() {
               </div>
             )}
 
-            {/* Top Category & Restaurant */}
-            {(stats.topCategory || stats.favoriteRestaurant) && (
+            {/* Category Tiers */}
+            {stats.categoryTiers.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+                  Your Ranks
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {stats.categoryTiers.map((tier) => (
+                    <div
+                      key={tier.category}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-200 rounded-full text-sm"
+                    >
+                      <span>{tier.emoji}</span>
+                      <span className="font-medium text-neutral-800">{tier.label}</span>
+                      <span className="text-neutral-400">·</span>
+                      <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>
+                        {tier.icon} {tier.title}
+                      </span>
+                      <span className="text-xs text-neutral-400">({tier.count})</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Top spot (if no tiers yet, show encouragement) */}
+            {stats.categoryTiers.length === 0 && stats.favoriteRestaurant && (
               <div className="flex flex-wrap gap-2 mt-3">
-                {stats.topCategory && (
-                  <div className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs font-medium text-neutral-600">
-                    Fave category: <span className="text-neutral-900">{stats.topCategory}</span>
-                  </div>
-                )}
-                {stats.favoriteRestaurant && (
-                  <div className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs font-medium text-neutral-600">
-                    Top spot: <span className="text-neutral-900">{stats.favoriteRestaurant}</span>
-                  </div>
-                )}
+                <div className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs font-medium text-neutral-600">
+                  Top spot: <span className="text-neutral-900">{stats.favoriteRestaurant}</span>
+                </div>
+                <div className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs font-medium text-neutral-500">
+                  Rate 5+ dishes in a category to earn ranks!
+                </div>
               </div>
             )}
           </div>
