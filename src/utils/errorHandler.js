@@ -3,6 +3,8 @@
  * Centralized error handling, classification, and user messaging
  */
 
+import * as Sentry from '@sentry/react'
+
 export const ErrorTypes = {
   NETWORK_ERROR: 'NETWORK_ERROR',
   TIMEOUT: 'TIMEOUT',
@@ -153,13 +155,34 @@ export async function withRetry(fn, options = {}) {
     } catch (error) {
       lastError = error
 
-      // Don't retry if not retryable
+      // Don't retry non-retryable errors
       if (!isRetryable(error)) {
+        if (import.meta.env.PROD) {
+          Sentry.captureException(error, {
+            tags: {
+              errorType: classifyError(error),
+              retryable: false,
+            },
+          })
+        }
         throw error
       }
 
       // Don't retry on last attempt
       if (attempt === maxAttempts) {
+        if (import.meta.env.PROD) {
+          Sentry.captureException(error, {
+            tags: {
+              errorType: classifyError(error),
+              retriesExhausted: true,
+            },
+            contexts: {
+              retry: {
+                attempts: maxAttempts,
+              },
+            },
+          })
+        }
         throw error
       }
 

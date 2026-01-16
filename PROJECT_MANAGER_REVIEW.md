@@ -103,9 +103,29 @@
 
 ### **TIER 2: "GOOD TO HAVE" (Week 2-3)**
 
-#### **4. Offline Support** 📱
-**Why:** 30% of users have spotty island WiFi. They want to still browse.  
-**Time:** 8-10 hours  
+#### **4. Toast Notifications with Progress Timer** 🔔
+**Why:** Better UX for feedback messages. Saw this done well on PostHog's onboarding.
+**Time:** 1-2 hours
+**Impact:** Medium (polished feel)
+
+**What to Build:**
+- [ ] Replace current toast system with **Sonner** (modern React library)
+- [ ] Show visual progress bar so users see how long notification stays
+- [ ] Support types: success, error, warning, info
+- [ ] Customizable position, animation, and timing
+
+**Libraries to Consider:**
+- Sonner (recommended - modern, progress timer built-in)
+- React-Hot-Toast
+- React Toastify
+
+**Inspiration:** PostHog onboarding screens
+
+---
+
+#### **5. Offline Support** 📱
+**Why:** 30% of users have spotty island WiFi. They want to still browse.
+**Time:** 8-10 hours
 **Impact:** Medium (especially for island tourists)
 
 **What to Build:**
@@ -117,7 +137,7 @@
 
 ---
 
-#### **5. Search Improvements** 🔎
+#### **6. Search Improvements** 🔎
 **Why:** Current search only works on dish/restaurant name. Limited.  
 **Time:** 4 hours  
 **Impact:** Medium (helps discovery)
@@ -131,7 +151,7 @@
 
 ---
 
-#### **6. Social Features** 👥
+#### **7. Social Features** 👥
 **Why:** Drives engagement & retention. People want to see what friends rated.  
 **Time:** 10-12 hours  
 **Impact:** High (but lower priority than bugs)
