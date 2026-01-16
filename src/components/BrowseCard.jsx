@@ -10,7 +10,6 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
     category,
     photo_url,
     price,
-    percent_worth_it,
     avg_rating,
     total_votes,
     distance_miles,

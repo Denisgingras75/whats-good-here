@@ -52,7 +52,7 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }) {
         {/* Scrollable category chips */}
         <div className="overflow-x-auto scrollbar-hide smooth-scroll">
           <div className="flex gap-2 px-4 py-4 min-w-max">
-            {categoriesToShow.map((category, index) => (
+            {categoriesToShow.map((category) => (
               <button
                 key={category.id || 'all'}
                 onClick={() => onSelectCategory(category.id)}

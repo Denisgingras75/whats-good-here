@@ -40,7 +40,8 @@ export function Home() {
     null,
     null
   )
-  const { isSaved, toggleSave } = useSavedDishes(user?.id)
+  // Save functionality available but not used on Home page yet
+  const _savedDishes = useSavedDishes(user?.id)
 
   // Split dishes into ranked (enough votes) and unrated (not enough votes)
   const rankedDishes = dishes?.filter(d => (d.total_votes || 0) >= MIN_VOTES_FOR_RANKING) || []
@@ -133,14 +134,6 @@ export function Home() {
 
   const handleLoginRequired = () => {
     setLoginModalOpen(true)
-  }
-
-  const handleToggleSave = async (dishId) => {
-    if (!user) {
-      setLoginModalOpen(true)
-      return
-    }
-    await toggleSave(dishId)
   }
 
   return (
@@ -313,7 +306,6 @@ function DishRow({ dish, rank, onClick, isRanked }) {
     restaurant_name,
     category,
     photo_url,
-    percent_worth_it,
     avg_rating,
     total_votes,
     distance_miles,

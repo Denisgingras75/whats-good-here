@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { restaurantsApi, adminApi } from '../api'
 import { CATEGORY_IMAGES } from '../constants/categoryImages'
 
 const CATEGORIES = Object.keys(CATEGORY_IMAGES)
 
+// Admin emails - comma-separated list from env var
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
+
 export function Admin() {
+  const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -92,12 +99,45 @@ export function Admin() {
     }
   }
 
-  if (loading) {
+  // Check if user is an admin
+  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())
+
+  // Show loading while checking auth
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-surface)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
           <p className="mt-2 text-sm text-gray-500">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Unauthorized - not logged in or not an admin
+  if (!user || !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-surface)' }}>
+        <div className="text-center max-w-md px-6">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+            <span className="text-2xl">🔒</span>
+          </div>
+          <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            Access Denied
+          </h1>
+          <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+            {!user
+              ? "You need to be logged in to access this page."
+              : "You don't have permission to access the admin area."
+            }
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 rounded-xl font-semibold text-white"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            Go Home
+          </button>
         </div>
       </div>
     )
