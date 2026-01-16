@@ -80,6 +80,31 @@ Ideas and features for future versions. Not prioritized yet.
 
 ---
 
+## Bot Protection & Vote Integrity
+
+**Summary:** Prevent bots and fake accounts from gaming the rankings.
+
+**Already in place:**
+- One vote per user per dish (database constraint)
+- Authentication required (Google OAuth or magic link email)
+- Email verification inherent in auth flow
+
+**Future measures (if needed):**
+- Rate limiting: Max 20 votes per hour per user
+- New account cooldown: Can't vote for first 10 minutes after signup
+- Suspicious pattern detection: Flag accounts that vote on same restaurant repeatedly
+- Phone verification: Optional, unlocks "verified voter" badge
+- Device fingerprinting: Detect multiple accounts from same device
+
+**What NOT to do:**
+- CAPTCHA on every vote (kills UX)
+- Require phone number upfront (too much friction)
+- Public vote history (privacy concern)
+
+**Philosophy:** Start with light protection, add friction only if abuse appears. Don't punish real users for hypothetical bots.
+
+---
+
 ## Search Autocomplete
 
 **Summary:** Show matching suggestions as user types in search.
