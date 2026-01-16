@@ -1,12 +1,29 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { authApi } from '../../api'
 import { getPendingVoteFromStorage } from '../ReviewFlow'
+
+const REMEMBERED_EMAIL_KEY = 'whats-good-here-email'
 
 export function LoginModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState(null)
   const [showEmailForm, setShowEmailForm] = useState(false)
+
+  // Load remembered email when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
+        if (savedEmail) {
+          setEmail(savedEmail)
+          setShowEmailForm(true) // Auto-expand if we have a saved email
+        }
+      } catch (e) {
+        // localStorage not available
+      }
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -33,6 +50,13 @@ export function LoginModal({ isOpen, onClose }) {
     try {
       setLoading(true)
 
+      // Remember the email for next time
+      try {
+        localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
+      } catch (e) {
+        // localStorage not available
+      }
+
       // Build redirect URL with pending dish ID so we can reopen the modal after login
       const redirectUrl = new URL(window.location.href)
       const pending = getPendingVoteFromStorage()
@@ -46,7 +70,7 @@ export function LoginModal({ isOpen, onClose }) {
         type: 'success',
         text: 'Check your email for the login link!',
       })
-      setEmail('')
+      // Don't clear email - keep it visible so they know where to check
     } catch (error) {
       setMessage({ type: 'error', text: error.message })
     } finally {

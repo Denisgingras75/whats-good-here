@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api'
 import { useAuth } from '../context/AuthContext'
 
+const REMEMBERED_EMAIL_KEY = 'whats-good-here-email'
+
 export function Login() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -10,6 +12,19 @@ export function Login() {
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState(null)
   const [showEmailForm, setShowEmailForm] = useState(false)
+
+  // Load remembered email on mount
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
+      if (savedEmail) {
+        setEmail(savedEmail)
+        setShowEmailForm(true) // Auto-expand if we have a saved email
+      }
+    } catch (e) {
+      // localStorage not available
+    }
+  }, [])
 
   // Redirect if already logged in
   useEffect(() => {
@@ -32,12 +47,18 @@ export function Login() {
     e.preventDefault()
     try {
       setLoading(true)
+      // Remember the email for next time
+      try {
+        localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
+      } catch (e) {
+        // localStorage not available
+      }
       await authApi.signInWithMagicLink(email)
       setMessage({
         type: 'success',
         text: 'Check your email for the login link!',
       })
-      setEmail('')
+      // Don't clear email - keep it visible so they know where to check
     } catch (error) {
       setMessage({ type: 'error', text: error.message })
     } finally {

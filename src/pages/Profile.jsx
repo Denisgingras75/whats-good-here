@@ -14,6 +14,8 @@ const TABS = [
   { id: 'saved', label: 'Saved', emoji: '❤️' },
 ]
 
+const REMEMBERED_EMAIL_KEY = 'whats-good-here-email'
+
 export function Profile() {
   const navigate = useNavigate()
   const { user, loading, signOut } = useAuth()
@@ -28,6 +30,20 @@ export function Profile() {
   const { profile, updateProfile } = useProfile(user?.id)
   const { worthItDishes, avoidDishes, stats, loading: votesLoading } = useUserVotes(user?.id)
   const { savedDishes, loading: savedLoading, unsaveDish } = useSavedDishes(user?.id)
+
+  // Load remembered email on mount (for logged-out state)
+  useEffect(() => {
+    if (!user) {
+      try {
+        const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
+        if (savedEmail) {
+          setEmail(savedEmail)
+        }
+      } catch (e) {
+        // localStorage not available
+      }
+    }
+  }, [user])
 
   // Set initial name for editing
   useEffect(() => {
@@ -60,10 +76,16 @@ export function Profile() {
     e.preventDefault()
     setAuthLoading(true)
     try {
+      // Remember the email for next time
+      try {
+        localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
+      } catch (e) {
+        // localStorage not available
+      }
       // Use current page URL so user returns to the same place after login
       await authApi.signInWithMagicLink(email, window.location.href)
       setMessage({ type: 'success', text: 'Check your email for a magic link!' })
-      setEmail('')
+      // Don't clear email - keep it visible so they know where to check
     } catch (error) {
       setMessage({ type: 'error', text: error.message })
     } finally {
