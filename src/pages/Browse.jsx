@@ -13,6 +13,12 @@ import { ImpactFeedback, getImpactMessage } from '../components/ImpactFeedback'
 
 const MIN_VOTES_FOR_RANKING = 5
 
+const SORT_OPTIONS = [
+  { id: 'top_rated', label: 'Top Rated', icon: '⭐' },
+  { id: 'most_voted', label: 'Most Voted', icon: '🔥' },
+  { id: 'closest', label: 'Closest', icon: '📍' },
+]
+
 const CATEGORIES = [
   { id: 'pizza', label: 'Pizza', emoji: '🍕' },
   { id: 'burger', label: 'Burgers', emoji: '🍔' },
@@ -46,7 +52,12 @@ export function Browse() {
   const [selectedDish, setSelectedDish] = useState(null)
   const [impactFeedback, setImpactFeedback] = useState(null)
   const [pendingVoteData, setPendingVoteData] = useState(null)
+  const [sortBy, setSortBy] = useState(() => {
+    return localStorage.getItem('browse_sort') || 'top_rated'
+  })
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
   const beforeVoteRef = useRef(null)
+  const sortDropdownRef = useRef(null)
 
   // Handle category from URL params (when coming from home page)
   useEffect(() => {
@@ -63,6 +74,24 @@ export function Browse() {
     }, 300)
     return () => clearTimeout(timer)
   }, [searchQuery])
+
+  // Close sort dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target)) {
+        setSortDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Handle sort change
+  const handleSortChange = (sortId) => {
+    setSortBy(sortId)
+    localStorage.setItem('browse_sort', sortId)
+    setSortDropdownOpen(false)
+  }
 
   const { location, radius } = useLocationContext()
 
@@ -181,10 +210,10 @@ export function Browse() {
     setSearchParams({})
   }
 
-  // Filter dishes by search query (dish name or restaurant name)
-  // Use useMemo to prevent stale closures and ensure proper dependency tracking
+  // Filter and sort dishes
   const filteredDishes = useMemo(() => {
-    return dishes.filter(dish => {
+    // First filter by search query
+    let result = dishes.filter(dish => {
       if (!debouncedSearchQuery.trim()) return true
       const query = debouncedSearchQuery.toLowerCase()
       return (
@@ -192,7 +221,32 @@ export function Browse() {
         dish.restaurant_name?.toLowerCase().includes(query)
       )
     })
-  }, [dishes, debouncedSearchQuery])
+
+    // Then sort based on selected option
+    switch (sortBy) {
+      case 'most_voted':
+        result = [...result].sort((a, b) => (b.total_votes || 0) - (a.total_votes || 0))
+        break
+      case 'closest':
+        result = [...result].sort((a, b) => (a.distance_miles || 999) - (b.distance_miles || 999))
+        break
+      case 'top_rated':
+      default:
+        // Sort by percent_worth_it, with min votes as tiebreaker
+        result = [...result].sort((a, b) => {
+          const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+          const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+          // Ranked dishes first
+          if (aRanked && !bRanked) return -1
+          if (!aRanked && bRanked) return 1
+          // Then by percent_worth_it
+          return (b.percent_worth_it || 0) - (a.percent_worth_it || 0)
+        })
+        break
+    }
+
+    return result
+  }, [dishes, debouncedSearchQuery, sortBy])
 
   // Clear search
   const clearSearch = () => {
@@ -289,8 +343,8 @@ export function Browse() {
       ) : (
         /* Dish List View */
         <>
-          {/* Results count */}
-          <div className="px-4 py-2 bg-stone-50 border-b border-neutral-100">
+          {/* Results count and sort */}
+          <div className="px-4 py-2 bg-stone-50 border-b border-neutral-100 flex items-center justify-between">
             <p className="text-sm text-neutral-500">
               {loading ? (
                 'Loading...'
@@ -305,6 +359,50 @@ export function Browse() {
                 </>
               )}
             </p>
+
+            {/* Sort dropdown */}
+            <div className="relative" ref={sortDropdownRef}>
+              <button
+                onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-neutral-100 transition-colors"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                <span>{SORT_OPTIONS.find(o => o.id === sortBy)?.icon}</span>
+                <span>{SORT_OPTIONS.find(o => o.id === sortBy)?.label}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Dropdown menu */}
+              {sortDropdownOpen && (
+                <div className="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 z-50">
+                  {SORT_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => handleSortChange(option.id)}
+                      className={`w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-neutral-50 transition-colors ${
+                        sortBy === option.id ? 'font-medium' : ''
+                      }`}
+                      style={{ color: sortBy === option.id ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}
+                    >
+                      <span>{option.icon}</span>
+                      <span>{option.label}</span>
+                      {sortBy === option.id && (
+                        <svg className="w-4 h-4 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Dish Grid */}
