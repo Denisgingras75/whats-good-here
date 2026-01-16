@@ -170,7 +170,7 @@ export function Home() {
             Help shape the Top 10 within {radius} {radius === 1 ? 'mile' : 'miles'}
           </h1>
           <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-            Beta — rankings unlock as dishes reach {MIN_VOTES_FOR_RANKING}+ votes · Ranked by % who would order again
+            Beta — rankings unlock at {MIN_VOTES_FOR_RANKING}+ votes · Ranked by average score
           </p>
         </div>
 
