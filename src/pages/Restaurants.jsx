@@ -1,11 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { restaurantsApi } from '../api'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useSavedDishes } from '../hooks/useSavedDishes'
-import { DishFeed } from '../components/DishFeed'
+import { DishCard } from '../components/DishCard'
 import { LoginModal } from '../components/Auth/LoginModal'
+import { getCategoryImage } from '../constants/categoryImages'
+
+const MIN_VOTES_FOR_RANKING = 5
+const TOP_DISHES_COUNT = 5
 
 export function Restaurants() {
   const { user } = useAuth()
@@ -236,30 +240,16 @@ export function Restaurants() {
             )}
           </div>
 
-          {/* Most Loved Here Section - Confidence View */}
-          <div className="px-4 pt-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">❤️</span>
-              <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                Most loved here
-              </h3>
-            </div>
-            <p className="text-xs mb-4" style={{ color: 'var(--color-text-tertiary)' }}>
-              Ranked by % who would order again
-            </p>
-          </div>
-
-          {/* Dish Feed */}
-          <DishFeed
+          {/* What Should I Order? - Confidence View */}
+          <RestaurantDishes
             dishes={dishes}
             loading={dishesLoading}
             error={dishesError}
             onVote={handleVote}
             onLoginRequired={handleLoginRequired}
-            selectedRestaurant={selectedRestaurant}
             isSaved={isSaved}
             onToggleSave={handleToggleSave}
-            isConfidenceView={true}
+            user={user}
           />
         </>
       )}
@@ -268,6 +258,272 @@ export function Restaurants() {
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
       />
+    </div>
+  )
+}
+
+// Restaurant dishes component - Job #2: "What should I order?"
+function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isSaved, onToggleSave, user }) {
+  const [showAllDishes, setShowAllDishes] = useState(false)
+
+  // Sort dishes by order_again_percent (confidence ranking)
+  const sortedDishes = useMemo(() => {
+    if (!dishes?.length) return { top: [], rest: [] }
+
+    const sorted = [...dishes].sort((a, b) => {
+      const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+      const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+      // Ranked dishes first
+      if (aRanked && !bRanked) return -1
+      if (!aRanked && bRanked) return 1
+      // Then by percent_worth_it (order again %)
+      const aPct = a.percent_worth_it || 0
+      const bPct = b.percent_worth_it || 0
+      if (bPct !== aPct) return bPct - aPct
+      // Tie-breaker: avg_rating
+      const aRating = a.avg_rating || 0
+      const bRating = b.avg_rating || 0
+      if (bRating !== aRating) return bRating - aRating
+      // Final tie-breaker: vote count
+      return (b.total_votes || 0) - (a.total_votes || 0)
+    })
+
+    return {
+      top: sorted.slice(0, TOP_DISHES_COUNT),
+      rest: sorted.slice(TOP_DISHES_COUNT),
+    }
+  }, [dishes])
+
+  const rankedCount = dishes?.filter(d => (d.total_votes || 0) >= MIN_VOTES_FOR_RANKING).length || 0
+
+  if (loading) {
+    return (
+      <div className="px-4 py-6">
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-divider)' }} />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="px-4 py-12 text-center">
+        <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
+      </div>
+    )
+  }
+
+  const handleToggleSave = async (dishId) => {
+    if (!user) {
+      onLoginRequired()
+      return
+    }
+    await onToggleSave(dishId)
+  }
+
+  return (
+    <div className="px-4 py-4">
+      {/* Section Header */}
+      <div className="mb-4">
+        <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          What should I order?
+        </h3>
+        <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+          {rankedCount > 0
+            ? `Top picks based on ${rankedCount} rated ${rankedCount === 1 ? 'dish' : 'dishes'}`
+            : 'Not enough votes yet — be the first to rate dishes here'
+          }
+        </p>
+      </div>
+
+      {/* Top Dishes */}
+      {sortedDishes.top.length > 0 ? (
+        <div className="space-y-3">
+          {sortedDishes.top.map((dish, index) => (
+            <TopDishCard
+              key={dish.dish_id}
+              dish={dish}
+              rank={index + 1}
+              onVote={onVote}
+              onLoginRequired={onLoginRequired}
+              isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+              onToggleFavorite={handleToggleSave}
+            />
+          ))}
+        </div>
+      ) : (
+        <div
+          className="py-8 text-center rounded-xl"
+          style={{ background: 'var(--color-bg)', border: '1px solid var(--color-divider)' }}
+        >
+          <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            No dishes at this restaurant yet
+          </p>
+        </div>
+      )}
+
+      {/* More Dishes */}
+      {sortedDishes.rest.length > 0 && (
+        <div className="mt-6">
+          <button
+            onClick={() => setShowAllDishes(!showAllDishes)}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-colors"
+            style={{
+              background: 'var(--color-bg)',
+              color: 'var(--color-text-secondary)',
+              border: '1px solid var(--color-divider)'
+            }}
+          >
+            {showAllDishes ? 'Show less' : `See ${sortedDishes.rest.length} more dishes`}
+            <svg
+              className={`w-4 h-4 transition-transform ${showAllDishes ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showAllDishes && (
+            <div className="mt-4 space-y-3">
+              {sortedDishes.rest.map((dish, index) => (
+                <TopDishCard
+                  key={dish.dish_id}
+                  dish={dish}
+                  rank={TOP_DISHES_COUNT + index + 1}
+                  onVote={onVote}
+                  onLoginRequired={onLoginRequired}
+                  isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+                  onToggleFavorite={handleToggleSave}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Compact dish card for restaurant view - shows order again % prominently
+function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, onToggleFavorite }) {
+  const {
+    dish_id,
+    dish_name,
+    category,
+    photo_url,
+    price,
+    total_votes,
+    percent_worth_it,
+    avg_rating,
+  } = dish
+
+  const imgSrc = photo_url || getCategoryImage(category)
+  const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
+  const votes = total_votes || 0
+
+  return (
+    <div
+      className="flex gap-3 p-3 rounded-xl"
+      style={{
+        background: 'var(--color-bg)',
+        border: '1px solid var(--color-divider)'
+      }}
+    >
+      {/* Rank Badge */}
+      <div
+        className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 mt-1"
+        style={{
+          background: rank <= 3 && isRanked ? 'var(--color-primary)' : 'var(--color-surface)',
+          color: rank <= 3 && isRanked ? 'white' : 'var(--color-text-tertiary)',
+        }}
+      >
+        {rank}
+      </div>
+
+      {/* Photo */}
+      <div
+        className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0"
+        style={{ background: 'var(--color-surface)' }}
+      >
+        <img
+          src={imgSrc}
+          alt={dish_name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Dish Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h4 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+              {dish_name}
+            </h4>
+            {price && (
+              <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                ${Number(price).toFixed(0)}
+              </p>
+            )}
+          </div>
+
+          {/* Favorite Button */}
+          {onToggleFavorite && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleFavorite(dish_id)
+              }}
+              className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                isFavorite
+                  ? 'bg-red-500 text-white'
+                  : 'bg-neutral-100 text-neutral-400 hover:text-red-500'
+              }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill={isFavorite ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                strokeWidth={2}
+                className="w-4 h-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Rating Info */}
+        <div className="flex items-center gap-3 mt-2">
+          {isRanked ? (
+            <>
+              <div
+                className="text-sm font-bold px-2 py-0.5 rounded"
+                style={{ background: 'var(--color-primary)', color: 'white' }}
+              >
+                {Math.round(percent_worth_it)}% would order again
+              </div>
+              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                {avg_rating}/10 · {votes} votes
+              </span>
+            </>
+          ) : (
+            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+              {votes > 0 ? `${votes} of ${MIN_VOTES_FOR_RANKING} votes to rank` : 'Be first to rate'}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
