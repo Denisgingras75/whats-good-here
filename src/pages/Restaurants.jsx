@@ -185,17 +185,6 @@ export function Restaurants() {
                     className="w-full bg-white rounded-xl border border-neutral-200 p-4 text-left hover:border-orange-300 hover:shadow-md transition-all group"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      {/* Rank number */}
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
-                        style={{
-                          background: index < 3 ? 'var(--color-primary)' : 'var(--color-surface)',
-                          color: index < 3 ? 'white' : 'var(--color-text-tertiary)',
-                        }}
-                      >
-                        {index + 1}
-                      </div>
-
                       {/* Restaurant info */}
                       <div className="min-w-0 flex-1">
                         <h3 className="font-semibold text-neutral-900 group-hover:text-orange-600 transition-colors">
