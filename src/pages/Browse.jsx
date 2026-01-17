@@ -26,6 +26,7 @@ const CATEGORIES = [
   { id: 'steak', label: 'Steak', emoji: '🥩' },
   { id: 'chicken', label: 'Chicken', emoji: '🍗' },
   { id: 'taco', label: 'Tacos', emoji: '🌮' },
+  { id: 'quesadilla', label: 'Quesadillas', emoji: '🫓' },
   { id: 'wings', label: 'Wings', emoji: '🍗' },
   { id: 'sushi', label: 'Sushi', emoji: '🍣' },
   { id: 'sandwich', label: 'Sandwiches', emoji: '🥪' },

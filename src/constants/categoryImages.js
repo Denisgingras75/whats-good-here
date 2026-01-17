@@ -27,6 +27,7 @@ export const CATEGORY_IMAGES = {
   'chicken': `https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800&q=80&${CACHE_BUST}`,
   'donuts': `https://images.unsplash.com/photo-1551024601-bec78aea704b?w=800&q=80&${CACHE_BUST}`,
   'asian': `https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=80&${CACHE_BUST}`,
+  'quesadilla': `https://images.unsplash.com/photo-1618040996337-56904b7850b9?w=800&q=80&${CACHE_BUST}`,
 }
 
 // Fallback image - PIZZA for testing
