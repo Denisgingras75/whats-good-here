@@ -236,6 +236,19 @@ export function Restaurants() {
             )}
           </div>
 
+          {/* Most Loved Here Section - Confidence View */}
+          <div className="px-4 pt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">❤️</span>
+              <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                Most loved here
+              </h3>
+            </div>
+            <p className="text-xs mb-4" style={{ color: 'var(--color-text-tertiary)' }}>
+              Ranked by % who would order again
+            </p>
+          </div>
+
           {/* Dish Feed */}
           <DishFeed
             dishes={dishes}
@@ -246,6 +259,7 @@ export function Restaurants() {
             selectedRestaurant={selectedRestaurant}
             isSaved={isSaved}
             onToggleSave={handleToggleSave}
+            isConfidenceView={true}
           />
         </>
       )}

@@ -1,6 +1,15 @@
 import { DishCard } from './DishCard'
 
-export function DishFeed({ dishes, loading, error, onVote, onLoginRequired, selectedRestaurant, isSaved, onToggleSave }) {
+const MIN_VOTES_FOR_RANKING = 5
+
+export function DishFeed({ dishes, loading, error, onVote, onLoginRequired, selectedRestaurant, isSaved, onToggleSave, isConfidenceView = false }) {
+  // For Confidence view, separate dishes into ranked (5+ votes) and unranked
+  const rankedDishes = isConfidenceView
+    ? dishes.filter(d => (d.total_votes || 0) >= MIN_VOTES_FOR_RANKING)
+    : dishes
+  const unrankedDishes = isConfidenceView
+    ? dishes.filter(d => (d.total_votes || 0) < MIN_VOTES_FOR_RANKING)
+    : []
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
@@ -68,40 +77,95 @@ export function DishFeed({ dishes, loading, error, onVote, onLoginRequired, sele
 
   return (
     <div className="px-4 py-6">
-      {/* Results count */}
-      <div className="mb-6">
-        <p className="text-sm font-medium text-neutral-600">
-          {selectedRestaurant ? (
-            <>
-              <span className="text-neutral-900 font-bold">{dishes.length}</span>{' '}
-              {dishes.length === 1 ? 'dish' : 'dishes'} at{' '}
-              <span className="text-neutral-900 font-bold">{selectedRestaurant.name}</span>
-            </>
+      {/* Results count - only show if not Confidence view */}
+      {!isConfidenceView && (
+        <div className="mb-6">
+          <p className="text-sm font-medium text-neutral-600">
+            {selectedRestaurant ? (
+              <>
+                <span className="text-neutral-900 font-bold">{dishes.length}</span>{' '}
+                {dishes.length === 1 ? 'dish' : 'dishes'} at{' '}
+                <span className="text-neutral-900 font-bold">{selectedRestaurant.name}</span>
+              </>
+            ) : (
+              <>
+                Found <span className="text-neutral-900 font-bold">{dishes.length}</span>{' '}
+                {dishes.length === 1 ? 'dish' : 'dishes'}
+              </>
+            )}
+          </p>
+        </div>
+      )}
+
+      {/* Confidence View: Show ranked dishes first, then unranked with divider */}
+      {isConfidenceView ? (
+        <div className="space-y-6">
+          {/* Ranked dishes (5+ votes) */}
+          {rankedDishes.length > 0 ? (
+            rankedDishes.map((dish) => (
+              <DishCard
+                key={dish.dish_id}
+                dish={dish}
+                onVote={onVote}
+                onLoginRequired={onLoginRequired}
+                isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+                onToggleFavorite={onToggleSave}
+                showOrderAgainPercent={true}
+              />
+            ))
           ) : (
+            <div className="py-8 text-center bg-neutral-50 rounded-xl border border-neutral-200">
+              <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                Not enough votes yet
+              </p>
+              <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                Be the first to rate dishes here
+              </p>
+            </div>
+          )}
+
+          {/* Divider for unranked dishes */}
+          {unrankedDishes.length > 0 && (
             <>
-              Found <span className="text-neutral-900 font-bold">{dishes.length}</span>{' '}
-              {dishes.length === 1 ? 'dish' : 'dishes'}
+              <div className="flex items-center gap-3 py-3">
+                <div className="flex-1 h-px" style={{ background: 'var(--color-divider)' }} />
+                <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Needs more votes
+                </span>
+                <div className="flex-1 h-px" style={{ background: 'var(--color-divider)' }} />
+              </div>
+              {unrankedDishes.map((dish) => (
+                <DishCard
+                  key={dish.dish_id}
+                  dish={dish}
+                  onVote={onVote}
+                  onLoginRequired={onLoginRequired}
+                  isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+                  onToggleFavorite={onToggleSave}
+                  showOrderAgainPercent={true}
+                />
+              ))}
             </>
           )}
-        </p>
-      </div>
-
-      {/* Dish cards with stagger animation */}
-      <div className="space-y-6">
-        {dishes.map((dish) => (
-          <DishCard
-            key={dish.dish_id}
-            dish={dish}
-            onVote={onVote}
-            onLoginRequired={onLoginRequired}
-            isFavorite={isSaved ? isSaved(dish.dish_id) : false}
-            onToggleFavorite={onToggleSave}
-          />
-        ))}
-      </div>
+        </div>
+      ) : (
+        /* Standard view: all dishes */
+        <div className="space-y-6">
+          {dishes.map((dish) => (
+            <DishCard
+              key={dish.dish_id}
+              dish={dish}
+              onVote={onVote}
+              onLoginRequired={onLoginRequired}
+              isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+              onToggleFavorite={onToggleSave}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Footer */}
-      {dishes.length > 0 && (
+      {dishes.length > 0 && !isConfidenceView && (
         <div className="mt-12 pt-8 border-t border-neutral-200 text-center">
           <p className="text-sm text-neutral-500 mb-2">
             That's all the dishes within your radius

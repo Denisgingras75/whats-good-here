@@ -282,15 +282,15 @@ export function Browse() {
         break
       case 'top_rated':
       default:
-        // Sort by percent_worth_it, with min votes as tiebreaker
+        // Sort by avg_rating (1-10 scale) for Discovery view
         result = [...result].sort((a, b) => {
           const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
           const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
           // Ranked dishes first
           if (aRanked && !bRanked) return -1
           if (!aRanked && bRanked) return 1
-          // Then by percent_worth_it
-          return (b.percent_worth_it || 0) - (a.percent_worth_it || 0)
+          // Then by avg_rating (quality score)
+          return (b.avg_rating || 0) - (a.avg_rating || 0)
         })
         break
     }

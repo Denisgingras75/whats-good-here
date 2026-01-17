@@ -40,41 +40,18 @@ export const dishesApi = {
   },
 
   /**
-   * Get dishes for a specific restaurant
+   * Get dishes for a specific restaurant with vote data
+   * Sorted by percent_worth_it DESC for "Most loved here" ranking (Confidence view)
    * @param {Object} params
    * @param {string} params.restaurantId - Restaurant ID
-   * @param {string|null} params.category - Optional category filter
-   * @returns {Promise<Array>} Array of dishes
+   * @returns {Promise<Array>} Array of dishes with vote stats
    * @throws {Error} With classified error type
    */
-  async getDishesForRestaurant({ restaurantId, category = null }) {
+  async getDishesForRestaurant({ restaurantId }) {
     try {
-      let query = supabase
-        .from('dishes')
-        .select(`
-          id,
-          name,
-          category,
-          price,
-          photo_url,
-          restaurant_id,
-          restaurants!inner (
-            id,
-            name,
-            address,
-            lat,
-            lng,
-            is_open
-          )
-        `)
-        .eq('restaurant_id', restaurantId)
-        .eq('restaurants.is_open', true)
-
-      if (category) {
-        query = query.eq('category', category)
-      }
-
-      const { data, error } = await query
+      const { data, error } = await supabase.rpc('get_restaurant_dishes', {
+        p_restaurant_id: restaurantId,
+      })
 
       if (error) {
         const classifiedError = new Error(error.message)
@@ -83,20 +60,7 @@ export const dishesApi = {
         throw classifiedError
       }
 
-      // Transform data to match the format from get_ranked_dishes
-      return (data || []).map(dish => ({
-        dish_id: dish.id,
-        dish_name: dish.name,
-        restaurant_id: dish.restaurant_id,
-        restaurant_name: dish.restaurants.name,
-        category: dish.category,
-        price: dish.price,
-        photo_url: dish.photo_url,
-        total_votes: 0,
-        yes_votes: 0,
-        percent_worth_it: 0,
-        distance_miles: 0,
-      }))
+      return data || []
     } catch (error) {
       console.error('Error fetching restaurant dishes:', error)
       throw error

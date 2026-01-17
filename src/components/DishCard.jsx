@@ -2,7 +2,7 @@ import { ReviewFlow } from './ReviewFlow'
 import { getWorthItBadge, formatScore10, calculateWorthItScore10 } from '../utils/ranking'
 import { getCategoryImage } from '../constants/categoryImages'
 
-export function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFavorite }) {
+export function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFavorite, showOrderAgainPercent = false }) {
   const {
     dish_id,
     dish_name,
@@ -13,7 +13,7 @@ export function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFa
     total_votes,
     yes_votes,
     percent_worth_it,
-    avg_rating_10,
+    avg_rating,
     distance_miles,
   } = dish
 
@@ -144,28 +144,51 @@ export function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFa
               </span>
             </div>
 
-            {/* Stats Grid */}
+            {/* Stats Grid - Order based on view context */}
             <div className="grid grid-cols-2 gap-4">
-              {/* Would Order Again % */}
-              <div className="text-center">
-                <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                  {Math.round(percent_worth_it)}%
-                </div>
-                <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                  would order again
-                </div>
-              </div>
-
-              {/* Average Rating */}
-              <div className="text-center">
-                <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                  {avg_rating_10 ? formatScore10(avg_rating_10) : '—'}
-                  <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
-                </div>
-                <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                  avg rating
-                </div>
-              </div>
+              {showOrderAgainPercent ? (
+                <>
+                  {/* Confidence view: Order Again % is primary (ranking criterion) */}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
+                      {Math.round(percent_worth_it)}%
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                      would order again
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                      {avg_rating ? formatScore10(avg_rating) : '—'}
+                      <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                      avg rating
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Discovery view: Avg Rating is primary (ranking criterion) */}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
+                      {avg_rating ? formatScore10(avg_rating) : '—'}
+                      <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                      avg rating
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                      {Math.round(percent_worth_it)}%
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                      would order again
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
