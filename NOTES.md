@@ -42,6 +42,7 @@ Jan 15-16 (Week 4)                      Week 4: Polish
 ### Recent Work (update this as you go)
 | Date | What Changed | Category |
 |------|--------------|----------|
+| Jan 16 | Category cleanup: steak, chicken, seafood split | Data |
 | Jan 16 | Welcome splash (tap to dismiss) | Onboarding |
 | Jan 16 | TopBar with brand tint | Polish |
 | Jan 16 | Responsive logo scaling | Polish |
@@ -129,29 +130,34 @@ Using Tailwind defaults:
 
 ## Food Categories
 
-Current categories in the app:
+Current categories (updated Jan 16, 2026):
 
-| Category | Emoji | Image Source |
-|----------|-------|--------------|
-| Burger | 🍔 | `categoryImages.js` |
-| Pizza | 🍕 | `categoryImages.js` |
-| Sushi | 🍣 | `categoryImages.js` |
-| Taco | 🌮 | `categoryImages.js` |
-| Sandwich | 🥪 | `categoryImages.js` |
-| Salad | 🥗 | `categoryImages.js` |
-| Pasta | 🍝 | `categoryImages.js` |
-| Fries | 🍟 | `categoryImages.js` |
-| Wings | 🍗 | `categoryImages.js` |
-| Lobster Roll | 🦞 | `categoryImages.js` |
-| Breakfast | 🍳 | `categoryImages.js` |
-| Breakfast Sandwich | 🥓 | `categoryImages.js` |
-| Poke Bowl | 🥙 | `categoryImages.js` |
-| Tendys | 🐔 | `categoryImages.js` |
-| Seafood | 🦐 | `categoryImages.js` |
-| Chowder | 🥣 | `categoryImages.js` |
-| Soup | 🍜 | `categoryImages.js` |
-| Entree | 🍽️ | `categoryImages.js` |
-| Apps | 🧆 | `categoryImages.js` |
+| Category | Count | Notes |
+|----------|-------|-------|
+| Sandwich | 168 | |
+| Seafood | 160 | Includes calamari, crab cakes, shrimp, mussels, oysters |
+| Apps | 154 | True appetizers (fried, dips, shareables) |
+| Salad | 112 | |
+| Pizza | 75 | |
+| Entree | 65 | Misc proteins (pork, lamb, duck, veggie) |
+| Burger | 64 | |
+| Steak | 63 | All beef/steak dishes |
+| Breakfast | 56 | Pancakes, benedicts, etc. |
+| Pasta | 53 | |
+| Breakfast Sandwich | 48 | |
+| Sushi | 31 | |
+| Chowder | 29 | MV specialty |
+| Chicken | 25 | Non-fried chicken entrees |
+| Fries | 24 | |
+| Fried Chicken | 23 | |
+| Wings | 23 | |
+| Taco | 17 | |
+| Soup | 17 | |
+| Lobster Roll | 16 | MV specialty |
+| Tendys | 12 | |
+| Pokebowl | 6 | |
+| Donuts | 3 | Consider merging if stays small |
+| Asian | 1 | Consider merging if stays small |
 
 ---
 
