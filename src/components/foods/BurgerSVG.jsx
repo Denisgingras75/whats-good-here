@@ -34,9 +34,6 @@ export function BurgerSVG({ eatenPercent, value }) {
     { x: biteX - 8, startY: 53, length: 6 + Math.sin(eatenPercent * 25) * 3, width: 2 },
   ] : []
 
-  // Layer shift amount based on eating progress
-  const layerShift = eatenPercent > 0.2 ? Math.sin(eatenPercent * 10) * 2 : 0
-
   return (
     <>
       <defs>

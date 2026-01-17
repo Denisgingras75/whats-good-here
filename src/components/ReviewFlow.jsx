@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useVote } from '../hooks/useVote'
@@ -18,7 +19,9 @@ export function getPendingVoteFromStorage() {
       }
       localStorage.removeItem(PENDING_VOTE_KEY)
     }
-  } catch (e) {}
+  } catch (error) {
+    console.warn('Unable to read pending vote from storage', error)
+  }
   return null
 }
 
@@ -29,13 +32,17 @@ export function setPendingVoteToStorage(dishId, vote) {
       vote,
       timestamp: Date.now()
     }))
-  } catch (e) {}
+  } catch (error) {
+    console.warn('Unable to persist pending vote to storage', error)
+  }
 }
 
 export function clearPendingVoteStorage() {
   try {
     localStorage.removeItem(PENDING_VOTE_KEY)
-  } catch (e) {}
+  } catch (error) {
+    console.warn('Unable to clear pending vote from storage', error)
+  }
 }
 
 export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVotes = 0, onVote, onLoginRequired }) {

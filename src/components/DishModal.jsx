@@ -7,7 +7,6 @@ import { dishPhotosApi } from '../api/dishPhotosApi'
 
 export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
   const [photoUploaded, setPhotoUploaded] = useState(null)
-  const [showReviewAfterPhoto, setShowReviewAfterPhoto] = useState(false)
   const [featuredPhoto, setFeaturedPhoto] = useState(null)
   const [communityPhotos, setCommunityPhotos] = useState([])
   const [allPhotos, setAllPhotos] = useState([])

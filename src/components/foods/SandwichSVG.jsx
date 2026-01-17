@@ -30,9 +30,6 @@ export function SandwichSVG({ eatenPercent, value }) {
     { x: biteX - 5, y: 83 + eatenPercent * 4, size: 2, type: 'lettuce' },
   ] : []
 
-  // Compression effect - sandwich squishes as you bite
-  const compressionAmount = eatenPercent > 0.1 ? Math.sin(eatenPercent * 15) * 1.5 : 0
-
   return (
     <>
       <defs>

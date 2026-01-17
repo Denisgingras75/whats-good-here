@@ -48,7 +48,7 @@ export function Profile() {
           setEmail(savedEmail)
         }
       } catch (e) {
-        // localStorage not available
+          console.warn('Profile: unable to read remembered email', e)
       }
     }
   }, [user])
@@ -88,7 +88,7 @@ export function Profile() {
       try {
         localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
       } catch (e) {
-        // localStorage not available
+          console.warn('Profile: unable to persist remembered email', e)
       }
       // Use current page URL so user returns to the same place after login
       await authApi.signInWithMagicLink(email, window.location.href)

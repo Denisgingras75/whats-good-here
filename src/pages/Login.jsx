@@ -21,8 +21,8 @@ export function Login() {
         setEmail(savedEmail)
         setShowEmailForm(true) // Auto-expand if we have a saved email
       }
-    } catch (e) {
-      // localStorage not available
+    } catch (error) {
+      console.warn('Login: unable to read remembered email', error)
     }
   }, [])
 
@@ -43,15 +43,15 @@ export function Login() {
     }
   }
 
-  const handleMagicLink = async (e) => {
-    e.preventDefault()
+  const handleMagicLink = async (event) => {
+    event.preventDefault()
     try {
       setLoading(true)
       // Remember the email for next time
       try {
         localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
-      } catch (e) {
-        // localStorage not available
+      } catch (error) {
+        console.warn('Login: unable to persist remembered email', error)
       }
       await authApi.signInWithMagicLink(email)
       setMessage({

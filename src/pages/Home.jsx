@@ -103,7 +103,7 @@ export function Home() {
 
     // Open modal immediately - dishes are guaranteed ready now
     openDishModal(dish)
-  }, [user, dishes])
+  }, [user, dishes, openDishModal, votingDishId])
 
   // Calculate impact when dishes update after voting
   useEffect(() => {
@@ -119,7 +119,7 @@ export function Home() {
       setImpactFeedback(impact)
       setPendingVoteData(null)
     }
-  }, [dishes, pendingVoteData])
+  }, [dishes, pendingVoteData, setImpactFeedback])
 
   const handleVote = () => {
     // Store before data and mark as pending

@@ -83,7 +83,6 @@ export function WelcomeModal() {
   if (!isOpen) return null
 
   const currentStep = STEPS[step]
-  const isLastStep = step === STEPS.length - 1
   const isNameStep = currentStep.id === 'name'
 
   return (

@@ -237,7 +237,6 @@ export function useUserVotes(userId) {
   const [worthItDishes, setWorthItDishes] = useState([])
   const [avoidDishes, setAvoidDishes] = useState([])
   const [loading, setLoading] = useState(true)
-  const [dishesHelpedRank, setDishesHelpedRank] = useState(0)
   const [stats, setStats] = useState({
     totalVotes: 0,
     worthItCount: 0,
@@ -255,7 +254,6 @@ export function useUserVotes(userId) {
 
   const processVotes = useCallback((data, helpedCount = 0) => {
     setVotes(data)
-    setDishesHelpedRank(helpedCount)
 
     // Split into worth it and avoid, then sort by rating (highest first)
     // Dishes without ratings go to the end
@@ -279,7 +277,6 @@ export function useUserVotes(userId) {
       setVotes([])
       setWorthItDishes([])
       setAvoidDishes([])
-      setDishesHelpedRank(0)
       setStats({
         totalVotes: 0,
         worthItCount: 0,

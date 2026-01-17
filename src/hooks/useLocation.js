@@ -16,6 +16,50 @@ export function useLocation() {
   const [permissionState, setPermissionState] = useState('prompt') // 'prompt' | 'granted' | 'denied' | 'unsupported'
   const [hasAskedBefore, setHasAskedBefore] = useState(false)
 
+  const requestLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser')
+      setPermissionState('unsupported')
+      setLocation(DEFAULT_LOCATION)
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    localStorage.setItem(STORAGE_KEY, 'true')
+    setHasAskedBefore(true)
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        })
+        setPermissionState('granted')
+        setLoading(false)
+        setError(null)
+      },
+      (err) => {
+        console.warn('Geolocation error:', err.message)
+        setPermissionState('denied')
+        setError('denied')
+        setLocation(DEFAULT_LOCATION)
+        setLoading(false)
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000, // Cache for 5 minutes
+      }
+    )
+  }, [])
+
+  const useDefaultLocation = useCallback(() => {
+    setLocation(DEFAULT_LOCATION)
+    setError(null)
+    setLoading(false)
+  }, [])
+
   // Check if we've asked before
   useEffect(() => {
     const asked = localStorage.getItem(STORAGE_KEY)
@@ -65,51 +109,7 @@ export function useLocation() {
       // No permission API, just stop loading
       setLoading(false)
     }
-  }, [])
-
-  const requestLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser')
-      setPermissionState('unsupported')
-      setLocation(DEFAULT_LOCATION)
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-    localStorage.setItem(STORAGE_KEY, 'true')
-    setHasAskedBefore(true)
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        })
-        setPermissionState('granted')
-        setLoading(false)
-        setError(null)
-      },
-      (err) => {
-        console.warn('Geolocation error:', err.message)
-        setPermissionState('denied')
-        setError('denied')
-        setLocation(DEFAULT_LOCATION)
-        setLoading(false)
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 10000,
-        maximumAge: 300000, // Cache for 5 minutes
-      }
-    )
-  }, [])
-
-  const useDefaultLocation = useCallback(() => {
-    setLocation(DEFAULT_LOCATION)
-    setError(null)
-    setLoading(false)
-  }, [])
+  }, [requestLocation])
 
   return {
     location,

@@ -23,6 +23,8 @@ const SORT_OPTIONS = [
 const CATEGORIES = [
   { id: 'pizza', label: 'Pizza', emoji: '🍕' },
   { id: 'burger', label: 'Burgers', emoji: '🍔' },
+  { id: 'steak', label: 'Steak', emoji: '🥩' },
+  { id: 'chicken', label: 'Chicken', emoji: '🍗' },
   { id: 'taco', label: 'Tacos', emoji: '🌮' },
   { id: 'wings', label: 'Wings', emoji: '🍗' },
   { id: 'sushi', label: 'Sushi', emoji: '🍣' },
@@ -40,7 +42,7 @@ const CATEGORIES = [
   { id: 'tendys', label: 'Tendys', emoji: '🍗' },
   { id: 'fried chicken', label: 'Fried Chicken', emoji: '🍗' },
   { id: 'apps', label: 'Apps', emoji: '🧆' },
-  { id: 'entree', label: 'Entrees', emoji: '🥩' },
+  { id: 'entree', label: 'Entrees', emoji: '🍽️' },
 ]
 
 export function Browse() {
@@ -198,7 +200,7 @@ export function Browse() {
 
     // Open modal immediately - dishes are guaranteed ready now
     openDishModal(dish)
-  }, [user, dishes])
+  }, [user, dishes, openDishModal, votingDishId])
 
   // Calculate impact when dishes update after voting
   useEffect(() => {
@@ -214,7 +216,7 @@ export function Browse() {
       setImpactFeedback(impact)
       setPendingVoteData(null)
     }
-  }, [dishes, pendingVoteData])
+  }, [dishes, pendingVoteData, setImpactFeedback])
 
   const handleVote = () => {
     // Store before data and mark as pending

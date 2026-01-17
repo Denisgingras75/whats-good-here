@@ -11,10 +11,6 @@ export function PastaSVG({ eatenPercent, value }) {
     { x: 30, y: 70 + eatenPercent * 3, size: 1.8 },
   ] : []
 
-  // Pasta strand that's being twirled on fork
-  const twirledStrands = eatenPercent > 0.1 && eatenPercent < 0.9 ?
-    Math.floor(3 + eatenPercent * 4) : 0
-
   // Generate spaghetti strands - fewer as more is eaten
   const generateStrands = () => {
     const strands = []

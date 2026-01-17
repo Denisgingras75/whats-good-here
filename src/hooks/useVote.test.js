@@ -69,6 +69,8 @@ describe('useVote Hook', () => {
         await promise
       })
 
+      expect(submittingDuringCall).toBe(true)
+
       // After the promise resolves, submitting should be false
       expect(result.current.submitting).toBe(false)
     })

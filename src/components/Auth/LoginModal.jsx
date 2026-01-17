@@ -19,8 +19,9 @@ export function LoginModal({ isOpen, onClose }) {
           setEmail(savedEmail)
           setShowEmailForm(true) // Auto-expand if we have a saved email
         }
-      } catch (e) {
+      } catch (error) {
         // localStorage not available
+        console.warn('LoginModal: unable to read remembered email', error)
       }
     }
   }, [isOpen])
@@ -53,8 +54,9 @@ export function LoginModal({ isOpen, onClose }) {
       // Remember the email for next time
       try {
         localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
-      } catch (e) {
+      } catch (error) {
         // localStorage not available
+        console.warn('LoginModal: unable to persist remembered email', error)
       }
 
       // Build redirect URL with pending dish ID so we can reopen the modal after login
