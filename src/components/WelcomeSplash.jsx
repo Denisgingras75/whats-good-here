@@ -56,11 +56,6 @@ export function WelcomeSplash() {
           Finally, here's some for you.
         </p>
 
-        {/* Value prop */}
-        <p className="welcome-splash__subtext">
-          Know what's worth ordering — before you sit down.
-        </p>
-
         {/* Tap hint */}
         <p className="welcome-splash__hint">
           Tap anywhere to continue
