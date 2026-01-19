@@ -46,19 +46,19 @@ export function WelcomeSplash() {
           className="welcome-splash__logo"
         />
 
-        {/* Welcome header */}
+        {/* Hook */}
         <p className="welcome-splash__header">
-          Welcome.
+          Restaurants have all the data.
         </p>
 
-        {/* Mission statement */}
+        {/* Empowerment */}
         <p className="welcome-splash__mission">
-          Find dishes worth ordering — based on real people, not hype.
+          Finally, here's some for you.
         </p>
 
-        {/* Reinforcement */}
+        {/* Value prop */}
         <p className="welcome-splash__subtext">
-          Vote on what you try. Let the best rise to the top.
+          Know what's worth ordering — before you sit down.
         </p>
 
         {/* Tap hint */}
