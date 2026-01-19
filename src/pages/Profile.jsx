@@ -489,6 +489,22 @@ export function Profile() {
               {/* How Ranks Work */}
               <RanksInfoSection />
 
+              {/* How Badges Work */}
+              <a
+                href="/badges"
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                    🏆
+                  </div>
+                  <span className="font-medium text-neutral-900">How Badges Work</span>
+                </div>
+                <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+
               {/* How Photos Work */}
               <PhotosInfoSection />
 

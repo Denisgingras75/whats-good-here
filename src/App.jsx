@@ -15,6 +15,7 @@ import { Admin } from './pages/Admin'
 import { Login } from './pages/Login'
 import { Privacy } from './pages/Privacy'
 import { Terms } from './pages/Terms'
+import { Badges } from './pages/Badges'
 import { preloadSounds } from './lib/sounds'
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/badges" element={<Badges />} />
           </Routes>
         </BrowserRouter>
       </LocationProvider>

@@ -193,10 +193,6 @@ export function Home() {
           </div>
         )}
 
-        {/* Badges Info Section */}
-        {!loading && !error && categoryRankings.length > 0 && (
-          <BadgesInfoCard />
-        )}
       </main>
     </div>
   )
