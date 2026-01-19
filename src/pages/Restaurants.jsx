@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import posthog from 'posthog-js'
 import { useAuth } from '../context/AuthContext'
 import { restaurantsApi } from '../api'
 import { useLocationContext } from '../context/LocationContext'
@@ -61,6 +62,18 @@ export function Restaurants() {
       return
     }
     await toggleSave(dishId)
+  }
+
+  const handleRestaurantSelect = (restaurant) => {
+    const stats = restaurantStats[restaurant.id] || {}
+    posthog.capture('restaurant_viewed', {
+      restaurant_id: restaurant.id,
+      restaurant_name: restaurant.name,
+      restaurant_address: restaurant.address,
+      total_dish_votes: stats.totalVotes || 0,
+      dish_count: restaurant.dishCount,
+    })
+    setSelectedRestaurant(restaurant)
   }
 
   // Compute top dish and total votes per restaurant
@@ -172,7 +185,7 @@ export function Restaurants() {
                 return (
                   <button
                     key={restaurant.id}
-                    onClick={() => setSelectedRestaurant(restaurant)}
+                    onClick={() => handleRestaurantSelect(restaurant)}
                     className="w-full bg-white rounded-xl border border-neutral-200 p-4 text-left hover:border-orange-300 hover:shadow-md transition-all group"
                   >
                     <div className="flex items-center justify-between gap-3">

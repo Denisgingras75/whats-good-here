@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import posthog from 'posthog-js'
 import { getCategoryImage } from '../constants/categoryImages'
 import { getRatingColor } from '../utils/ranking'
 
@@ -100,6 +101,15 @@ export function DishSearch({ dishes = [], loading = false }) {
 
   // Handle dish selection
   const handleDishSelect = (dish) => {
+    // Track search -> dish selection
+    posthog.capture('search_performed', {
+      query: query,
+      result_type: 'dish',
+      selected_dish_id: dish.dish_id,
+      selected_dish_name: dish.dish_name,
+      selected_restaurant: dish.restaurant_name,
+      results_count: results.dishes.length,
+    })
     setQuery('')
     setIsFocused(false)
     // Navigate to dedicated dish page
@@ -108,6 +118,13 @@ export function DishSearch({ dishes = [], loading = false }) {
 
   // Handle category selection
   const handleCategorySelect = (category) => {
+    // Track search -> category selection
+    posthog.capture('search_performed', {
+      query: query,
+      result_type: 'category',
+      selected_category: category.id,
+      results_count: results.categories.length,
+    })
     setQuery('')
     setIsFocused(false)
     navigate(`/browse?category=${encodeURIComponent(category.id)}`)
@@ -116,6 +133,13 @@ export function DishSearch({ dishes = [], loading = false }) {
   // Handle Enter key - go to full search results page
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && query.trim().length >= MIN_SEARCH_LENGTH) {
+      // Track search submission
+      posthog.capture('search_performed', {
+        query: query.trim(),
+        result_type: 'full_search',
+        dish_results_count: results.dishes.length,
+        category_results_count: results.categories.length,
+      })
       setQuery('')
       setIsFocused(false)
       navigate(`/browse?q=${encodeURIComponent(query.trim())}`)

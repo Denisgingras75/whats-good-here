@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import posthog from 'posthog-js'
 import { useAuth } from '../context/AuthContext'
 import { dishesApi } from '../api'
 import { dishPhotosApi } from '../api/dishPhotosApi'
@@ -60,6 +61,19 @@ export function Dish() {
         }
 
         setDish(transformedDish)
+
+        // Track dish view - valuable for restaurants!
+        posthog.capture('dish_viewed', {
+          dish_id: transformedDish.dish_id,
+          dish_name: transformedDish.dish_name,
+          restaurant_id: transformedDish.restaurant_id,
+          restaurant_name: transformedDish.restaurant_name,
+          category: transformedDish.category,
+          price: transformedDish.price,
+          avg_rating: transformedDish.avg_rating,
+          total_votes: transformedDish.total_votes,
+          percent_worth_it: transformedDish.percent_worth_it,
+        })
       } catch (err) {
         console.error('Error fetching dish:', err)
         setError('Dish not found')

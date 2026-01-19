@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import posthog from 'posthog-js'
 
 // Default location: Martha's Vineyard center (between Vineyard Haven, Oak Bluffs, Edgartown)
 const DEFAULT_LOCATION = {
@@ -14,7 +15,21 @@ const LocationContext = createContext(null)
 export function LocationProvider({ children }) {
   // Start with default location immediately - don't block on geolocation
   const [location, setLocation] = useState(DEFAULT_LOCATION)
-  const [radius, setRadius] = useState(5) // Default 5 miles
+  const [radius, setRadiusState] = useState(5) // Default 5 miles
+
+  // Wrap setRadius to track filter changes
+  const setRadius = useCallback((newRadius) => {
+    setRadiusState(prevRadius => {
+      if (newRadius !== prevRadius) {
+        posthog.capture('filter_applied', {
+          filter_type: 'radius',
+          radius_miles: newRadius,
+          previous_radius: prevRadius,
+        })
+      }
+      return newRadius
+    })
+  }, [])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [permissionState, setPermissionState] = useState('prompt') // 'prompt' | 'granted' | 'denied' | 'unsupported'
