@@ -312,8 +312,13 @@ function RankedDishRow({ dish, rank }) {
       {/* Rating */}
       <div className="flex-shrink-0 text-right">
         {isRanked ? (
-          <div className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
-            {avg_rating ? `${avg_rating}/10` : '—'}
+          <div className="flex flex-col items-end">
+            <span className="text-base font-bold leading-tight" style={{ color: 'var(--color-primary)' }}>
+              {avg_rating || '—'}
+            </span>
+            <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+              {total_votes} votes
+            </span>
           </div>
         ) : (
           <div
@@ -432,11 +437,16 @@ function Top10Row({ dish, rank, onClick }) {
       </div>
 
       {/* Rating or vote count */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 text-right">
         {isRanked ? (
-          <span className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>
-            {avg_rating}/10
-          </span>
+          <div className="flex flex-col items-end">
+            <span className="text-sm font-bold leading-tight" style={{ color: 'var(--color-primary)' }}>
+              {avg_rating}
+            </span>
+            <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+              {total_votes} votes
+            </span>
+          </div>
         ) : (
           <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
             {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}

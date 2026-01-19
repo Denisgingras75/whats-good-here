@@ -604,19 +604,23 @@ function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, onToggle
         </div>
 
         {/* Rating Info */}
-        <div className="flex items-center gap-3 mt-2">
+        <div className="mt-2">
           {isRanked ? (
-            <>
-              <div
-                className="text-sm font-bold px-2 py-0.5 rounded"
-                style={{ background: 'var(--color-primary)', color: 'white' }}
-              >
-                {Math.round(percent_worth_it)}% would order again
+            <div className="flex items-center gap-3">
+              {/* Rating block - stacked vertically */}
+              <div className="flex flex-col items-center px-3 py-1.5 rounded-lg" style={{ background: 'var(--color-surface)' }}>
+                <span className="text-lg font-bold leading-none" style={{ color: 'var(--color-primary)' }}>
+                  {avg_rating || '—'}
+                </span>
+                <span className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                  {votes} votes
+                </span>
               </div>
-              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                {avg_rating}/10 · {votes} votes
+              {/* Order again badge */}
+              <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                {Math.round(percent_worth_it)}% would order again
               </span>
-            </>
+            </div>
           ) : (
             <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
               {votes > 0 ? `Early · ${votes} vote${votes === 1 ? '' : 's'} so far` : 'Be first to vote'}

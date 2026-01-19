@@ -207,7 +207,7 @@ export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVote
           <p className="text-sm text-emerald-800 font-medium text-center mb-2">Your review</p>
           <div className="flex items-center justify-center gap-4">
             <span className="text-2xl">{userVote ? '👍' : '👎'}</span>
-            <span className="text-xl font-bold text-emerald-700">{Number(userRating).toFixed(1)}/10</span>
+            <span className="text-xl font-bold text-emerald-700">{Number(userRating).toFixed(1)}</span>
           </div>
         </div>
         <div className="flex items-center justify-center gap-4 text-sm">
@@ -364,7 +364,7 @@ export function ReviewFlow({ dishId, dishName, category, totalVotes = 0, yesVote
             onClick={() => setStep(2)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 transition-colors"
           >
-            <span className="text-sm font-bold text-neutral-700">{sliderValue.toFixed(1)}/10</span>
+            <span className="text-sm font-bold text-neutral-700">{sliderValue.toFixed(1)}</span>
             <span className="text-xs text-neutral-400">Edit</span>
           </button>
         </div>

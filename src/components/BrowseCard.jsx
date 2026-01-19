@@ -48,9 +48,12 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
 
         {/* Rating badge - bottom left */}
         {isRanked ? (
-          <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm">
-            <span className="text-sm font-semibold text-white">
-              ⭐ {avg_rating || '—'}/10
+          <div className="absolute bottom-3 left-3 px-2.5 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm flex flex-col items-center">
+            <span className="text-base font-bold text-white leading-tight">
+              {avg_rating || '—'}
+            </span>
+            <span className="text-[10px] text-white/70">
+              {total_votes} votes
             </span>
           </div>
         ) : (

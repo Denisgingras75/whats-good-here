@@ -161,7 +161,6 @@ export function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFa
                   <div className="text-center">
                     <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
                       {avg_rating ? formatScore10(avg_rating) : '—'}
-                      <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
                     </div>
                     <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                       avg rating
@@ -174,7 +173,6 @@ export function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFa
                   <div className="text-center">
                     <div className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
                       {avg_rating ? formatScore10(avg_rating) : '—'}
-                      <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
                     </div>
                     <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                       avg rating

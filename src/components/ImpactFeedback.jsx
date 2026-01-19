@@ -55,7 +55,7 @@ export function getImpactMessage(before, after, beforeRank, afterRank) {
 
   // Default for ranked dishes - show rating
   return {
-    message: `Now rated ${after.avg_rating || '—'}/10`,
+    message: `Now rated ${after.avg_rating || '—'}`,
     emoji: "✓",
     type: "update"
   }

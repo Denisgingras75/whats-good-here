@@ -275,7 +275,7 @@ export function Dish() {
             {isRanked && (
               <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm">
                 <span className="text-lg font-bold text-white">
-                  {dish.avg_rating ? `${dish.avg_rating}/10` : `${dish.percent_worth_it}%`}
+                  {dish.avg_rating || `${dish.percent_worth_it}%`}
                 </span>
                 <span className="text-xs text-white/80 ml-1">
                   {dish.avg_rating ? 'rating' : 'would order again'}

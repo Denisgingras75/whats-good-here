@@ -639,7 +639,7 @@ function ProfileDishCard({ dish, tab, onUnsave }) {
           <div className="flex items-center gap-2">
             {dish.rating_10 && (
               <span className="text-sm font-semibold" style={{ color: 'var(--color-rating)' }}>
-                {dish.rating_10}/10
+                {dish.rating_10}
               </span>
             )}
             {hasComparison && (
