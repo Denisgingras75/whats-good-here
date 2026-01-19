@@ -873,34 +873,39 @@ function MissionSection() {
 
       {expanded && (
         <div className="px-4 pb-4">
-          <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 mb-4">
-            <p className="text-lg font-semibold text-neutral-900 mb-2">
-              Restaurants have all the data.
-            </p>
-            <p className="text-neutral-700">
-              Finally, here's some for you.
-            </p>
+          <p className="text-sm text-neutral-600 mb-4">
+            Restaurants collect an incredible amount of data — what you ordered, when you came, how long you stayed, and whether you returned. They have dashboards, analytics, and insights.
+          </p>
+
+          <p className="text-sm text-neutral-600 mb-4">
+            But when you sit down at a new place, what do you have?
+          </p>
+
+          <div className="bg-neutral-50 rounded-xl p-4 mb-4 text-center">
+            <p className="text-sm text-neutral-700 font-medium">A menu.</p>
+            <p className="text-sm text-neutral-500">No context.</p>
+            <p className="text-sm text-neutral-500">No signal.</p>
+            <p className="text-sm text-neutral-400">Just a guess.</p>
           </div>
 
-          <p className="text-sm text-neutral-600 mb-4">
-            Think about it: restaurants know what you ordered, when you came, how long you stayed, and whether you came back. They have dashboards, analytics, and insights.
+          <p className="text-sm font-semibold text-neutral-800 mb-4">
+            What's Good Here exists to change that.
           </p>
 
           <p className="text-sm text-neutral-600 mb-4">
-            But what do you have when you sit down at a new place? A menu with no context. No idea what's actually good. You're guessing.
-          </p>
-
-          <p className="text-sm font-medium text-neutral-800 mb-4">
-            Not anymore.
+            We give diners access to the data that actually matters when you're ordering: what real people thought of real dishes. No influencers. No hype. Just honest votes.
           </p>
 
           <p className="text-sm text-neutral-600 mb-4">
-            What's Good Here flips the script. Real people vote on real dishes. The best rises to the top. Now you have data that helps <span className="font-semibold">you</span> order with confidence.
+            When enough people agree a dish is worth ordering, it rises to the top — making it easier for the next person to decide with confidence.
           </p>
 
-          <div className="bg-neutral-50 rounded-lg p-3 mt-4">
-            <p className="text-xs text-neutral-500 text-center">
-              Every vote you cast helps someone else eat better. That's the mission.
+          <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 mt-4">
+            <p className="text-sm font-medium text-neutral-800 text-center">
+              Every vote you cast helps someone else eat better.
+            </p>
+            <p className="text-xs text-neutral-600 text-center mt-1">
+              That's the mission.
             </p>
           </div>
         </div>
