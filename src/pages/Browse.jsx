@@ -367,6 +367,12 @@ export function Browse() {
         setAutocompleteOpen(true)
         setAutocompleteIndex(0)
         e.preventDefault()
+      } else if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
+        // Handle Enter even when autocomplete is closed - navigate to search results
+        e.preventDefault()
+        setSelectedCategory(null)
+        setDebouncedSearchQuery(searchQuery.trim())
+        setSearchParams({ q: searchQuery.trim() })
       }
       return
     }
@@ -388,6 +394,13 @@ export function Browse() {
         e.preventDefault()
         if (autocompleteIndex >= 0 && autocompleteSuggestions[autocompleteIndex]) {
           handleAutocompleteSelect(autocompleteSuggestions[autocompleteIndex])
+        } else if (searchQuery.trim().length >= 2) {
+          // No autocomplete selection - trigger search like Home page does
+          setAutocompleteOpen(false)
+          setAutocompleteIndex(-1)
+          setSelectedCategory(null)
+          setDebouncedSearchQuery(searchQuery.trim())
+          setSearchParams({ q: searchQuery.trim() })
         }
         break
       case 'Escape':
@@ -395,7 +408,7 @@ export function Browse() {
         setAutocompleteIndex(-1)
         break
     }
-  }, [autocompleteOpen, autocompleteSuggestions, autocompleteIndex, handleAutocompleteSelect, searchQuery])
+  }, [autocompleteOpen, autocompleteSuggestions, autocompleteIndex, handleAutocompleteSelect, searchQuery, setSearchParams])
 
   // Are we showing dishes or the category grid?
   const showingDishes = selectedCategory || debouncedSearchQuery.trim()

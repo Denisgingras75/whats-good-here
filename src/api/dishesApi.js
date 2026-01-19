@@ -119,14 +119,15 @@ export const dishesApi = {
   },
 
   /**
-   * Get a single dish by ID
+   * Get a single dish by ID with calculated vote stats
    * @param {string} dishId - Dish ID
-   * @returns {Promise<Object>} Dish object
+   * @returns {Promise<Object>} Dish object with calculated avg_rating from votes
    * @throws {Error} With classified error type
    */
   async getDishById(dishId) {
     try {
-      const { data, error } = await supabase
+      // Fetch dish with restaurant info
+      const { data: dish, error: dishError } = await supabase
         .from('dishes')
         .select(`
           *,
@@ -141,14 +142,38 @@ export const dishesApi = {
         .eq('id', dishId)
         .single()
 
-      if (error) {
-        const classifiedError = new Error(error.message)
-        classifiedError.type = classifyError(error)
-        classifiedError.originalError = error
+      if (dishError) {
+        const classifiedError = new Error(dishError.message)
+        classifiedError.type = classifyError(dishError)
+        classifiedError.originalError = dishError
         throw classifiedError
       }
 
-      return data
+      // Fetch vote stats to calculate accurate avg_rating
+      const { data: votes, error: votesError } = await supabase
+        .from('votes')
+        .select('rating_10, would_order_again')
+        .eq('dish_id', dishId)
+
+      if (votesError) {
+        console.error('Error fetching votes for dish:', votesError)
+        // Continue with dish data even if votes fail
+        return dish
+      }
+
+      // Calculate stats from votes
+      const totalVotes = votes?.length || 0
+      const yesVotes = votes?.filter(v => v.would_order_again).length || 0
+      const avgRating = totalVotes > 0
+        ? Math.round((votes.reduce((sum, v) => sum + (v.rating_10 || 0), 0) / totalVotes) * 10) / 10
+        : null
+
+      return {
+        ...dish,
+        total_votes: totalVotes,
+        yes_votes: yesVotes,
+        avg_rating: avgRating,
+      }
     } catch (error) {
       console.error('Error fetching dish:', error)
       throw error
