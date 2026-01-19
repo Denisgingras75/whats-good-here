@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authApi } from '../api'
 import { useProfile } from '../hooks/useProfile'
@@ -11,6 +11,9 @@ import { getCategoryImage } from '../constants/categoryImages'
 import { PHOTO_TIERS_LIST } from '../constants/photoQuality'
 import { DishModal } from '../components/DishModal'
 import { LoginModal } from '../components/Auth/LoginModal'
+
+// Admin emails - comma-separated list from env var
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
 
 const TABS = [
   { id: 'unrated', label: 'Unrated', emoji: '📷' },
@@ -450,6 +453,24 @@ export function Profile() {
                   <div className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform mt-1 ${soundMuted ? 'ml-1' : 'ml-6'}`} />
                 </div>
               </button>
+
+              {/* Admin Panel Link - only visible to admins */}
+              {user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()) && (
+                <Link
+                  to="/admin"
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                      ⚙️
+                    </div>
+                    <span className="font-medium text-neutral-900">Admin Panel</span>
+                  </div>
+                  <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              )}
 
               {/* How Ranks Work */}
               <RanksInfoSection />
