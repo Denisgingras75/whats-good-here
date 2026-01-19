@@ -13,6 +13,8 @@ function transformVote(vote) {
     photo_url: vote.dishes.photo_url,
     restaurant_name: vote.dishes.restaurants?.name,
     rating_10: vote.rating_10,
+    community_avg: vote.dishes.avg_rating,
+    total_votes: vote.dishes.total_votes,
     voted_at: vote.created_at,
   }
 }

@@ -584,6 +584,10 @@ export function Profile() {
 function ProfileDishCard({ dish, tab, onUnsave }) {
   const imageUrl = dish.photo_url || getCategoryImage(dish.category)
 
+  // Calculate difference between user rating and community average
+  const hasComparison = dish.rating_10 && dish.community_avg && dish.total_votes >= 2
+  const ratingDiff = hasComparison ? dish.rating_10 - dish.community_avg : null
+
   return (
     <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden flex">
       {/* Image */}
@@ -603,10 +607,24 @@ function ProfileDishCard({ dish, tab, onUnsave }) {
         </div>
 
         <div className="flex items-center justify-between">
-          {/* Rating if available */}
-          {dish.rating_10 && (
-            <span className="text-sm font-semibold" style={{ color: 'var(--color-rating)' }}>{dish.rating_10}/10</span>
-          )}
+          {/* Rating comparison */}
+          <div className="flex items-center gap-2">
+            {dish.rating_10 && (
+              <span className="text-sm font-semibold" style={{ color: 'var(--color-rating)' }}>
+                {dish.rating_10}/10
+              </span>
+            )}
+            {hasComparison && (
+              <span className="text-xs text-neutral-400">
+                · avg {dish.community_avg.toFixed(1)}
+                {ratingDiff !== 0 && (
+                  <span className={ratingDiff > 0 ? 'text-emerald-500' : 'text-red-400'}>
+                    {' '}({ratingDiff > 0 ? '+' : ''}{ratingDiff.toFixed(1)})
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
 
           {/* Tab-specific indicator */}
           {tab === 'worth-it' && (

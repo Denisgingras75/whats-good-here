@@ -113,6 +113,8 @@ export const votesApi = {
             category,
             price,
             photo_url,
+            avg_rating,
+            total_votes,
             restaurants (name)
           )
         `)
