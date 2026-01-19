@@ -69,9 +69,11 @@ export const dishesApi = {
 
   /**
    * Search dishes by name (for autocomplete)
+   * Searches ALL dishes regardless of category - categories are shortcuts, not containers
+   * Results sorted by avg_rating (highest first) so best matches rise to top
    * @param {string} query - Search query
    * @param {number} limit - Max results
-   * @returns {Promise<Array>} Array of matching dishes
+   * @returns {Promise<Array>} Array of matching dishes sorted by rating
    */
   async search(query, limit = 5) {
     try {
@@ -83,6 +85,10 @@ export const dishesApi = {
           id,
           name,
           category,
+          photo_url,
+          total_votes,
+          yes_votes,
+          avg_rating,
           restaurants!inner (
             id,
             name,
@@ -91,6 +97,7 @@ export const dishesApi = {
         `)
         .eq('restaurants.is_open', true)
         .ilike('name', `%${query}%`)
+        .order('avg_rating', { ascending: false, nullsFirst: false })
         .limit(limit)
 
       if (error) {
@@ -102,6 +109,9 @@ export const dishesApi = {
         dish_id: dish.id,
         dish_name: dish.name,
         category: dish.category,
+        photo_url: dish.photo_url,
+        total_votes: dish.total_votes || 0,
+        avg_rating: dish.avg_rating,
         restaurant_id: dish.restaurants.id,
         restaurant_name: dish.restaurants.name,
       }))

@@ -20,30 +20,23 @@ const SORT_OPTIONS = [
   { id: 'closest', label: 'Closest', icon: '📍' },
 ]
 
+// Browse shortcuts - curated high-frequency categories only
+// Categories are shortcuts, NOT containers. All dishes are searchable regardless of category.
 const CATEGORIES = [
   { id: 'pizza', label: 'Pizza', emoji: '🍕' },
   { id: 'burger', label: 'Burgers', emoji: '🍔' },
-  { id: 'steak', label: 'Steak', emoji: '🥩' },
-  { id: 'chicken', label: 'Chicken', emoji: '🍗' },
   { id: 'taco', label: 'Tacos', emoji: '🌮' },
-  { id: 'quesadilla', label: 'Quesadillas', emoji: '🫓' },
   { id: 'wings', label: 'Wings', emoji: '🍗' },
   { id: 'sushi', label: 'Sushi', emoji: '🍣' },
-  { id: 'sandwich', label: 'Sandwiches', emoji: '🥪' },
-  { id: 'breakfast sandwich', label: 'Bfast Sandwich', emoji: '🥯' },
-  { id: 'pasta', label: 'Pasta', emoji: '🍝' },
-  { id: 'pokebowl', label: 'Poke', emoji: '🥗' },
+  { id: 'breakfast', label: 'Breakfast', emoji: '🍳' },
   { id: 'lobster roll', label: 'Lobster Rolls', emoji: '🦞' },
   { id: 'seafood', label: 'Seafood', emoji: '🦐' },
   { id: 'chowder', label: 'Chowder', emoji: '🍲' },
-  { id: 'soup', label: 'Soups', emoji: '🍜' },
-  { id: 'breakfast', label: 'Breakfast', emoji: '🍳' },
+  { id: 'pasta', label: 'Pasta', emoji: '🍝' },
+  { id: 'steak', label: 'Steak', emoji: '🥩' },
+  { id: 'sandwich', label: 'Sandwiches', emoji: '🥪' },
   { id: 'salad', label: 'Salads', emoji: '🥗' },
-  { id: 'fries', label: 'Fries', emoji: '🍟' },
   { id: 'tendys', label: 'Tendys', emoji: '🍗' },
-  { id: 'fried chicken', label: 'Fried Chicken', emoji: '🍗' },
-  { id: 'apps', label: 'Apps', emoji: '🧆' },
-  { id: 'entree', label: 'Entrees', emoji: '🍽️' },
 ]
 
 export function Browse() {

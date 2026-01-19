@@ -7,30 +7,23 @@ const MIN_SEARCH_LENGTH = 2
 const MAX_DISH_RESULTS = 5
 const MAX_CATEGORY_RESULTS = 2
 
-// All known categories for matching
-const ALL_CATEGORIES = [
+// Browse shortcuts - curated high-frequency categories only
+// Categories are shortcuts, NOT containers. All dishes are searchable regardless of category.
+const BROWSE_CATEGORIES = [
   { id: 'pizza', label: 'Pizza' },
   { id: 'burger', label: 'Burgers' },
   { id: 'taco', label: 'Tacos' },
   { id: 'wings', label: 'Wings' },
   { id: 'sushi', label: 'Sushi' },
-  { id: 'apps', label: 'Apps' },
   { id: 'breakfast', label: 'Breakfast' },
-  { id: 'breakfast sandwich', label: 'Breakfast Sandwiches' },
-  { id: 'chowder', label: 'Chowder' },
-  { id: 'entree', label: 'Entrees' },
-  { id: 'fried chicken', label: 'Fried Chicken' },
-  { id: 'fries', label: 'Fries' },
   { id: 'lobster roll', label: 'Lobster Rolls' },
-  { id: 'pasta', label: 'Pasta' },
-  { id: 'pokebowl', label: 'Poke Bowls' },
-  { id: 'salad', label: 'Salads' },
-  { id: 'sandwich', label: 'Sandwiches' },
   { id: 'seafood', label: 'Seafood' },
-  { id: 'soup', label: 'Soups' },
-  { id: 'tendys', label: 'Tendys' },
-  { id: 'quesadilla', label: 'Quesadillas' },
+  { id: 'chowder', label: 'Chowder' },
+  { id: 'pasta', label: 'Pasta' },
   { id: 'steak', label: 'Steak' },
+  { id: 'sandwich', label: 'Sandwiches' },
+  { id: 'salad', label: 'Salads' },
+  { id: 'tendys', label: 'Tendys' },
 ]
 
 export function DishSearch({ dishes = [], loading = false }) {
@@ -89,7 +82,7 @@ export function DishSearch({ dishes = [], loading = false }) {
     }).slice(0, MAX_DISH_RESULTS)
 
     // 3. Find matching categories
-    const matchingCategories = ALL_CATEGORIES.filter(cat => {
+    const matchingCategories = BROWSE_CATEGORIES.filter(cat => {
       const catId = cat.id.toLowerCase()
       const catLabel = cat.label.toLowerCase()
       return catId.includes(searchTerm) || catLabel.includes(searchTerm)
