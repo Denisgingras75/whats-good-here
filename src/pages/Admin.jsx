@@ -224,9 +224,19 @@ export function Admin() {
       {/* Header */}
       <header className="px-4 py-4 border-b" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            Admin - {editingDishId ? 'Edit Dish' : 'Add Dishes'}
-          </h1>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-neutral-100 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              Admin - {editingDishId ? 'Edit Dish' : 'Add Dishes'}
+            </h1>
+          </div>
           {editingDishId && (
             <button
               onClick={handleCancelEdit}
