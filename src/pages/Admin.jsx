@@ -18,6 +18,14 @@ export function Admin() {
   const [message, setMessage] = useState(null)
   const [recentDishes, setRecentDishes] = useState([])
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [searching, setSearching] = useState(false)
+
+  // Edit mode state
+  const [editingDishId, setEditingDishId] = useState(null)
+
   // Form state
   const [restaurantId, setRestaurantId] = useState('')
   const [dishName, setDishName] = useState('')
@@ -52,6 +60,45 @@ export function Admin() {
     }
   }
 
+  async function handleSearch(e) {
+    e.preventDefault()
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    setSearching(true)
+    try {
+      const results = await adminApi.searchDishes(searchQuery)
+      setSearchResults(results)
+    } catch (error) {
+      console.error('Error searching dishes:', error)
+      setMessage({ type: 'error', text: 'Search failed' })
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  function handleEdit(dish) {
+    setEditingDishId(dish.id)
+    setRestaurantId(dish.restaurant_id)
+    setDishName(dish.name)
+    setCategory(dish.category)
+    setPrice(dish.price ? String(dish.price) : '')
+    setPhotoUrl(dish.photo_url || '')
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleCancelEdit() {
+    setEditingDishId(null)
+    setRestaurantId('')
+    setDishName('')
+    setCategory('')
+    setPrice('')
+    setPhotoUrl('')
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
 
@@ -64,35 +111,64 @@ export function Admin() {
     setMessage(null)
 
     try {
-      await adminApi.addDish({
-        restaurantId,
-        name: dishName,
-        category,
-        price: price ? parseFloat(price) : null,
-        photoUrl,
-      })
-      setMessage({ type: 'success', text: `Added "${dishName}" successfully!` })
+      if (editingDishId) {
+        // Update existing dish
+        await adminApi.updateDish(editingDishId, {
+          restaurantId,
+          name: dishName,
+          category,
+          price: price ? parseFloat(price) : null,
+          photoUrl,
+        })
+        setMessage({ type: 'success', text: `Updated "${dishName}" successfully!` })
+        setEditingDishId(null)
+      } else {
+        // Add new dish
+        await adminApi.addDish({
+          restaurantId,
+          name: dishName,
+          category,
+          price: price ? parseFloat(price) : null,
+          photoUrl,
+        })
+        setMessage({ type: 'success', text: `Added "${dishName}" successfully!` })
+      }
       // Reset form
+      setRestaurantId('')
       setDishName('')
+      setCategory('')
       setPrice('')
       setPhotoUrl('')
-      // Refresh recent dishes
+      // Refresh lists
       fetchRecentDishes()
+      if (searchQuery) {
+        const results = await adminApi.searchDishes(searchQuery)
+        setSearchResults(results)
+      }
     } catch (error) {
-      console.error('Error adding dish:', error)
-      setMessage({ type: 'error', text: `Failed to add dish: ${error.message}` })
+      console.error('Error saving dish:', error)
+      setMessage({ type: 'error', text: `Failed to save dish: ${error.message}` })
     } finally {
       setSubmitting(false)
     }
   }
 
-  async function handleDelete(dishId, dishName) {
-    if (!confirm(`Delete "${dishName}"? This cannot be undone.`)) return
+  async function handleDelete(dishId, deletedDishName) {
+    if (!confirm(`Delete "${deletedDishName}"? This cannot be undone.`)) return
 
     try {
       await adminApi.deleteDish(dishId)
-      setMessage({ type: 'success', text: `Deleted "${dishName}"` })
+      setMessage({ type: 'success', text: `Deleted "${deletedDishName}"` })
       fetchRecentDishes()
+      // Also refresh search results if searching
+      if (searchQuery) {
+        const results = await adminApi.searchDishes(searchQuery)
+        setSearchResults(results)
+      }
+      // Clear edit mode if deleting the dish being edited
+      if (editingDishId === dishId) {
+        handleCancelEdit()
+      }
     } catch (error) {
       console.error('Error deleting dish:', error)
       setMessage({ type: 'error', text: `Failed to delete: ${error.message}` })
@@ -147,9 +223,20 @@ export function Admin() {
     <div className="min-h-screen pb-24" style={{ background: 'var(--color-surface)' }}>
       {/* Header */}
       <header className="px-4 py-4 border-b" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-          Admin - Add Dishes
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            Admin - {editingDishId ? 'Edit Dish' : 'Add Dishes'}
+          </h1>
+          {editingDishId && (
+            <button
+              onClick={handleCancelEdit}
+              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-6">
@@ -218,7 +305,7 @@ export function Admin() {
               <option value="">Select a category...</option>
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  {cat.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                 </option>
               ))}
             </select>
@@ -264,11 +351,85 @@ export function Admin() {
             type="submit"
             disabled={submitting}
             className="w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-50"
-            style={{ background: 'var(--color-primary)' }}
+            style={{ background: editingDishId ? '#059669' : 'var(--color-primary)' }}
           >
-            {submitting ? 'Adding...' : 'Add Dish'}
+            {submitting
+              ? (editingDishId ? 'Updating...' : 'Adding...')
+              : (editingDishId ? 'Update Dish' : 'Add Dish')
+            }
           </button>
         </form>
+
+        {/* Search Dishes */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+            Search Dishes
+          </h2>
+          <form onSubmit={handleSearch} className="flex gap-2 mb-3">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by dish name..."
+              className="flex-1 px-3 py-2 border rounded-lg text-sm"
+              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-bg)' }}
+            />
+            <button
+              type="submit"
+              disabled={searching}
+              className="px-4 py-2 rounded-lg font-medium text-white transition-all disabled:opacity-50"
+              style={{ background: 'var(--color-primary)' }}
+            >
+              {searching ? '...' : 'Search'}
+            </button>
+          </form>
+
+          {/* Search Results */}
+          {searchResults.length > 0 && (
+            <div className="space-y-2 mb-6">
+              <p className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+              </p>
+              {searchResults.map((dish) => (
+                <div
+                  key={dish.id}
+                  className={`flex items-center justify-between p-3 rounded-lg border ${
+                    editingDishId === dish.id ? 'ring-2 ring-emerald-500' : ''
+                  }`}
+                  style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {dish.name}
+                    </p>
+                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      {dish.restaurants?.name} · {dish.category} {dish.price ? `· $${dish.price}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-2">
+                    <button
+                      onClick={() => handleEdit(dish)}
+                      className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(dish.id, dish.name)}
+                      className="text-red-500 hover:text-red-700 text-sm font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {searchQuery && searchResults.length === 0 && !searching && (
+            <p className="text-sm text-center py-4" style={{ color: 'var(--color-text-tertiary)' }}>
+              No dishes found for "{searchQuery}"
+            </p>
+          )}
+        </div>
 
         {/* Recent Dishes */}
         <div className="mt-8">
@@ -279,23 +440,33 @@ export function Admin() {
             {recentDishes.map((dish) => (
               <div
                 key={dish.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className={`flex items-center justify-between p-3 rounded-lg border ${
+                  editingDishId === dish.id ? 'ring-2 ring-emerald-500' : ''
+                }`}
                 style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}
               >
-                <div>
-                  <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
                     {dish.name}
                   </p>
-                  <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
                     {dish.restaurants?.name} · {dish.category} {dish.price ? `· $${dish.price}` : ''}
                   </p>
                 </div>
-                <button
-                  onClick={() => handleDelete(dish.id, dish.name)}
-                  className="text-red-500 hover:text-red-700 text-sm font-medium"
-                >
-                  Delete
-                </button>
+                <div className="flex items-center gap-2 ml-2">
+                  <button
+                    onClick={() => handleEdit(dish)}
+                    className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(dish.id, dish.name)}
+                    className="text-red-500 hover:text-red-700 text-sm font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
             {recentDishes.length === 0 && (
