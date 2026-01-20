@@ -418,12 +418,8 @@ export function Browse() {
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
       {/* Header */}
       <header style={{ background: 'var(--color-bg)' }}>
-        <div className="flex flex-col items-center py-1.5">
-          <img src="/logo.png" alt="What's Good Here" className="h-10 md:h-12 lg:h-14 w-auto" />
-        </div>
-
         {/* Search bar with autocomplete */}
-        <div className="px-4 pb-1.5">
+        <div className="px-4 pt-3 pb-1.5">
           <div className="relative">
             <svg
               xmlns="http://www.w3.org/2000/svg"
