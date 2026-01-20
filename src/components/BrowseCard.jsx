@@ -33,8 +33,8 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
       tabIndex={0}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className="w-full bg-white rounded-2xl overflow-hidden border shadow-sm transition-all duration-200 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] active:shadow-md text-left group cursor-pointer"
-      style={{ borderColor: 'var(--color-divider)' }}
+      className="w-full rounded-2xl overflow-hidden border shadow-sm transition-all duration-200 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] active:shadow-md text-left group cursor-pointer"
+      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
     >
       {/* Image with rating badge */}
       <div className="relative aspect-[16/10] overflow-hidden">
@@ -59,8 +59,8 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
             </span>
           </div>
         ) : (
-          <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-sm">
-            <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm">
+            <span className="text-xs font-medium text-white/80">
               {votesNeeded > 0 ? `Needs ${votesNeeded} more vote${votesNeeded > 1 ? 's' : ''}` : 'Needs votes'}
             </span>
           </div>
@@ -68,8 +68,8 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
 
         {/* Distance - bottom right */}
         {distance_miles && (
-          <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-sm">
-            <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+          <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm">
+            <span className="text-xs font-semibold text-white/90">
               {Number(distance_miles).toFixed(1)} mi
             </span>
           </div>
@@ -86,7 +86,7 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
             className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-all ${
               isFavorite
                 ? 'bg-red-500 text-white'
-                : 'bg-white/90 backdrop-blur-sm text-neutral-400 hover:text-red-500'
+                : 'bg-black/50 backdrop-blur-sm text-white/70 hover:text-red-400'
             }`}
           >
             <svg
@@ -150,7 +150,7 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
               style={{
-                background: 'color-mix(in srgb, var(--color-primary) 12%, white)',
+                background: 'var(--color-primary-muted)',
                 color: 'var(--color-primary)'
               }}
             >

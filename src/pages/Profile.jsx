@@ -177,18 +177,18 @@ export function Profile() {
 
   if (loading) {
     return (
-      <div className="bg-stone-50 flex items-center justify-center py-20">
+      <div className="flex items-center justify-center py-20" style={{ background: 'var(--color-surface)' }}>
         <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }} />
       </div>
     )
   }
 
   return (
-    <div className="bg-stone-50">
+    <div style={{ background: 'var(--color-surface)' }}>
       {user ? (
         <>
           {/* Profile Header */}
-          <div className="bg-white border-b border-neutral-200 px-4 py-6">
+          <div className="border-b px-4 py-6" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
             <div className="flex items-center gap-4">
               {/* Avatar */}
               <div className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ background: 'var(--color-primary)' }}>
@@ -203,7 +203,8 @@ export function Profile() {
                       type="text"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      className="flex-1 px-3 py-1.5 border border-neutral-300 rounded-lg text-lg font-bold focus:border-orange-400 focus:outline-none"
+                      className="flex-1 px-3 py-1.5 border rounded-lg text-lg font-bold focus:border-orange-400 focus:outline-none"
+                      style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)', color: 'var(--color-text-primary)' }}
                       autoFocus
                     />
                     <button
@@ -221,7 +222,7 @@ export function Profile() {
                     style={{ color: 'var(--color-text-primary)' }}
                   >
                     {profile?.display_name || 'Set your name'}
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-neutral-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-[color:var(--color-text-tertiary)]">
                       <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                     </svg>
                   </button>
@@ -238,7 +239,7 @@ export function Profile() {
                 )}
 
                 {/* Contribution Stats */}
-                <p className="text-sm text-neutral-500 mt-1">
+                <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">
                   {stats.totalVotes > 0
                     ? `${stats.totalVotes} ${stats.totalVotes === 1 ? 'dish' : 'dishes'} rated`
                     : 'Start rating to help others'
@@ -261,19 +262,19 @@ export function Profile() {
             {/* Quick Stats Cards */}
             {stats.totalVotes > 0 && (
               <div className="grid grid-cols-3 gap-3 mt-4">
-                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+                <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
                   <div className="text-2xl font-bold text-emerald-600">{stats.worthItCount}</div>
-                  <div className="text-xs text-neutral-500">Worth It</div>
+                  <div className="text-xs text-[color:var(--color-text-secondary)]">Worth It</div>
                 </div>
-                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+                <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
                   <div className="text-2xl font-bold text-red-500">{stats.avoidCount}</div>
-                  <div className="text-xs text-neutral-500">Avoid</div>
+                  <div className="text-xs text-[color:var(--color-text-secondary)]">Avoid</div>
                 </div>
-                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+                <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
                   <div className="text-2xl font-bold" style={{ color: 'var(--color-rating)' }}>
                     {stats.avgRating ? stats.avgRating.toFixed(1) : '—'}
                   </div>
-                  <div className="text-xs text-neutral-500">Avg Rating</div>
+                  <div className="text-xs text-[color:var(--color-text-secondary)]">Avg Rating</div>
                 </div>
               </div>
             )}
@@ -286,22 +287,23 @@ export function Profile() {
             {/* Category Tiers */}
             {stats.categoryTiers.length > 0 && (
               <div className="mt-4">
-                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide mb-2">
                   Your Ranks
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {stats.categoryTiers.map((tier) => (
                     <div
                       key={tier.category}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-200 rounded-full text-sm"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border"
+                      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
                     >
                       <span>{tier.emoji}</span>
-                      <span className="font-medium text-neutral-800">{tier.label}</span>
-                      <span className="text-neutral-400">·</span>
+                      <span className="font-medium text-[color:var(--color-text-primary)]">{tier.label}</span>
+                      <span className="text-[color:var(--color-text-tertiary)]">·</span>
                       <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>
                         {tier.icon} {tier.title}
                       </span>
-                      <span className="text-xs text-neutral-400">({tier.count})</span>
+                      <span className="text-xs text-[color:var(--color-text-tertiary)]">({tier.count})</span>
                     </div>
                   ))}
                 </div>
@@ -311,21 +313,22 @@ export function Profile() {
             {/* Tier Progress Indicators */}
             {stats.categoryProgress.length > 0 && (
               <div className="mt-4">
-                <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide mb-2">
                   {stats.categoryTiers.length > 0 ? 'Level Up' : 'Progress'}
                 </h3>
                 <div className="space-y-2">
                   {stats.categoryProgress.slice(0, 3).map((prog) => (
                     <div
                       key={prog.category}
-                      className="bg-white border border-neutral-200 rounded-xl p-3"
+                      className="rounded-xl p-3 border"
+                      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span>{prog.emoji}</span>
-                          <span className="font-medium text-neutral-800">{prog.label}</span>
+                          <span className="font-medium text-[color:var(--color-text-primary)]">{prog.label}</span>
                           {prog.currentTier && (
-                            <span className="text-xs text-neutral-400">
+                            <span className="text-xs text-[color:var(--color-text-tertiary)]">
                               {prog.currentTier.icon} {prog.currentTier.title}
                             </span>
                           )}
@@ -334,7 +337,7 @@ export function Profile() {
                           {prog.votesNeeded} more to {prog.nextTier.icon} {prog.nextTier.title}
                         </span>
                       </div>
-                      <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-elevated)' }}>
                         <div
                           className="h-full rounded-full transition-all"
                           style={{
@@ -344,8 +347,8 @@ export function Profile() {
                         />
                       </div>
                       <div className="flex justify-between mt-1">
-                        <span className="text-xs text-neutral-400">{prog.count} votes</span>
-                        <span className="text-xs text-neutral-400">{prog.nextTier.min} needed</span>
+                        <span className="text-xs text-[color:var(--color-text-tertiary)]">{prog.count} votes</span>
+                        <span className="text-xs text-[color:var(--color-text-tertiary)]">{prog.nextTier.min} needed</span>
                       </div>
                     </div>
                   ))}
@@ -356,10 +359,10 @@ export function Profile() {
             {/* Top spot (if no progress yet, show encouragement) */}
             {stats.categoryProgress.length === 0 && stats.favoriteRestaurant && (
               <div className="flex flex-wrap gap-2 mt-3">
-                <div className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs font-medium text-neutral-600">
-                  Top spot: <span className="text-neutral-900">{stats.favoriteRestaurant}</span>
+                <div className="px-3 py-1.5 rounded-full text-xs font-medium text-[color:var(--color-text-secondary)]" style={{ background: 'var(--color-surface-elevated)' }}>
+                  Top spot: <span className="text-[color:var(--color-text-primary)]">{stats.favoriteRestaurant}</span>
                 </div>
-                <div className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs font-medium text-neutral-500">
+                <div className="px-3 py-1.5 rounded-full text-xs font-medium text-[color:var(--color-text-secondary)]" style={{ background: 'var(--color-surface-elevated)' }}>
                   Keep rating to earn ranks!
                 </div>
               </div>
@@ -367,7 +370,7 @@ export function Profile() {
           </div>
 
           {/* Tabs */}
-          <div className="bg-white border-b border-neutral-200 px-4 py-2">
+          <div className="border-b px-4 py-2" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}>
             <div className="flex gap-2">
               {TABS.map((tab) => (
                 <button
@@ -376,14 +379,16 @@ export function Profile() {
                   className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     activeTab === tab.id
                       ? 'text-white shadow-md'
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      : 'text-[color:var(--color-text-secondary)]'
                   }`}
-                  style={activeTab === tab.id ? { background: 'var(--color-primary)' } : {}}
+                  style={activeTab === tab.id
+                    ? { background: 'var(--color-primary)' }
+                    : { background: 'var(--color-surface-elevated)' }}
                 >
                   <span>{tab.emoji}</span>
                   <span>{tab.label}</span>
                   <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
-                    activeTab === tab.id ? 'bg-white/20' : 'bg-neutral-200'
+                    activeTab === tab.id ? 'bg-white/20' : 'bg-black/20'
                   }`}>
                     {tab.id === 'unrated' ? unratedCount :
                      tab.id === 'worth-it' ? worthItDishes.length :
@@ -400,7 +405,7 @@ export function Profile() {
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-24 bg-neutral-200 rounded-xl animate-pulse" />
+                  <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-surface-elevated)' }} />
                 ))}
               </div>
             ) : tabDishes.length > 0 ? (
@@ -430,7 +435,8 @@ export function Profile() {
                 {hasMoreDishes && (
                   <button
                     onClick={() => setExpandedTabs(prev => ({ ...prev, [activeTab]: !isTabExpanded }))}
-                    className="w-full py-3 text-center rounded-xl border-2 border-dashed border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 transition-colors"
+                    className="w-full py-3 text-center rounded-xl border-2 border-dashed hover:bg-[color:var(--color-surface-elevated)] transition-colors"
+                    style={{ borderColor: 'var(--color-divider)' }}
                   >
                     <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
                       {isTabExpanded
@@ -463,23 +469,23 @@ export function Profile() {
 
           {/* Settings */}
           <div className="p-4 pt-0">
-            <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-neutral-100">
-                <h2 className="font-semibold text-neutral-900">Settings</h2>
+            <div className="rounded-2xl border overflow-hidden" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
+              <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--color-divider)' }}>
+                <h2 className="font-semibold text-[color:var(--color-text-primary)]">Settings</h2>
               </div>
 
               {/* Sound Toggle */}
               <button
                 onClick={handleToggleSound}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors"
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
                     {soundMuted ? '🔇' : '🔊'}
                   </div>
-                  <span className="font-medium text-neutral-900">Bite Sounds</span>
+                  <span className="font-medium text-[color:var(--color-text-primary)]">Bite Sounds</span>
                 </div>
-                <div className={`w-12 h-7 rounded-full transition-colors ${soundMuted ? 'bg-neutral-200' : ''}`} style={!soundMuted ? { background: 'var(--color-primary)' } : {}}>
+                <div className="w-12 h-7 rounded-full transition-colors" style={{ background: soundMuted ? 'var(--color-surface-elevated)' : 'var(--color-primary)' }}>
                   <div className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform mt-1 ${soundMuted ? 'ml-1' : 'ml-6'}`} />
                 </div>
               </button>
@@ -488,15 +494,15 @@ export function Profile() {
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
                       ⚙️
                     </div>
-                    <span className="font-medium text-neutral-900">Admin Panel</span>
+                    <span className="font-medium text-[color:var(--color-text-primary)]">Admin Panel</span>
                   </div>
-                  <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
@@ -505,15 +511,15 @@ export function Profile() {
               {/* How Badges Work */}
               <a
                 href="/badges"
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
                     🏆
                   </div>
-                  <span className="font-medium text-neutral-900">How Badges Work</span>
+                  <span className="font-medium text-[color:var(--color-text-primary)]">How Badges Work</span>
                 </div>
-                <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </a>
@@ -527,15 +533,15 @@ export function Profile() {
               {/* Privacy Policy */}
               <a
                 href="/privacy"
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
                     🔒
                   </div>
-                  <span className="font-medium text-neutral-900">Privacy Policy</span>
+                  <span className="font-medium text-[color:var(--color-text-primary)]">Privacy Policy</span>
                 </div>
-                <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </a>
@@ -543,15 +549,15 @@ export function Profile() {
               {/* Terms of Service */}
               <a
                 href="/terms"
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
                     📋
                   </div>
-                  <span className="font-medium text-neutral-900">Terms of Service</span>
+                  <span className="font-medium text-[color:var(--color-text-primary)]">Terms of Service</span>
                 </div>
-                <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </a>
@@ -559,12 +565,13 @@ export function Profile() {
               {/* Sign Out */}
               <button
                 onClick={handleSignOut}
-                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t"
+                style={{ borderColor: 'var(--color-divider)' }}
               >
-                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.15)' }}>
                   🚪
                 </div>
-                <span className="font-medium text-red-600">Sign Out</span>
+                <span className="font-medium text-red-400">Sign Out</span>
               </button>
             </div>
           </div>
@@ -572,15 +579,15 @@ export function Profile() {
       ) : (
         /* Sign In Card */
         <div className="p-4">
-          <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+          <div className="rounded-2xl border p-6" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
             <div className="text-center mb-6">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--color-primary)' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-white">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-neutral-900">Sign in to vote</h2>
-              <p className="text-sm text-neutral-500 mt-1">
+              <h2 className="text-xl font-bold text-[color:var(--color-text-primary)]">Sign in to vote</h2>
+              <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">
                 Track your votes, save favorites, and help others find great food
               </p>
             </div>
@@ -588,8 +595,8 @@ export function Profile() {
             {message && (
               <div className={`p-3 rounded-lg mb-4 text-sm ${
                 message.type === 'error'
-                  ? 'bg-red-50 text-red-600'
-                  : 'bg-emerald-50 text-emerald-600'
+                  ? 'bg-red-500/20 text-red-400'
+                  : 'bg-emerald-500/20 text-emerald-400'
               }`}>
                 {message.text}
               </div>
@@ -600,7 +607,8 @@ export function Profile() {
               <button
                 onClick={handleGoogleSignIn}
                 disabled={authLoading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white border-2 border-neutral-200 rounded-xl font-semibold text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50 active:scale-[0.98] transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border-2 rounded-xl font-semibold text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface-elevated)] active:scale-[0.98] transition-all disabled:opacity-50"
+                style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -613,9 +621,9 @@ export function Profile() {
 
               {/* Divider */}
               <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-neutral-200" />
-                <span className="text-xs font-medium text-neutral-400">or</span>
-                <div className="flex-1 h-px bg-neutral-200" />
+                <div className="flex-1 h-px" style={{ background: 'var(--color-divider)' }} />
+                <span className="text-xs font-medium text-[color:var(--color-text-tertiary)]">or</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--color-divider)' }} />
               </div>
 
               {/* Email Magic Link */}
@@ -626,12 +634,14 @@ export function Profile() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-neutral-50 border-2 border-neutral-200 rounded-xl focus:border-orange-400 focus:bg-white focus:outline-none transition-all mb-3"
+                  className="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all mb-3"
+                  style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)', color: 'var(--color-text-primary)' }}
                 />
                 <button
                   type="submit"
                   disabled={authLoading}
-                  className="w-full px-4 py-3 text-neutral-700 font-semibold rounded-xl bg-neutral-100 hover:bg-neutral-200 active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="w-full px-4 py-3 text-[color:var(--color-text-primary)] font-semibold rounded-xl active:scale-[0.98] transition-all disabled:opacity-50"
+                  style={{ background: 'var(--color-surface-elevated)' }}
                 >
                   {authLoading ? 'Sending...' : 'Sign in with email'}
                 </button>
@@ -653,9 +663,9 @@ function ProfileDishCard({ dish, tab, onUnsave }) {
   const ratingDiff = hasComparison ? dish.rating_10 - dish.community_avg : null
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden flex">
+    <div className="rounded-xl border overflow-hidden flex" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
       {/* Image */}
-      <div className="w-24 h-24 flex-shrink-0 bg-neutral-100">
+      <div className="w-24 h-24 flex-shrink-0" style={{ background: 'var(--color-surface-elevated)' }}>
         <img
           src={imageUrl}
           alt={dish.dish_name}
@@ -666,8 +676,8 @@ function ProfileDishCard({ dish, tab, onUnsave }) {
       {/* Info */}
       <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
         <div>
-          <h3 className="font-semibold text-neutral-900 truncate">{dish.dish_name}</h3>
-          <p className="text-sm text-neutral-500 truncate">{dish.restaurant_name}</p>
+          <h3 className="font-semibold text-[color:var(--color-text-primary)] truncate">{dish.dish_name}</h3>
+          <p className="text-sm text-[color:var(--color-text-secondary)] truncate">{dish.restaurant_name}</p>
         </div>
 
         <div className="flex items-center justify-between">
@@ -679,7 +689,7 @@ function ProfileDishCard({ dish, tab, onUnsave }) {
               </span>
             )}
             {hasComparison && (
-              <span className="text-xs text-neutral-400">
+              <span className="text-xs text-[color:var(--color-text-tertiary)]">
                 · avg {dish.community_avg.toFixed(1)}
                 {ratingDiff !== 0 && (
                   <span className={ratingDiff > 0 ? 'text-emerald-500' : 'text-red-400'}>
@@ -741,10 +751,10 @@ function EmptyState({ tab }) {
   const { emoji, title, description } = content[tab]
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center">
+    <div className="rounded-2xl border p-8 text-center" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
       <div className="text-4xl mb-3">{emoji}</div>
-      <h3 className="font-semibold text-neutral-900">{title}</h3>
-      <p className="text-sm text-neutral-500 mt-1">{description}</p>
+      <h3 className="font-semibold text-[color:var(--color-text-primary)]">{title}</h3>
+      <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">{description}</p>
     </div>
   )
 }
@@ -761,10 +771,11 @@ function UnratedDishCard({ dish, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full bg-white rounded-xl border border-neutral-200 overflow-hidden flex text-left hover:shadow-md transition-shadow"
+      className="w-full rounded-xl border overflow-hidden flex text-left hover:shadow-md transition-shadow"
+      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
     >
       {/* Image with photo indicator */}
-      <div className="w-24 h-24 flex-shrink-0 bg-neutral-100 relative">
+      <div className="w-24 h-24 flex-shrink-0 relative" style={{ background: 'var(--color-surface-elevated)' }}>
         <img
           src={imageUrl}
           alt={dish.dish_name}
@@ -781,13 +792,13 @@ function UnratedDishCard({ dish, onClick }) {
       {/* Info */}
       <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
         <div>
-          <h3 className="font-semibold text-neutral-900 truncate">{dish.dish_name}</h3>
-          <p className="text-sm text-neutral-500 truncate">{dish.restaurant_name}</p>
+          <h3 className="font-semibold text-[color:var(--color-text-primary)] truncate">{dish.dish_name}</h3>
+          <p className="text-sm text-[color:var(--color-text-secondary)] truncate">{dish.restaurant_name}</p>
         </div>
 
         <div className="flex items-center justify-between">
           {timeSince && (
-            <span className="text-xs text-neutral-400">Added {timeSince}</span>
+            <span className="text-xs text-[color:var(--color-text-tertiary)]">Added {timeSince}</span>
           )}
           <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
             Rate now →
@@ -803,19 +814,19 @@ function PhotosInfoSection() {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="border-t border-neutral-100">
+    <div className="border-t" style={{ borderColor: 'var(--color-divider)' }}>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
             📷
           </div>
-          <span className="font-medium text-neutral-900">How Photos Work</span>
+          <span className="font-medium text-[color:var(--color-text-primary)]">How Photos Work</span>
         </div>
         <svg
-          className={`w-5 h-5 text-neutral-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-[color:var(--color-text-tertiary)] transition-transform ${expanded ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -826,7 +837,7 @@ function PhotosInfoSection() {
 
       {expanded && (
         <div className="px-4 pb-4">
-          <p className="text-sm text-neutral-600 mb-4">
+          <p className="text-sm text-[color:var(--color-text-secondary)] mb-4">
             When you add a photo, we automatically sort it so the clearest ones represent each dish. Everyone can contribute — not all photos are shown the same way.
           </p>
 
@@ -834,22 +845,22 @@ function PhotosInfoSection() {
             {PHOTO_TIERS_LIST.map((tier) => (
               <div
                 key={tier.label}
-                className="flex items-center gap-3 p-2 rounded-lg bg-neutral-50"
+                className="flex items-center gap-3 p-2 rounded-lg bg-[color:var(--color-surface-elevated)]"
               >
                 <span className="text-xl">{tier.icon}</span>
                 <div className="flex-1">
-                  <span className="font-semibold text-neutral-900">{tier.label}</span>
-                  <p className="text-xs text-neutral-500">{tier.description}</p>
+                  <span className="font-semibold text-[color:var(--color-text-primary)]">{tier.label}</span>
+                  <p className="text-xs text-[color:var(--color-text-secondary)]">{tier.description}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <p className="text-sm text-neutral-600 mt-4">
+          <p className="text-sm text-[color:var(--color-text-secondary)] mt-4">
             If a photo is too dark, too bright, or too small, we'll ask you to try again with a clearer shot.
           </p>
 
-          <p className="text-xs text-neutral-400 mt-3 text-center">
+          <p className="text-xs text-[color:var(--color-text-tertiary)] mt-3 text-center">
             This keeps the app trustworthy and makes dishes easier to recognize.
           </p>
         </div>
@@ -863,19 +874,19 @@ function MissionSection() {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="border-t border-neutral-100">
+    <div className="border-t" style={{ borderColor: 'var(--color-divider)' }}>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
             💡
           </div>
-          <span className="font-medium text-neutral-900">Our Mission</span>
+          <span className="font-medium text-[color:var(--color-text-primary)]">Our Mission</span>
         </div>
         <svg
-          className={`w-5 h-5 text-neutral-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-[color:var(--color-text-tertiary)] transition-transform ${expanded ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -886,38 +897,38 @@ function MissionSection() {
 
       {expanded && (
         <div className="px-4 pb-4">
-          <p className="text-sm text-neutral-600 mb-4">
+          <p className="text-sm text-[color:var(--color-text-secondary)] mb-4">
             Restaurants collect an incredible amount of data — what you ordered, when you came, how long you stayed, and whether you returned. They have dashboards, analytics, and insights.
           </p>
 
-          <p className="text-sm text-neutral-600 mb-4">
+          <p className="text-sm text-[color:var(--color-text-secondary)] mb-4">
             But when you sit down at a new place, what do you have?
           </p>
 
-          <div className="bg-neutral-50 rounded-xl p-4 mb-4 text-center">
-            <p className="text-sm text-neutral-700 font-medium">A menu.</p>
-            <p className="text-sm text-neutral-500">No context.</p>
-            <p className="text-sm text-neutral-500">No signal.</p>
-            <p className="text-sm text-neutral-400">Just a guess.</p>
+          <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-4 mb-4 text-center">
+            <p className="text-sm text-[color:var(--color-text-primary)] font-medium">A menu.</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">No context.</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">No signal.</p>
+            <p className="text-sm text-[color:var(--color-text-tertiary)]">Just a guess.</p>
           </div>
 
-          <p className="text-sm font-semibold text-neutral-800 mb-4">
+          <p className="text-sm font-semibold text-[color:var(--color-text-primary)] mb-4">
             What's Good Here exists to change that.
           </p>
 
-          <p className="text-sm text-neutral-600 mb-4">
+          <p className="text-sm text-[color:var(--color-text-secondary)] mb-4">
             We give diners access to the data that actually matters when you're ordering: what real people thought of real dishes. No influencers. No hype. Just honest votes.
           </p>
 
-          <p className="text-sm text-neutral-600 mb-4">
+          <p className="text-sm text-[color:var(--color-text-secondary)] mb-4">
             When enough people agree a dish is worth ordering, it rises to the top — making it easier for the next person to decide with confidence.
           </p>
 
-          <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 mt-4">
-            <p className="text-sm font-medium text-neutral-800 text-center">
+          <div className="rounded-xl p-4 mt-4" style={{ background: 'var(--color-primary-muted)' }}>
+            <p className="text-sm font-medium text-[color:var(--color-text-primary)] text-center">
               Every vote you cast helps someone else eat better.
             </p>
-            <p className="text-xs text-neutral-600 text-center mt-1">
+            <p className="text-xs text-[color:var(--color-text-secondary)] text-center mt-1">
               That's the mission.
             </p>
           </div>
@@ -948,11 +959,11 @@ function AchievementsSection({ badges }) {
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between"
       >
-        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
+        <h3 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide">
           Achievements ({unlockedBadges.length}/{badges.length})
         </h3>
         <svg
-          className={`w-4 h-4 text-neutral-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-[color:var(--color-text-tertiary)] transition-transform ${expanded ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -969,31 +980,32 @@ function AchievementsSection({ badges }) {
               {unlockedBadges.map((badge) => (
                 <div
                   key={badge.key}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-full"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border"
+                  style={{ background: 'var(--color-primary-muted)', borderColor: 'var(--color-primary)' }}
                   title={`${badge.name}: ${badge.description}`}
                 >
                   <span className="text-lg">{badge.icon}</span>
-                  <span className="text-sm font-medium text-amber-800">{badge.name}</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>{badge.name}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-neutral-400">Rate dishes to earn badges!</p>
+            <p className="text-sm text-[color:var(--color-text-tertiary)]">Rate dishes to earn badges!</p>
           )}
 
           {/* Show next badge progress */}
           {nextBadge && (
-            <div className="mt-3 p-3 bg-neutral-50 rounded-xl">
+            <div className="mt-3 p-3 bg-[color:var(--color-surface-elevated)] rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl opacity-50">{nextBadge.icon}</span>
-                <span className="text-sm font-medium text-neutral-600">
+                <span className="text-sm font-medium text-[color:var(--color-text-secondary)]">
                   Next: {nextBadge.name}
                 </span>
-                <span className="text-xs text-neutral-400 ml-auto">
+                <span className="text-xs text-[color:var(--color-text-tertiary)] ml-auto">
                   {nextBadge.progress}/{nextBadge.target}
                 </span>
               </div>
-              <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
@@ -1016,14 +1028,15 @@ function AchievementsSection({ badges }) {
               {unlockedBadges.map((badge) => (
                 <div
                   key={badge.key}
-                  className="flex items-center gap-3 p-3 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl"
+                  className="flex items-center gap-3 p-3 rounded-xl border"
+                  style={{ background: 'var(--color-primary-muted)', borderColor: 'var(--color-primary)' }}
                 >
                   <span className="text-2xl">{badge.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-amber-900">{badge.name}</div>
-                    <div className="text-xs text-amber-700">{badge.subtitle}</div>
+                    <div className="font-semibold" style={{ color: 'var(--color-primary)' }}>{badge.name}</div>
+                    <div className="text-xs text-[color:var(--color-text-secondary)]">{badge.subtitle}</div>
                   </div>
-                  <div className="text-xs text-amber-600">
+                  <div className="text-xs text-[color:var(--color-text-tertiary)]">
                     {badge.unlocked_at && new Date(badge.unlocked_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                 </div>
@@ -1037,22 +1050,23 @@ function AchievementsSection({ badges }) {
               {lockedBadges.map((badge) => (
                 <div
                   key={badge.key}
-                  className="flex items-center gap-3 p-3 bg-neutral-50 border border-neutral-200 rounded-xl"
+                  className="flex items-center gap-3 p-3 rounded-xl border"
+                  style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}
                 >
                   <span className="text-2xl opacity-40">{badge.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-neutral-500">{badge.name}</div>
-                    <div className="text-xs text-neutral-400">{badge.description}</div>
+                    <div className="font-semibold text-[color:var(--color-text-secondary)]">{badge.name}</div>
+                    <div className="text-xs text-[color:var(--color-text-tertiary)]">{badge.description}</div>
                     {/* Progress bar */}
                     <div className="mt-2">
-                      <div className="flex justify-between text-xs text-neutral-400 mb-1">
+                      <div className="flex justify-between text-xs text-[color:var(--color-text-tertiary)] mb-1">
                         <span>{badge.progress}/{badge.target}</span>
                         <span>{badge.percentage}%</span>
                       </div>
-                      <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
                         <div
-                          className="h-full rounded-full transition-all bg-neutral-400"
-                          style={{ width: `${badge.percentage}%` }}
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${badge.percentage}%`, background: 'var(--color-text-tertiary)' }}
                         />
                       </div>
                     </div>

@@ -44,9 +44,9 @@ export function LocationPicker({
       return (
         <button
           onClick={() => setShowLocationSheet(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors hover:bg-orange-50"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors"
           style={{
-            background: 'color-mix(in srgb, var(--color-primary) 10%, white)',
+            background: 'var(--color-primary-muted)',
             borderColor: 'color-mix(in srgb, var(--color-primary) 30%, transparent)',
             color: 'var(--color-primary)'
           }}
@@ -63,9 +63,9 @@ export function LocationPicker({
       return (
         <button
           onClick={() => setShowLocationSheet(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors hover:bg-gray-50"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors"
           style={{
-            background: 'var(--color-surface)',
+            background: 'var(--color-surface-elevated)',
             borderColor: 'var(--color-divider)',
             color: 'var(--color-text-primary)'
           }}
@@ -83,9 +83,9 @@ export function LocationPicker({
     return (
       <button
         onClick={() => setShowLocationSheet(true)}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors hover:bg-gray-50"
+        className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors"
         style={{
-          background: 'color-mix(in srgb, var(--color-success) 10%, white)',
+          background: 'color-mix(in srgb, var(--color-success) 15%, var(--color-bg))',
           borderColor: 'color-mix(in srgb, var(--color-success) 30%, transparent)',
           color: 'var(--color-success)'
         }}
@@ -102,7 +102,7 @@ export function LocationPicker({
   return (
     <>
       {/* Filter Chips Row */}
-      <div className="bg-white px-4 py-2">
+      <div className="px-4 py-2" style={{ background: 'var(--color-bg)' }}>
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           {/* Location Chip */}
           {getLocationChip()}
@@ -168,9 +168,9 @@ export function LocationPicker({
                   onRequestLocation()
                   setShowLocationSheet(false)
                 }}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all hover:border-orange-300"
+                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all"
                 style={{
-                  background: 'color-mix(in srgb, var(--color-primary) 5%, white)',
+                  background: 'var(--color-primary-muted)',
                   borderColor: 'var(--color-primary)'
                 }}
               >
@@ -199,9 +199,9 @@ export function LocationPicker({
                   onUseDefault()
                   setShowLocationSheet(false)
                 }}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all hover:border-gray-300"
+                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all"
                 style={{
-                  background: 'var(--color-surface)',
+                  background: 'var(--color-surface-elevated)',
                   borderColor: 'var(--color-divider)'
                 }}
               >
@@ -225,7 +225,7 @@ export function LocationPicker({
               {permissionState === 'denied' && (
                 <div
                   className="p-4 rounded-xl text-sm"
-                  style={{ background: 'color-mix(in srgb, var(--color-warning) 10%, white)' }}
+                  style={{ background: 'color-mix(in srgb, var(--color-rating) 15%, var(--color-bg))' }}
                 >
                   <p className="font-medium mb-1" style={{ color: 'var(--color-text-primary)' }}>
                     Location access blocked?
@@ -278,14 +278,13 @@ export function LocationPicker({
                 <button
                   key={r}
                   onClick={() => handleRadiusSelect(r)}
-                  className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-                    radius === r ? 'border-transparent' : 'border-transparent hover:border-neutral-200'
-                  }`}
+                  className="w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all"
                   style={radius === r ? {
-                    background: 'color-mix(in srgb, var(--color-primary) 10%, white)',
+                    background: 'var(--color-primary-muted)',
                     borderColor: 'var(--color-primary)'
                   } : {
-                    background: 'var(--color-surface)'
+                    background: 'var(--color-surface-elevated)',
+                    borderColor: 'transparent'
                   }}
                 >
                   <div className="flex items-center gap-3">

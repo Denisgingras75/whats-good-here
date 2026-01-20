@@ -135,9 +135,9 @@ export function Restaurants() {
   }, [restaurants, searchQuery])
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
       {/* Header */}
-      <header className="bg-white px-4 py-2">
+      <header className="px-4 py-2" style={{ background: 'var(--color-bg)' }}>
         <div className="flex flex-col items-center mb-2">
           <img src="/logo.png" alt="What's Good Here" className="h-12 md:h-14 lg:h-16 w-auto" />
         </div>
@@ -159,16 +159,22 @@ export function Restaurants() {
             placeholder={selectedRestaurant ? `Search dishes at ${selectedRestaurant.name}...` : "Search restaurants..."}
             value={selectedRestaurant ? dishSearchQuery : searchQuery}
             onChange={(e) => selectedRestaurant ? setDishSearchQuery(e.target.value) : setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-neutral-100 rounded-xl border-0 focus:ring-2 focus:bg-white transition-all"
-            style={{ '--tw-ring-color': 'var(--color-primary)' }}
+            className="w-full pl-10 pr-4 py-3 rounded-xl border focus:ring-2 transition-all"
+            style={{
+              background: 'var(--color-surface-elevated)',
+              borderColor: 'var(--color-divider)',
+              color: 'var(--color-text-primary)',
+              '--tw-ring-color': 'var(--color-primary)'
+            }}
           />
           {/* Clear button when searching dishes */}
           {selectedRestaurant && dishSearchQuery && (
             <button
               onClick={() => setDishSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-neutral-200 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors"
+              style={{ color: 'var(--color-text-tertiary)' }}
             >
-              <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -200,7 +206,7 @@ export function Restaurants() {
           ) : loading || dishesLoading ? (
             <div className="space-y-3">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-24 bg-neutral-200 rounded-xl animate-pulse" />
+                <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-card)' }} />
               ))}
             </div>
           ) : (
@@ -212,12 +218,13 @@ export function Restaurants() {
                   <button
                     key={restaurant.id}
                     onClick={() => handleRestaurantSelect(restaurant)}
-                    className="w-full bg-white rounded-xl border border-neutral-200 p-4 text-left hover:border-orange-300 hover:shadow-md transition-all group"
+                    className="w-full rounded-xl border p-4 text-left hover:shadow-md transition-all group"
+                    style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
                   >
                     <div className="flex items-center justify-between gap-3">
                       {/* Restaurant info */}
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-neutral-900 group-hover:text-orange-600 transition-colors">
+                        <h3 className="font-semibold group-hover:text-orange-400 transition-colors" style={{ color: 'var(--color-text-primary)' }}>
                           {restaurant.name}
                         </h3>
                         <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -229,7 +236,7 @@ export function Restaurants() {
                       </div>
 
                       {/* Chevron */}
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-neutral-400 group-hover:text-orange-400 transition-colors flex-shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 group-hover:text-orange-400 transition-colors flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                       </svg>
                     </div>
@@ -251,7 +258,7 @@ export function Restaurants() {
       {selectedRestaurant && (
         <>
           {/* Back button and restaurant header */}
-          <div className="sticky top-0 z-20 bg-white border-b border-neutral-200 px-4 py-3">
+          <div className="sticky top-0 z-20 border-b px-4 py-3" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => {
@@ -262,17 +269,18 @@ export function Restaurants() {
                     navigate('/restaurants', { replace: true })
                   }
                 }}
-                className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center hover:bg-neutral-200 transition-colors flex-shrink-0"
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+                style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                 </svg>
               </button>
               <div className="min-w-0">
-                <h2 className="text-xl font-bold text-neutral-900 truncate">
+                <h2 className="text-xl font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
                   {selectedRestaurant.name}
                 </h2>
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   {selectedRestaurant.dishCount} dishes
                 </p>
               </div>
@@ -280,7 +288,7 @@ export function Restaurants() {
           </div>
 
           {/* Restaurant Details Card */}
-          <div className="bg-white border-b border-neutral-200 px-4 py-4">
+          <div className="border-b px-4 py-4" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
             <div className="space-y-3">
               {/* Address with Maps link */}
               {selectedRestaurant.address && (
@@ -288,14 +296,15 @@ export function Restaurants() {
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedRestaurant.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-start gap-3 text-neutral-700 hover:text-orange-600 transition-colors group"
+                  className="flex items-start gap-3 hover:text-orange-400 transition-colors group"
+                  style={{ color: 'var(--color-text-secondary)' }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mt-0.5 flex-shrink-0 text-neutral-400 group-hover:opacity-80">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mt-0.5 flex-shrink-0 group-hover:opacity-80" style={{ color: 'var(--color-text-tertiary)' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                   </svg>
                   <span className="text-sm">{selectedRestaurant.address}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mt-0.5 flex-shrink-0 text-neutral-300 group-hover:text-orange-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:text-orange-400" style={{ color: 'var(--color-divider)' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                   </svg>
                 </a>

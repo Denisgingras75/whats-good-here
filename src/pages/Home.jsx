@@ -407,7 +407,10 @@ function Top10Row({ dish, rank, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-neutral-50 transition-colors text-left group"
+      className="w-full flex items-center gap-2 py-2 px-2 rounded-lg transition-colors text-left group"
+      style={{ '--hover-bg': 'var(--color-surface-elevated)' }}
+      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
     >
       {/* Rank - medals for top 3 */}
       {rank <= 3 ? (

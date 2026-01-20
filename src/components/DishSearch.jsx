@@ -187,7 +187,10 @@ export function DishSearch({ dishes = [], loading = false }) {
               inputRef.current?.focus()
             }}
             aria-label="Clear search"
-            className="p-1 rounded-full hover:bg-neutral-100 transition-colors"
+            className="p-1 rounded-full transition-colors"
+            style={{ ':hover': { background: 'var(--color-surface-elevated)' } }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
           >
             <svg
               className="w-4 h-4"
@@ -209,14 +212,14 @@ export function DishSearch({ dishes = [], loading = false }) {
           ref={dropdownRef}
           className="absolute top-full left-0 right-0 mt-2 rounded-xl overflow-hidden z-50"
           style={{
-            background: 'var(--color-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-divider)',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.4)',
           }}
         >
           {loading ? (
             <div className="px-4 py-6 text-center">
-              <div className="animate-spin w-5 h-5 border-2 border-neutral-300 border-t-neutral-600 rounded-full mx-auto" />
+              <div className="animate-spin w-5 h-5 border-2 rounded-full mx-auto" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }} />
               <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
                 Searching...
               </p>
@@ -299,7 +302,9 @@ function DishResult({ dish, rank, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 transition-colors text-left"
+      className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
+      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
     >
       {/* Rank badge */}
       <div
@@ -366,7 +371,9 @@ function CategoryResult({ category, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 transition-colors text-left"
+      className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
+      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
     >
       {/* Category image */}
       <div

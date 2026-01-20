@@ -41,7 +41,13 @@ export function BottomNav() {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-neutral-200 shadow-lg">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 shadow-lg"
+      style={{
+        background: 'var(--color-surface)',
+        borderTop: '1px solid var(--color-divider)'
+      }}
+    >
       <div className="flex justify-around items-center h-16 pb-safe">
         {tabs.map((tab) => (
           <NavLink

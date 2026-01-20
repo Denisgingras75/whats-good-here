@@ -11,6 +11,7 @@ import { getPendingVoteFromStorage } from '../components/ReviewFlow'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { DishCardSkeleton } from '../components/Skeleton'
 import { ImpactFeedback, getImpactMessage } from '../components/ImpactFeedback'
+import { CategoryIconRow } from '../components/CategoryIconTile'
 
 const MIN_VOTES_FOR_RANKING = 5
 
@@ -414,9 +415,9 @@ export function Browse() {
   const showingDishes = selectedCategory || debouncedSearchQuery.trim()
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
       {/* Header */}
-      <header className="bg-white">
+      <header style={{ background: 'var(--color-bg)' }}>
         <div className="flex flex-col items-center py-2">
           <img src="/logo.png" alt="What's Good Here" className="h-12 md:h-14 lg:h-16 w-auto" />
         </div>
@@ -454,15 +455,21 @@ export function Browse() {
                 }
               }}
               onKeyDown={handleSearchKeyDown}
-              className="w-full pl-10 pr-10 py-3 bg-neutral-100 rounded-xl border-0 focus:ring-2 focus:bg-white transition-all"
-              style={{ '--tw-ring-color': 'var(--color-primary)' }}
+              className="w-full pl-10 pr-10 py-3 rounded-xl border focus:ring-2 transition-all"
+              style={{
+                background: 'var(--color-surface-elevated)',
+                borderColor: 'var(--color-divider)',
+                color: 'var(--color-text-primary)',
+                '--tw-ring-color': 'var(--color-primary)'
+              }}
             />
             {searchQuery && (
               <button
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center hover:bg-neutral-400 transition-colors z-10"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center transition-colors z-10"
+                style={{ background: 'var(--color-divider)' }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-neutral-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -472,17 +479,19 @@ export function Browse() {
             {autocompleteOpen && autocompleteSuggestions.length > 0 && (
               <div
                 ref={autocompleteRef}
-                className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden z-50"
+                className="absolute top-full left-0 right-0 mt-1 rounded-xl shadow-lg border overflow-hidden z-50"
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}
               >
                 {autocompleteSuggestions.map((suggestion, index) => (
                   <button
                     key={`${suggestion.type}-${suggestion.id}`}
                     onClick={() => handleAutocompleteSelect(suggestion)}
-                    className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors ${
-                      index === autocompleteIndex
-                        ? 'bg-orange-50'
-                        : 'hover:bg-neutral-50'
-                    }`}
+                    className="w-full px-4 py-3 text-left flex items-center gap-3 transition-colors"
+                    style={{
+                      background: index === autocompleteIndex ? 'var(--color-primary-muted)' : 'transparent'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = index === autocompleteIndex ? 'var(--color-primary-muted)' : 'transparent'}
                   >
                     {/* Icon */}
                     <div
@@ -514,19 +523,21 @@ export function Browse() {
                     </div>
 
                     {/* Type badge */}
-                    <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
-                      suggestion.type === 'dish'
-                        ? 'bg-orange-100 text-orange-700'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
+                    <span
+                      className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{
+                        background: suggestion.type === 'dish' ? 'var(--color-primary-muted)' : 'rgba(59, 130, 246, 0.15)',
+                        color: suggestion.type === 'dish' ? 'var(--color-primary)' : '#60A5FA'
+                      }}
+                    >
                       {suggestion.type === 'dish' ? 'Dish' : 'Spot'}
                     </span>
                   </button>
                 ))}
 
                 {/* Hint */}
-                <div className="px-4 py-2 bg-neutral-50 border-t border-neutral-100">
-                  <p className="text-xs text-neutral-400">
+                <div className="px-4 py-2 border-t" style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}>
+                  <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                     Press Enter to search all, or select a suggestion
                   </p>
                 </div>
@@ -535,24 +546,19 @@ export function Browse() {
           </div>
         </div>
 
-        {/* Back button and category indicator when viewing dishes */}
+        {/* Category indicator when viewing dishes */}
         {showingDishes && selectedCategory && !debouncedSearchQuery.trim() && (
           <div className="px-4 pb-3 flex items-center gap-3">
-            <button
-              onClick={handleBackToCategories}
-              className="flex items-center gap-1 text-sm font-medium"
-              style={{ color: 'var(--color-primary)' }}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Categories
-            </button>
-            <span className="text-neutral-300">|</span>
-            <span className="text-sm font-medium text-neutral-700">
-              {CATEGORIES.find(c => c.id === selectedCategory)?.emoji}{' '}
+            <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
               {CATEGORIES.find(c => c.id === selectedCategory)?.label}
             </span>
+            <button
+              onClick={handleBackToCategories}
+              className="text-xs font-medium px-2 py-1 rounded-lg transition-colors"
+              style={{ color: 'var(--color-primary)', background: 'var(--color-primary-muted)' }}
+            >
+              Clear
+            </button>
           </div>
         )}
 
@@ -566,37 +572,47 @@ export function Browse() {
         )}
       </header>
 
+      {/* Category Filter Row - Always visible */}
+      <div className="py-4" style={{ background: 'var(--color-surface)' }}>
+        <CategoryIconRow
+          categories={CATEGORIES}
+          selectedCategory={selectedCategory}
+          onSelect={handleCategoryChange}
+        />
+      </div>
+
       {/* Main Content */}
       {!showingDishes ? (
-        /* Category Grid - Default View */
-        <div className="px-4 py-6">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-            Categories
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {CATEGORIES.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryChange(category.id)}
-                className="flex flex-col items-center justify-center p-5 bg-white rounded-2xl border border-neutral-200 hover:border-neutral-300 hover:shadow-md active:scale-[0.98] transition-all"
-              >
-                <span className="text-3xl mb-2">{category.emoji}</span>
-                <span className="text-sm font-medium text-neutral-700">{category.label}</span>
-              </button>
-            ))}
+        /* Empty state when no category selected */
+        <div className="px-4 py-12 text-center">
+          <div className="max-w-xs mx-auto">
+            <div
+              className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
+              style={{ background: 'var(--color-surface-elevated)' }}
+            >
+              <svg className="w-8 h-8" style={{ color: 'var(--color-text-tertiary)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </div>
+            <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Select a category
+            </h3>
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+              Tap a category above to discover top-rated dishes near you
+            </p>
           </div>
         </div>
       ) : (
         /* Dish List View */
         <>
           {/* Results count and sort */}
-          <div className="px-4 py-2 bg-stone-50 border-b border-neutral-100 flex items-center justify-between">
-            <p className="text-sm text-neutral-500">
+          <div className="px-4 py-2 border-b flex items-center justify-between" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               {loading ? (
                 'Loading...'
               ) : (
                 <>
-                  <span className="font-medium text-neutral-700">{filteredDishes.length}</span>
+                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{filteredDishes.length}</span>
                   {' '}
                   {filteredDishes.length === 1 ? 'dish' : 'dishes'}
                   {debouncedSearchQuery && (
@@ -610,8 +626,10 @@ export function Browse() {
             <div className="relative" ref={sortDropdownRef}>
               <button
                 onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-neutral-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
                 style={{ color: 'var(--color-text-secondary)' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
               >
                 <span>{SORT_OPTIONS.find(o => o.id === sortBy)?.icon}</span>
                 <span>{SORT_OPTIONS.find(o => o.id === sortBy)?.label}</span>
@@ -627,15 +645,17 @@ export function Browse() {
 
               {/* Dropdown menu */}
               {sortDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 z-50">
+                <div className="absolute right-0 mt-1 w-40 rounded-xl shadow-lg border py-1 z-50" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}>
                   {SORT_OPTIONS.map((option) => (
                     <button
                       key={option.id}
                       onClick={() => handleSortChange(option.id)}
-                      className={`w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-neutral-50 transition-colors ${
+                      className={`w-full px-3 py-2 text-sm text-left flex items-center gap-2 transition-colors ${
                         sortBy === option.id ? 'font-medium' : ''
                       }`}
                       style={{ color: sortBy === option.id ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
                       <span>{option.icon}</span>
                       <span>{option.label}</span>
@@ -690,33 +710,18 @@ export function Browse() {
                   }
                 </p>
 
-                {/* Suggested categories */}
-                <div className="mb-6">
-                  <p className="text-xs font-medium mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
-                    Popular categories
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {CATEGORIES.slice(0, 6).map((category) => (
-                      <button
-                        key={category.id}
-                        onClick={() => handleCategoryChange(category.id)}
-                        className="px-3 py-2 bg-white rounded-full border border-neutral-200 text-sm font-medium hover:border-neutral-300 hover:shadow-sm active:scale-[0.98] transition-all flex items-center gap-1.5"
-                        style={{ color: 'var(--color-text-secondary)' }}
-                      >
-                        <span>{category.emoji}</span>
-                        <span>{category.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                {/* Try different category */}
+                <p className="text-xs mb-4" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Try a different category above
+                </p>
 
-                {/* All categories button */}
+                {/* Clear filter button */}
                 <button
                   onClick={handleBackToCategories}
                   className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 active:scale-[0.98] transition-all"
                   style={{ background: 'var(--color-primary)' }}
                 >
-                  All Categories
+                  Clear Filter
                 </button>
               </div>
             ) : (
