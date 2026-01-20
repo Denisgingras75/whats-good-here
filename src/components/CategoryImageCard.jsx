@@ -34,7 +34,7 @@ export function CategoryImageCard({
     <button
       onClick={onClick}
       className="
-        flex flex-col items-center gap-2
+        flex flex-col items-center gap-1.5
         w-full
         transition-all duration-200
         active:scale-[0.97]

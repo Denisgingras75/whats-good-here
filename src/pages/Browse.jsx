@@ -418,12 +418,12 @@ export function Browse() {
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
       {/* Header */}
       <header style={{ background: 'var(--color-bg)' }}>
-        <div className="flex flex-col items-center py-2">
-          <img src="/logo.png" alt="What's Good Here" className="h-12 md:h-14 lg:h-16 w-auto" />
+        <div className="flex flex-col items-center py-1.5">
+          <img src="/logo.png" alt="What's Good Here" className="h-10 md:h-12 lg:h-14 w-auto" />
         </div>
 
         {/* Search bar with autocomplete */}
-        <div className="px-4 pb-2">
+        <div className="px-4 pb-1.5">
           <div className="relative">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -455,7 +455,7 @@ export function Browse() {
                 }
               }}
               onKeyDown={handleSearchKeyDown}
-              className="w-full pl-10 pr-10 py-3 rounded-xl border focus:ring-2 transition-all"
+              className="w-full pl-10 pr-10 py-2 rounded-xl border focus:ring-2 transition-all text-sm"
               style={{
                 background: 'var(--color-surface-elevated)',
                 borderColor: 'var(--color-divider)',
@@ -576,7 +576,7 @@ export function Browse() {
       {!showingDishes ? (
         /* Category Grid - Table surface integrated with page */
         <div
-          className="px-4 py-6 relative"
+          className="px-4 pt-3 pb-4 relative"
           style={{
             /* Surface matches page but slightly darker */
             background: 'linear-gradient(180deg, #1a1a1a 0%, #151515 50%, #121212 100%)',
@@ -596,10 +596,27 @@ export function Browse() {
               background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.5) 60%, #0a0a0a 100%)',
             }}
           />
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-            Categories
-          </h2>
-          <div className="grid grid-cols-3 gap-4">
+
+          {/* Reservation card style header */}
+          <div className="flex justify-center mb-3">
+            <div
+              className="px-6 py-1.5 rounded-sm"
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(244, 162, 97, 0.4)',
+                boxShadow: '0 0 12px rgba(244, 162, 97, 0.1)',
+              }}
+            >
+              <span
+                className="text-xs font-medium tracking-[0.2em] uppercase"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                Categories
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
             {CATEGORIES.map((category) => (
               <CategoryImageCard
                 key={category.id}
