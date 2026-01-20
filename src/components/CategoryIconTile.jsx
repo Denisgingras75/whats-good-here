@@ -12,12 +12,12 @@
 const CATEGORY_ICONS = {
   pizza: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      {/* Pizza slice with pepperoni */}
-      <path d="M12 3L3 20h18L12 3z" />
-      <path d="M12 3v17" />
-      <circle cx="10" cy="12" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="14" cy="14" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="11" cy="17" r="1.5" fill="currentColor" stroke="none" />
+      {/* Pizza slice - angled with crust and pepperoni */}
+      <path d="M5 5c5-2 10-1 14 3L8 19c-4-4-5-9-3-14z" />
+      <path d="M5 5c1.5 0.5 3 1.5 4 3" />
+      <circle cx="11" cy="10" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="14" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="13" cy="14" r="1.2" fill="currentColor" stroke="none" />
     </svg>
   ),
   burger: (

@@ -40,20 +40,13 @@ export function CategoryImageCard({
         active:scale-[0.97]
       "
     >
-      {/* Image container */}
+      {/* Image container with vignette blend */}
       <div
         className="
-          w-full aspect-square
-          rounded-[20px]
+          relative w-full aspect-square
           overflow-hidden
           transition-all duration-200
         "
-        style={{
-          background: '#1A1A1A',
-          boxShadow: isActive
-            ? '0 0 0 2px var(--color-primary), 0 0 20px rgba(244, 162, 97, 0.3)'
-            : 'none',
-        }}
       >
         {imageSrc ? (
           <img
@@ -61,14 +54,24 @@ export function CategoryImageCard({
             alt={category.label}
             className="w-full h-full object-cover"
             onError={(e) => {
-              // On error, hide the broken image and show placeholder
               e.target.style.display = 'none'
             }}
           />
         ) : (
-          // Neutral placeholder - no icons, just dark box
           <div className="w-full h-full" style={{ background: '#1A1A1A' }} />
         )}
+
+        {/* Vignette overlay - fades edges into background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(circle at center, transparent 30%, rgba(18, 18, 18, 0.6) 70%, rgba(18, 18, 18, 0.95) 100%)`,
+            boxShadow: isActive
+              ? 'inset 0 0 0 2px var(--color-primary)'
+              : 'none',
+            borderRadius: '16px',
+          }}
+        />
       </div>
 
       {/* Label below image */}
