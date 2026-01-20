@@ -574,43 +574,17 @@ export function Browse() {
 
       {/* Main Content */}
       {!showingDishes ? (
-        /* Category Grid - Default View - Plates on a premium dark wood table */
+        /* Category Grid - Warm charcoal surface for neon amber icons */
         <div
           className="px-4 py-6 relative"
           style={{
             background: `
-              /* Table surface polish - subtle sheen */
-              radial-gradient(ellipse 100% 40% at 50% 0%, rgba(255,250,245,0.04) 0%, transparent 60%),
-              /* Wood grain - more visible horizontal bands */
-              repeating-linear-gradient(
-                180deg,
-                transparent 0px,
-                transparent 12px,
-                rgba(60,50,40,0.12) 13px,
-                rgba(45,38,32,0.08) 14px,
-                transparent 15px,
-                transparent 35px,
-                rgba(55,45,38,0.10) 36px,
-                transparent 38px,
-                transparent 55px
-              ),
-              /* Subtle vertical grain variation */
-              repeating-linear-gradient(
-                90deg,
-                transparent 0px,
-                rgba(50,42,35,0.03) 80px,
-                transparent 160px
-              ),
-              /* Base wood color - warm dark walnut */
-              linear-gradient(180deg, #231e1a 0%, #1a1614 50%, #151210 100%)
+              /* Micro-noise texture - matte stone feel, 2-3% opacity */
+              url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+              /* Soft vertical gradient - top slightly lighter */
+              linear-gradient(180deg, #151312 0%, #121110 40%, #0f0f0e 100%)
             `,
-            borderTop: '2px solid rgba(90,75,60,0.4)',
-            borderBottom: '4px solid #0a0908',
-            boxShadow: `
-              inset 0 2px 4px rgba(255,250,245,0.03),
-              inset 0 -8px 20px rgba(0,0,0,0.4),
-              0 4px 12px rgba(0,0,0,0.5)
-            `,
+            backgroundBlendMode: 'soft-light, normal',
           }}
         >
           <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>

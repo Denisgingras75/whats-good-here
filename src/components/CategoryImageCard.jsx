@@ -1,8 +1,8 @@
 /**
  * CategoryImageCard - Premium image-based category selector
  *
- * Design: Plates on a table aesthetic
- * The rounded image boxes look like plates resting on a dark wood table.
+ * Design: Circular containers on warm charcoal surface
+ * Warm-neutral shadows create grounded "resting on surface" feel
  */
 
 // Category image mappings
@@ -40,7 +40,7 @@ export function CategoryImageCard({
         active:scale-[0.97]
       "
     >
-      {/* Plate - realistic ceramic plate look */}
+      {/* Circular container - warm-neutral shadows for grounded feel */}
       <div
         className="
           relative w-[85%] aspect-square
@@ -49,22 +49,20 @@ export function CategoryImageCard({
           transition-all duration-200
         "
         style={{
-          border: '3px solid #2a2a2a',
-          background: 'linear-gradient(145deg, #1f1f1f, #171717)',
+          border: '2px solid #1a1816',
+          background: '#131211',
           boxShadow: isActive
             ? `
-              0 12px 32px rgba(0,0,0,0.6),
-              0 4px 8px rgba(0,0,0,0.4),
+              0 8px 24px rgba(30,25,20,0.7),
+              0 2px 6px rgba(25,20,15,0.5),
               0 0 0 2px var(--color-primary),
-              0 0 24px rgba(244, 162, 97, 0.4),
-              inset 0 2px 3px rgba(255,255,255,0.08),
-              inset 0 -3px 6px rgba(0,0,0,0.4)
+              0 0 20px rgba(244, 162, 97, 0.3),
+              inset 0 1px 2px rgba(255,250,245,0.05)
             `
             : `
-              0 12px 32px rgba(0,0,0,0.6),
-              0 4px 8px rgba(0,0,0,0.4),
-              inset 0 2px 3px rgba(255,255,255,0.08),
-              inset 0 -3px 6px rgba(0,0,0,0.4)
+              0 8px 24px rgba(30,25,20,0.7),
+              0 2px 6px rgba(25,20,15,0.5),
+              inset 0 1px 2px rgba(255,250,245,0.05)
             `,
         }}
       >
@@ -78,7 +76,7 @@ export function CategoryImageCard({
             }}
           />
         ) : (
-          <div className="w-full h-full" style={{ background: '#1A1A1A' }} />
+          <div className="w-full h-full" style={{ background: '#131211' }} />
         )}
       </div>
 
