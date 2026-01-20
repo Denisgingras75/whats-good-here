@@ -20,6 +20,71 @@
 
 ---
 
+## RECENT PROGRESS (January 2026)
+
+### ✅ COMPLETED ITEMS
+
+#### 1. User Onboarding Flow - SHIPPED
+**Problem addressed:** Reviewer feedback that new users didn't understand the app's purpose.
+
+**Solution:** Built a 3-slide welcome carousel explaining both core use cases:
+- Slide 1: "At a restaurant?" → Find the best thing on the menu
+- Slide 2: "Craving something?" → Find the best version near you
+- Slide 3: "Tried something?" → Vote and help others decide
+
+**Impact:** First-time visitors now immediately understand the two purposes of the app before browsing. Includes progress dots, Back/Next navigation, Skip option.
+
+**File:** `src/components/WelcomeSplash.jsx`
+
+#### 2. PostHog Analytics Integration - SHIPPED
+**Problem addressed:** No tracking of core conversion events or guest behavior.
+
+**Solution implemented:**
+- `vote_cast` event tracking with dish, restaurant, vote type, and context
+- Restaurant-level data for B2B dashboards
+- Price tracking for monetization insights
+- Vercel Edge Middleware proxy for reliable tracking
+
+**Impact:** Now collecting the data needed for:
+- Guest metrics (votes per user, retention signals)
+- Restaurant metrics (which dishes get votes, popularity)
+- B2B pitch (real data to show restaurant owners)
+
+**Files:** PostHog integration throughout voting flow
+
+#### 3. Restaurant Pitch Presentations - CREATED
+**Problem addressed:** Need materials to pitch B2B restaurant partnerships.
+
+**Solution:** Created 3 presentation styles for restaurant owners:
+- Corporate/Minimal style
+- Bold/Dashboard style
+- Warm/Friendly style
+
+Each includes:
+- Top 5 / Bottom 5 dish performance comparison
+- Analytics mockups for restaurant dashboards
+- Value proposition for restaurant owners
+
+**Files:** `presentation-style-*.html` (deployed to Vercel)
+
+---
+
+### IMPACT ON RATINGS
+
+| Category | Before | After | Change | Why |
+|----------|--------|-------|--------|-----|
+| Problem/Solution Fit | 82 | 84 | +2 | Onboarding now explains both use cases clearly |
+| Execution Path | 72 | 75 | +3 | Analytics + pitch materials accelerate restaurant outreach |
+| **OVERALL** | **72** | **74** | **+2** | Solid progress on execution gaps |
+
+### NEXT PRIORITIES (from reviewer feedback)
+
+1. **Restaurant page crash bug** - Fix the crash when navigating to restaurant details
+2. **Voting auth flow clarity** - Make it clearer what happens when non-logged-in users vote
+3. **Profile page bloat** - Simplify the profile/achievements section
+
+---
+
 ## SCORE REVISION SUMMARY
 
 | Factor | Original | Revised | Change | Why |
@@ -251,9 +316,9 @@ Problem:
 
 ---
 
-## OVERALL DIAGNOSIS: 72/100
+## OVERALL DIAGNOSIS: 74/100
 
-### Why 72, not 62 or 80?
+### Why 74, not 72 or 80?
 
 **Bull case (why it could work):**
 - ✅ Problem is real (people DO want better food data)
@@ -451,4 +516,10 @@ Hit these 6 milestones in the next 12 months:
 
 ## TL;DR
 
-Move from "cool idea" to "proven working business" — that's the gap between 62 and 80.
+**Current: 74/100** (up from 72)
+
+Recent wins: Multi-step onboarding, PostHog analytics, restaurant pitch decks.
+
+Next moves: Fix restaurant page crash, clarify voting auth flow, simplify profile page.
+
+Move from "cool idea" to "proven working business" — that's the gap between 74 and 80.

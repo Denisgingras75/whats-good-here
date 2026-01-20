@@ -127,24 +127,29 @@ export function Dish() {
 
   const handleVote = async () => {
     // Refetch dish data after voting
-    const data = await dishesApi.getDishById(dishId)
-    const transformedDish = {
-      dish_id: data.id,
-      dish_name: data.name,
-      restaurant_id: data.restaurant_id,
-      restaurant_name: data.restaurants?.name || 'Unknown',
-      restaurant_address: data.restaurants?.address,
-      category: data.category,
-      price: data.price,
-      photo_url: data.photo_url,
-      total_votes: data.total_votes || 0,
-      yes_votes: data.yes_votes || 0,
-      percent_worth_it: data.total_votes > 0
-        ? Math.round((data.yes_votes / data.total_votes) * 100)
-        : 0,
-      avg_rating: data.avg_rating,
+    try {
+      const data = await dishesApi.getDishById(dishId)
+      const transformedDish = {
+        dish_id: data.id,
+        dish_name: data.name,
+        restaurant_id: data.restaurant_id,
+        restaurant_name: data.restaurants?.name || 'Unknown',
+        restaurant_address: data.restaurants?.address,
+        category: data.category,
+        price: data.price,
+        photo_url: data.photo_url,
+        total_votes: data.total_votes || 0,
+        yes_votes: data.yes_votes || 0,
+        percent_worth_it: data.total_votes > 0
+          ? Math.round((data.yes_votes / data.total_votes) * 100)
+          : 0,
+        avg_rating: data.avg_rating,
+      }
+      setDish(transformedDish)
+    } catch (err) {
+      console.error('Failed to refresh dish data after vote:', err)
+      // UI continues with stale data - vote was still recorded
     }
-    setDish(transformedDish)
   }
 
   const handleLoginRequired = () => {
@@ -280,6 +285,7 @@ export function Dish() {
             <img
               src={heroImage}
               alt={dish.dish_name}
+              loading="lazy"
               className="w-full h-full object-cover"
             />
 

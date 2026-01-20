@@ -48,6 +48,5 @@ export function getCategoryImage(category) {
     return DEFAULT_DISH_IMAGE
   }
 
-  console.log(`getCategoryImage: category="${category}" -> ${imageUrl}`)
   return imageUrl
 }

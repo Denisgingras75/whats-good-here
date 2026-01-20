@@ -41,6 +41,7 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
         <img
           src={imgSrc}
           alt={dish_name}
+          loading="lazy"
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
 

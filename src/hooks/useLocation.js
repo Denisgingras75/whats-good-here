@@ -85,9 +85,13 @@ export function useLocation() {
       return
     }
 
+    let permissionStatus = null
+    let handleChange = null
+
     // Check permission API if available
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        permissionStatus = result
         setPermissionState(result.state)
 
         // If already granted, get location automatically
@@ -103,12 +107,13 @@ export function useLocation() {
         }
 
         // Listen for permission changes
-        result.onchange = () => {
+        handleChange = () => {
           setPermissionState(result.state)
           if (result.state === 'granted') {
             requestLocation()
           }
         }
+        result.addEventListener('change', handleChange)
       }).catch(() => {
         // Permission API not supported, will prompt on request
         setLoading(false)
@@ -116,6 +121,13 @@ export function useLocation() {
     } else {
       // No permission API, just stop loading
       setLoading(false)
+    }
+
+    // Cleanup listener on unmount
+    return () => {
+      if (permissionStatus && handleChange) {
+        permissionStatus.removeEventListener('change', handleChange)
+      }
     }
   }, [requestLocation])
 

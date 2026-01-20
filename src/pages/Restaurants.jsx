@@ -18,6 +18,7 @@ export function Restaurants() {
   const { user } = useAuth()
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [dishSearchQuery, setDishSearchQuery] = useState('')
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
@@ -36,11 +37,13 @@ export function Restaurants() {
   useEffect(() => {
     async function fetchRestaurants() {
       setLoading(true)
+      setFetchError(null)
       try {
         const data = await restaurantsApi.getAll()
         setRestaurants(data)
       } catch (error) {
         console.error('Error fetching restaurants:', error)
+        setFetchError('Unable to load restaurants. Please try again.')
       } finally {
         setLoading(false)
       }
@@ -171,7 +174,18 @@ export function Restaurants() {
             </h2>
           </div>
 
-          {loading || dishesLoading ? (
+          {fetchError ? (
+            <div className="text-center py-12">
+              <p className="text-sm mb-4" style={{ color: 'var(--color-danger)' }}>{fetchError}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 text-sm font-medium rounded-lg"
+                style={{ background: 'var(--color-primary)', color: 'white' }}
+              >
+                Try Again
+              </button>
+            </div>
+          ) : loading || dishesLoading ? (
             <div className="space-y-3">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="h-24 bg-neutral-200 rounded-xl animate-pulse" />
