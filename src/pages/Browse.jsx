@@ -574,29 +574,26 @@ export function Browse() {
 
       {/* Main Content */}
       {!showingDishes ? (
-        /* Category Grid - TABLE with visible thick edge */
+        /* Category Grid - Table surface integrated with page */
         <div
-          className="mx-4 mt-4 mb-6 pt-6 pb-6 relative rounded-xl overflow-hidden"
+          className="px-4 py-6 relative"
           style={{
-            /* Table surface - warm dark wood tone */
-            background: `
-              radial-gradient(ellipse 120% 60% at 50% 0%, rgba(50,40,30,0.3) 0%, transparent 50%),
-              linear-gradient(180deg, #1e1a17 0%, #171412 60%, #12100e 100%)
-            `,
-            /* Table outer edge/rim */
-            border: '3px solid #252019',
-            boxShadow: `
-              inset 0 2px 4px rgba(70,55,40,0.15),
-              0 8px 24px rgba(0,0,0,0.5),
-              0 2px 4px rgba(0,0,0,0.3)
-            `,
+            /* Surface matches page but slightly darker */
+            background: 'linear-gradient(180deg, #1a1a1a 0%, #151515 50%, #121212 100%)',
           }}
         >
-          {/* Table surface highlight - polished wood sheen */}
+          {/* Table edge - top bevel/rim catching light */}
           <div
-            className="absolute top-0 left-0 right-0 h-12 pointer-events-none"
+            className="absolute top-0 left-0 right-0 h-[2px]"
             style={{
-              background: 'linear-gradient(180deg, rgba(80,65,50,0.12) 0%, transparent 100%)',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.08) 80%, transparent 100%)',
+            }}
+          />
+          {/* Table edge - bottom thickness/shadow */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[8px]"
+            style={{
+              background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.5) 60%, #0a0a0a 100%)',
             }}
           />
           <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
