@@ -1,8 +1,8 @@
 /**
  * CategoryImageCard - Premium image-based category selector
  *
- * Uses real image assets, not SVGs or icons.
- * Feels editorial and curated, like a food magazine.
+ * Design: Plates on a table aesthetic
+ * The rounded image boxes look like plates resting on a dark wood table.
  */
 
 // Category image mappings
@@ -40,20 +40,25 @@ export function CategoryImageCard({
         active:scale-[0.97]
       "
     >
-      {/* Image container with vignette blend */}
+      {/* Plate - image looks like a plate resting on the table */}
       <div
         className="
-          relative w-full aspect-square
+          relative w-[85%] aspect-square
+          rounded-2xl
           overflow-hidden
           transition-all duration-200
         "
+        style={{
+          boxShadow: isActive
+            ? '0 8px 24px rgba(0,0,0,0.5), 0 0 0 2px var(--color-primary), 0 0 20px rgba(244, 162, 97, 0.3)'
+            : '0 8px 24px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3)',
+        }}
       >
         {imageSrc ? (
           <img
             src={imageSrc}
             alt={category.label}
             className="w-full h-full object-cover"
-            style={{ transform: 'scale(1.4)' }}
             onError={(e) => {
               e.target.style.display = 'none'
             }}
@@ -61,18 +66,6 @@ export function CategoryImageCard({
         ) : (
           <div className="w-full h-full" style={{ background: '#1A1A1A' }} />
         )}
-
-        {/* Vignette overlay - fades edges into background */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `radial-gradient(circle at center, transparent 30%, rgba(18, 18, 18, 0.6) 70%, rgba(18, 18, 18, 0.95) 100%)`,
-            boxShadow: isActive
-              ? 'inset 0 0 0 2px var(--color-primary)'
-              : 'none',
-            borderRadius: '16px',
-          }}
-        />
       </div>
 
       {/* Label below image */}

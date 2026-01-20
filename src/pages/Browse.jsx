@@ -574,12 +574,28 @@ export function Browse() {
 
       {/* Main Content */}
       {!showingDishes ? (
-        /* Category Grid - Default View */
-        <div className="px-4 py-6">
+        /* Category Grid - Default View - Plates on a table */
+        <div
+          className="px-4 py-6"
+          style={{
+            background: `
+              linear-gradient(90deg, rgba(30,25,20,0.3) 0%, transparent 2%, transparent 98%, rgba(30,25,20,0.3) 100%),
+              repeating-linear-gradient(
+                90deg,
+                #1a1612 0px,
+                #1f1a15 3px,
+                #1a1612 6px,
+                #181410 12px,
+                #1c1814 18px,
+                #1a1612 24px
+              )
+            `,
+          }}
+        >
           <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
             Categories
           </h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-4">
             {CATEGORIES.map((category) => (
               <CategoryImageCard
                 key={category.id}
