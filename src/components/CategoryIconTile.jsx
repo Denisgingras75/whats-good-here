@@ -192,11 +192,11 @@ export function CategoryIconTile({
     <button
       onClick={onClick}
       className="
-        flex flex-col items-center justify-center gap-3
-        w-full py-6
-        rounded-2xl
+        flex flex-col items-center justify-center gap-2
+        w-full py-4
+        rounded-xl
         transition-all duration-200
-        active:scale-[0.98]
+        active:scale-[0.97]
       "
       style={{
         background: isActive ? 'var(--color-primary)' : 'var(--color-surface-elevated)',
@@ -205,7 +205,7 @@ export function CategoryIconTile({
     >
       {/* Icon */}
       <div
-        className="w-10 h-10"
+        className="w-8 h-8"
         style={{
           color: isActive ? '#1A1A1A' : 'var(--color-text-tertiary)'
         }}
@@ -215,7 +215,7 @@ export function CategoryIconTile({
 
       {/* Label */}
       <span
-        className="text-sm font-medium"
+        className="text-xs font-medium"
         style={{
           color: isActive ? '#1A1A1A' : 'var(--color-text-secondary)'
         }}
