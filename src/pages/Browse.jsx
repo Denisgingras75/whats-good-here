@@ -87,13 +87,18 @@ export function Browse() {
     }
   }, [searchParams])
 
-  // Debounce search query by 300ms
+  // Debounce search query by 300ms - only when already showing dishes
+  // On categories page, search only triggers on Enter key
   useEffect(() => {
+    // Skip auto-debounce if we're on the category grid (not showing dishes yet)
+    if (!selectedCategory && !debouncedSearchQuery) {
+      return
+    }
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery)
     }, 300)
     return () => clearTimeout(timer)
-  }, [searchQuery])
+  }, [searchQuery, selectedCategory, debouncedSearchQuery])
 
   // Close sort dropdown when clicking outside
   useEffect(() => {
