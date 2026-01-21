@@ -26,20 +26,24 @@ const CATEGORY_IMAGES = {
   tendys: '/categories/tendys.webp',
 }
 
-// 12-point scalloped plate - visible curves, soft china feel
+// 12-point scalloped plate - pronounced curves, clearly reads as plate
 const PLATE_CLIP_PATH = `polygon(
   50% 0%,
-  65% 2%, 77% 8%,
-  88% 18%, 95% 32%,
+  62% 0%, 72% 5%,
+  82% 5%, 90% 15%,
+  95% 25%, 100% 38%,
   100% 50%,
-  95% 68%, 88% 82%,
-  77% 92%, 65% 98%,
+  100% 62%, 95% 75%,
+  90% 85%, 82% 95%,
+  72% 95%, 62% 100%,
   50% 100%,
-  35% 98%, 23% 92%,
-  12% 82%, 5% 68%,
+  38% 100%, 28% 95%,
+  18% 95%, 10% 85%,
+  5% 75%, 0% 62%,
   0% 50%,
-  5% 32%, 12% 18%,
-  23% 8%, 35% 2%
+  0% 38%, 5% 25%,
+  10% 15%, 18% 5%,
+  28% 5%, 38% 0%
 )`
 
 export function CategoryImageCard({
