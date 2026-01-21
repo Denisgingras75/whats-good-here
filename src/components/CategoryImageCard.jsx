@@ -1,11 +1,11 @@
 /**
  * CategoryImageCard - Premium image-based category selector
  *
- * Design: Scalloped dinner plate silhouette
- * - 12 shallow, soft scallops (classic porcelain)
- * - Subtle inner rim, slightly lighter than plate body
- * - No shadows, highlights, bevels, or gradients
- * - Reads as plate via silhouette + rim only
+ * Design: Pronounced scalloped dinner plate
+ * - 10 dramatic, clearly visible scallops
+ * - Visible rim with depth and dimension
+ * - Subtle drop shadow to ground on table
+ * - Instantly recognizable as a plate
  */
 
 // Category image mappings
@@ -26,6 +26,22 @@ const CATEGORY_IMAGES = {
   tendys: '/categories/tendys.webp',
 }
 
+// 10-point scalloped plate shape - dramatic, clearly visible scallops
+const PLATE_CLIP_PATH = `polygon(
+  50% 0%,
+  68% 2%, 80% 10%,
+  95% 20%, 100% 35%,
+  100% 50%,
+  100% 65%, 95% 80%,
+  80% 90%, 68% 98%,
+  50% 100%,
+  32% 98%, 20% 90%,
+  5% 80%, 0% 65%,
+  0% 50%,
+  0% 35%, 5% 20%,
+  20% 10%, 32% 2%
+)`
+
 export function CategoryImageCard({
   category,
   isActive = false,
@@ -43,53 +59,41 @@ export function CategoryImageCard({
         active:scale-[0.97]
       "
     >
-      {/* Scalloped dinner plate silhouette */}
+      {/* Plate container with drop shadow */}
       <div
-        className="
-          relative aspect-square
-          overflow-hidden
-          transition-all duration-200
-          w-[85%]
-        "
+        className="relative aspect-square w-[85%]"
         style={{
-          background: '#0f0f0f',
-          /* 12 shallow, soft scallops - classic porcelain plate */
-          clipPath: `polygon(
-            50% 0%,
-            58% 0.5%, 66% 2%, 73% 4.5%,
-            79% 8%, 85% 13%, 90% 19%,
-            94% 27%, 97% 35%, 99% 43%,
-            100% 50%,
-            99% 57%, 97% 65%, 94% 73%,
-            90% 81%, 85% 87%, 79% 92%,
-            73% 95.5%, 66% 98%, 58% 99.5%,
-            50% 100%,
-            42% 99.5%, 34% 98%, 27% 95.5%,
-            21% 92%, 15% 87%, 10% 81%,
-            6% 73%, 3% 65%, 1% 57%,
-            0% 50%,
-            1% 43%, 3% 35%, 6% 27%,
-            10% 19%, 15% 13%, 21% 8%,
-            27% 4.5%, 34% 2%, 42% 0.5%
-          )`,
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))',
         }}
       >
-        {/* Inner rim - follows scalloped contour, 6% inset */}
+        {/* Outer plate edge - the scalloped rim */}
         <div
-          className="absolute inset-[6%] pointer-events-none"
+          className="absolute inset-0"
           style={{
-            background: isActive ? 'var(--color-primary)' : '#1c1c1c',
-            clipPath: 'inherit',
-            opacity: isActive ? 0.3 : 1,
+            background: isActive
+              ? 'linear-gradient(145deg, var(--color-primary) 0%, #c87f4a 100%)'
+              : 'linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #252525 100%)',
+            clipPath: PLATE_CLIP_PATH,
           }}
         />
 
-        {/* Plate interior - where food icon sits */}
+        {/* Inner rim highlight - creates depth */}
+        <div
+          className="absolute inset-[4%]"
+          style={{
+            background: isActive
+              ? 'linear-gradient(145deg, #d4956a 0%, var(--color-primary) 100%)'
+              : 'linear-gradient(145deg, #333 0%, #222 100%)',
+            clipPath: PLATE_CLIP_PATH,
+          }}
+        />
+
+        {/* Plate well - where food sits */}
         <div
           className="absolute inset-[8%] overflow-hidden"
           style={{
             background: '#0f0f0f',
-            clipPath: 'inherit',
+            clipPath: PLATE_CLIP_PATH,
           }}
         >
           {imageSrc ? (
