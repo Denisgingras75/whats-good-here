@@ -96,10 +96,10 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
           maxWidth: '360px',
           maxHeight: '85vh',
           overflowY: 'auto',
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-surface-elevated)',
           borderRadius: '16px',
           padding: '20px',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
         }}
       >
         {/* Close button */}
@@ -113,7 +113,8 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
             width: '28px',
             height: '28px',
             borderRadius: '50%',
-            backgroundColor: '#e5e5e5',
+            backgroundColor: 'var(--color-divider)',
+            color: 'var(--color-text-secondary)',
             border: 'none',
             fontSize: '18px',
             cursor: 'pointer',
@@ -137,10 +138,10 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
         ) : (
           <>
             {/* Dish name + restaurant */}
-            <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', paddingRight: '30px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', paddingRight: '30px', color: 'var(--color-text-primary)' }}>
               {dish.dish_name}
             </h2>
-            <p style={{ fontSize: '14px', color: '#666', marginBottom: '16px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>
               {dish.restaurant_name}
               {dish.price && ` · $${Number(dish.price).toFixed(0)}`}
             </p>

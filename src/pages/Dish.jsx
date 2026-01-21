@@ -230,7 +230,8 @@ export function Dish() {
         <button
           onClick={handleBack}
           aria-label="Go back"
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-neutral-100 transition-colors"
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+          style={{ color: 'var(--color-text-primary)' }}
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -244,11 +245,11 @@ export function Dish() {
         <button
           onClick={handleToggleSave}
           aria-label={isSaved?.(dishId) ? 'Remove from favorites' : 'Add to favorites'}
-          className={`ml-auto w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-            isSaved?.(dishId)
-              ? 'bg-red-500 text-white'
-              : 'bg-neutral-100 text-neutral-400 hover:text-red-500'
-          }`}
+          className="ml-auto w-10 h-10 rounded-full flex items-center justify-center transition-all"
+          style={isSaved?.(dishId)
+            ? { background: 'var(--color-danger)', color: 'white' }
+            : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-tertiary)' }
+          }
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
