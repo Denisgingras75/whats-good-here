@@ -509,7 +509,7 @@ export function Browse() {
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search dishes"
+              placeholder="Find the best ___ near you"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value)
