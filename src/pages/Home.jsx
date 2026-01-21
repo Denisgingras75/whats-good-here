@@ -132,7 +132,7 @@ export function Home() {
               <img
                 src="/logo.png"
                 alt="What's Good Here"
-                className="w-full h-full object-contain p-2"
+                className="w-full h-full object-cover"
               />
             </div>
           </div>
