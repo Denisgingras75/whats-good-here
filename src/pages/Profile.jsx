@@ -34,6 +34,7 @@ export function Profile() {
   const [message, setMessage] = useState(null)
   const [editingName, setEditingName] = useState(false)
   const [newName, setNewName] = useState('')
+  const [nameStatus, setNameStatus] = useState(null) // null | 'checking' | 'available' | 'taken' | 'same'
 
   const { profile, updateProfile } = useProfile(user?.id)
   const { worthItDishes, avoidDishes, stats, loading: votesLoading, refetch: refetchVotes } = useUserVotes(user?.id)
@@ -84,6 +85,28 @@ export function Profile() {
     }
   }, [profile])
 
+  // Check username availability when editing name
+  useEffect(() => {
+    if (!editingName || !newName || newName.length < 2) {
+      setNameStatus(null)
+      return
+    }
+
+    // If name is same as current, no need to check
+    if (newName.trim().toLowerCase() === profile?.display_name?.toLowerCase()) {
+      setNameStatus('same')
+      return
+    }
+
+    setNameStatus('checking')
+    const timer = setTimeout(async () => {
+      const available = await authApi.isUsernameAvailable(newName.trim())
+      setNameStatus(available ? 'available' : 'taken')
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [newName, editingName, profile?.display_name])
+
   const handleToggleSound = () => {
     const newMutedState = toggleSoundMute()
     setSoundMuted(newMutedState)
@@ -126,10 +149,16 @@ export function Profile() {
   }
 
   const handleSaveName = async () => {
+    // Don't save if name is taken
+    if (nameStatus === 'taken') {
+      return
+    }
+
     if (newName.trim()) {
       await updateProfile({ display_name: newName.trim() })
     }
     setEditingName(false)
+    setNameStatus(null)
   }
 
   // Get dishes for current tab
@@ -209,22 +238,56 @@ export function Profile() {
               <div className="flex-1 min-w-0">
                 {/* Display Name */}
                 {editingName ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      className="flex-1 px-3 py-1.5 border rounded-lg text-lg font-bold focus:border-orange-400 focus:outline-none"
-                      style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)', color: 'var(--color-text-primary)' }}
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleSaveName}
-                      className="px-3 py-1.5 text-white rounded-lg text-sm font-medium"
-                      style={{ background: 'var(--color-primary)' }}
-                    >
-                      Save
-                    </button>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={newName}
+                          onChange={(e) => setNewName(e.target.value.replace(/\s/g, ''))}
+                          className="w-full px-3 py-1.5 border rounded-lg text-lg font-bold focus:outline-none pr-8"
+                          style={{
+                            background: 'var(--color-surface-elevated)',
+                            borderColor: nameStatus === 'taken' ? '#ef4444' : nameStatus === 'available' ? '#10b981' : 'var(--color-divider)',
+                            color: 'var(--color-text-primary)'
+                          }}
+                          autoFocus
+                          maxLength={30}
+                        />
+                        {nameStatus && nameStatus !== 'same' && (
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">
+                            {nameStatus === 'checking' && '⏳'}
+                            {nameStatus === 'available' && '✓'}
+                            {nameStatus === 'taken' && '✗'}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={handleSaveName}
+                        disabled={nameStatus === 'taken' || nameStatus === 'checking'}
+                        className="px-3 py-1.5 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                        style={{ background: 'var(--color-primary)' }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingName(false)
+                          setNewName(profile?.display_name || '')
+                          setNameStatus(null)
+                        }}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    {nameStatus === 'taken' && (
+                      <p className="text-xs" style={{ color: '#ef4444' }}>This username is already taken</p>
+                    )}
+                    {nameStatus === 'available' && (
+                      <p className="text-xs" style={{ color: '#10b981' }}>Username available!</p>
+                    )}
                   </div>
                 ) : (
                   <button
