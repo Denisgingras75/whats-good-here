@@ -59,12 +59,14 @@ export function NotificationBell() {
       setNotifications(data)
       setLoading(false)
 
-      // Mark all as read after viewing
-      if (unreadCount > 0) {
-        await notificationsApi.markAllAsRead()
+      // Delete all notifications after viewing
+      if (data.length > 0) {
+        await notificationsApi.deleteAll()
         setUnreadCount(0)
-        // Update local notifications to show as read
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+        // Clear local notifications after a brief moment so user can see them
+        setTimeout(() => {
+          setNotifications([])
+        }, 3000) // Clear after 3 seconds
       }
     }
   }

@@ -73,6 +73,27 @@ export const notificationsApi = {
   },
 
   /**
+   * Delete all notifications for current user
+   * @returns {Promise<boolean>}
+   */
+  async deleteAll() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return false
+
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', user.id)
+
+    if (error) {
+      console.error('Error deleting notifications:', error)
+      return false
+    }
+
+    return true
+  },
+
+  /**
    * Mark a single notification as read
    * @param {string} notificationId
    * @returns {Promise<boolean>}
