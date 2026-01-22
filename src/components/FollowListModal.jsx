@@ -32,7 +32,7 @@ export function FollowListModal({ userId, type, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       {/* Backdrop */}
@@ -40,8 +40,8 @@ export function FollowListModal({ userId, type, onClose }) {
 
       {/* Modal */}
       <div
-        className="relative w-full sm:max-w-md max-h-[70vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col"
-        style={{ background: 'var(--color-bg)' }}
+        className="relative w-full max-w-md rounded-2xl overflow-hidden flex flex-col"
+        style={{ background: 'var(--color-bg)', maxHeight: 'calc(100vh - 120px)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

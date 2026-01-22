@@ -94,30 +94,41 @@ export const followsApi = {
    * @returns {Promise<Array>}
    */
   async getFollowers(userId, limit = 50) {
-    const { data, error } = await supabase
+    // Get follower IDs first
+    const { data: followData, error: followError } = await supabase
       .from('follows')
-      .select(`
-        follower_id,
-        created_at,
-        profiles!follows_follower_id_fkey (
-          id,
-          display_name,
-          follower_count
-        )
-      `)
+      .select('follower_id, created_at')
       .eq('followed_id', userId)
       .order('created_at', { ascending: false })
       .limit(limit)
 
-    if (error) {
-      console.error('Error fetching followers:', error)
+    if (followError) {
+      console.error('Error fetching followers:', followError)
       return []
     }
 
-    return data.map(f => ({
+    if (!followData || followData.length === 0) {
+      return []
+    }
+
+    // Get profile info for each follower
+    const followerIds = followData.map(f => f.follower_id)
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, display_name, follower_count')
+      .in('id', followerIds)
+
+    if (profileError) {
+      console.error('Error fetching follower profiles:', profileError)
+    }
+
+    const profileMap = {}
+    ;(profiles || []).forEach(p => { profileMap[p.id] = p })
+
+    return followData.map(f => ({
       id: f.follower_id,
-      display_name: f.profiles?.display_name || 'Anonymous',
-      follower_count: f.profiles?.follower_count || 0,
+      display_name: profileMap[f.follower_id]?.display_name || 'Anonymous',
+      follower_count: profileMap[f.follower_id]?.follower_count || 0,
       followed_at: f.created_at,
     }))
   },
@@ -129,30 +140,41 @@ export const followsApi = {
    * @returns {Promise<Array>}
    */
   async getFollowing(userId, limit = 50) {
-    const { data, error } = await supabase
+    // Get followed IDs first
+    const { data: followData, error: followError } = await supabase
       .from('follows')
-      .select(`
-        followed_id,
-        created_at,
-        profiles!follows_followed_id_fkey (
-          id,
-          display_name,
-          follower_count
-        )
-      `)
+      .select('followed_id, created_at')
       .eq('follower_id', userId)
       .order('created_at', { ascending: false })
       .limit(limit)
 
-    if (error) {
-      console.error('Error fetching following:', error)
+    if (followError) {
+      console.error('Error fetching following:', followError)
       return []
     }
 
-    return data.map(f => ({
+    if (!followData || followData.length === 0) {
+      return []
+    }
+
+    // Get profile info for each followed user
+    const followedIds = followData.map(f => f.followed_id)
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, display_name, follower_count')
+      .in('id', followedIds)
+
+    if (profileError) {
+      console.error('Error fetching following profiles:', profileError)
+    }
+
+    const profileMap = {}
+    ;(profiles || []).forEach(p => { profileMap[p.id] = p })
+
+    return followData.map(f => ({
       id: f.followed_id,
-      display_name: f.profiles?.display_name || 'Anonymous',
-      follower_count: f.profiles?.follower_count || 0,
+      display_name: profileMap[f.followed_id]?.display_name || 'Anonymous',
+      follower_count: profileMap[f.followed_id]?.follower_count || 0,
       followed_at: f.created_at,
     }))
   },
