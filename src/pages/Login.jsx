@@ -264,6 +264,18 @@ export function Login() {
               Get Started
             </button>
 
+            {/* Create Account Button */}
+            <button
+              onClick={() => {
+                setShowLogin(true)
+                setMode('signup')
+              }}
+              className="w-full max-w-sm mt-3 px-6 py-4 rounded-xl font-bold text-lg active:scale-[0.98] transition-all"
+              style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', border: '2px solid var(--color-divider)' }}
+            >
+              Create Account
+            </button>
+
             {/* Sign in option */}
             <button
               onClick={() => setShowLogin(true)}
