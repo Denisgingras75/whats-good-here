@@ -59,17 +59,21 @@ export function NotificationBell() {
       setNotifications(data)
       setLoading(false)
 
-      // Delete all notifications after viewing
+      // Mark that we've viewed these notifications - they'll be deleted when dropdown closes
       if (data.length > 0) {
-        await notificationsApi.deleteAll()
         setUnreadCount(0)
-        // Clear local notifications after a brief moment so user can see them
-        setTimeout(() => {
-          setNotifications([])
-        }, 3000) // Clear after 3 seconds
       }
     }
   }
+
+  // Delete notifications when dropdown closes
+  useEffect(() => {
+    if (!showDropdown && notifications.length > 0) {
+      // Delete from database and clear local state
+      notificationsApi.deleteAll()
+      setNotifications([])
+    }
+  }, [showDropdown])
 
   // Handle clicking a notification
   const handleNotificationClick = (notification) => {
