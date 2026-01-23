@@ -19,6 +19,7 @@ import { UserSearch } from '../components/UserSearch'
 import { FollowListModal } from '../components/FollowListModal'
 import { ProfileSkeleton } from '../components/Skeleton'
 import { CategoryPicker } from '../components/CategoryPicker'
+import { getRatingColor } from '../utils/ranking'
 
 const TABS = [
   { id: 'unrated', label: 'Unrated', emoji: '📷' },
@@ -327,10 +328,9 @@ export function Profile() {
                 {/* Contribution Stats */}
                 <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">
                   {stats.totalVotes > 0
-                    ? `${stats.totalVotes} ${stats.totalVotes === 1 ? 'dish' : 'dishes'} rated`
+                    ? `Helped rank ${stats.totalVotes} ${stats.totalVotes === 1 ? 'dish' : 'dishes'}`
                     : 'Start rating to help others'
                   }
-                  {stats.dishesHelpedRank > 0 && ` · Helped rank ${stats.dishesHelpedRank}`}
                   {stats.uniqueRestaurants > 0 && ` · ${stats.uniqueRestaurants} spots`}
                   {memberSince && ` · Since ${memberSince}`}
                 </p>
@@ -379,7 +379,7 @@ export function Profile() {
                   <div className="text-xs text-[color:var(--color-text-secondary)]">Avoid</div>
                 </div>
                 <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
-                  <div className="text-2xl font-bold" style={{ color: 'var(--color-rating)' }}>
+                  <div className="text-2xl font-bold" style={{ color: stats.avgRating ? getRatingColor(stats.avgRating) : 'var(--color-text-tertiary)' }}>
                     {stats.avgRating ? stats.avgRating.toFixed(1) : '—'}
                   </div>
                   <div className="text-xs text-[color:var(--color-text-secondary)]">Avg Rating</div>
@@ -850,7 +850,7 @@ function ProfileDishCard({ dish, tab, onUnsave }) {
           {/* Rating comparison */}
           <div className="flex items-center gap-2">
             {dish.rating_10 && (
-              <span className="text-sm font-semibold" style={{ color: 'var(--color-rating)' }}>
+              <span className="text-sm font-semibold" style={{ color: getRatingColor(dish.rating_10) }}>
                 {dish.rating_10}
               </span>
             )}
@@ -1104,143 +1104,340 @@ function MissionSection() {
   )
 }
 
-// Achievements section with badges
+// Achievements section with badges - Gamified with marketing psychology
 function AchievementsSection({ badges }) {
+  const navigate = useNavigate()
   const [expanded, setExpanded] = useState(false)
 
   // Split badges into unlocked and locked
   const unlockedBadges = badges.filter(b => b.unlocked)
   const lockedBadges = badges.filter(b => !b.unlocked)
 
-  // Get next badge to unlock (first locked badge with highest progress percentage)
-  const nextBadge = lockedBadges.length > 0
-    ? lockedBadges.reduce((best, current) =>
-        current.percentage > best.percentage ? current : best
-      , lockedBadges[0])
-    : null
+  // Sort locked badges by progress percentage (closest to unlock first)
+  const sortedLockedBadges = [...lockedBadges].sort((a, b) => b.percentage - a.percentage)
+
+  // Get the badge closest to unlocking
+  const nextBadge = sortedLockedBadges[0] || null
+
+  // Check if any badge was unlocked recently (within 7 days)
+  const recentUnlock = unlockedBadges.find(b => {
+    if (!b.unlocked_at) return false
+    const unlockDate = new Date(b.unlocked_at)
+    const daysSince = (Date.now() - unlockDate.getTime()) / (1000 * 60 * 60 * 24)
+    return daysSince < 7
+  })
+
+  // Calculate overall progress
+  const totalProgress = badges.length > 0
+    ? Math.round((unlockedBadges.length / badges.length) * 100)
+    : 0
+
+  // Determine user's "rank" based on unlocked badges
+  const getRank = () => {
+    const count = unlockedBadges.length
+    if (count >= 8) return { title: 'Legend', emoji: '👑', color: '#9333EA' }
+    if (count >= 5) return { title: 'Expert', emoji: '⭐', color: '#F59E0B' }
+    if (count >= 3) return { title: 'Rising Star', emoji: '🌟', color: '#10B981' }
+    if (count >= 1) return { title: 'Explorer', emoji: '🧭', color: '#3B82F6' }
+    return { title: 'Newcomer', emoji: '🌱', color: '#6B7280' }
+  }
+  const rank = getRank()
+
+  // Get urgency message for next badge (Goal-Gradient + Zeigarnik Effect)
+  const getUrgencyMessage = (badge) => {
+    if (!badge) return null
+    const remaining = badge.target - badge.progress
+    if (badge.percentage >= 90) return `🔥 Just ${remaining} more to unlock!`
+    if (badge.percentage >= 70) return `⚡ Almost there! ${remaining} to go`
+    if (badge.percentage >= 50) return `💪 Halfway there!`
+    if (badge.percentage >= 25) return `🎯 Keep going!`
+    return `${remaining} to unlock`
+  }
 
   return (
     <div className="mt-4">
+      {/* Header with rank */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between"
+        className="w-full"
       >
-        <h3 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide">
-          Achievements ({unlockedBadges.length}/{badges.length})
-        </h3>
-        <svg
-          className={`w-4 h-4 text-[color:var(--color-text-tertiary)] transition-transform ${expanded ? 'rotate-180' : ''}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{rank.emoji}</span>
+            <div>
+              <span className="text-sm font-bold" style={{ color: rank.color }}>{rank.title}</span>
+              <span className="text-xs text-[color:var(--color-text-tertiary)] ml-2">
+                {unlockedBadges.length}/{badges.length} badges
+              </span>
+            </div>
+          </div>
+          <svg
+            className={`w-5 h-5 text-[color:var(--color-text-tertiary)] transition-transform ${expanded ? 'rotate-180' : ''}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+
+        {/* Progress bar showing overall completion */}
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${totalProgress}%`,
+              background: `linear-gradient(90deg, ${rank.color}, var(--color-primary))`,
+            }}
+          />
+        </div>
       </button>
 
-      {/* Collapsed view: Show unlocked badges as icons */}
-      {!expanded && (
-        <div className="mt-2">
-          {unlockedBadges.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {unlockedBadges.map((badge) => (
-                <div
-                  key={badge.key}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border"
-                  style={{ background: 'var(--color-primary-muted)', borderColor: 'var(--color-primary)' }}
-                  title={`${badge.name}: ${badge.description}`}
-                >
-                  <span className="text-lg">{badge.icon}</span>
-                  <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>{badge.name}</span>
-                </div>
-              ))}
+      {/* Recent unlock celebration (Peak-End Rule) */}
+      {recentUnlock && !expanded && (
+        <div
+          className="mt-3 p-3 rounded-xl border-2 animate-pulse"
+          style={{
+            background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
+            borderColor: '#F59E0B',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">{recentUnlock.icon}</span>
+            <div>
+              <p className="text-xs font-medium text-amber-800">🎉 Recently Unlocked!</p>
+              <p className="font-bold text-amber-900">{recentUnlock.name}</p>
             </div>
-          ) : (
-            <p className="text-sm text-[color:var(--color-text-tertiary)]">Rate dishes to earn badges!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Collapsed view: Next badge focus (Goal-Gradient Effect) */}
+      {!expanded && nextBadge && (
+        <div className="mt-3">
+          <div
+            className="p-4 rounded-2xl relative overflow-hidden"
+            style={{
+              background: nextBadge.percentage >= 70
+                ? 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)'
+                : 'var(--color-surface-elevated)',
+              border: nextBadge.percentage >= 70 ? '2px solid #F59E0B' : '1px solid var(--color-divider)',
+            }}
+          >
+            {/* Urgency indicator for close badges */}
+            {nextBadge.percentage >= 70 && (
+              <div className="absolute top-0 right-0 px-2 py-1 text-xs font-bold text-amber-800 bg-amber-200 rounded-bl-lg">
+                ALMOST THERE
+              </div>
+            )}
+
+            <div className="flex items-center gap-4">
+              {/* Circular progress indicator */}
+              <div className="relative w-16 h-16 flex-shrink-0">
+                <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                  {/* Background circle */}
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="var(--color-divider)"
+                    strokeWidth="6"
+                    fill="none"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke={nextBadge.percentage >= 70 ? '#F59E0B' : 'var(--color-primary)'}
+                    strokeWidth="6"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeDasharray={`${nextBadge.percentage * 1.76} 176`}
+                    className="transition-all duration-500"
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-2xl">
+                  {nextBadge.icon}
+                </span>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wide">
+                  Next Badge
+                </p>
+                <p className="font-bold text-[color:var(--color-text-primary)]">{nextBadge.name}</p>
+                <p className="text-sm mt-1" style={{
+                  color: nextBadge.percentage >= 70 ? '#92400E' : 'var(--color-text-secondary)'
+                }}>
+                  {getUrgencyMessage(nextBadge)}
+                </p>
+              </div>
+
+              {/* Progress fraction */}
+              <div className="text-right">
+                <div className="text-2xl font-bold" style={{ color: nextBadge.percentage >= 70 ? '#F59E0B' : 'var(--color-primary)' }}>
+                  {nextBadge.progress}
+                </div>
+                <div className="text-xs text-[color:var(--color-text-tertiary)]">
+                  of {nextBadge.target}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Unlocked badges row */}
+          {unlockedBadges.length > 0 && (
+            <div className="mt-3">
+              <p className="text-xs text-[color:var(--color-text-tertiary)] mb-2">Your badges:</p>
+              <div className="flex flex-wrap gap-2">
+                {unlockedBadges.map((badge) => (
+                  <div
+                    key={badge.key}
+                    className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"
+                    style={{
+                      background: 'linear-gradient(135deg, var(--color-primary-muted) 0%, white 100%)',
+                      border: '2px solid var(--color-primary)',
+                    }}
+                    title={badge.name}
+                  >
+                    <span className="text-lg">{badge.icon}</span>
+                  </div>
+                ))}
+                {/* Show "more to earn" prompt */}
+                {lockedBadges.length > 1 && (
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{
+                      background: 'var(--color-surface-elevated)',
+                      border: '2px dashed var(--color-divider)',
+                      color: 'var(--color-text-tertiary)',
+                    }}
+                  >
+                    +{lockedBadges.length}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
-          {/* Show next badge progress */}
-          {nextBadge && (
-            <div className="mt-3 p-3 bg-[color:var(--color-surface-elevated)] rounded-xl">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl opacity-50">{nextBadge.icon}</span>
-                <span className="text-sm font-medium text-[color:var(--color-text-secondary)]">
-                  Next: {nextBadge.name}
-                </span>
-                <span className="text-xs text-[color:var(--color-text-tertiary)] ml-auto">
-                  {nextBadge.progress}/{nextBadge.target}
-                </span>
-              </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${nextBadge.percentage}%`,
-                    background: 'var(--color-primary)',
-                  }}
-                />
-              </div>
+          {/* Empty state with motivation */}
+          {unlockedBadges.length === 0 && (
+            <div className="mt-3 text-center p-3 rounded-xl" style={{ background: 'var(--color-surface-elevated)' }}>
+              <p className="text-sm text-[color:var(--color-text-secondary)]">
+                🎯 Rate your first dish to start earning badges!
+              </p>
             </div>
           )}
         </div>
       )}
 
-      {/* Expanded view: Show all badges with progress */}
+      {/* Expanded view: Full badge collection */}
       {expanded && (
-        <div className="mt-3 space-y-3">
-          {/* Unlocked badges */}
+        <div className="mt-4 space-y-4">
+          {/* Unlocked section */}
           {unlockedBadges.length > 0 && (
-            <div className="space-y-2">
-              {unlockedBadges.map((badge) => (
-                <div
-                  key={badge.key}
-                  className="flex items-center gap-3 p-3 rounded-xl border"
-                  style={{ background: 'var(--color-primary-muted)', borderColor: 'var(--color-primary)' }}
-                >
-                  <span className="text-2xl">{badge.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold" style={{ color: 'var(--color-primary)' }}>{badge.name}</div>
-                    <div className="text-xs text-[color:var(--color-text-secondary)]">{badge.subtitle}</div>
-                  </div>
-                  <div className="text-xs text-[color:var(--color-text-tertiary)]">
-                    {badge.unlocked_at && new Date(badge.unlocked_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Locked badges */}
-          {lockedBadges.length > 0 && (
-            <div className="space-y-2">
-              {lockedBadges.map((badge) => (
-                <div
-                  key={badge.key}
-                  className="flex items-center gap-3 p-3 rounded-xl border"
-                  style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}
-                >
-                  <span className="text-2xl opacity-40">{badge.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-[color:var(--color-text-secondary)]">{badge.name}</div>
-                    <div className="text-xs text-[color:var(--color-text-tertiary)]">{badge.description}</div>
-                    {/* Progress bar */}
-                    <div className="mt-2">
-                      <div className="flex justify-between text-xs text-[color:var(--color-text-tertiary)] mb-1">
-                        <span>{badge.progress}/{badge.target}</span>
-                        <span>{badge.percentage}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${badge.percentage}%`, background: 'var(--color-text-tertiary)' }}
-                        />
+            <div>
+              <h4 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide mb-2 flex items-center gap-2">
+                <span>✨ Earned</span>
+                <span className="text-[color:var(--color-primary)]">({unlockedBadges.length})</span>
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {unlockedBadges.map((badge) => (
+                  <div
+                    key={badge.key}
+                    className="p-3 rounded-xl border-2 relative overflow-hidden"
+                    style={{
+                      background: 'linear-gradient(135deg, var(--color-primary-muted) 0%, white 100%)',
+                      borderColor: 'var(--color-primary)',
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{badge.icon}</span>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-primary)' }}>
+                          {badge.name}
+                        </p>
+                        <p className="text-[10px] text-[color:var(--color-text-tertiary)]">
+                          {badge.unlocked_at && new Date(badge.unlocked_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
+
+          {/* Locked section with progress */}
+          {sortedLockedBadges.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide mb-2 flex items-center gap-2">
+                <span>🔒 In Progress</span>
+                <span className="text-[color:var(--color-text-tertiary)]">({sortedLockedBadges.length})</span>
+              </h4>
+              <div className="space-y-2">
+                {sortedLockedBadges.map((badge) => {
+                  const isClose = badge.percentage >= 70
+                  const remaining = badge.target - badge.progress
+
+                  return (
+                    <div
+                      key={badge.key}
+                      className="p-3 rounded-xl border relative"
+                      style={{
+                        background: isClose ? 'linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%)' : 'var(--color-surface-elevated)',
+                        borderColor: isClose ? '#F59E0B' : 'var(--color-divider)',
+                      }}
+                    >
+                      {isClose && (
+                        <div className="absolute top-2 right-2">
+                          <span className="text-xs font-bold text-amber-600 animate-pulse">🔥</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <span className={`text-2xl ${isClose ? '' : 'opacity-50'}`}>{badge.icon}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`font-semibold text-sm ${isClose ? 'text-amber-900' : 'text-[color:var(--color-text-secondary)]'}`}>
+                            {badge.name}
+                          </p>
+                          <p className={`text-xs ${isClose ? 'text-amber-700' : 'text-[color:var(--color-text-tertiary)]'}`}>
+                            {isClose ? `Just ${remaining} more!` : `${remaining} to go`}
+                          </p>
+                          {/* Progress bar */}
+                          <div className="mt-2 h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{
+                                width: `${badge.percentage}%`,
+                                background: isClose ? '#F59E0B' : 'var(--color-text-tertiary)',
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`text-lg font-bold ${isClose ? 'text-amber-600' : 'text-[color:var(--color-text-secondary)]'}`}>
+                            {badge.percentage}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* CTA to learn more */}
+          <button
+            onClick={() => navigate('/badges')}
+            className="w-full py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+            style={{ background: 'var(--color-primary)', color: 'white' }}
+          >
+            View All Badges & Rewards →
+          </button>
         </div>
       )}
     </div>

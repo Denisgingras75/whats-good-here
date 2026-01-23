@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo } from 'react'
 import { MAIN_CATEGORIES, matchCategories, getCategoryById } from '../constants/categories'
 
 const MAX_SELECTIONS = 3
 
-export function CategoryPicker({
+export const CategoryPicker = memo(function CategoryPicker({
   selectedCategories = [],
   onSelectionChange,
   showHeader = true,
@@ -197,4 +197,4 @@ export function CategoryPicker({
       )}
     </div>
   )
-}
+})

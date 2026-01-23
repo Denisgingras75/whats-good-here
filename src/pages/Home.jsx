@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useLocationContext } from '../context/LocationContext'
@@ -269,7 +269,7 @@ function CategoryRanking({ category, onViewAll }) {
 }
 
 // Compact dish row for homepage rankings
-function RankedDishRow({ dish, rank }) {
+const RankedDishRow = memo(function RankedDishRow({ dish, rank }) {
   const navigate = useNavigate()
   const {
     dish_id,
@@ -382,7 +382,7 @@ function RankedDishRow({ dish, rank }) {
       </svg>
     </button>
   )
-}
+})
 
 // Loading skeleton for category section
 function CategorySkeleton() {
@@ -481,7 +481,7 @@ function Top10Sidebar({ dishes, showToggle, activeTab, onTabChange }) {
 }
 
 // Compact row for Top 10 sidebar
-function Top10Row({ dish, rank, onClick }) {
+const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
 
@@ -541,7 +541,7 @@ function Top10Row({ dish, rank, onClick }) {
       </div>
     </button>
   )
-}
+})
 
 // Badges info card for homepage
 function BadgesInfoCard() {
