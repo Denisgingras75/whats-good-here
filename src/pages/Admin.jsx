@@ -124,6 +124,26 @@ export function Admin() {
       return
     }
 
+    // Validate price is a valid number if provided
+    if (price && (isNaN(parseFloat(price)) || parseFloat(price) < 0)) {
+      setMessage({ type: 'error', text: 'Please enter a valid price (positive number)' })
+      return
+    }
+
+    // Validate photo URL format if provided
+    if (photoUrl) {
+      try {
+        const url = new URL(photoUrl)
+        if (!['http:', 'https:'].includes(url.protocol)) {
+          setMessage({ type: 'error', text: 'Photo URL must use http or https protocol' })
+          return
+        }
+      } catch {
+        setMessage({ type: 'error', text: 'Please enter a valid photo URL' })
+        return
+      }
+    }
+
     setSubmitting(true)
     setMessage(null)
 

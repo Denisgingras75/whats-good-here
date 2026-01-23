@@ -334,19 +334,23 @@ export const dishPhotosApi = {
    * @throws {Error} On API failure
    */
   async getCommunityPhotos(dishId) {
-    const { data, error } = await supabase
-      .from('dish_photos')
-      .select('*')
-      .eq('dish_id', dishId)
-      .eq('status', 'community')
-      .order('quality_score', { ascending: false })
+    try {
+      const { data, error } = await supabase
+        .from('dish_photos')
+        .select('*')
+        .eq('dish_id', dishId)
+        .eq('status', 'community')
+        .order('quality_score', { ascending: false })
 
-    if (error) {
+      if (error) {
+        throw error
+      }
+
+      return data || []
+    } catch (error) {
       console.error('Error fetching community photos:', error)
       throw error
     }
-
-    return data || []
   },
 
   /**
@@ -356,25 +360,29 @@ export const dishPhotosApi = {
    * @throws {Error} On API failure
    */
   async getAllVisiblePhotos(dishId) {
-    const { data, error } = await supabase
-      .from('dish_photos')
-      .select('*')
-      .eq('dish_id', dishId)
-      .in('status', ['featured', 'community', 'hidden'])
-      .order('quality_score', { ascending: false })
+    try {
+      const { data, error } = await supabase
+        .from('dish_photos')
+        .select('*')
+        .eq('dish_id', dishId)
+        .in('status', ['featured', 'community', 'hidden'])
+        .order('quality_score', { ascending: false })
 
-    if (error) {
+      if (error) {
+        throw error
+      }
+
+      // Sort by status priority: featured > community > hidden
+      const statusOrder = { featured: 0, community: 1, hidden: 2 }
+      return (data || []).sort((a, b) => {
+        const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3)
+        if (statusDiff !== 0) return statusDiff
+        return (b.quality_score || 0) - (a.quality_score || 0)
+      })
+    } catch (error) {
       console.error('Error fetching all photos:', error)
       throw error
     }
-
-    // Sort by status priority: featured > community > hidden
-    const statusOrder = { featured: 0, community: 1, hidden: 2 }
-    return (data || []).sort((a, b) => {
-      const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3)
-      if (statusDiff !== 0) return statusDiff
-      return (b.quality_score || 0) - (a.quality_score || 0)
-    })
   },
 
   /**

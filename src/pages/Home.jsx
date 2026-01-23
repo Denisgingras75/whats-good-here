@@ -114,7 +114,7 @@ export function Home() {
       <main className="px-4 py-6">
         {/* Loading State */}
         {loading && (
-          <div className="space-y-8">
+          <div className="space-y-8" aria-live="polite" aria-label="Loading categories">
             {[...Array(3)].map((_, i) => (
               <CategorySkeleton key={i} />
             ))}

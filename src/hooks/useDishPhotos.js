@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import posthog from 'posthog-js'
 import { dishPhotosApi } from '../api/dishPhotosApi'
 import { analyzeImage } from '../utils/imageAnalysis'
@@ -11,6 +11,16 @@ export function useDishPhotos() {
   const [analyzing, setAnalyzing] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [error, setError] = useState(null)
+  const progressResetTimerRef = useRef(null)
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (progressResetTimerRef.current) {
+        clearTimeout(progressResetTimerRef.current)
+      }
+    }
+  }, [])
 
   const uploadPhoto = useCallback(async (dishId, file) => {
     setAnalyzing(true)
@@ -80,7 +90,7 @@ export function useDishPhotos() {
       setAnalyzing(false)
       setUploading(false)
       // Reset progress after a short delay
-      setTimeout(() => setUploadProgress(0), 500)
+      progressResetTimerRef.current = setTimeout(() => setUploadProgress(0), 500)
     }
   }, [])
 

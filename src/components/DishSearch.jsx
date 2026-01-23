@@ -37,6 +37,15 @@ export function DishSearch({ loading = false }) {
   const [searching, setSearching] = useState(false)
   const inputRef = useRef(null)
   const dropdownRef = useRef(null)
+  const mountedRef = useRef(true)
+
+  // Track mounted state for async operations
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -64,12 +73,19 @@ export function DishSearch({ loading = false }) {
       setSearching(true)
       try {
         const results = await dishesApi.search(query, MAX_DISH_RESULTS)
-        setSearchResults(results)
+        // Only update state if still mounted
+        if (mountedRef.current) {
+          setSearchResults(results)
+        }
       } catch (error) {
         console.error('Search error:', error)
-        setSearchResults([])
+        if (mountedRef.current) {
+          setSearchResults([])
+        }
       } finally {
-        setSearching(false)
+        if (mountedRef.current) {
+          setSearching(false)
+        }
       }
     }
 
@@ -175,6 +191,10 @@ export function DishSearch({ loading = false }) {
           onFocus={() => setIsFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder="Find the best ___ near you"
+          aria-label="Search dishes by name"
+          aria-autocomplete="list"
+          aria-expanded={showDropdown}
+          aria-controls="dish-search-dropdown"
           className="flex-1 bg-transparent outline-none text-sm"
           style={{ color: 'var(--color-text-primary)' }}
         />
@@ -209,6 +229,9 @@ export function DishSearch({ loading = false }) {
       {showDropdown && (
         <div
           ref={dropdownRef}
+          id="dish-search-dropdown"
+          role="listbox"
+          aria-label="Search results"
           className="absolute top-full left-0 right-0 mt-2 rounded-xl overflow-hidden z-50"
           style={{
             background: 'var(--color-surface)',

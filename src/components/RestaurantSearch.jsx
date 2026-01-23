@@ -69,6 +69,10 @@ export function RestaurantSearch({ selectedRestaurant, onSelectRestaurant, onCle
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={() => searchQuery.length > 0 && setShowDropdown(true)}
+            aria-label="Search restaurants by name"
+            aria-autocomplete="list"
+            aria-expanded={showDropdown && filteredRestaurants.length > 0}
+            aria-controls="restaurant-search-dropdown"
             className="
               w-full
               pl-11 pr-12 py-3
@@ -105,7 +109,11 @@ export function RestaurantSearch({ selectedRestaurant, onSelectRestaurant, onCle
 
         {/* Autocomplete Dropdown */}
         {showDropdown && filteredRestaurants.length > 0 && (
-          <div className="
+          <div
+            id="restaurant-search-dropdown"
+            role="listbox"
+            aria-label="Restaurant search results"
+            className="
             absolute top-full left-0 right-0 mt-2 z-30
             bg-white
             border-2 border-neutral-200
@@ -117,6 +125,8 @@ export function RestaurantSearch({ selectedRestaurant, onSelectRestaurant, onCle
               <button
                 key={restaurant.id}
                 onClick={() => handleSelectRestaurant(restaurant)}
+                role="option"
+                aria-selected="false"
                 className="
                   w-full px-4 py-3
                   text-left text-sm font-medium

@@ -98,9 +98,13 @@ export function LocationProvider({ children }) {
       return
     }
 
+    let permissionStatus = null
+    let handlePermissionChange = null
+
     // Check permission API if available
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        permissionStatus = result
         setPermissionState(result.state)
 
         // DISABLED: Auto-requesting location when off-island shows no dishes
@@ -108,8 +112,8 @@ export function LocationProvider({ children }) {
         //   requestLocation()
         // }
 
-        // Listen for permission changes - with proper cleanup
-        const handlePermissionChange = () => {
+        // Listen for permission changes
+        handlePermissionChange = () => {
           setPermissionState(result.state)
           // DISABLED: Auto-requesting location when off-island shows no dishes
           // if (result.state === 'granted') {
@@ -118,17 +122,19 @@ export function LocationProvider({ children }) {
         }
 
         result.addEventListener('change', handlePermissionChange)
-
-        // Cleanup function to remove listener when component unmounts
-        return () => {
-          result.removeEventListener('change', handlePermissionChange)
-        }
       }).catch(() => {
         // Permission API not supported, will prompt on request
       })
     }
+
+    // Cleanup function to remove listener when component unmounts
+    return () => {
+      if (permissionStatus && handlePermissionChange) {
+        permissionStatus.removeEventListener('change', handlePermissionChange)
+      }
+    }
     // No else needed - we already have default location and loading is false
-  }, [requestLocation])
+  }, [])
 
   const useDefaultLocation = useCallback(() => {
     setLocation(DEFAULT_LOCATION)

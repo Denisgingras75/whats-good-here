@@ -179,6 +179,12 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
       return
     }
 
+    // Validate rating is within acceptable range
+    if (sliderValue < 0 || sliderValue > 10) {
+      console.error('Invalid rating value:', sliderValue)
+      return
+    }
+
     const previousVote = userVote
     const previousRating = userRating
 
