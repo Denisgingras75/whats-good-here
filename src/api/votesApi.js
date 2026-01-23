@@ -16,8 +16,7 @@ export const votesApi = {
    * @returns {Promise<Object>} Success status
    */
   async submitVote({ dishId, wouldOrderAgain, rating10 = null }) {
-    try {
-      // Quick client-side check first (better UX)
+    // Quick client-side check first (better UX)
       const clientRateLimit = checkVoteRateLimit()
       if (!clientRateLimit.allowed) {
         throw new Error(clientRateLimit.message)
@@ -66,9 +65,6 @@ export const votesApi = {
       })
 
       return { success: true }
-    } catch (error) {
-      throw error
-    }
   },
 
   /**

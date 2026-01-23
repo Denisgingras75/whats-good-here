@@ -94,8 +94,7 @@ export const followsApi = {
    * @returns {Promise<{users: Array, hasMore: boolean}>}
    */
   async getFollowers(userId, { limit = 20, cursor = null } = {}) {
-    try {
-      // Build query with cursor-based pagination
+    // Build query with cursor-based pagination
       let query = supabase
         .from('follows')
         .select('follower_id, created_at')
@@ -144,9 +143,6 @@ export const followsApi = {
       }))
 
       return { users, hasMore }
-    } catch (err) {
-      throw err
-    }
   },
 
   /**
@@ -158,8 +154,7 @@ export const followsApi = {
    * @returns {Promise<{users: Array, hasMore: boolean}>}
    */
   async getFollowing(userId, { limit = 20, cursor = null } = {}) {
-    try {
-      // Build query with cursor-based pagination
+    // Build query with cursor-based pagination
       let query = supabase
         .from('follows')
         .select('followed_id, created_at')
@@ -208,9 +203,6 @@ export const followsApi = {
       }))
 
       return { users, hasMore }
-    } catch (err) {
-      throw err
-    }
   },
 
   /**

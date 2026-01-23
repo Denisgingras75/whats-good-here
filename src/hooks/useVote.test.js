@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useVote } from '../hooks/useVote'
-import { votesApi } from '../api'
+import { votesApi } from '../api/votesApi'
 
-// Mock the API
-vi.mock('../api', () => ({
+// Mock the API - must match the import path in useVote.js
+vi.mock('../api/votesApi', () => ({
   votesApi: {
     submitVote: vi.fn(),
     getUserVotes: vi.fn(),
