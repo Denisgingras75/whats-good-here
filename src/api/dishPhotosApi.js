@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { checkPhotoUploadRateLimit } from '../lib/rateLimiter'
+import { extractSafeFilename } from '../utils/sanitize'
 
 /**
  * Dish Photos API - Centralized data fetching and mutation for dish photos
@@ -230,27 +231,37 @@ export const dishPhotosApi = {
         throw new Error('Not authenticated')
       }
 
-      // Get photo record to get file path
+      // Get photo record - fetch user_id to verify ownership explicitly
       const { data: photo, error: fetchError } = await supabase
         .from('dish_photos')
-        .select('photo_url, dish_id')
+        .select('photo_url, dish_id, user_id')
         .eq('id', photoId)
-        .eq('user_id', user.id)
         .single()
 
       if (fetchError || !photo) {
-        throw new Error('Photo not found or access denied')
+        throw new Error('Photo not found')
       }
 
-      // Delete from storage - extract actual filename from URL
-      const urlParts = photo.photo_url.split('/')
-      const actualFileName = urlParts[urlParts.length - 1]
-      const filePath = `${user.id}/${actualFileName}`
+      // Explicit ownership verification (defense in depth beyond RLS)
+      if (photo.user_id !== user.id) {
+        throw new Error('Access denied - you can only delete your own photos')
+      }
+
+      // Securely extract filename using URL parsing (prevents path traversal)
+      const safeFilename = extractSafeFilename(photo.photo_url, user.id)
+      if (!safeFilename) {
+        throw new Error('Invalid photo URL format')
+      }
+
+      // Construct safe file path
+      const filePath = `${user.id}/${safeFilename}`
+
+      // Delete from storage
       await supabase.storage
         .from('dish-photos')
         .remove([filePath])
 
-      // Delete record
+      // Delete record (with user_id check for defense in depth)
       const { error } = await supabase
         .from('dish_photos')
         .delete()

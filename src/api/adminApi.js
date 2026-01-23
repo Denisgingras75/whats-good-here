@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { sanitizeSearchQuery } from '../utils/sanitize'
 
 /**
  * Admin API - Centralized data mutations for admin operations
@@ -170,6 +171,10 @@ export const adminApi = {
   async searchDishes(query, limit = 20) {
     if (!query?.trim()) return []
 
+    // Sanitize query to prevent SQL injection via LIKE patterns
+    const sanitized = sanitizeSearchQuery(query, 50)
+    if (!sanitized) return []
+
     try {
       const { data, error } = await supabase
         .from('dishes')
@@ -182,7 +187,7 @@ export const adminApi = {
           restaurant_id,
           restaurants (id, name)
         `)
-        .ilike('name', `%${query}%`)
+        .ilike('name', `%${sanitized}%`)
         .order('name')
         .limit(limit)
 

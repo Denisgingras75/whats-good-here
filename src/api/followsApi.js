@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { sanitizeSearchQuery } from '../utils/sanitize'
 
 /**
  * Follows API - Social connections
@@ -257,10 +258,14 @@ export const followsApi = {
     try {
       if (!query?.trim() || query.length < 2) return []
 
+      // Sanitize query to prevent SQL injection via LIKE patterns
+      const sanitized = sanitizeSearchQuery(query, 50)
+      if (!sanitized || sanitized.length < 2) return []
+
       const { data, error } = await supabase
         .from('profiles')
         .select('id, display_name, follower_count, following_count')
-        .ilike('display_name', `%${query}%`)
+        .ilike('display_name', `%${sanitized}%`)
         .order('follower_count', { ascending: false })
         .limit(limit)
 

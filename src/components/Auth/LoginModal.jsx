@@ -21,7 +21,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
   useEffect(() => {
     if (isOpen) {
       try {
-        const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
+        const savedEmail = sessionStorage.getItem(REMEMBERED_EMAIL_KEY)
         if (savedEmail) {
           setEmail(savedEmail)
         }
@@ -51,8 +51,13 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
 
     setUsernameStatus('checking')
     const timer = setTimeout(async () => {
-      const available = await authApi.isUsernameAvailable(username)
-      setUsernameStatus(available ? 'available' : 'taken')
+      try {
+        const available = await authApi.isUsernameAvailable(username)
+        setUsernameStatus(available ? 'available' : 'taken')
+      } catch (error) {
+        console.error('LoginModal: username check failed', error)
+        setUsernameStatus(null)
+      }
     }, 500)
 
     return () => clearTimeout(timer)
@@ -83,7 +88,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
 
       // Remember the email
       try {
-        localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
+        sessionStorage.setItem(REMEMBERED_EMAIL_KEY, email)
       } catch (error) {
         console.warn('LoginModal: unable to persist remembered email', error)
       }

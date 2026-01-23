@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { classifyError } from '../utils/errorHandler'
+import { sanitizeSearchQuery } from '../utils/sanitize'
 
 /**
  * Dishes API - Centralized data fetching for dishes
@@ -79,6 +80,10 @@ export const dishesApi = {
   async search(query, limit = 5) {
     if (!query?.trim()) return []
 
+    // Sanitize query to prevent SQL injection via LIKE patterns
+    const sanitized = sanitizeSearchQuery(query, 50)
+    if (!sanitized) return []
+
     const { data, error } = await supabase
       .from('dishes')
       .select(`
@@ -96,7 +101,7 @@ export const dishesApi = {
         )
       `)
       .eq('restaurants.is_open', true)
-      .or(`name.ilike.%${query}%,category.ilike.%${query}%`)
+      .or(`name.ilike.%${sanitized}%,category.ilike.%${sanitized}%`)
       .order('avg_rating', { ascending: false, nullsFirst: false })
       .limit(limit)
 

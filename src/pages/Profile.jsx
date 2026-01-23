@@ -104,8 +104,13 @@ export function Profile() {
 
     setNameStatus('checking')
     const timer = setTimeout(async () => {
-      const available = await authApi.isUsernameAvailable(newName.trim())
-      setNameStatus(available ? 'available' : 'taken')
+      try {
+        const available = await authApi.isUsernameAvailable(newName.trim())
+        setNameStatus(available ? 'available' : 'taken')
+      } catch (error) {
+        console.error('Profile: username check failed', error)
+        setNameStatus(null)
+      }
     }, 500)
 
     return () => clearTimeout(timer)
