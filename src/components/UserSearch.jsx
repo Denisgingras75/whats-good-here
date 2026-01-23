@@ -26,9 +26,15 @@ export function UserSearch({ onClose }) {
 
     const search = async () => {
       setLoading(true)
-      const users = await followsApi.searchUsers(query, 10)
-      setResults(users)
-      setLoading(false)
+      try {
+        const users = await followsApi.searchUsers(query, 10)
+        setResults(users)
+      } catch (err) {
+        console.error('Failed to search users:', err)
+        setResults([]) // Graceful degradation
+      } finally {
+        setLoading(false)
+      }
     }
 
     const timer = setTimeout(search, 200)

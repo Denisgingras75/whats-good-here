@@ -39,13 +39,19 @@ export function UserProfile() {
       setLoading(true)
       setError(null)
 
-      const data = await followsApi.getUserProfile(userId)
-      if (!data) {
-        setError('User not found')
-      } else {
-        setProfile(data)
+      try {
+        const data = await followsApi.getUserProfile(userId)
+        if (!data) {
+          setError('User not found')
+        } else {
+          setProfile(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err)
+        setError('Failed to load profile')
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     if (userId) {
@@ -57,8 +63,12 @@ export function UserProfile() {
   useEffect(() => {
     async function checkFollowStatus() {
       if (currentUser && userId && !isOwnProfile) {
-        const following = await followsApi.isFollowing(userId)
-        setIsFollowing(following)
+        try {
+          const following = await followsApi.isFollowing(userId)
+          setIsFollowing(following)
+        } catch (err) {
+          console.error('Failed to check follow status:', err)
+        }
       }
     }
     checkFollowStatus()
@@ -75,16 +85,22 @@ export function UserProfile() {
 
       if (dishIds.length === 0) return
 
-      const { data } = await supabase
-        .from('votes')
-        .select('dish_id, rating_10')
-        .eq('user_id', currentUser.id)
-        .in('dish_id', dishIds)
+      try {
+        const { data, error } = await supabase
+          .from('votes')
+          .select('dish_id, rating_10')
+          .eq('user_id', currentUser.id)
+          .in('dish_id', dishIds)
 
-      if (data) {
-        const ratingsMap = {}
-        data.forEach(v => { ratingsMap[v.dish_id] = v.rating_10 })
-        setMyRatings(ratingsMap)
+        if (error) throw error
+
+        if (data) {
+          const ratingsMap = {}
+          data.forEach(v => { ratingsMap[v.dish_id] = v.rating_10 })
+          setMyRatings(ratingsMap)
+        }
+      } catch (err) {
+        console.error('Failed to fetch my ratings:', err)
       }
     }
     fetchMyRatings()
@@ -129,7 +145,7 @@ export function UserProfile() {
           title: `${profile.display_name} on What's Good Here`,
           url,
         })
-      } catch (e) {
+      } catch {
         // User cancelled or error
       }
     } else {
@@ -482,9 +498,8 @@ function RecentVoteCard({ vote, myRating }) {
   const myRatingNum = Number(myRating) || 0
   const hasMyRating = myRating !== undefined && myRating !== null && myRatingNum >= 1 && myRatingNum <= 10
 
-  // Community average and delta (how friend's rating compares to community)
+  // Community average
   const communityAvg = dish.avg_rating ? Number(dish.avg_rating) : null
-  const communityDelta = communityAvg ? Math.round((theirRating - communityAvg) * 10) / 10 : null
 
   return (
     <button

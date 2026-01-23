@@ -8,7 +8,7 @@ const REMEMBERED_EMAIL_KEY = 'whats-good-here-email'
 
 export function Login() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  useAuth() // Hook must be called for context to work
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,7 +22,7 @@ export function Login() {
   // Load remembered email on mount
   useEffect(() => {
     try {
-      const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
+      const savedEmail = sessionStorage.getItem(REMEMBERED_EMAIL_KEY)
       if (savedEmail) {
         setEmail(savedEmail)
       }
@@ -51,8 +51,13 @@ export function Login() {
 
     setUsernameStatus('checking')
     const timer = setTimeout(async () => {
-      const available = await authApi.isUsernameAvailable(username)
-      setUsernameStatus(available ? 'available' : 'taken')
+      try {
+        const available = await authApi.isUsernameAvailable(username)
+        setUsernameStatus(available ? 'available' : 'taken')
+      } catch (error) {
+        console.error('Failed to check username availability:', error)
+        setUsernameStatus(null)
+      }
     }, 500)
 
     return () => clearTimeout(timer)
@@ -76,7 +81,7 @@ export function Login() {
 
       // Remember the email
       try {
-        localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
+        sessionStorage.setItem(REMEMBERED_EMAIL_KEY, email)
       } catch (error) {
         console.warn('Login: unable to persist remembered email', error)
       }
@@ -114,7 +119,7 @@ export function Login() {
 
       // Remember the email
       try {
-        localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
+        sessionStorage.setItem(REMEMBERED_EMAIL_KEY, email)
       } catch (error) {
         console.warn('Login: unable to persist remembered email', error)
       }

@@ -82,6 +82,7 @@ export const followsApi = {
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error checking follow status:', error)
+      throw error
     }
 
     return !!data
@@ -94,43 +95,48 @@ export const followsApi = {
    * @returns {Promise<Array>}
    */
   async getFollowers(userId, limit = 50) {
-    // Get follower IDs first
-    const { data: followData, error: followError } = await supabase
-      .from('follows')
-      .select('follower_id, created_at')
-      .eq('followed_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(limit)
+    try {
+      // Get follower IDs first
+      const { data: followData, error: followError } = await supabase
+        .from('follows')
+        .select('follower_id, created_at')
+        .eq('followed_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
 
-    if (followError) {
-      console.error('Error fetching followers:', followError)
-      return []
+      if (followError) {
+        console.error('Error fetching followers:', followError)
+        throw new Error('Failed to fetch followers')
+      }
+
+      if (!followData || followData.length === 0) {
+        return []
+      }
+
+      // Get profile info for each follower
+      const followerIds = followData.map(f => f.follower_id)
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, display_name, follower_count')
+        .in('id', followerIds)
+
+      if (profileError) {
+        console.error('Error fetching follower profiles:', profileError)
+      }
+
+      const profileMap = {}
+      ;(profiles || []).forEach(p => { profileMap[p.id] = p })
+
+      return followData.map(f => ({
+        id: f.follower_id,
+        display_name: profileMap[f.follower_id]?.display_name || 'Anonymous',
+        follower_count: profileMap[f.follower_id]?.follower_count || 0,
+        followed_at: f.created_at,
+      }))
+    } catch (err) {
+      console.error('Unexpected error in getFollowers:', err)
+      throw err
     }
-
-    if (!followData || followData.length === 0) {
-      return []
-    }
-
-    // Get profile info for each follower
-    const followerIds = followData.map(f => f.follower_id)
-    const { data: profiles, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, display_name, follower_count')
-      .in('id', followerIds)
-
-    if (profileError) {
-      console.error('Error fetching follower profiles:', profileError)
-    }
-
-    const profileMap = {}
-    ;(profiles || []).forEach(p => { profileMap[p.id] = p })
-
-    return followData.map(f => ({
-      id: f.follower_id,
-      display_name: profileMap[f.follower_id]?.display_name || 'Anonymous',
-      follower_count: profileMap[f.follower_id]?.follower_count || 0,
-      followed_at: f.created_at,
-    }))
   },
 
   /**
@@ -140,43 +146,48 @@ export const followsApi = {
    * @returns {Promise<Array>}
    */
   async getFollowing(userId, limit = 50) {
-    // Get followed IDs first
-    const { data: followData, error: followError } = await supabase
-      .from('follows')
-      .select('followed_id, created_at')
-      .eq('follower_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(limit)
+    try {
+      // Get followed IDs first
+      const { data: followData, error: followError } = await supabase
+        .from('follows')
+        .select('followed_id, created_at')
+        .eq('follower_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
 
-    if (followError) {
-      console.error('Error fetching following:', followError)
-      return []
+      if (followError) {
+        console.error('Error fetching following:', followError)
+        throw new Error('Failed to fetch following')
+      }
+
+      if (!followData || followData.length === 0) {
+        return []
+      }
+
+      // Get profile info for each followed user
+      const followedIds = followData.map(f => f.followed_id)
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, display_name, follower_count')
+        .in('id', followedIds)
+
+      if (profileError) {
+        console.error('Error fetching following profiles:', profileError)
+      }
+
+      const profileMap = {}
+      ;(profiles || []).forEach(p => { profileMap[p.id] = p })
+
+      return followData.map(f => ({
+        id: f.followed_id,
+        display_name: profileMap[f.followed_id]?.display_name || 'Anonymous',
+        follower_count: profileMap[f.followed_id]?.follower_count || 0,
+        followed_at: f.created_at,
+      }))
+    } catch (err) {
+      console.error('Unexpected error in getFollowing:', err)
+      throw err
     }
-
-    if (!followData || followData.length === 0) {
-      return []
-    }
-
-    // Get profile info for each followed user
-    const followedIds = followData.map(f => f.followed_id)
-    const { data: profiles, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, display_name, follower_count')
-      .in('id', followedIds)
-
-    if (profileError) {
-      console.error('Error fetching following profiles:', profileError)
-    }
-
-    const profileMap = {}
-    ;(profiles || []).forEach(p => { profileMap[p.id] = p })
-
-    return followData.map(f => ({
-      id: f.followed_id,
-      display_name: profileMap[f.followed_id]?.display_name || 'Anonymous',
-      follower_count: profileMap[f.followed_id]?.follower_count || 0,
-      followed_at: f.created_at,
-    }))
   },
 
   /**
@@ -199,7 +210,7 @@ export const followsApi = {
 
     if (followerError || followingError) {
       console.error('Error fetching follow counts:', followerError || followingError)
-      return { followers: 0, following: 0 }
+      throw (followerError || followingError)
     }
 
     return {
@@ -214,21 +225,26 @@ export const followsApi = {
    * @returns {Promise<Array>}
    */
   async getFriendsVotesForDish(dishId) {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return []
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return []
 
-    const { data, error } = await supabase
-      .rpc('get_friends_votes_for_dish', {
-        p_user_id: user.id,
-        p_dish_id: dishId,
-      })
+      const { data, error } = await supabase
+        .rpc('get_friends_votes_for_dish', {
+          p_user_id: user.id,
+          p_dish_id: dishId,
+        })
 
-    if (error) {
-      console.error('Error fetching friends votes:', error)
-      return []
+      if (error) {
+        console.error('Error fetching friends votes:', error)
+        throw new Error('Failed to fetch friends votes')
+      }
+
+      return data || []
+    } catch (err) {
+      console.error('Unexpected error in getFriendsVotesForDish:', err)
+      throw err
     }
-
-    return data || []
   },
 
   /**
@@ -238,21 +254,26 @@ export const followsApi = {
    * @returns {Promise<Array>}
    */
   async searchUsers(query, limit = 10) {
-    if (!query?.trim() || query.length < 2) return []
+    try {
+      if (!query?.trim() || query.length < 2) return []
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, display_name, follower_count, following_count')
-      .ilike('display_name', `%${query}%`)
-      .order('follower_count', { ascending: false })
-      .limit(limit)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, follower_count, following_count')
+        .ilike('display_name', `%${query}%`)
+        .order('follower_count', { ascending: false })
+        .limit(limit)
 
-    if (error) {
-      console.error('Error searching users:', error)
-      return []
+      if (error) {
+        console.error('Error searching users:', error)
+        throw new Error('Failed to search users')
+      }
+
+      return data || []
+    } catch (err) {
+      console.error('Unexpected error in searchUsers:', err)
+      throw err
     }
-
-    return data || []
   },
 
   /**

@@ -14,7 +14,7 @@ export function WelcomeSplash({ onComplete }) {
         onComplete?.()
         return
       }
-    } catch (error) {
+    } catch {
       // localStorage not available, show splash anyway
     }
 
@@ -31,7 +31,7 @@ export function WelcomeSplash({ onComplete }) {
     timers.push(setTimeout(() => {
       try {
         localStorage.setItem(STORAGE_KEY, 'true')
-      } catch (error) {
+      } catch {
         // localStorage not available
       }
       setShouldShow(false)
@@ -53,11 +53,18 @@ export function WelcomeSplash({ onComplete }) {
     if (isVisible && !isFadingOut) {
       try {
         localStorage.setItem(STORAGE_KEY, 'true')
-      } catch (error) {
+      } catch {
         // localStorage not available
       }
       setShouldShow(false)
       onComplete?.()
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClick()
     }
   }
 
@@ -69,6 +76,10 @@ export function WelcomeSplash({ onComplete }) {
         opacity: isFadingOut ? 0 : 1,
       }}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Welcome splash screen. Press Enter or tap to continue."
     >
       {/* Main WGH Image */}
       <div

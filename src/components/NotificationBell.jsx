@@ -23,8 +23,12 @@ export function NotificationBell() {
     }
 
     const fetchCount = async () => {
-      const count = await notificationsApi.getUnreadCount()
-      setUnreadCount(count)
+      try {
+        const count = await notificationsApi.getUnreadCount()
+        setUnreadCount(count)
+      } catch (err) {
+        console.error('Failed to fetch unread count:', err)
+      }
     }
 
     fetchCount()
@@ -55,13 +59,17 @@ export function NotificationBell() {
 
     if (!showDropdown) {
       setLoading(true)
-      const data = await notificationsApi.getNotifications(20)
-      setNotifications(data)
-      setLoading(false)
-
-      // Mark that we've viewed these notifications - they'll be deleted when dropdown closes
-      if (data.length > 0) {
-        setUnreadCount(0)
+      try {
+        const data = await notificationsApi.getNotifications(20)
+        setNotifications(data)
+        // Mark that we've viewed these notifications - they'll be deleted when dropdown closes
+        if (data.length > 0) {
+          setUnreadCount(0)
+        }
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err)
+      } finally {
+        setLoading(false)
       }
     }
   }
@@ -70,10 +78,17 @@ export function NotificationBell() {
   useEffect(() => {
     if (!showDropdown && notifications.length > 0) {
       // Delete from database and clear local state
-      notificationsApi.deleteAll()
+      const deleteNotifications = async () => {
+        try {
+          await notificationsApi.deleteAll()
+        } catch (err) {
+          console.error('Failed to delete notifications:', err)
+        }
+      }
+      deleteNotifications()
       setNotifications([])
     }
-  }, [showDropdown])
+  }, [showDropdown, notifications.length])
 
   // Handle clicking a notification
   const handleNotificationClick = (notification) => {
@@ -105,6 +120,7 @@ export function NotificationBell() {
         onClick={handleBellClick}
         className="relative p-2 rounded-full transition-colors"
         style={{ color: 'var(--color-text-secondary)' }}
+        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
         <svg
           className="w-6 h-6"

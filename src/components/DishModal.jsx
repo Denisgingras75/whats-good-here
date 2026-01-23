@@ -12,6 +12,7 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
   const [allPhotos, setAllPhotos] = useState([])
   const [showAllPhotos, setShowAllPhotos] = useState(false)
   const [lightboxPhoto, setLightboxPhoto] = useState(null)
+  const [photoLoadError, setPhotoLoadError] = useState(false)
 
   // Fetch photos when modal opens
   useEffect(() => {
@@ -19,6 +20,7 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
 
     const fetchPhotos = async () => {
       try {
+        setPhotoLoadError(false)
         const [featured, community, all] = await Promise.all([
           dishPhotosApi.getFeaturedPhoto(dish.dish_id),
           dishPhotosApi.getCommunityPhotos(dish.dish_id),
@@ -29,6 +31,7 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
         setAllPhotos(all)
       } catch (error) {
         console.error('Failed to fetch photos:', error)
+        setPhotoLoadError(true)
       }
     }
 
@@ -145,6 +148,21 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
               {dish.restaurant_name}
               {dish.price && ` · $${Number(dish.price).toFixed(0)}`}
             </p>
+
+            {/* Photo load error feedback */}
+            {photoLoadError && (
+              <div style={{
+                padding: '12px',
+                marginBottom: '12px',
+                borderRadius: '8px',
+                backgroundColor: 'var(--color-danger-muted)',
+                color: 'var(--color-danger)',
+                fontSize: '13px',
+                textAlign: 'center',
+              }}>
+                Unable to load photos
+              </div>
+            )}
 
             {/* Featured photo (hero) */}
             {featuredPhoto && (

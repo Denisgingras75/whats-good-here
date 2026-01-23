@@ -633,6 +633,7 @@ function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, onToggle
                   ? 'bg-red-500 text-white'
                   : 'bg-neutral-100 text-neutral-400 hover:text-red-500'
               }`}
+              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

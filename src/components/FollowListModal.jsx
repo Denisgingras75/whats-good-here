@@ -9,6 +9,7 @@ export function FollowListModal({ userId, type, onClose }) {
   const navigate = useNavigate()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   const isFollowers = type === 'followers'
   const title = isFollowers ? 'Followers' : 'Following'
@@ -16,11 +17,18 @@ export function FollowListModal({ userId, type, onClose }) {
   useEffect(() => {
     async function fetchUsers() {
       setLoading(true)
-      const data = isFollowers
-        ? await followsApi.getFollowers(userId)
-        : await followsApi.getFollowing(userId)
-      setUsers(data)
-      setLoading(false)
+      setError(null)
+      try {
+        const data = isFollowers
+          ? await followsApi.getFollowers(userId)
+          : await followsApi.getFollowing(userId)
+        setUsers(data)
+      } catch (err) {
+        console.error('Failed to load users:', err)
+        setError('Unable to load. Please try again.')
+      } finally {
+        setLoading(false)
+      }
     }
     fetchUsers()
   }, [userId, isFollowers])
@@ -63,6 +71,7 @@ export function FollowListModal({ userId, type, onClose }) {
             onClick={onClose}
             className="p-2 -mr-2 rounded-full"
             style={{ color: 'var(--color-text-secondary)' }}
+            aria-label="Close"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -78,6 +87,13 @@ export function FollowListModal({ userId, type, onClose }) {
                 className="w-6 h-6 border-2 rounded-full animate-spin"
                 style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }}
               />
+            </div>
+          ) : error ? (
+            <div className="py-12 text-center">
+              <div className="text-4xl mb-2">⚠️</div>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                {error}
+              </p>
             </div>
           ) : users.length === 0 ? (
             <div className="py-12 text-center">

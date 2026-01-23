@@ -99,10 +99,14 @@ export const notificationsApi = {
    * @returns {Promise<boolean>}
    */
   async markAsRead(notificationId) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return false
+
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
       .eq('id', notificationId)
+      .eq('user_id', user.id)
 
     if (error) {
       console.error('Error marking notification as read:', error)

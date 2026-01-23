@@ -94,8 +94,13 @@ export function Dish() {
     }
 
     const fetchFriendsVotes = async () => {
-      const votes = await followsApi.getFriendsVotesForDish(dishId)
-      setFriendsVotes(votes)
+      try {
+        const votes = await followsApi.getFriendsVotesForDish(dishId)
+        setFriendsVotes(votes)
+      } catch (err) {
+        console.error('Failed to fetch friends votes:', err)
+        setFriendsVotes([]) // Graceful degradation
+      }
     }
 
     fetchFriendsVotes()

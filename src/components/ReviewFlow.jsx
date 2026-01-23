@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import posthog from 'posthog-js'
 import { useAuth } from '../context/AuthContext'
 import { useVote } from '../hooks/useVote'
@@ -71,6 +71,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [confirmationType, setConfirmationType] = useState(null)
   const [awaitingLogin, setAwaitingLogin] = useState(false)
+  const confirmationTimerRef = useRef(null)
 
   const noVotes = localTotalVotes - localYesVotes
   const yesPercent = localTotalVotes > 0 ? Math.round((localYesVotes / localTotalVotes) * 100) : 0
@@ -134,6 +135,15 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     }
   }, [step, user, onLoginRequired])
 
+  // Cleanup confirmation timer on unmount to prevent memory leak
+  useEffect(() => {
+    return () => {
+      if (confirmationTimerRef.current) {
+        clearTimeout(confirmationTimerRef.current)
+      }
+    }
+  }, [])
+
   const handleVoteClick = (wouldOrderAgain) => {
     setPendingVote(wouldOrderAgain)
 
@@ -151,7 +161,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     setConfirmationType(wouldOrderAgain ? 'yes' : 'no')
     setShowConfirmation(true)
 
-    setTimeout(() => {
+    confirmationTimerRef.current = setTimeout(() => {
       setShowConfirmation(false)
       setStep(2)
     }, 350)

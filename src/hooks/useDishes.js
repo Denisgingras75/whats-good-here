@@ -13,6 +13,8 @@ export function useDishes(location, radius, category = null, restaurantId = null
       return
     }
 
+    let cancelled = false
+
     async function fetchDishes() {
       try {
         setLoading(true)
@@ -36,22 +38,33 @@ export function useDishes(location, radius, category = null, restaurantId = null
               })
             )
           }
-          setDishes(data || [])
+          // Only update state if effect is still active
+          if (!cancelled) {
+            setDishes(data || [])
+          }
         } catch (apiError) {
-          const errorMessage = getUserMessage(apiError, 'loading dishes')
-          setError({
-            message: errorMessage,
-            originalError: apiError,
-            type: apiError.type,
-          })
-          console.error('Error fetching dishes:', apiError)
+          if (!cancelled) {
+            const errorMessage = getUserMessage(apiError, 'loading dishes')
+            setError({
+              message: errorMessage,
+              originalError: apiError,
+              type: apiError.type,
+            })
+            console.error('Error fetching dishes:', apiError)
+          }
         }
       } finally {
-        setLoading(false)
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
     }
 
     fetchDishes()
+
+    return () => {
+      cancelled = true
+    }
   }, [location, radius, category, restaurantId])
 
   const refetch = async () => {

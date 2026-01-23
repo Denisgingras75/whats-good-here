@@ -61,14 +61,18 @@ export function Profile() {
   // Fetch follow counts
   useEffect(() => {
     if (!user) return
-    followsApi.getFollowCounts(user.id).then(setFollowCounts)
+    followsApi.getFollowCounts(user.id)
+      .then(setFollowCounts)
+      .catch((error) => {
+        console.error('Failed to fetch follow counts:', error)
+      })
   }, [user])
 
   // Load remembered email on mount (for logged-out state)
   useEffect(() => {
     if (!user) {
       try {
-        const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
+        const savedEmail = sessionStorage.getItem(REMEMBERED_EMAIL_KEY)
         if (savedEmail) {
           setEmail(savedEmail)
         }
@@ -133,7 +137,7 @@ export function Profile() {
     try {
       // Remember the email for next time
       try {
-        localStorage.setItem(REMEMBERED_EMAIL_KEY, email)
+        sessionStorage.setItem(REMEMBERED_EMAIL_KEY, email)
       } catch (e) {
           console.warn('Profile: unable to persist remembered email', e)
       }

@@ -72,11 +72,15 @@ export const authApi = {
       posthog.capture('signup_started', { method: 'password' })
 
       // Check if username is already taken
-      const { data: existingUser } = await supabase
+      const { data: existingUser, error: usernameError } = await supabase
         .from('profiles')
         .select('id')
         .ilike('display_name', username)
         .single()
+
+      if (usernameError && usernameError.code !== 'PGRST116') {
+        throw usernameError
+      }
 
       if (existingUser) {
         throw new Error('This username is already taken. Please choose another.')
@@ -99,10 +103,14 @@ export const authApi = {
 
       // Update the profile with the display name
       if (data.user) {
-        await supabase
+        const { error: profileError } = await supabase
           .from('profiles')
           .update({ display_name: username })
           .eq('id', data.user.id)
+
+        if (profileError) {
+          throw profileError
+        }
       }
 
       posthog.capture('signup_completed', { method: 'password' })
@@ -192,18 +200,22 @@ export const authApi = {
    */
   async isUsernameAvailable(username) {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('id')
         .ilike('display_name', username)
         .single()
+
+      if (error && error.code !== 'PGRST116') {
+        throw error
+      }
 
       return !data
     } catch (error) {
       // PGRST116 means no rows found, which means username is available
       if (error.code === 'PGRST116') return true
       console.error('Error checking username:', error)
-      return false
+      throw new Error('Unable to check username availability')
     }
   },
 
