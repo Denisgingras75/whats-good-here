@@ -297,8 +297,13 @@ export function Profile() {
           )}
 
           {/* Find Friends Section */}
-          <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-            <UserSearch />
+          <div className="px-4 py-3 border-b" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{ background: 'var(--color-primary)', padding: '2px' }}
+            >
+              <UserSearch />
+            </div>
           </div>
 
           {/* Tabs */}
