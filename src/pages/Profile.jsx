@@ -17,12 +17,9 @@ import { getCategoryById } from '../constants/categories'
 import { PHOTO_TIERS_LIST } from '../constants/photoQuality'
 import { DishModal } from '../components/DishModal'
 import { LoginModal } from '../components/Auth/LoginModal'
-import { UserSearch } from '../components/UserSearch'
 import { FollowListModal } from '../components/FollowListModal'
 import { ProfileSkeleton } from '../components/Skeleton'
 import { CategoryPicker } from '../components/CategoryPicker'
-import { StreakCard } from '../components/StreakCard'
-import { FriendsLeaderboard } from '../components/FriendsLeaderboard'
 import { getRatingColor } from '../utils/ranking'
 
 const TABS = [
@@ -56,7 +53,6 @@ export function Profile() {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [expandedTabs, setExpandedTabs] = useState({}) // Track which tabs show all dishes
-  const [showFindFriends, setShowFindFriends] = useState(false)
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 })
   const [followListModal, setFollowListModal] = useState(null) // 'followers' | 'following' | null
   const [editingFavorites, setEditingFavorites] = useState(false)
@@ -269,11 +265,6 @@ export function Profile() {
     }
   }
 
-  // Format member since date
-  const memberSince = user?.created_at
-    ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-    : null
-
   if (loading) {
     return <ProfileSkeleton />
   }
@@ -282,283 +273,27 @@ export function Profile() {
     <div style={{ background: 'var(--color-surface)' }}>
       {user ? (
         <>
-          {/* Profile Header */}
-          <div className="border-b px-4 py-6" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
-            <div className="flex items-center gap-4">
-              {/* Avatar */}
-              <div className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ background: 'var(--color-primary)' }}>
-                {profile?.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
-              </div>
+          {/* Hero Identity Card */}
+          <HeroIdentityCard
+            user={user}
+            profile={profile}
+            stats={stats}
+            badges={badges}
+            followCounts={followCounts}
+            editingName={editingName}
+            newName={newName}
+            nameStatus={nameStatus}
+            setEditingName={setEditingName}
+            setNewName={setNewName}
+            setNameStatus={setNameStatus}
+            handleSaveName={handleSaveName}
+            setFollowListModal={setFollowListModal}
+          />
 
-              <div className="flex-1 min-w-0">
-                {/* Display Name */}
-                {editingName ? (
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          value={newName}
-                          onChange={(e) => setNewName(e.target.value.replace(/\s/g, ''))}
-                          className="w-full px-3 py-1.5 border rounded-lg text-lg font-bold focus:outline-none pr-8"
-                          style={{
-                            background: 'var(--color-surface-elevated)',
-                            borderColor: nameStatus === 'taken' ? '#ef4444' : nameStatus === 'available' ? '#10b981' : 'var(--color-divider)',
-                            color: 'var(--color-text-primary)'
-                          }}
-                          autoFocus
-                          maxLength={30}
-                        />
-                        {nameStatus && nameStatus !== 'same' && (
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">
-                            {nameStatus === 'checking' && '⏳'}
-                            {nameStatus === 'available' && '✓'}
-                            {nameStatus === 'taken' && '✗'}
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        onClick={handleSaveName}
-                        disabled={nameStatus === 'taken' || nameStatus === 'checking'}
-                        className="px-3 py-1.5 text-white rounded-lg text-sm font-medium disabled:opacity-50"
-                        style={{ background: 'var(--color-primary)' }}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingName(false)
-                          setNewName(profile?.display_name || '')
-                          setNameStatus(null)
-                        }}
-                        className="px-3 py-1.5 rounded-lg text-sm font-medium"
-                        style={{ color: 'var(--color-text-secondary)' }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                    {nameStatus === 'taken' && (
-                      <p className="text-xs" style={{ color: '#ef4444' }}>This username is already taken</p>
-                    )}
-                    {nameStatus === 'available' && (
-                      <p className="text-xs" style={{ color: '#10b981' }}>Username available!</p>
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setEditingName(true)}
-                    className="text-xl font-bold transition-colors flex items-center gap-2"
-                    style={{ color: 'var(--color-text-primary)' }}
-                  >
-                    {profile?.display_name || 'Set your name'}
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-[color:var(--color-text-tertiary)]">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                    </svg>
-                  </button>
-                )}
-
-                {/* Rating Personality */}
-                {stats.ratingPersonality && (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span>{stats.ratingPersonality.emoji}</span>
-                    <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
-                      {stats.ratingPersonality.title}
-                    </span>
-                  </div>
-                )}
-
-                {/* Contribution Stats */}
-                <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">
-                  {stats.totalVotes > 0
-                    ? `Helped rank ${stats.totalVotes} ${stats.totalVotes === 1 ? 'dish' : 'dishes'}`
-                    : 'Start rating to help others'
-                  }
-                  {stats.uniqueRestaurants > 0 && ` · ${stats.uniqueRestaurants} spots`}
-                  {memberSince && ` · Since ${memberSince}`}
-                </p>
-
-                {/* Follow Stats */}
-                <div className="flex items-center gap-3 mt-2 text-sm">
-                  <button
-                    onClick={() => setFollowListModal('followers')}
-                    className="hover:underline"
-                    style={{ color: 'var(--color-text-secondary)' }}
-                  >
-                    <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                      {followCounts.followers}
-                    </span> followers
-                  </button>
-                  <button
-                    onClick={() => setFollowListModal('following')}
-                    className="hover:underline"
-                    style={{ color: 'var(--color-text-secondary)' }}
-                  >
-                    <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                      {followCounts.following}
-                    </span> following
-                  </button>
-                </div>
-
-                {/* Contributor Badge */}
-                {stats.totalVotes >= 10 && (
-                  <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: 'color-mix(in srgb, var(--color-rating) 20%, white)', color: '#1A1A1A' }}>
-                    <span>🏝️</span>
-                    <span>MV Contributor</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Quick Stats Cards */}
-            {stats.totalVotes > 0 && (
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
-                  <div className="text-2xl font-bold text-emerald-600">{stats.worthItCount}</div>
-                  <div className="text-xs text-[color:var(--color-text-secondary)]">Good Here</div>
-                </div>
-                <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
-                  <div className="text-2xl font-bold text-red-500">{stats.avoidCount}</div>
-                  <div className="text-xs text-[color:var(--color-text-secondary)]">Not Good</div>
-                </div>
-                <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
-                  <div className="text-2xl font-bold" style={{ color: stats.avgRating ? getRatingColor(stats.avgRating) : 'var(--color-text-tertiary)' }}>
-                    {stats.avgRating ? stats.avgRating.toFixed(1) : '—'}
-                  </div>
-                  <div className="text-xs text-[color:var(--color-text-secondary)]">Avg Rating</div>
-                </div>
-              </div>
-            )}
-
-            {/* Find Friends Section */}
-            <div className="mt-4">
-              <button
-                onClick={() => setShowFindFriends(!showFindFriends)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors"
-                style={{ background: 'var(--color-surface-elevated)' }}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">👥</span>
-                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                    Find Friends
-                  </span>
-                </div>
-                <svg
-                  className={`w-5 h-5 transition-transform ${showFindFriends ? 'rotate-180' : ''}`}
-                  style={{ color: 'var(--color-text-tertiary)' }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {showFindFriends && (
-                <div className="mt-3">
-                  <UserSearch onClose={() => setShowFindFriends(false)} />
-                </div>
-              )}
-            </div>
-
-            {/* Achievements Section */}
-            {!badgesLoading && badges.length > 0 && (
-              <AchievementsSection badges={badges} />
-            )}
-
-            {/* Streak Card */}
-            <div className="mt-4">
-              <StreakCard userId={user?.id} />
-            </div>
-
-            {/* Friends Leaderboard */}
-            <div className="mt-4">
-              <FriendsLeaderboard />
-            </div>
-
-            {/* Category Tiers */}
-            {stats.categoryTiers.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide mb-2">
-                  Your Ranks
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {stats.categoryTiers.map((tier) => (
-                    <div
-                      key={tier.category}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border"
-                      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
-                    >
-                      <span>{tier.emoji}</span>
-                      <span className="font-medium text-[color:var(--color-text-primary)]">{tier.label}</span>
-                      <span className="text-[color:var(--color-text-tertiary)]">·</span>
-                      <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>
-                        {tier.icon} {tier.title}
-                      </span>
-                      <span className="text-xs text-[color:var(--color-text-tertiary)]">({tier.count})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Tier Progress Indicators */}
-            {stats.categoryProgress.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide mb-2">
-                  {stats.categoryTiers.length > 0 ? 'Level Up' : 'Progress'}
-                </h3>
-                <div className="space-y-2">
-                  {stats.categoryProgress.slice(0, 3).map((prog) => (
-                    <div
-                      key={prog.category}
-                      className="rounded-xl p-3 border"
-                      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span>{prog.emoji}</span>
-                          <span className="font-medium text-[color:var(--color-text-primary)]">{prog.label}</span>
-                          {prog.currentTier && (
-                            <span className="text-xs text-[color:var(--color-text-tertiary)]">
-                              {prog.currentTier.icon} {prog.currentTier.title}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
-                          {prog.votesNeeded} more to {prog.nextTier.icon} {prog.nextTier.title}
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-elevated)' }}>
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{
-                            width: `${Math.round(prog.progress * 100)}%`,
-                            background: 'var(--color-primary)',
-                          }}
-                        />
-                      </div>
-                      <div className="flex justify-between mt-1">
-                        <span className="text-xs text-[color:var(--color-text-tertiary)]">{prog.count} votes</span>
-                        <span className="text-xs text-[color:var(--color-text-tertiary)]">{prog.nextTier.min} needed</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Top spot (if no progress yet, show encouragement) */}
-            {stats.categoryProgress.length === 0 && stats.favoriteRestaurant && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                <div className="px-3 py-1.5 rounded-full text-xs font-medium text-[color:var(--color-text-secondary)]" style={{ background: 'var(--color-surface-elevated)' }}>
-                  Top spot: <span className="text-[color:var(--color-text-primary)]">{stats.favoriteRestaurant}</span>
-                </div>
-                <div className="px-3 py-1.5 rounded-full text-xs font-medium text-[color:var(--color-text-secondary)]" style={{ background: 'var(--color-surface-elevated)' }}>
-                  Keep rating to earn ranks!
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Compact Identity Snapshot - Category tiers without progress bars */}
+          {(stats.categoryTiers.length > 0 || stats.categoryProgress.length > 0) && (
+            <IdentitySnapshot categoryTiers={stats.categoryTiers} categoryProgress={stats.categoryProgress} />
+          )}
 
           {/* Tabs */}
           <div className="border-b py-2" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}>
@@ -1246,342 +981,266 @@ function MissionSection() {
   )
 }
 
-// Achievements section with badges - Gamified with marketing psychology
-function AchievementsSection({ badges }) {
+// Hero Identity Card - dominant card replacing the cluttered header
+function HeroIdentityCard({
+  user,
+  profile,
+  stats,
+  badges,
+  followCounts,
+  editingName,
+  newName,
+  nameStatus,
+  setEditingName,
+  setNewName,
+  setNameStatus,
+  handleSaveName,
+  setFollowListModal,
+}) {
   const navigate = useNavigate()
-  const [expanded, setExpanded] = useState(false)
 
-  // Split badges into unlocked and locked
-  const unlockedBadges = badges.filter(b => b.unlocked)
-  const lockedBadges = badges.filter(b => !b.unlocked)
-
-  // Sort locked badges by progress percentage (closest to unlock first)
-  const sortedLockedBadges = [...lockedBadges].sort((a, b) => b.percentage - a.percentage)
-
-  // Get the badge closest to unlocking
-  const nextBadge = sortedLockedBadges[0] || null
-
-  // Check if any badge was unlocked recently (within 7 days)
-  const recentUnlock = unlockedBadges.find(b => {
-    if (!b.unlocked_at) return false
-    const unlockDate = new Date(b.unlocked_at)
-    const daysSince = (Date.now() - unlockDate.getTime()) / (1000 * 60 * 60 * 24)
-    return daysSince < 7
-  })
-
-  // Calculate overall progress
-  const totalProgress = badges.length > 0
-    ? Math.round((unlockedBadges.length / badges.length) * 100)
-    : 0
-
-  // Determine user's "rank" based on unlocked badges
-  const getRank = () => {
-    const count = unlockedBadges.length
-    if (count >= 8) return { title: 'Legend', emoji: '👑', color: '#9333EA' }
-    if (count >= 5) return { title: 'Expert', emoji: '⭐', color: '#F59E0B' }
-    if (count >= 3) return { title: 'Rising Star', emoji: '🌟', color: '#10B981' }
-    if (count >= 1) return { title: 'Explorer', emoji: '🧭', color: '#3B82F6' }
-    return { title: 'Newcomer', emoji: '🌱', color: '#6B7280' }
+  // Derive primary identity title from highest tier or rating personality
+  const getPrimaryTitle = () => {
+    if (stats.categoryTiers.length > 0) {
+      // Use highest tier as primary identity
+      const highestTier = stats.categoryTiers[0]
+      return `${highestTier.label} ${highestTier.title}`
+    }
+    if (stats.ratingPersonality) {
+      return stats.ratingPersonality.title
+    }
+    return 'Food Explorer'
   }
-  const rank = getRank()
 
-  // Get urgency message for next badge (Goal-Gradient + Zeigarnik Effect)
-  const getUrgencyMessage = (badge) => {
-    if (!badge) return null
-    const remaining = badge.target - badge.progress
-    if (badge.percentage >= 90) return `🔥 Just ${remaining} more to unlock!`
-    if (badge.percentage >= 70) return `⚡ Almost there! ${remaining} to go`
-    if (badge.percentage >= 50) return `💪 Halfway there!`
-    if (badge.percentage >= 25) return `🎯 Keep going!`
-    return `${remaining} to unlock`
+  // Calculate badges earned
+  const unlockedBadges = badges?.filter(b => b.unlocked) || []
+  const badgeCount = unlockedBadges.length
+
+  // Get near-term goal (closest to unlocking)
+  const getNearTermGoal = () => {
+    // Check category progress first
+    if (stats.categoryProgress.length > 0) {
+      const closest = stats.categoryProgress[0]
+      return `${closest.votesNeeded} vote${closest.votesNeeded === 1 ? '' : 's'} to ${closest.nextTier.title} in ${closest.label}`
+    }
+    // Fall back to encouraging first votes
+    if (stats.totalVotes === 0) {
+      return 'Rate your first dish to get started'
+    }
+    return null
   }
+
+  const nearTermGoal = getNearTermGoal()
 
   return (
-    <div className="mt-4">
-      {/* Header with rank */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full"
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{rank.emoji}</span>
-            <div>
-              <span className="text-sm font-bold" style={{ color: rank.color }}>{rank.title}</span>
-              <span className="text-xs text-[color:var(--color-text-tertiary)] ml-2">
-                {unlockedBadges.length}/{badges.length} badges
-              </span>
-            </div>
-          </div>
-          <svg
-            className={`w-5 h-5 text-[color:var(--color-text-tertiary)] transition-transform ${expanded ? 'rotate-180' : ''}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+    <div className="border-b px-4 py-6" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
+      {/* Avatar + Name row */}
+      <div className="flex items-center gap-4">
+        {/* Avatar */}
+        <div className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ background: 'var(--color-primary)' }}>
+          {profile?.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
         </div>
 
-        {/* Progress bar showing overall completion */}
-        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{
-              width: `${totalProgress}%`,
-              background: `linear-gradient(90deg, ${rank.color}, var(--color-primary))`,
-            }}
-          />
-        </div>
-      </button>
-
-      {/* Recent unlock celebration (Peak-End Rule) */}
-      {recentUnlock && !expanded && (
-        <div
-          className="mt-3 p-3 rounded-xl border-2 animate-pulse"
-          style={{
-            background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
-            borderColor: '#F59E0B',
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">{recentUnlock.icon}</span>
-            <div>
-              <p className="text-xs font-medium text-amber-800">🎉 Recently Unlocked!</p>
-              <p className="font-bold text-amber-900">{recentUnlock.name}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Collapsed view: Next badge focus (Goal-Gradient Effect) */}
-      {!expanded && nextBadge && (
-        <div className="mt-3">
-          <div
-            className="p-4 rounded-2xl relative overflow-hidden"
-            style={{
-              background: nextBadge.percentage >= 70
-                ? 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)'
-                : 'var(--color-surface-elevated)',
-              border: nextBadge.percentage >= 70 ? '2px solid #F59E0B' : '1px solid var(--color-divider)',
-            }}
-          >
-            {/* Urgency indicator for close badges */}
-            {nextBadge.percentage >= 70 && (
-              <div className="absolute top-0 right-0 px-2 py-1 text-xs font-bold text-amber-800 bg-amber-200 rounded-bl-lg">
-                ALMOST THERE
-              </div>
-            )}
-
-            <div className="flex items-center gap-4">
-              {/* Circular progress indicator */}
-              <div className="relative w-16 h-16 flex-shrink-0">
-                <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
-                  {/* Background circle */}
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="var(--color-divider)"
-                    strokeWidth="6"
-                    fill="none"
-                  />
-                  {/* Progress circle */}
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke={nextBadge.percentage >= 70 ? '#F59E0B' : 'var(--color-primary)'}
-                    strokeWidth="6"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray={`${nextBadge.percentage * 1.76} 176`}
-                    className="transition-all duration-500"
-                  />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-2xl">
-                  {nextBadge.icon}
-                </span>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wide">
-                  Next Badge
-                </p>
-                <p className="font-bold text-[color:var(--color-text-primary)]">{nextBadge.name}</p>
-                <p className="text-sm mt-1" style={{
-                  color: nextBadge.percentage >= 70 ? '#92400E' : 'var(--color-text-secondary)'
-                }}>
-                  {getUrgencyMessage(nextBadge)}
-                </p>
-              </div>
-
-              {/* Progress fraction */}
-              <div className="text-right">
-                <div className="text-2xl font-bold" style={{ color: nextBadge.percentage >= 70 ? '#F59E0B' : 'var(--color-primary)' }}>
-                  {nextBadge.progress}
-                </div>
-                <div className="text-xs text-[color:var(--color-text-tertiary)]">
-                  of {nextBadge.target}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Unlocked badges row */}
-          {unlockedBadges.length > 0 && (
-            <div className="mt-3">
-              <p className="text-xs text-[color:var(--color-text-tertiary)] mb-2">Your badges:</p>
-              <div className="flex flex-wrap gap-2">
-                {unlockedBadges.map((badge) => (
-                  <div
-                    key={badge.key}
-                    className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"
-                    style={{
-                      background: 'linear-gradient(135deg, var(--color-primary-muted) 0%, white 100%)',
-                      border: '2px solid var(--color-primary)',
-                    }}
-                    title={badge.name}
-                  >
-                    <span className="text-lg">{badge.icon}</span>
-                  </div>
-                ))}
-                {/* Show "more to earn" prompt */}
-                {lockedBadges.length > 1 && (
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold"
+        <div className="flex-1 min-w-0">
+          {/* Display Name */}
+          {editingName ? (
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value.replace(/\s/g, ''))}
+                    className="w-full px-3 py-1.5 border rounded-lg text-lg font-bold focus:outline-none pr-8"
                     style={{
                       background: 'var(--color-surface-elevated)',
-                      border: '2px dashed var(--color-divider)',
-                      color: 'var(--color-text-tertiary)',
+                      borderColor: nameStatus === 'taken' ? '#ef4444' : nameStatus === 'available' ? '#10b981' : 'var(--color-divider)',
+                      color: 'var(--color-text-primary)'
                     }}
-                  >
-                    +{lockedBadges.length}
-                  </div>
-                )}
+                    autoFocus
+                    maxLength={30}
+                  />
+                  {nameStatus && nameStatus !== 'same' && (
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">
+                      {nameStatus === 'checking' && '⏳'}
+                      {nameStatus === 'available' && '✓'}
+                      {nameStatus === 'taken' && '✗'}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={handleSaveName}
+                  disabled={nameStatus === 'taken' || nameStatus === 'checking'}
+                  className="px-3 py-1.5 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                  style={{ background: 'var(--color-primary)' }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingName(false)
+                    setNewName(profile?.display_name || '')
+                    setNameStatus(null)
+                  }}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  Cancel
+                </button>
               </div>
+              {nameStatus === 'taken' && (
+                <p className="text-xs" style={{ color: '#ef4444' }}>This username is already taken</p>
+              )}
+              {nameStatus === 'available' && (
+                <p className="text-xs" style={{ color: '#10b981' }}>Username available!</p>
+              )}
             </div>
+          ) : (
+            <button
+              onClick={() => setEditingName(true)}
+              className="text-xl font-bold transition-colors flex items-center gap-2"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              {profile?.display_name || 'Set your name'}
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-[color:var(--color-text-tertiary)]">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+              </svg>
+            </button>
           )}
 
-          {/* Empty state with motivation */}
-          {unlockedBadges.length === 0 && (
-            <div className="mt-3 text-center p-3 rounded-xl" style={{ background: 'var(--color-surface-elevated)' }}>
-              <p className="text-sm text-[color:var(--color-text-secondary)]">
-                🎯 Rate your first dish to start earning badges!
+          {/* Follow Stats */}
+          <div className="flex items-center gap-3 mt-1 text-sm">
+            <button
+              onClick={() => setFollowListModal('followers')}
+              className="hover:underline"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                {followCounts.followers}
+              </span> followers
+            </button>
+            <button
+              onClick={() => setFollowListModal('following')}
+              className="hover:underline"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                {followCounts.following}
+              </span> following
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Primary Identity Title */}
+      <div className="mt-4">
+        <h2 className="text-lg font-bold" style={{ color: 'var(--color-primary)' }}>
+          {getPrimaryTitle()}
+        </h2>
+        {/* Secondary line: rank info + badges */}
+        <p className="text-sm text-[color:var(--color-text-secondary)] mt-0.5">
+          {stats.totalVotes > 0 ? `${stats.totalVotes} ratings` : 'Getting started'}
+          {badgeCount > 0 && ` · ${badgeCount} badge${badgeCount === 1 ? '' : 's'} earned`}
+        </p>
+      </div>
+
+      {/* Near-term Goal CTA */}
+      {nearTermGoal && (
+        <button
+          onClick={() => navigate('/badges')}
+          className="mt-4 w-full p-3 rounded-xl text-left transition-colors hover:opacity-90"
+          style={{
+            background: 'var(--color-primary-muted)',
+            border: '1px solid var(--color-primary)'
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wide">
+                Next Goal
+              </p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
+                {nearTermGoal}
               </p>
             </div>
-          )}
-        </div>
+            <svg className="w-5 h-5" style={{ color: 'var(--color-primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </button>
       )}
+    </div>
+  )
+}
 
-      {/* Expanded view: Full badge collection */}
-      {expanded && (
-        <div className="mt-4 space-y-4">
-          {/* Unlocked section */}
-          {unlockedBadges.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide mb-2 flex items-center gap-2">
-                <span>✨ Earned</span>
-                <span className="text-[color:var(--color-primary)]">({unlockedBadges.length})</span>
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
-                {unlockedBadges.map((badge) => (
-                  <div
-                    key={badge.key}
-                    className="p-3 rounded-xl border-2 relative overflow-hidden"
-                    style={{
-                      background: 'linear-gradient(135deg, var(--color-primary-muted) 0%, white 100%)',
-                      borderColor: 'var(--color-primary)',
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{badge.icon}</span>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-primary)' }}>
-                          {badge.name}
-                        </p>
-                        <p className="text-[10px] text-[color:var(--color-text-tertiary)]">
-                          {badge.unlocked_at && new Date(badge.unlocked_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+// Compact Identity Snapshot - category tiers without progress bars
+function IdentitySnapshot({ categoryTiers, categoryProgress }) {
+  const navigate = useNavigate()
 
-          {/* Locked section with progress */}
-          {sortedLockedBadges.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold text-[color:var(--color-text-secondary)] uppercase tracking-wide mb-2 flex items-center gap-2">
-                <span>🔒 In Progress</span>
-                <span className="text-[color:var(--color-text-tertiary)]">({sortedLockedBadges.length})</span>
-              </h4>
-              <div className="space-y-2">
-                {sortedLockedBadges.map((badge) => {
-                  const isClose = badge.percentage >= 70
-                  const remaining = badge.target - badge.progress
+  // Combine current tiers with "near" tiers from progress
+  const getDisplayRows = () => {
+    const rows = []
 
-                  return (
-                    <div
-                      key={badge.key}
-                      className="p-3 rounded-xl border relative"
-                      style={{
-                        background: isClose ? 'linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%)' : 'var(--color-surface-elevated)',
-                        borderColor: isClose ? '#F59E0B' : 'var(--color-divider)',
-                      }}
-                    >
-                      {isClose && (
-                        <div className="absolute top-2 right-2">
-                          <span className="text-xs font-bold text-amber-600 animate-pulse">🔥</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
-                          <span className={`text-2xl ${isClose ? '' : 'opacity-50'}`}>{badge.icon}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`font-semibold text-sm ${isClose ? 'text-amber-900' : 'text-[color:var(--color-text-secondary)]'}`}>
-                            {badge.name}
-                          </p>
-                          <p className={`text-xs ${isClose ? 'text-amber-700' : 'text-[color:var(--color-text-tertiary)]'}`}>
-                            {isClose ? `Just ${remaining} more!` : `${remaining} to go`}
-                          </p>
-                          {/* Progress bar */}
-                          <div className="mt-2 h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
-                            <div
-                              className="h-full rounded-full transition-all duration-500"
-                              style={{
-                                width: `${badge.percentage}%`,
-                                background: isClose ? '#F59E0B' : 'var(--color-text-tertiary)',
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`text-lg font-bold ${isClose ? 'text-amber-600' : 'text-[color:var(--color-text-secondary)]'}`}>
-                            {badge.percentage}%
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+    // Add current tiers first (up to 3)
+    categoryTiers.slice(0, 3).forEach(tier => {
+      rows.push({
+        emoji: tier.emoji,
+        category: tier.label,
+        tier: tier.title,
+        tierIcon: tier.icon,
+        isNear: false,
+      })
+    })
 
-          {/* CTA to learn more */}
+    // If we have room, add "near" tiers from progress
+    if (rows.length < 3 && categoryProgress.length > 0) {
+      categoryProgress.slice(0, 3 - rows.length).forEach(prog => {
+        // Only add if not already in rows
+        if (!rows.find(r => r.category === prog.label)) {
+          rows.push({
+            emoji: prog.emoji,
+            category: prog.label,
+            tier: `Near ${prog.nextTier.title}`,
+            tierIcon: prog.nextTier.icon,
+            isNear: true,
+          })
+        }
+      })
+    }
+
+    return rows.slice(0, 3)
+  }
+
+  const displayRows = getDisplayRows()
+
+  if (displayRows.length === 0) return null
+
+  return (
+    <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--color-divider)' }}>
+      <div className="space-y-2">
+        {displayRows.map((row, idx) => (
           <button
+            key={idx}
             onClick={() => navigate('/badges')}
-            className="w-full py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-            style={{ background: 'var(--color-primary)', color: 'white' }}
+            className="w-full flex items-center justify-between py-2 px-3 rounded-lg transition-colors hover:bg-[color:var(--color-surface-elevated)]"
           >
-            View All Badges & Rewards →
+            <div className="flex items-center gap-3">
+              <span className="text-lg">{row.emoji}</span>
+              <span className="font-medium text-[color:var(--color-text-primary)]">{row.category}</span>
+              <span className="text-[color:var(--color-text-tertiary)]">·</span>
+              <span
+                className={`font-semibold ${row.isNear ? 'text-[color:var(--color-text-secondary)]' : ''}`}
+                style={!row.isNear ? { color: 'var(--color-primary)' } : undefined}
+              >
+                {row.tierIcon} {row.tier}
+              </span>
+            </div>
+            <svg className="w-4 h-4 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   )
 }
