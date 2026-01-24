@@ -278,9 +278,8 @@ export const followsApi = {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, follower_count, following_count')
+        .select('id, display_name')
         .ilike('display_name', `%${sanitized}%`)
-        .order('follower_count', { ascending: false })
         .limit(limit)
 
       if (error) {
@@ -288,7 +287,24 @@ export const followsApi = {
         throw new Error('Failed to search users')
       }
 
-      return data || []
+      if (!data || data.length === 0) return []
+
+      // Get live follower counts for each user
+      const usersWithCounts = await Promise.all(
+        data.map(async (user) => {
+          const { count } = await supabase
+            .from('follows')
+            .select('*', { count: 'exact', head: true })
+            .eq('followed_id', user.id)
+          return {
+            ...user,
+            follower_count: count || 0,
+          }
+        })
+      )
+
+      // Sort by follower count descending
+      return usersWithCounts.sort((a, b) => b.follower_count - a.follower_count)
     } catch (err) {
       console.error('Unexpected error in searchUsers:', err)
       throw err
