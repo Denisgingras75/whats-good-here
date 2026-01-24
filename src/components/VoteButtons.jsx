@@ -54,7 +54,7 @@ export function VoteButtons({ dishId, onVote, onLoginRequired }) {
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {/* Worth It Button */}
+      {/* Good Here Button */}
       <button
         onClick={() => handleVote(true)}
         disabled={submitting}
@@ -81,10 +81,10 @@ export function VoteButtons({ dishId, onVote, onLoginRequired }) {
         <span className="text-xl relative z-10">
           {currentVote === true ? '✅' : '👍'}
         </span>
-        <span className="relative z-10">Worth It</span>
+        <span className="relative z-10">Good Here</span>
       </button>
 
-      {/* Avoid Button */}
+      {/* Not Good Button */}
       <button
         onClick={() => handleVote(false)}
         disabled={submitting}
@@ -111,7 +111,7 @@ export function VoteButtons({ dishId, onVote, onLoginRequired }) {
         <span className="text-xl relative z-10">
           {currentVote === false ? '❌' : '👎'}
         </span>
-        <span className="relative z-10">Avoid</span>
+        <span className="relative z-10">Not Good</span>
       </button>
     </div>
   )

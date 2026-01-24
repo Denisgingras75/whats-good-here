@@ -16,7 +16,7 @@ const STEPS = [
     id: 'how-it-works',
     emoji: '👍',
     title: 'Vote on dishes you\'ve tried',
-    subtitle: 'Worth It or Avoid — it\'s that simple',
+    subtitle: 'Good Here or Not Good — it\'s that simple',
     description: 'Rate 1-10, and watch dishes climb the rankings as the community votes.',
   },
   {
@@ -174,11 +174,11 @@ export function WelcomeModal() {
             <div className="flex justify-center gap-4 mb-6">
               <div className="flex flex-col items-center p-3 bg-emerald-50 rounded-xl">
                 <span className="text-2xl mb-1">👍</span>
-                <span className="text-xs font-medium text-emerald-700">Worth It</span>
+                <span className="text-xs font-medium text-emerald-700">Good Here</span>
               </div>
               <div className="flex flex-col items-center p-3 bg-red-50 rounded-xl">
                 <span className="text-2xl mb-1">👎</span>
-                <span className="text-xs font-medium text-red-600">Avoid</span>
+                <span className="text-xs font-medium text-red-600">Not Good</span>
               </div>
               <div className="flex flex-col items-center p-3 bg-amber-50 rounded-xl">
                 <span className="text-2xl mb-1">⭐</span>

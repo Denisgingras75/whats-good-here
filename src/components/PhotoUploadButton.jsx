@@ -53,8 +53,7 @@ export function PhotoUploadButton({
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          capture="environment"
-          onChange={handleFileChange}
+                    onChange={handleFileChange}
           style={{ display: 'none' }}
         />
         <button
@@ -86,8 +85,7 @@ export function PhotoUploadButton({
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
-        onChange={handleFileChange}
+                onChange={handleFileChange}
         style={{ display: 'none' }}
       />
 

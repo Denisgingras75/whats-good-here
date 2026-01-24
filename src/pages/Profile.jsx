@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext'
 import { authApi } from '../api/authApi'
 import { adminApi } from '../api/adminApi'
 import { followsApi } from '../api/followsApi'
+import { votesApi } from '../api/votesApi'
+import { dishPhotosApi } from '../api/dishPhotosApi'
 import { useProfile } from '../hooks/useProfile'
 import { useUserVotes } from '../hooks/useUserVotes'
 import { useSavedDishes } from '../hooks/useSavedDishes'
@@ -25,9 +27,10 @@ import { getRatingColor } from '../utils/ranking'
 
 const TABS = [
   { id: 'unrated', label: 'Unrated', emoji: '📷' },
-  { id: 'worth-it', label: 'Worth It', emoji: '👍' },
-  { id: 'avoid', label: 'Avoid', emoji: '👎' },
-  { id: 'saved', label: 'Saved', emoji: '❤️' },
+  { id: 'worth-it', label: "Good Here", emoji: '👍' },
+  { id: 'avoid', label: "Not Good", emoji: '👎' },
+  { id: 'saved', label: 'Heard Good', emoji: '❤️' },
+  { id: 'reviews', label: 'Reviews', emoji: '📝' },
 ]
 
 const REMEMBERED_EMAIL_KEY = 'whats-good-here-email'
@@ -58,6 +61,8 @@ export function Profile() {
   const [followListModal, setFollowListModal] = useState(null) // 'followers' | 'following' | null
   const [editingFavorites, setEditingFavorites] = useState(false)
   const [editedCategories, setEditedCategories] = useState([])
+  const [userReviews, setUserReviews] = useState([])
+  const [reviewsLoading, setReviewsLoading] = useState(false)
 
   // Check admin status from database (matches RLS policies)
   useEffect(() => {
@@ -126,6 +131,26 @@ export function Profile() {
     return () => clearTimeout(timer)
   }, [newName, editingName, profile?.display_name])
 
+  // Fetch user's written reviews
+  useEffect(() => {
+    if (!user) {
+      setUserReviews([])
+      return
+    }
+    async function fetchReviews() {
+      setReviewsLoading(true)
+      try {
+        const reviews = await votesApi.getReviewsForUser(user.id)
+        setUserReviews(reviews)
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error)
+      } finally {
+        setReviewsLoading(false)
+      }
+    }
+    fetchReviews()
+  }, [user])
+
   const handleToggleSound = () => {
     const newMutedState = toggleSoundMute()
     setSoundMuted(newMutedState)
@@ -191,6 +216,8 @@ export function Profile() {
         return avoidDishes
       case 'saved':
         return savedDishes
+      case 'reviews':
+        return userReviews
       default:
         return []
     }
@@ -198,7 +225,8 @@ export function Profile() {
 
   const tabDishes = getTabDishes()
   const isLoading = activeTab === 'saved' ? savedLoading :
-                    activeTab === 'unrated' ? unratedLoading : votesLoading
+                    activeTab === 'unrated' ? unratedLoading :
+                    activeTab === 'reviews' ? reviewsLoading : votesLoading
 
   // Limit to 5 dishes unless expanded
   const MAX_VISIBLE_DISHES = 5
@@ -227,6 +255,18 @@ export function Profile() {
       total_votes: 0,
       yes_votes: 0,
     })
+  }
+
+  // Handle deleting an unrated photo
+  const handleDeletePhoto = async (photoId) => {
+    if (!confirm('Delete this photo? This cannot be undone.')) return
+    try {
+      await dishPhotosApi.deletePhoto(photoId)
+      await refetchUnrated()
+    } catch (error) {
+      console.error('Failed to delete photo:', error)
+      alert('Failed to delete photo. Please try again.')
+    }
   }
 
   // Format member since date
@@ -374,11 +414,11 @@ export function Profile() {
               <div className="grid grid-cols-3 gap-3 mt-4">
                 <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
                   <div className="text-2xl font-bold text-emerald-600">{stats.worthItCount}</div>
-                  <div className="text-xs text-[color:var(--color-text-secondary)]">Worth It</div>
+                  <div className="text-xs text-[color:var(--color-text-secondary)]">Good Here</div>
                 </div>
                 <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
                   <div className="text-2xl font-bold text-red-500">{stats.avoidCount}</div>
-                  <div className="text-xs text-[color:var(--color-text-secondary)]">Avoid</div>
+                  <div className="text-xs text-[color:var(--color-text-secondary)]">Not Good</div>
                 </div>
                 <div className="bg-[color:var(--color-surface-elevated)] rounded-xl p-3 text-center">
                   <div className="text-2xl font-bold" style={{ color: stats.avgRating ? getRatingColor(stats.avgRating) : 'var(--color-text-tertiary)' }}>
@@ -544,6 +584,7 @@ export function Profile() {
                     {tab.id === 'unrated' ? unratedCount :
                      tab.id === 'worth-it' ? worthItDishes.length :
                      tab.id === 'avoid' ? avoidDishes.length :
+                     tab.id === 'reviews' ? userReviews.length :
                      savedDishes.length}
                   </span>
                 </button>
@@ -568,6 +609,15 @@ export function Profile() {
                       key={dish.dish_id}
                       dish={dish}
                       onClick={() => handleUnratedDishClick(dish)}
+                      onDelete={() => handleDeletePhoto(dish.photo_id)}
+                    />
+                  ))
+                ) : activeTab === 'reviews' ? (
+                  // Reviews tab
+                  visibleDishes.map((review) => (
+                    <ProfileReviewCard
+                      key={review.id}
+                      review={review}
                     />
                   ))
                 ) : (
@@ -592,7 +642,7 @@ export function Profile() {
                     <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
                       {isTabExpanded
                         ? 'Show less'
-                        : `View ${hiddenCount} more ${hiddenCount === 1 ? 'dish' : 'dishes'}`
+                        : `View ${hiddenCount} more ${activeTab === 'reviews' ? (hiddenCount === 1 ? 'review' : 'reviews') : (hiddenCount === 1 ? 'dish' : 'dishes')}`
                       }
                     </span>
                   </button>
@@ -901,6 +951,61 @@ function ProfileDishCard({ dish, tab, onUnsave }) {
   )
 }
 
+// Card for displaying a user's review
+function ProfileReviewCard({ review }) {
+  const dish = review.dishes
+  const imageUrl = dish?.photo_url || getCategoryImage(dish?.category)
+
+  // Format date
+  const formattedDate = review.review_created_at
+    ? new Date(review.review_created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : null
+
+  return (
+    <Link
+      to={`/dish/${review.dish_id}`}
+      className="block rounded-xl border overflow-hidden"
+      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
+    >
+      <div className="flex">
+        {/* Image */}
+        <div className="w-20 h-20 flex-shrink-0" style={{ background: 'var(--color-surface-elevated)' }}>
+          <img
+            src={imageUrl}
+            alt={dish?.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 p-3 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h3 className="font-semibold text-[color:var(--color-text-primary)] truncate text-sm">{dish?.name}</h3>
+              <p className="text-xs text-[color:var(--color-text-secondary)] truncate">{dish?.restaurants?.name}</p>
+            </div>
+            {review.rating_10 && (
+              <span className="text-sm font-bold flex-shrink-0" style={{ color: getRatingColor(review.rating_10) }}>
+                {review.rating_10}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Review text */}
+      <div className="px-3 pb-3">
+        <p className="text-sm text-[color:var(--color-text-secondary)] line-clamp-2 italic">
+          "{review.review_text}"
+        </p>
+        {formattedDate && (
+          <p className="text-xs text-[color:var(--color-text-tertiary)] mt-1">{formattedDate}</p>
+        )}
+      </div>
+    </Link>
+  )
+}
+
 // Empty state for tabs
 function EmptyState({ tab }) {
   const content = {
@@ -911,18 +1016,23 @@ function EmptyState({ tab }) {
     },
     'worth-it': {
       emoji: '👍',
-      title: 'No favorites yet',
-      description: 'Dishes you rate as "Worth It" will appear here',
+      title: "Nothing good here yet",
+      description: "Dishes you'd order again will appear here",
     },
     'avoid': {
       emoji: '👎',
-      title: 'Nothing to avoid',
-      description: 'Dishes you think others should skip will appear here',
+      title: "Nothing to skip yet",
+      description: "Dishes that weren't good will appear here",
     },
     'saved': {
       emoji: '❤️',
-      title: 'No saved dishes',
-      description: 'Tap the heart on dishes you want to try later',
+      title: "No dishes saved yet",
+      description: 'Save dishes you heard were good to try later',
+    },
+    'reviews': {
+      emoji: '📝',
+      title: 'No reviews yet',
+      description: 'Share your thoughts when you rate a dish',
     },
   }
 
@@ -938,7 +1048,7 @@ function EmptyState({ tab }) {
 }
 
 // Card for unrated dishes (dishes with photos but no vote)
-function UnratedDishCard({ dish, onClick }) {
+function UnratedDishCard({ dish, onClick, onDelete }) {
   const imageUrl = dish.user_photo_url || dish.photo_url || getCategoryImage(dish.category)
 
   // Format time since photo was taken
@@ -946,14 +1056,22 @@ function UnratedDishCard({ dish, onClick }) {
     ? new Date(dish.photo_created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : null
 
+  const handleDelete = (e) => {
+    e.stopPropagation()
+    onDelete?.()
+  }
+
   return (
-    <button
-      onClick={onClick}
+    <div
       className="w-full rounded-xl border overflow-hidden flex text-left hover:shadow-md transition-shadow"
       style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
     >
-      {/* Image with photo indicator */}
-      <div className="w-24 h-24 flex-shrink-0 relative" style={{ background: 'var(--color-surface-elevated)' }}>
+      {/* Image with photo indicator - clickable to rate */}
+      <button
+        onClick={onClick}
+        className="w-24 h-24 flex-shrink-0 relative"
+        style={{ background: 'var(--color-surface-elevated)' }}
+      >
         <img
           src={imageUrl}
           alt={dish.dish_name}
@@ -965,10 +1083,10 @@ function UnratedDishCard({ dish, onClick }) {
             <span>Your photo</span>
           </div>
         )}
-      </div>
+      </button>
 
-      {/* Info */}
-      <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
+      {/* Info - clickable to rate */}
+      <button onClick={onClick} className="flex-1 p-3 flex flex-col justify-between min-w-0 text-left">
         <div>
           <h3 className="font-semibold text-[color:var(--color-text-primary)] truncate">{dish.dish_name}</h3>
           <p className="text-sm text-[color:var(--color-text-secondary)] truncate">{dish.restaurant_name}</p>
@@ -982,8 +1100,20 @@ function UnratedDishCard({ dish, onClick }) {
             Rate now →
           </span>
         </div>
-      </div>
-    </button>
+      </button>
+
+      {/* Delete button */}
+      <button
+        onClick={handleDelete}
+        className="px-3 flex items-center justify-center hover:bg-red-50 transition-colors"
+        style={{ borderLeft: '1px solid var(--color-divider)' }}
+        aria-label="Delete photo"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-red-500">
+          <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.519.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clipRule="evenodd" />
+        </svg>
+      </button>
+    </div>
   )
 }
 

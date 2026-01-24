@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { followsApi } from '../api/followsApi'
+import { votesApi } from '../api/votesApi'
 import { getCategoryImage } from '../constants/categoryImages'
 import { getRatingColor } from '../utils/ranking'
 import { FollowListModal } from '../components/FollowListModal'
@@ -30,6 +31,11 @@ export function UserProfile() {
   const [followListModal, setFollowListModal] = useState(null) // 'followers' | 'following' | null
   const [myRatings, setMyRatings] = useState({}) // { dishId: rating }
   const [showAllRatings, setShowAllRatings] = useState(false)
+  const [userReviews, setUserReviews] = useState([])
+  const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [showAllReviews, setShowAllReviews] = useState(false)
+  const [selectedReview, setSelectedReview] = useState(null)
+  const [activityTab, setActivityTab] = useState('ratings') // 'ratings' | 'reviews'
 
   // Check if viewing own profile
   const isOwnProfile = currentUser?.id === userId
@@ -106,6 +112,23 @@ export function UserProfile() {
     }
     fetchMyRatings()
   }, [currentUser, profile?.recent_votes, isOwnProfile])
+
+  // Fetch user's written reviews
+  useEffect(() => {
+    async function fetchReviews() {
+      if (!userId) return
+      setReviewsLoading(true)
+      try {
+        const reviews = await votesApi.getReviewsForUser(userId)
+        setUserReviews(reviews)
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error)
+      } finally {
+        setReviewsLoading(false)
+      }
+    }
+    fetchReviews()
+  }, [userId])
 
   // Handle follow/unfollow
   const handleFollowToggle = async () => {
@@ -319,11 +342,11 @@ export function UserProfile() {
           <div className="grid grid-cols-3 gap-3 mt-4">
             <div className="rounded-xl p-3 text-center" style={{ background: 'var(--color-surface-elevated)' }}>
               <div className="text-2xl font-bold text-emerald-500">{profile.stats.worth_it}</div>
-              <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Worth It</div>
+              <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Good Here</div>
             </div>
             <div className="rounded-xl p-3 text-center" style={{ background: 'var(--color-surface-elevated)' }}>
               <div className="text-2xl font-bold text-red-500">{profile.stats.avoid}</div>
-              <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Avoid</div>
+              <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Not Good</div>
             </div>
             <div className="rounded-xl p-3 text-center" style={{ background: 'var(--color-surface-elevated)' }}>
               <div className="text-2xl font-bold" style={{ color: getRatingColor(profile.stats.avg_rating) }}>
@@ -430,41 +453,119 @@ export function UserProfile() {
         )}
       </div>
 
-      {/* Recent Ratings */}
+      {/* Activity Section with Tabs */}
       <div className="px-4 py-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--color-text-secondary)' }}>
-          {profile.display_name}'s Ratings
-        </h3>
+        {/* Tab Bar */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setActivityTab('ratings')}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+              activityTab === 'ratings'
+                ? 'text-white shadow-md'
+                : 'text-[color:var(--color-text-secondary)]'
+            }`}
+            style={activityTab === 'ratings'
+              ? { background: 'var(--color-primary)' }
+              : { background: 'var(--color-surface-elevated)' }}
+          >
+            {profile.display_name}'s Ratings
+            <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-xs ${
+              activityTab === 'ratings' ? 'bg-white/20' : 'bg-black/10'
+            }`}>
+              {profile.recent_votes?.length || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setActivityTab('reviews')}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+              activityTab === 'reviews'
+                ? 'text-white shadow-md'
+                : 'text-[color:var(--color-text-secondary)]'
+            }`}
+            style={activityTab === 'reviews'
+              ? { background: 'var(--color-primary)' }
+              : { background: 'var(--color-surface-elevated)' }}
+          >
+            Written Reviews
+            <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-xs ${
+              activityTab === 'reviews' ? 'bg-white/20' : 'bg-black/10'
+            }`}>
+              {userReviews.length}
+            </span>
+          </button>
+        </div>
 
-        {profile.recent_votes?.length > 0 ? (
-          <div className="space-y-3">
-            {(showAllRatings ? profile.recent_votes : profile.recent_votes.slice(0, 5)).map((vote, index) => (
-              <RecentVoteCard key={index} vote={vote} myRating={myRatings[vote.dish?.id]} />
-            ))}
+        {/* Tab Content */}
+        {activityTab === 'ratings' ? (
+          // Ratings Tab
+          profile.recent_votes?.length > 0 ? (
+            <div className="space-y-3">
+              {(showAllRatings ? profile.recent_votes : profile.recent_votes.slice(0, 5)).map((vote, index) => (
+                <RecentVoteCard key={index} vote={vote} myRating={myRatings[vote.dish?.id]} />
+              ))}
 
-            {/* View more / View less button */}
-            {profile.recent_votes.length > 5 && (
-              <button
-                onClick={() => setShowAllRatings(!showAllRatings)}
-                className="w-full py-3 text-center rounded-xl border-2 border-dashed hover:bg-white/5 transition-colors"
-                style={{ borderColor: 'var(--color-divider)' }}
-              >
-                <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
-                  {showAllRatings
-                    ? 'Show less'
-                    : `View ${profile.recent_votes.length - 5} more ${profile.recent_votes.length - 5 === 1 ? 'dish' : 'dishes'}`
-                  }
-                </span>
-              </button>
-            )}
-          </div>
+              {/* View more / View less button */}
+              {profile.recent_votes.length > 5 && (
+                <button
+                  onClick={() => setShowAllRatings(!showAllRatings)}
+                  className="w-full py-3 text-center rounded-xl border-2 border-dashed hover:bg-white/5 transition-colors"
+                  style={{ borderColor: 'var(--color-divider)' }}
+                >
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
+                    {showAllRatings
+                      ? 'Show less'
+                      : `View ${profile.recent_votes.length - 5} more ${profile.recent_votes.length - 5 === 1 ? 'rating' : 'ratings'}`
+                    }
+                  </span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="py-8 text-center">
+              <div className="text-4xl mb-2">🍽️</div>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                No ratings yet
+              </p>
+            </div>
+          )
         ) : (
-          <div className="py-8 text-center">
-            <div className="text-4xl mb-2">🍽️</div>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              No ratings yet
-            </p>
-          </div>
+          // Reviews Tab
+          reviewsLoading ? (
+            <div className="space-y-3">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-surface-elevated)' }} />
+              ))}
+            </div>
+          ) : userReviews.length > 0 ? (
+            <div className="space-y-3">
+              {(showAllReviews ? userReviews : userReviews.slice(0, 5)).map((review) => (
+                <UserReviewCard key={review.id} review={review} onClick={() => setSelectedReview(review)} />
+              ))}
+
+              {/* View more / View less button */}
+              {userReviews.length > 5 && (
+                <button
+                  onClick={() => setShowAllReviews(!showAllReviews)}
+                  className="w-full py-3 text-center rounded-xl border-2 border-dashed hover:bg-white/5 transition-colors"
+                  style={{ borderColor: 'var(--color-divider)' }}
+                >
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
+                    {showAllReviews
+                      ? 'Show less'
+                      : `View ${userReviews.length - 5} more ${userReviews.length - 5 === 1 ? 'review' : 'reviews'}`
+                    }
+                  </span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="py-8 text-center">
+              <div className="text-4xl mb-2">📝</div>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                No reviews yet
+              </p>
+            </div>
+          )
         )}
       </div>
 
@@ -474,6 +575,15 @@ export function UserProfile() {
           userId={userId}
           type={followListModal}
           onClose={() => setFollowListModal(null)}
+        />
+      )}
+
+      {/* Review Detail Modal */}
+      {selectedReview && (
+        <ReviewDetailModal
+          review={selectedReview}
+          reviewerName={profile.display_name}
+          onClose={() => setSelectedReview(null)}
         />
       )}
     </div>
@@ -549,6 +659,178 @@ function RecentVoteCard({ vote, myRating }) {
         </div>
       </div>
     </button>
+  )
+}
+
+// User review card component
+function UserReviewCard({ review, onClick }) {
+  const dish = review.dishes
+
+  if (!dish) return null
+
+  const imgSrc = dish.photo_url || getCategoryImage(dish.category)
+
+  // Format date
+  const formattedDate = review.review_created_at
+    ? new Date(review.review_created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : null
+
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left rounded-xl transition-all active:scale-[0.99] overflow-hidden"
+      style={{ background: 'var(--color-bg)', border: '1px solid var(--color-divider)' }}
+    >
+      <div className="flex items-center gap-3 p-3">
+        {/* Dish Photo */}
+        <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0" style={{ background: 'var(--color-surface)' }}>
+          <img src={imgSrc} alt={dish.name} className="w-full h-full object-cover" />
+        </div>
+
+        {/* Dish Info */}
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+            {dish.name}
+          </h4>
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+            {dish.restaurants?.name}
+          </p>
+        </div>
+
+        {/* Rating */}
+        {review.rating_10 && (
+          <div className="flex-shrink-0">
+            <span className="text-lg font-bold" style={{ color: getRatingColor(review.rating_10) }}>
+              {review.rating_10}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
+          </div>
+        )}
+      </div>
+
+      {/* Review text */}
+      <div className="px-3 pb-3 pt-0">
+        <p className="text-sm line-clamp-2 italic" style={{ color: 'var(--color-text-secondary)' }}>
+          "{review.review_text}"
+        </p>
+        {formattedDate && (
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>{formattedDate}</p>
+        )}
+      </div>
+    </button>
+  )
+}
+
+// Review detail modal component
+function ReviewDetailModal({ review, reviewerName, onClose }) {
+  const navigate = useNavigate()
+  const dish = review.dishes
+
+  if (!dish) return null
+
+  const imgSrc = dish.photo_url || getCategoryImage(dish.category)
+
+  // Format date
+  const formattedDate = review.review_created_at
+    ? new Date(review.review_created_at).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      })
+    : null
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+
+      {/* Modal */}
+      <div
+        className="relative w-full sm:max-w-md mx-auto bg-white rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+        style={{ background: 'var(--color-bg)' }}
+      >
+        {/* Header with dish image */}
+        <div className="relative">
+          <div className="aspect-[16/9] w-full overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+            <img src={imgSrc} alt={dish.name} className="w-full h-full object-cover" />
+          </div>
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/50 text-white"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+            </svg>
+          </button>
+
+          {/* Rating badge */}
+          {review.rating_10 && (
+            <div className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm">
+              <span className="text-lg font-bold" style={{ color: getRatingColor(review.rating_10) }}>
+                {review.rating_10}
+              </span>
+              <span className="text-sm text-white/70">/10</span>
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="p-4 flex-1 overflow-y-auto">
+          {/* Dish info */}
+          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            {dish.name}
+          </h2>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+            {dish.restaurants?.name}
+          </p>
+
+          {/* Vote indicator */}
+          <div className="mt-4 flex items-center gap-3">
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-xl"
+              style={{ background: 'var(--color-surface-elevated)' }}
+            >
+              <span className="text-xl">{review.would_order_again ? '👍' : '👎'}</span>
+              <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                {review.would_order_again ? 'Would order again' : 'Would not order again'}
+              </span>
+            </div>
+          </div>
+
+          {/* Review text */}
+          <div className="mt-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--color-text-tertiary)' }}>
+              {reviewerName}'s Review
+            </h3>
+            <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
+              "{review.review_text}"
+            </p>
+            {formattedDate && (
+              <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                {formattedDate}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Footer - View dish button */}
+        <div className="p-4 border-t" style={{ borderColor: 'var(--color-divider)' }}>
+          <button
+            onClick={() => navigate(`/dish/${review.dish_id}`)}
+            className="w-full py-3 rounded-xl font-semibold text-white transition-colors"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            View Dish Details
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 

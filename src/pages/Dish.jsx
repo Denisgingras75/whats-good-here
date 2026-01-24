@@ -372,7 +372,7 @@ export function Dish() {
                   {dish.avg_rating || `${dish.percent_worth_it}%`}
                 </span>
                 <span className="text-xs text-white/80 ml-1">
-                  {dish.avg_rating ? 'rating' : 'would order again'}
+                  {dish.avg_rating ? 'rating' : 'say good here'}
                 </span>
               </div>
             )}
@@ -412,7 +412,7 @@ export function Dish() {
                 {dish.total_votes === 0
                   ? 'Be the first to vote on this dish'
                   : isRanked
-                    ? `${dish.total_votes} votes · ${dish.percent_worth_it}% would order again`
+                    ? `${dish.total_votes} votes · ${dish.percent_worth_it}% say it's good here`
                     : `Early · ${dish.total_votes} vote${dish.total_votes === 1 ? '' : 's'} so far`
                 }
               </p>

@@ -668,7 +668,7 @@ function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, onToggle
               </div>
               {/* Order again badge */}
               <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                {Math.round(percent_worth_it)}% would order again
+                {Math.round(percent_worth_it)}% say it's good here
               </span>
             </div>
           ) : (
