@@ -17,6 +17,7 @@ import { getCategoryById } from '../constants/categories'
 import { PHOTO_TIERS_LIST } from '../constants/photoQuality'
 import { DishModal } from '../components/DishModal'
 import { LoginModal } from '../components/Auth/LoginModal'
+import { UserSearch } from '../components/UserSearch'
 import { FollowListModal } from '../components/FollowListModal'
 import { ProfileSkeleton } from '../components/Skeleton'
 import { CategoryPicker } from '../components/CategoryPicker'
@@ -53,6 +54,7 @@ export function Profile() {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [expandedTabs, setExpandedTabs] = useState({}) // Track which tabs show all dishes
+  const [showFindFriends, setShowFindFriends] = useState(false)
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 })
   const [followListModal, setFollowListModal] = useState(null) // 'followers' | 'following' | null
   const [editingFavorites, setEditingFavorites] = useState(false)
@@ -294,6 +296,37 @@ export function Profile() {
           {(stats.categoryTiers.length > 0 || stats.categoryProgress.length > 0) && (
             <IdentitySnapshot categoryTiers={stats.categoryTiers} categoryProgress={stats.categoryProgress} />
           )}
+
+          {/* Find Friends Section */}
+          <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--color-divider)' }}>
+            <button
+              onClick={() => setShowFindFriends(!showFindFriends)}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors"
+              style={{ background: 'var(--color-surface-elevated)' }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-lg">👥</span>
+                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                  Find Friends
+                </span>
+              </div>
+              <svg
+                className={`w-5 h-5 transition-transform ${showFindFriends ? 'rotate-180' : ''}`}
+                style={{ color: 'var(--color-text-tertiary)' }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showFindFriends && (
+              <div className="mt-3">
+                <UserSearch onClose={() => setShowFindFriends(false)} />
+              </div>
+            )}
+          </div>
 
           {/* Tabs */}
           <div className="border-b py-2" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}>
