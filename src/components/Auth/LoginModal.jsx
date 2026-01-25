@@ -4,6 +4,7 @@ import { getPendingVoteFromStorage } from '../../lib/storage'
 import { ThumbsUpIcon } from '../ThumbsUpIcon'
 import { ThumbsDownIcon } from '../ThumbsDownIcon'
 import { logger } from '../../utils/logger'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 const REMEMBERED_EMAIL_KEY = 'whats-good-here-email'
 
@@ -65,6 +66,8 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
 
     return () => clearTimeout(timer)
   }, [username, mode])
+
+  const modalRef = useFocusTrap(isOpen, onClose)
 
   if (!isOpen) return null
 
@@ -180,12 +183,17 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
     <div
       className="fixed inset-0 z-[10000] flex items-center justify-center p-4 animate-fade-in-up"
       onClick={onClose}
+      role="presentation"
     >
       {/* Backdrop with blur */}
-      <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" aria-hidden="true" />
 
       {/* Modal */}
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-modal-title"
         className="relative rounded-3xl max-w-md w-full shadow-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         style={{ background: 'var(--color-surface-elevated)' }}
@@ -197,7 +205,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+            className="absolute top-6 right-6 w-[38px] h-[38px] rounded-full flex items-center justify-center transition-colors"
             style={{ background: 'var(--color-divider)', color: 'var(--color-text-secondary)' }}
             aria-label="Close"
           >
@@ -213,7 +221,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
 
           {/* Header */}
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            <h2 id="login-modal-title" className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
               {mode === 'signup' ? 'Create Account' : mode === 'signin' ? 'Welcome Back' : mode === 'forgot' ? 'Reset Password' : hasPendingVote ? 'Sign in to save your vote' : 'Sign in to vote'}
             </h2>
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
@@ -233,6 +241,8 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
           {/* Messages */}
           {message && (
             <div
+              role="alert"
+              aria-live="polite"
               className="mb-6 p-4 rounded-xl text-sm font-medium"
               style={message.type === 'error'
                 ? { background: 'color-mix(in srgb, var(--color-danger) 15%, var(--color-bg))', color: 'var(--color-danger)' }
@@ -296,32 +306,34 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
           {mode === 'signin' && (
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="signin-email" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                   Email
                 </label>
                 <input
+                  id="signin-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
                   autoFocus
-                  className="w-full px-4 py-3 rounded-xl focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
                   style={{ background: 'var(--color-bg)', border: '2px solid var(--color-divider)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="signin-password" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                   Password
                 </label>
                 <input
+                  id="signin-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full px-4 py-3 rounded-xl focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
                   style={{ background: 'var(--color-bg)', border: '2px solid var(--color-divider)', color: 'var(--color-text-primary)' }}
                 />
               </div>
@@ -371,17 +383,18 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
           {mode === 'forgot' && (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="forgot-email" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                   Email
                 </label>
                 <input
+                  id="forgot-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
                   autoFocus
-                  className="w-full px-4 py-3 rounded-xl focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
                   style={{ background: 'var(--color-bg)', border: '2px solid var(--color-divider)', color: 'var(--color-text-primary)' }}
                 />
               </div>
@@ -410,11 +423,12 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
           {mode === 'signup' && (
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="signup-username" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                   Username
                 </label>
                 <div className="relative">
                   <input
+                    id="signup-username"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value.replace(/\s/g, ''))}
@@ -423,7 +437,9 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
                     autoFocus
                     minLength={2}
                     maxLength={30}
-                    className="w-full px-4 py-3 rounded-xl focus:outline-none transition-colors pr-10"
+                    aria-describedby={usernameStatus ? 'username-status' : undefined}
+                    aria-invalid={usernameStatus === 'taken'}
+                    className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors pr-10"
                     style={{
                       background: 'var(--color-bg)',
                       border: `2px solid ${usernameStatus === 'taken' ? '#ef4444' : usernameStatus === 'available' ? '#10b981' : 'var(--color-divider)'}`,
@@ -431,7 +447,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
                     }}
                   />
                   {usernameStatus && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lg">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lg" aria-hidden="true">
                       {usernameStatus === 'checking' && '⏳'}
                       {usernameStatus === 'available' && '✓'}
                       {usernameStatus === 'taken' && '✗'}
@@ -439,40 +455,42 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
                   )}
                 </div>
                 {usernameStatus === 'taken' && (
-                  <p className="text-xs mt-1" style={{ color: '#ef4444' }}>This username is taken</p>
+                  <p id="username-status" className="text-xs mt-1" style={{ color: '#ef4444' }} role="alert">This username is taken</p>
                 )}
                 {usernameStatus === 'available' && (
-                  <p className="text-xs mt-1" style={{ color: '#10b981' }}>Username available!</p>
+                  <p id="username-status" className="text-xs mt-1" style={{ color: '#10b981' }}>Username available!</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="signup-email" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                   Email
                 </label>
                 <input
+                  id="signup-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full px-4 py-3 rounded-xl focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
                   style={{ background: 'var(--color-bg)', border: '2px solid var(--color-divider)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="signup-password" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                   Password
                 </label>
                 <input
+                  id="signup-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 6 characters"
                   required
                   minLength={6}
-                  className="w-full px-4 py-3 rounded-xl focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
                   style={{ background: 'var(--color-bg)', border: '2px solid var(--color-divider)', color: 'var(--color-text-primary)' }}
                 />
               </div>

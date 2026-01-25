@@ -3,6 +3,7 @@ import { getCategoryImage } from '../../constants/categoryImages'
 import { getRatingColor } from '../../utils/ranking'
 import { ThumbsUpIcon } from '../ThumbsUpIcon'
 import { ThumbsDownIcon } from '../ThumbsDownIcon'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 /**
  * Modal for displaying full review details
@@ -16,6 +17,7 @@ import { ThumbsDownIcon } from '../ThumbsDownIcon'
 export function ReviewDetailModal({ review, reviewerName, onClose }) {
   const navigate = useNavigate()
   const dish = review.dishes
+  const modalRef = useFocusTrap(!!dish, onClose)
 
   if (!dish) return null
 
@@ -34,12 +36,17 @@ export function ReviewDetailModal({ review, reviewerName, onClose }) {
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
       onClick={onClose}
+      role="presentation"
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
 
       {/* Modal */}
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="review-modal-title"
         className="relative w-full sm:max-w-md mx-auto bg-white rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
         style={{ background: 'var(--color-bg)' }}
@@ -53,7 +60,8 @@ export function ReviewDetailModal({ review, reviewerName, onClose }) {
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/50 text-white"
+            aria-label="Close review"
+            className="absolute top-3 right-3 w-[38px] h-[38px] rounded-full flex items-center justify-center bg-black/50 text-white"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
               <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
@@ -74,7 +82,7 @@ export function ReviewDetailModal({ review, reviewerName, onClose }) {
         {/* Content */}
         <div className="p-4 flex-1 overflow-y-auto">
           {/* Dish info */}
-          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          <h2 id="review-modal-title" className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {dish.name}
           </h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>

@@ -99,11 +99,13 @@ export function UserSearch({ onClose }) {
       {query.length >= 2 && (
         <div className="mt-3">
           {loading ? (
-            <div className="py-4 text-center">
+            <div className="py-4 text-center" role="status">
               <div
                 className="w-5 h-5 border-2 rounded-full animate-spin mx-auto"
                 style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }}
+                aria-hidden="true"
               />
+              <span className="sr-only">Searching users...</span>
             </div>
           ) : results.length === 0 ? (
             <div className="py-4 text-center">

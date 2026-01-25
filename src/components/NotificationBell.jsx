@@ -164,11 +164,13 @@ export function NotificationBell() {
 
           {/* Content */}
           {loading ? (
-            <div className="py-8 flex justify-center">
+            <div className="py-8 flex justify-center" role="status">
               <div
                 className="w-6 h-6 border-2 rounded-full animate-spin"
                 style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }}
+                aria-hidden="true"
               />
+              <span className="sr-only">Loading notifications...</span>
             </div>
           ) : notifications.length === 0 ? (
             <div className="py-8 text-center">

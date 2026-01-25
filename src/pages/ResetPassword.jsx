@@ -101,11 +101,13 @@ export function ResetPassword() {
       )}
 
       {checkingSession ? (
-        <div className="w-full max-w-sm flex justify-center py-8">
+        <div className="w-full max-w-sm flex justify-center py-8" role="status">
           <div
             className="w-8 h-8 border-2 rounded-full animate-spin"
             style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }}
+            aria-hidden="true"
           />
+          <span className="sr-only">Loading...</span>
         </div>
       ) : isValidSession ? (
         <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">

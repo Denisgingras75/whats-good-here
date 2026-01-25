@@ -11,6 +11,8 @@ export function DishRowSkeleton() {
         background: 'var(--color-bg)',
         borderColor: 'var(--color-divider)'
       }}
+      role="status"
+      aria-label="Loading dish"
     >
       {/* Rank circle */}
       <div
@@ -60,7 +62,7 @@ export function DishRowSkeleton() {
 // ProfileSkeleton - matches UserProfile layout
 export function ProfileSkeleton() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--color-surface)' }} role="status" aria-label="Loading profile">
       <div className="animate-pulse">
         {/* Header */}
         <div className="px-4 pt-4 pb-2 flex justify-between items-center">
@@ -112,6 +114,8 @@ export function DishCardSkeleton() {
     <div
       className="w-full bg-white rounded-2xl overflow-hidden border"
       style={{ borderColor: 'var(--color-divider)' }}
+      role="status"
+      aria-label="Loading dish"
     >
       {/* Image area with 16/10 aspect ratio */}
       <div

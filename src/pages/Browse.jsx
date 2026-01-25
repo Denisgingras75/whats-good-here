@@ -624,7 +624,7 @@ export function Browse() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
                   <span className="text-2xl">⚠️</span>
                 </div>
-                <p className="text-sm text-red-600 mb-4">{error}</p>
+                <p role="alert" className="text-sm text-red-600 mb-4">{error}</p>
                 <button
                   onClick={() => window.location.reload()}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium"

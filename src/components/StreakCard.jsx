@@ -18,7 +18,7 @@ export function StreakCard({ userId }) {
 
   if (loading) {
     return (
-      <div className="rounded-2xl p-4 animate-pulse" style={{ background: 'var(--color-surface-elevated)' }}>
+      <div className="rounded-2xl p-4 animate-pulse" style={{ background: 'var(--color-surface-elevated)' }} role="status" aria-label="Loading streak">
         <div className="h-6 w-32 rounded" style={{ background: 'var(--color-divider)' }} />
         <div className="h-3 w-full rounded mt-3" style={{ background: 'var(--color-divider)' }} />
       </div>

@@ -52,10 +52,10 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
 
   if (loading) {
     return (
-      <div className="px-4 py-6">
+      <div className="px-4 py-6" role="status" aria-label="Loading dishes">
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-divider)' }} />
+            <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-divider)' }} aria-hidden="true" />
           ))}
         </div>
       </div>

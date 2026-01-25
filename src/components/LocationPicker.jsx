@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 const RADIUS_OPTIONS = [1, 5, 10, 20]
 
@@ -15,6 +16,10 @@ export function LocationPicker({
 }) {
   const [showRadiusSheet, setShowRadiusSheet] = useState(false)
   const [showLocationSheet, setShowLocationSheet] = useState(false)
+
+  // Focus trap refs for accessibility
+  const locationSheetRef = useFocusTrap(showLocationSheet, () => setShowLocationSheet(false))
+  const radiusSheetRef = useFocusTrap(showRadiusSheet, () => setShowRadiusSheet(false))
 
   const handleRadiusSelect = (newRadius) => {
     onRadiusChange(newRadius)
@@ -133,17 +138,26 @@ export function LocationPicker({
 
       {/* Location Bottom Sheet */}
       {showLocationSheet && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          onClick={() => setShowLocationSheet(false)}
+          role="presentation"
+        >
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowLocationSheet(false)}
+            aria-hidden="true"
           />
 
           {/* Sheet Content */}
           <div
+            ref={locationSheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="location-sheet-title"
             className="relative w-full max-w-lg rounded-t-3xl animate-slide-up"
             style={{ background: 'var(--color-bg)' }}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-2">
@@ -152,7 +166,7 @@ export function LocationPicker({
 
             {/* Header */}
             <div className="px-6 pb-4 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-              <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              <h3 id="location-sheet-title" className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
                 Your location
               </h3>
               <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
@@ -245,17 +259,26 @@ export function LocationPicker({
 
       {/* Radius Bottom Sheet */}
       {showRadiusSheet && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          onClick={() => setShowRadiusSheet(false)}
+          role="presentation"
+        >
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowRadiusSheet(false)}
+            aria-hidden="true"
           />
 
           {/* Sheet Content */}
           <div
+            ref={radiusSheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="radius-sheet-title"
             className="relative w-full max-w-lg rounded-t-3xl animate-slide-up"
             style={{ background: 'var(--color-bg)' }}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-2">
@@ -264,7 +287,7 @@ export function LocationPicker({
 
             {/* Header */}
             <div className="px-6 pb-4 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-              <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              <h3 id="radius-sheet-title" className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
                 Search radius
               </h3>
               <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>

@@ -133,6 +133,8 @@ export function Restaurants() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
+      <h1 className="sr-only">Restaurants</h1>
+
       {/* Header */}
       <header className="px-4 pt-3 pb-2" style={{ background: 'var(--color-bg)' }}>
         {/* Search bar - context-aware */}
@@ -187,7 +189,7 @@ export function Restaurants() {
 
           {fetchError ? (
             <div className="text-center py-12">
-              <p className="text-sm mb-4" style={{ color: 'var(--color-danger)' }}>{fetchError}</p>
+              <p role="alert" className="text-sm mb-4" style={{ color: 'var(--color-danger)' }}>{fetchError}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-4 py-2 text-sm font-medium rounded-lg"

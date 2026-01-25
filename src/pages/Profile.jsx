@@ -284,6 +284,8 @@ export function Profile() {
 
   return (
     <div style={{ background: 'var(--color-surface)' }}>
+      <h1 className="sr-only">Your Profile</h1>
+
       {user ? (
         <>
           {/* Hero Identity Card */}

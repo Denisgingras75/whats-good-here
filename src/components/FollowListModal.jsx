@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { followsApi } from '../api/followsApi'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 /**
  * Modal to display followers or following list with pagination
@@ -69,16 +70,23 @@ export function FollowListModal({ userId, type, onClose }) {
     navigate(`/user/${user.id}`)
   }
 
+  const modalRef = useFocusTrap(true, onClose)
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
+      role="presentation"
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
 
       {/* Modal */}
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="follow-list-title"
         className="relative w-full max-w-md rounded-2xl overflow-hidden flex flex-col shadow-2xl border"
         style={{
           background: 'var(--color-surface-elevated)',
@@ -95,7 +103,7 @@ export function FollowListModal({ userId, type, onClose }) {
             background: 'rgba(244, 162, 97, 0.08)'
           }}
         >
-          <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          <h2 id="follow-list-title" className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {title}
           </h2>
           <button
@@ -113,11 +121,13 @@ export function FollowListModal({ userId, type, onClose }) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-12" role="status" aria-label="Loading">
               <div
                 className="w-6 h-6 border-2 rounded-full animate-spin"
                 style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }}
+                aria-hidden="true"
               />
+              <span className="sr-only">Loading...</span>
             </div>
           ) : error ? (
             <div className="py-12 text-center">

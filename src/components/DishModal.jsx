@@ -5,6 +5,7 @@ import { PhotoUploadButton } from './PhotoUploadButton'
 import { PhotoUploadConfirmation } from './PhotoUploadConfirmation'
 import { dishPhotosApi } from '../api/dishPhotosApi'
 import { logger } from '../utils/logger'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
   const [photoUploaded, setPhotoUploaded] = useState(null)
@@ -72,6 +73,8 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
   const displayPhotos = showAllPhotos ? allPhotos : communityPhotos.slice(0, 4)
   const hasMorePhotos = allPhotos.length > 4 && !showAllPhotos
 
+  const modalRef = useFocusTrap(!!dish, onClose)
+
   return createPortal(
     <div
       key={`modal-${dish.dish_id}`}
@@ -89,10 +92,18 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
         padding: '16px',
       }}
       onClick={onClose}
+      role="presentation"
     >
       {/* Modal card */}
       <div
-        ref={(el) => { if (el) el.scrollTop = 0 }}
+        ref={(el) => {
+          if (el) el.scrollTop = 0
+          // Merge with focus trap ref
+          if (modalRef) modalRef.current = el
+        }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dish-modal-title"
         onClick={(e) => e.stopPropagation()}
         style={{
           position: 'relative',
@@ -142,7 +153,7 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
         ) : (
           <>
             {/* Dish name + restaurant */}
-            <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', paddingRight: '30px', color: 'var(--color-text-primary)' }}>
+            <h2 id="dish-modal-title" style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', paddingRight: '30px', color: 'var(--color-text-primary)' }}>
               {dish.dish_name}
             </h2>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>

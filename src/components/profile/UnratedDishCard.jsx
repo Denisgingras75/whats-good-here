@@ -48,7 +48,7 @@ export function UnratedDishCard({ dish, onClick, onDelete }) {
       </button>
 
       {/* Info - clickable to rate */}
-      <button onClick={onClick} className="flex-1 p-3 flex flex-col justify-between min-w-0 text-left">
+      <button onClick={onClick} className="flex-1 p-3 flex flex-col justify-between min-w-0 text-left" aria-label={`Rate ${dish.dish_name} from ${dish.restaurant_name}`}>
         <div>
           <h3 className="font-semibold text-[color:var(--color-text-primary)] truncate">{dish.dish_name}</h3>
           <p className="text-sm text-[color:var(--color-text-secondary)] truncate">{dish.restaurant_name}</p>

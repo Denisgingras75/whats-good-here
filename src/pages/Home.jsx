@@ -141,7 +141,8 @@ export function Home() {
       </div>
 
       {/* Main Content */}
-      <main className="px-4 py-6">
+      <div className="px-4 py-6">
+        <h1 className="sr-only">What's Good Here - Top Ranked Dishes Near You</h1>
         {/* Loading State */}
         {loading && (
           <div className="space-y-8" aria-live="polite" aria-label="Loading categories">
@@ -154,7 +155,7 @@ export function Home() {
         {/* Error State */}
         {error && (
           <div className="py-12 text-center">
-            <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error?.message || error}</p>
+            <p role="alert" className="text-sm" style={{ color: 'var(--color-danger)' }}>{error?.message || error}</p>
             <button
               onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 text-sm font-medium rounded-lg"
@@ -226,7 +227,7 @@ export function Home() {
           </div>
         )}
 
-      </main>
+      </div>
     </div>
   )
 }

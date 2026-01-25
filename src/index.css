@@ -14,7 +14,7 @@
   /* Text hierarchy - light on dark */
   --color-text-primary: #F5F5F5;
   --color-text-secondary: #A3A3A3;
-  --color-text-tertiary: #737373;
+  --color-text-tertiary: #A0A0A0; /* Raised to meet WCAG AAA 7:1 contrast */
 
   /* Surfaces - dark backgrounds */
   --color-bg: #121212;
@@ -898,4 +898,70 @@
 .browse-card-virtualized {
   content-visibility: auto;
   contain-intrinsic-size: 0 280px;
+}
+
+/* ===========================
+   Accessibility: Reduced Motion
+   =========================== */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations globally */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep opacity for stagger items so they're visible */
+  .stagger-item {
+    opacity: 1;
+  }
+
+  /* Disable specific animation classes */
+  .animate-fadeIn,
+  .animate-fade-in-up,
+  .animate-slide-up,
+  .animate-shimmer,
+  .animate-crumb-fall,
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce {
+    animation: none;
+  }
+
+  /* Disable hover transforms */
+  .card-elevated:hover,
+  .image-zoom:hover {
+    transform: none;
+  }
+}
+
+/* ===========================
+   Accessibility: Focus Styles
+   =========================== */
+
+/* Global focus-visible styles for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Remove default focus for mouse users, keep for keyboard */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Enhanced focus for buttons and interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(244, 162, 97, 0.25);
 }

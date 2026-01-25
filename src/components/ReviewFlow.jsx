@@ -446,30 +446,35 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
 
       {/* Review text input */}
       <div className="relative">
+        <label htmlFor="review-text" className="sr-only">Your review</label>
         <textarea
+          id="review-text"
           value={reviewText}
           onChange={(e) => {
             setReviewText(e.target.value)
             if (reviewError) setReviewError(null)
           }}
           placeholder="What made this dish great (or not)?"
+          aria-label="Write your review"
+          aria-describedby={reviewError ? 'review-error' : 'review-char-count'}
+          aria-invalid={!!reviewError}
           maxLength={MAX_REVIEW_LENGTH + 50} // Allow typing over to show error
           rows={3}
-          className="w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-opacity-50"
+          className="w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           style={{
             background: 'var(--color-surface-elevated)',
             border: reviewError ? '2px solid var(--color-danger)' : '1px solid var(--color-divider)',
             color: 'var(--color-text-primary)',
           }}
         />
-        <div className="absolute bottom-2 right-3 text-xs" style={{ color: reviewText.length > MAX_REVIEW_LENGTH ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}>
+        <div id="review-char-count" className="absolute bottom-2 right-3 text-xs" style={{ color: reviewText.length > MAX_REVIEW_LENGTH ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}>
           {reviewText.length}/{MAX_REVIEW_LENGTH}
         </div>
       </div>
 
       {/* Error message */}
       {reviewError && (
-        <p className="text-sm text-center" style={{ color: 'var(--color-danger)' }}>
+        <p id="review-error" role="alert" className="text-sm text-center" style={{ color: 'var(--color-danger)' }}>
           {reviewError}
         </p>
       )}

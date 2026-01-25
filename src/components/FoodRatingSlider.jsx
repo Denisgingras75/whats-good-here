@@ -138,13 +138,20 @@ export function FoodRatingSlider({ value, onChange, min = 0, max = 10, step = 0.
 
       {/* Slider */}
       <div className="px-2">
+        <label htmlFor="food-rating" className="sr-only">Rate this dish from 0 to 10</label>
         <input
+          id="food-rating"
           type="range"
           min={min}
           max={max}
           step={step}
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value))}
+          aria-label={`Rating: ${value.toFixed(1)} out of 10. ${getRatingLabel(value, category)}`}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
+          aria-valuetext={`${value.toFixed(1)} out of 10: ${getRatingLabel(value, category)}`}
           className="rating-slider w-full h-3 bg-gradient-to-r from-red-300 via-yellow-300 to-emerald-400 rounded-full appearance-none cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-9 [&::-webkit-slider-thumb]:h-9
             [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-xl
