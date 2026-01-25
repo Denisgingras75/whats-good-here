@@ -8,7 +8,7 @@ import { votesApi } from '../api/votesApi'
 import { dishPhotosApi } from '../api/dishPhotosApi'
 import { useProfile } from '../hooks/useProfile'
 import { useUserVotes } from '../hooks/useUserVotes'
-import { useSavedDishes } from '../hooks/useSavedDishes'
+import { useFavorites } from '../hooks/useFavorites'
 import { useUnratedDishes } from '../hooks/useUnratedDishes'
 import { useBadges } from '../hooks/useBadges'
 import { isSoundMuted, toggleSoundMute } from '../lib/sounds'
@@ -58,7 +58,7 @@ export function Profile() {
 
   const { profile, updateProfile } = useProfile(user?.id)
   const { worthItDishes, avoidDishes, stats, loading: votesLoading, refetch: refetchVotes } = useUserVotes(user?.id)
-  const { savedDishes, loading: savedLoading, unsaveDish } = useSavedDishes(user?.id)
+  const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites(user?.id)
   const { dishes: unratedDishes, count: unratedCount, loading: unratedLoading, refetch: refetchUnrated } = useUnratedDishes(user?.id)
   const { badges, loading: badgesLoading } = useBadges(user?.id)
   const [selectedDish, setSelectedDish] = useState(null)
@@ -223,7 +223,7 @@ export function Profile() {
       case 'avoid':
         return avoidDishes
       case 'saved':
-        return savedDishes
+        return favorites
       case 'reviews':
         return userReviews
       default:
@@ -232,7 +232,7 @@ export function Profile() {
   }
 
   const tabDishes = getTabDishes()
-  const isLoading = activeTab === 'saved' ? savedLoading :
+  const isLoading = activeTab === 'saved' ? favoritesLoading :
                     activeTab === 'unrated' ? unratedLoading :
                     activeTab === 'reviews' ? reviewsLoading : votesLoading
 
@@ -376,7 +376,7 @@ export function Profile() {
                      tab.id === 'worth-it' ? worthItDishes.length :
                      tab.id === 'avoid' ? avoidDishes.length :
                      tab.id === 'reviews' ? userReviews.length :
-                     savedDishes.length}
+                     favorites.length}
                   </span>
                 </button>
               ))}
@@ -422,7 +422,7 @@ export function Profile() {
                         dish={dish}
                         variant="own-profile"
                         tab={activeTab}
-                        onUnsave={activeTab === 'saved' ? () => unsaveDish(dish.dish_id) : null}
+                        onUnsave={activeTab === 'saved' ? () => removeFavorite(dish.dish_id) : null}
                         reviewText={review?.review_text}
                       />
                     )

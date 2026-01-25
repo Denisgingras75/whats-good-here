@@ -6,7 +6,7 @@ import { dishesApi } from '../api/dishesApi'
 import { followsApi } from '../api/followsApi'
 import { dishPhotosApi } from '../api/dishPhotosApi'
 import { votesApi } from '../api/votesApi'
-import { useSavedDishes } from '../hooks/useSavedDishes'
+import { useFavorites } from '../hooks/useFavorites'
 import { ReviewFlow } from '../components/ReviewFlow'
 import { PhotoUploadButton } from '../components/PhotoUploadButton'
 import { PhotoUploadConfirmation } from '../components/PhotoUploadConfirmation'
@@ -68,7 +68,7 @@ export function Dish() {
   const [reviews, setReviews] = useState([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
 
-  const { isSaved, toggleSave } = useSavedDishes(user?.id)
+  const { isFavorite, toggleFavorite } = useFavorites(user?.id)
 
   // Fetch dish data
   useEffect(() => {
@@ -258,7 +258,7 @@ export function Dish() {
       setLoginModalOpen(true)
       return
     }
-    await toggleSave(dishId)
+    await toggleFavorite(dishId)
   }
 
   const handleBack = () => {
@@ -340,9 +340,9 @@ export function Dish() {
         {/* Favorite button */}
         <button
           onClick={handleToggleSave}
-          aria-label={isSaved?.(dishId) ? 'Remove from favorites' : 'Add to favorites'}
+          aria-label={isFavorite?.(dishId) ? 'Remove from favorites' : 'Add to favorites'}
           className="ml-auto w-10 h-10 rounded-full flex items-center justify-center transition-all"
-          style={isSaved?.(dishId)
+          style={isFavorite?.(dishId)
             ? { background: 'var(--color-danger)', color: 'white' }
             : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-tertiary)' }
           }
@@ -350,7 +350,7 @@ export function Dish() {
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            fill={isSaved?.(dishId) ? 'currentColor' : 'none'}
+            fill={isFavorite?.(dishId) ? 'currentColor' : 'none'}
             stroke="currentColor"
             strokeWidth={2}
             className="w-5 h-5"

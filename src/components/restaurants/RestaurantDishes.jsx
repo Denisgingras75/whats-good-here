@@ -5,7 +5,7 @@ import { TopDishCard } from './TopDishCard'
 const TOP_DISHES_COUNT = 5
 
 // Restaurant dishes component - Job #2: "What should I order?"
-export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isSaved, onToggleSave, user, searchQuery = '' }) {
+export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isFavorite, onToggleFavorite, user, searchQuery = '' }) {
   const [showAllDishes, setShowAllDishes] = useState(false)
 
   // Filter and sort dishes
@@ -75,7 +75,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
       onLoginRequired()
       return
     }
-    await onToggleSave(dishId)
+    await onToggleFavorite(dishId)
   }
 
   return (
@@ -110,7 +110,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
               rank={index + 1}
               onVote={onVote}
               onLoginRequired={onLoginRequired}
-              isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+              isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
               onToggleFavorite={handleToggleSave}
             />
           ))}
@@ -167,7 +167,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
                   rank={TOP_DISHES_COUNT + index + 1}
                   onVote={onVote}
                   onLoginRequired={onLoginRequired}
-                  isFavorite={isSaved ? isSaved(dish.dish_id) : false}
+                  isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
                   onToggleFavorite={handleToggleSave}
                 />
               ))}

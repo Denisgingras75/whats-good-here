@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
-import { useSavedDishes } from '../hooks/useSavedDishes'
+import { useFavorites } from '../hooks/useFavorites'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { RestaurantDishes } from '../components/restaurants'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
@@ -29,7 +29,7 @@ export function Restaurants() {
     null,
     selectedRestaurant?.id
   )
-  const { isSaved, toggleSave } = useSavedDishes(user?.id)
+  const { isFavorite, toggleFavorite } = useFavorites(user?.id)
 
   // Fetch restaurants with dish counts and details
   useEffect(() => {
@@ -67,12 +67,12 @@ export function Restaurants() {
     setLoginModalOpen(true)
   }
 
-  const handleToggleSave = async (dishId) => {
+  const handleToggleFavorite = async (dishId) => {
     if (!user) {
       setLoginModalOpen(true)
       return
     }
-    await toggleSave(dishId)
+    await toggleFavorite(dishId)
   }
 
   const handleRestaurantSelect = (restaurant) => {
@@ -358,8 +358,8 @@ export function Restaurants() {
             error={dishesError}
             onVote={handleVote}
             onLoginRequired={handleLoginRequired}
-            isSaved={isSaved}
-            onToggleSave={handleToggleSave}
+            isFavorite={isFavorite}
+            onToggleFavorite={handleToggleFavorite}
             user={user}
             searchQuery={dishSearchQuery}
           />

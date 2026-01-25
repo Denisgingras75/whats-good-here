@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
-import { useSavedDishes } from '../hooks/useSavedDishes'
+import { useFavorites } from '../hooks/useFavorites'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { dishesApi } from '../api/dishesApi'
 import { getStorageItem, setStorageItem } from '../lib/storage'
@@ -141,7 +141,7 @@ export function Browse() {
     debouncedSearchQuery.trim() ? null : selectedCategory, // Search across all categories
     null
   )
-  const { isSaved, toggleSave } = useSavedDishes(user?.id)
+  const { isFavorite, toggleFavorite } = useFavorites(user?.id)
 
   // Helper to find dish rank in current list
   const getDishRank = useCallback((dishId, dishList) => {
@@ -220,12 +220,12 @@ export function Browse() {
     setLoginModalOpen(true)
   }
 
-  const handleToggleSave = async (dishId) => {
+  const handleToggleFavorite = async (dishId) => {
     if (!user) {
       setLoginModalOpen(true)
       return
     }
-    await toggleSave(dishId)
+    await toggleFavorite(dishId)
   }
 
   const handleCategoryChange = (categoryId) => {
@@ -670,8 +670,8 @@ export function Browse() {
                     key={dish.dish_id}
                     dish={dish}
                     onClick={() => openDishModal(dish)}
-                    isFavorite={isSaved ? isSaved(dish.dish_id) : false}
-                    onToggleFavorite={handleToggleSave}
+                    isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
+                    onToggleFavorite={handleToggleFavorite}
                   />
                 ))}
               </div>
