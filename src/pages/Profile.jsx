@@ -27,13 +27,14 @@ import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 import { HearingIcon } from '../components/HearingIcon'
 import { CameraIcon } from '../components/CameraIcon'
+import { ReviewsIcon } from '../components/ReviewsIcon'
 import { getRatingColor } from '../utils/ranking'
 
 const TABS = [
   { id: 'worth-it', label: "Good Here", emoji: null, icon: 'thumbsUp' },
   { id: 'avoid', label: "Not Good Here", emoji: null, icon: 'thumbsDown' },
   { id: 'saved', label: 'Heard it was Good Here', emoji: null, icon: 'hearing' },
-  { id: 'reviews', label: 'Reviews', emoji: '📝' },
+  { id: 'reviews', label: 'Reviews', emoji: null, icon: 'reviews' },
   { id: 'unrated', label: 'Unrated', emoji: null, icon: 'camera' },
 ]
 
@@ -362,7 +363,7 @@ export function Profile() {
                     ? { background: 'var(--color-primary)' }
                     : { background: 'var(--color-surface-elevated)' }}
                 >
-                  {tab.id === 'saved' ? <HearingIcon size={40} active={activeTab === tab.id} /> : tab.id === 'worth-it' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.id === 'avoid' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : tab.id === 'unrated' ? <CameraIcon size={40} active={activeTab === tab.id} /> : <span>{tab.emoji}</span>}
+                  {tab.id === 'saved' ? <HearingIcon size={40} active={activeTab === tab.id} /> : tab.id === 'worth-it' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.id === 'avoid' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : tab.id === 'unrated' ? <CameraIcon size={40} active={activeTab === tab.id} /> : tab.id === 'reviews' ? <ReviewsIcon size={40} active={activeTab === tab.id} /> : <span>{tab.emoji}</span>}
                   <span>{tab.label}</span>
                   <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
                     activeTab === tab.id ? 'bg-white/20' : 'bg-black/20'
@@ -836,7 +837,8 @@ function EmptyState({ tab }) {
       description: 'Save dishes you heard were good to try later',
     },
     'reviews': {
-      emoji: '📝',
+      emoji: null,
+      icon: 'reviews',
       title: 'No reviews yet',
       description: 'Share your thoughts when you rate a dish',
     },
@@ -847,7 +849,7 @@ function EmptyState({ tab }) {
   return (
     <div className="rounded-2xl border p-8 text-center" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
       <div className="text-4xl mb-3">
-        {icon === 'thumbsUp' ? <ThumbsUpIcon size={52} /> : icon === 'thumbsDown' ? <ThumbsDownIcon size={52} /> : icon === 'hearing' ? <HearingIcon size={64} /> : icon === 'camera' ? <CameraIcon size={64} /> : emoji}
+        {icon === 'thumbsUp' ? <ThumbsUpIcon size={52} /> : icon === 'thumbsDown' ? <ThumbsDownIcon size={52} /> : icon === 'hearing' ? <HearingIcon size={64} /> : icon === 'camera' ? <CameraIcon size={64} /> : icon === 'reviews' ? <ReviewsIcon size={64} /> : emoji}
       </div>
       <h3 className="font-semibold text-[color:var(--color-text-primary)]">{title}</h3>
       <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">{description}</p>
