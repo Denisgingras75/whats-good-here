@@ -44,6 +44,43 @@ export function Browse() {
   const [dishSuggestions, setDishSuggestions] = useState([])
   const [restaurantSuggestions, setRestaurantSuggestions] = useState([])
 
+  // Search results from API (for cuisine/tag searches that client-side can't do)
+  const [searchResults, setSearchResults] = useState([])
+  const [searchLoading, setSearchLoading] = useState(false)
+
+  // Fetch search results from API when search query changes
+  // This handles cuisine/tag searches that client-side filtering can't do
+  useEffect(() => {
+    if (!debouncedSearchQuery.trim()) {
+      setSearchResults([])
+      setSearchLoading(false)
+      return
+    }
+
+    let cancelled = false
+    const fetchSearchResults = async () => {
+      setSearchLoading(true)
+      try {
+        const results = await dishesApi.search(debouncedSearchQuery, 50)
+        if (!cancelled) {
+          setSearchResults(results)
+        }
+      } catch (error) {
+        logger.error('Search failed:', error)
+        if (!cancelled) {
+          setSearchResults([])
+        }
+      } finally {
+        if (!cancelled) {
+          setSearchLoading(false)
+        }
+      }
+    }
+
+    fetchSearchResults()
+    return () => { cancelled = true }
+  }, [debouncedSearchQuery])
+
   const beforeVoteRef = useRef(null)
   const searchInputRef = useRef(null)
   const autocompleteRef = useRef(null)
@@ -251,35 +288,9 @@ export function Browse() {
 
   // Filter and sort dishes
   const filteredDishes = useMemo(() => {
-    // First filter by search query
-    let result = dishes.filter(dish => {
-      if (!debouncedSearchQuery.trim()) return true
-      const query = debouncedSearchQuery.toLowerCase()
-      // Split query into words for partial matching (e.g., "mexican food" -> ["mexican", "food"])
-      const queryWords = query.split(/\s+/).filter(w => w.length >= 2)
-
-      // Include dishes found by the search API (handles cuisine search the client can't do)
-      const matchesSearchApi = dishSuggestions.some(s => s.dish_id === dish.dish_id)
-      if (matchesSearchApi) return true
-
-      // Check dish name, restaurant name, category
-      const matchesBasic = (
-        dish.dish_name?.toLowerCase().includes(query) ||
-        dish.restaurant_name?.toLowerCase().includes(query) ||
-        dish.category?.toLowerCase().includes(query)
-      )
-      // Check tags array (e.g., "vegetarian", "caesar", "spicy")
-      const matchesTags = dish.tags?.some(tag =>
-        tag?.toLowerCase().includes(query) ||
-        queryWords.some(word => tag?.toLowerCase().includes(word))
-      )
-      // Check restaurant cuisine (field might be cuisine or restaurant_cuisine)
-      const cuisineValue = dish.cuisine || dish.restaurant_cuisine || ''
-      const matchesCuisine = cuisineValue.toLowerCase().includes(query) ||
-        queryWords.some(word => cuisineValue.toLowerCase().includes(word))
-
-      return matchesBasic || matchesTags || matchesCuisine
-    })
+    // When searching, use search results from API (handles cuisine/tag searches)
+    // When browsing by category, use dishes from useDishes()
+    let result = debouncedSearchQuery.trim() ? searchResults : dishes
 
     // Then sort based on selected option
     switch (sortBy) {
@@ -305,7 +316,7 @@ export function Browse() {
     }
 
     return result
-  }, [dishes, debouncedSearchQuery, sortBy, dishSuggestions])
+  }, [dishes, debouncedSearchQuery, sortBy, searchResults])
 
   // Clear search
   const clearSearch = () => {
@@ -600,7 +611,7 @@ export function Browse() {
           {/* Results count and sort */}
           <div className="px-4 py-2 border-b flex items-center justify-between" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}>
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              {loading ? (
+              {(loading || searchLoading) ? (
                 'Loading...'
               ) : (
                 <>
@@ -625,7 +636,7 @@ export function Browse() {
 
           {/* Dish Grid */}
           <div className="px-4 py-4">
-            {loading ? (
+            {(loading || searchLoading) ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[...Array(6)].map((_, i) => (
                   <DishCardSkeleton key={i} />
