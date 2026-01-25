@@ -21,7 +21,6 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
     avg_rating,
     has_variants,
     variant_count,
-    best_variant_id,
     best_variant_name,
     best_variant_rating,
   } = dish

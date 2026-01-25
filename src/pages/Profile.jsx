@@ -61,7 +61,7 @@ export function Profile() {
   const { worthItDishes, avoidDishes, stats, loading: votesLoading, refetch: refetchVotes } = useUserVotes(user?.id)
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites(user?.id)
   const { dishes: unratedDishes, count: unratedCount, loading: unratedLoading, refetch: refetchUnrated } = useUnratedDishes(user?.id)
-  const { badges, loading: badgesLoading } = useBadges(user?.id)
+  const { badges } = useBadges(user?.id)
   const [selectedDish, setSelectedDish] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)

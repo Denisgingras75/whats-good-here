@@ -152,6 +152,7 @@ export function Dish() {
     }
 
     fetchVariantData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only re-run on specific dish properties
   }, [dish?.dish_id, dish?.id, dish?.has_variants, dish?.parent_dish_id])
 
   // Fetch friends' votes for this dish

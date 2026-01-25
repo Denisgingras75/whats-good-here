@@ -33,7 +33,7 @@ export function FollowListModal({ userId, type, onClose }) {
         if (result.users.length > 0) {
           setCursor(result.users[result.users.length - 1].followed_at)
         }
-      } catch (err) {
+      } catch {
         setError('Unable to load. Please try again.')
       } finally {
         setLoading(false)
@@ -57,7 +57,7 @@ export function FollowListModal({ userId, type, onClose }) {
       if (result.users.length > 0) {
         setCursor(result.users[result.users.length - 1].followed_at)
       }
-    } catch (err) {
+    } catch {
       // Silently fail on load more - user can retry
     } finally {
       setLoadingMore(false)

@@ -87,9 +87,14 @@ src/components/
 └── foods/          # Food icon SVGs
 ```
 
+### Logging
+- **Use `logger` from `src/utils/logger.js`** - Never use `console.*` directly
+- `logger.error()` / `logger.warn()` - Always logged (errors go to Sentry in prod)
+- `logger.info()` / `logger.debug()` - Only logged in development
+
 ### What NOT to Commit
 - Unused components or hooks
 - Duplicate constants
-- Console.logs (except in catch blocks for genuine errors)
+- Direct `console.*` calls (use `logger` utility instead)
 - ES2023+ syntax without polyfills
 - Direct localStorage calls (use `src/lib/storage.js`)

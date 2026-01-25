@@ -1,4 +1,4 @@
-import { useRef, useEffect, forwardRef } from 'react'
+import { forwardRef } from 'react'
 
 // Autocomplete dropdown for search suggestions
 export const SearchAutocomplete = forwardRef(function SearchAutocomplete({

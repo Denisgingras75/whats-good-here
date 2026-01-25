@@ -1,5 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRef, useEffect } from 'react'
 import { CategoryImageCard } from '../CategoryImageCard'
 import { SearchAutocomplete } from './SearchAutocomplete'
 import { BROWSE_CATEGORIES } from '../../constants/categories'

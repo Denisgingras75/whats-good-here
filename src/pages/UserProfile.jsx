@@ -155,7 +155,7 @@ export function UserProfile() {
           follower_count: (prev.follower_count || 0) + 1
         }))
       }
-    } catch (err) {
+    } catch {
       // Error is already logged by Sentry, just fail silently for UX
     } finally {
       setFollowLoading(false)
