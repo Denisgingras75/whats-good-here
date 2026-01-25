@@ -3,7 +3,10 @@
  * Centralized error handling, classification, and user messaging
  */
 
-import * as Sentry from '@sentry/react'
+// Sentry is lazy-loaded in main.jsx - access it dynamically to avoid bundling
+function getSentry() {
+  return import.meta.env.PROD ? import('@sentry/react') : Promise.resolve(null)
+}
 
 export const ErrorTypes = {
   NETWORK_ERROR: 'NETWORK_ERROR',
@@ -157,32 +160,36 @@ export async function withRetry(fn, options = {}) {
 
       // Don't retry non-retryable errors
       if (!isRetryable(error)) {
-        if (import.meta.env.PROD) {
-          Sentry.captureException(error, {
-            tags: {
-              errorType: classifyError(error),
-              retryable: false,
-            },
-          })
-        }
+        getSentry().then(Sentry => {
+          if (Sentry) {
+            Sentry.captureException(error, {
+              tags: {
+                errorType: classifyError(error),
+                retryable: false,
+              },
+            })
+          }
+        })
         throw error
       }
 
       // Don't retry on last attempt
       if (attempt === maxAttempts) {
-        if (import.meta.env.PROD) {
-          Sentry.captureException(error, {
-            tags: {
-              errorType: classifyError(error),
-              retriesExhausted: true,
-            },
-            contexts: {
-              retry: {
-                attempts: maxAttempts,
+        getSentry().then(Sentry => {
+          if (Sentry) {
+            Sentry.captureException(error, {
+              tags: {
+                errorType: classifyError(error),
+                retriesExhausted: true,
               },
-            },
-          })
-        }
+              contexts: {
+                retry: {
+                  attempts: maxAttempts,
+                },
+              },
+            })
+          }
+        })
         throw error
       }
 

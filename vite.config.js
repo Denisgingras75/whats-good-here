@@ -82,9 +82,8 @@ export default defineConfig({
           // Vendor chunks - cached separately from app code
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-supabase': ['@supabase/supabase-js'],
-          // Split monitoring tools so they can load independently
-          'vendor-sentry': ['@sentry/react'],
-          'vendor-posthog': ['posthog-js'],
+          // Note: Sentry and PostHog are lazy-loaded via dynamic import
+          // They get their own chunks automatically, not loaded on initial page
         },
       },
     },
