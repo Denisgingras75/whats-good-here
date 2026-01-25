@@ -1,11 +1,9 @@
-import { memo, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { memo } from 'react'
 import { ReviewFlow } from './ReviewFlow'
 import { getWorthItBadge, formatScore10, calculateWorthItScore10, getRatingColor } from '../utils/ranking'
 import { getCategoryImage } from '../constants/categoryImages'
-import { votesApi } from '../api/votesApi'
 import { ThumbsUpIcon } from './ThumbsUpIcon'
-import { logger } from '../utils/logger'
+import { getResponsiveImageProps } from '../utils/images'
 
 export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFavorite, showOrderAgainPercent = false }) {
   const {
@@ -30,36 +28,19 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
   // Use photo_url if dish has one, otherwise use category-based image
   const imageUrl = photo_url || getCategoryImage(category)
 
-  // Smart snippet state
-  const [snippet, setSnippet] = useState(null)
-  const [snippetLoading, setSnippetLoading] = useState(false)
-
-  // Fetch smart snippet for dishes with reviews
-  useEffect(() => {
-    async function fetchSnippet() {
-      if (totalVotes < 1) return // No votes means no reviews
-      setSnippetLoading(true)
-      try {
-        const result = await votesApi.getSmartSnippetForDish(dish_id)
-        setSnippet(result)
-      } catch (error) {
-        logger.error('Error fetching snippet:', error)
-      } finally {
-        setSnippetLoading(false)
-      }
-    }
-    fetchSnippet()
-  }, [dish_id, totalVotes])
+  // Get responsive image props (srcSet for Unsplash, regular src for others)
+  const imageProps = getResponsiveImageProps(imageUrl, [400, 600, 800])
 
   return (
     <article className="card-elevated overflow-hidden mb-6 stagger-item dish-card-virtualized">
       {/* Dish Photo - Hero Element */}
       <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden group">
         <img
-          src={imageUrl}
+          {...imageProps}
           alt={dish_name}
           className="w-full h-full object-cover image-zoom"
           loading="lazy"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
         />
 
         {/* Subtle gradient for badge contrast */}
@@ -216,37 +197,6 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
                 </>
               )}
             </div>
-          </div>
-        )}
-
-        {/* Smart Snippet - Review Preview */}
-        {!snippetLoading && snippet && (
-          <div className="mt-4 p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}>
-            <p className="text-sm italic" style={{ color: 'var(--color-text-secondary)' }}>
-              "{snippet.review_text}"
-            </p>
-            <div className="mt-2 flex items-center justify-between">
-              <Link
-                to={`/profile/${snippet.user_id}`}
-                className="text-xs font-medium hover:underline"
-                style={{ color: 'var(--color-primary)' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                @{snippet.profiles?.display_name || 'Anonymous'}
-              </Link>
-              <span className="text-xs font-semibold" style={{ color: getRatingColor(snippet.rating_10) }}>
-                {snippet.rating_10 ? formatScore10(snippet.rating_10) : ''}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* No reviews CTA */}
-        {!snippetLoading && !snippet && totalVotes > 0 && (
-          <div className="mt-4 p-3 rounded-xl text-center" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}>
-            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-              No reviews yet — be the first!
-            </p>
           </div>
         )}
 

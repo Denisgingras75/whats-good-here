@@ -25,10 +25,11 @@ export const dishesApi = {
    * @param {number} params.lng - User longitude
    * @param {number} params.radiusMiles - Search radius in miles
    * @param {string|null} params.category - Optional category filter
+   * @param {number} params.limit - Max results (default 100, prevents huge payloads)
    * @returns {Promise<Array>} Array of ranked dishes
    * @throws {Error} With classified error type
    */
-  async getRankedDishes({ lat, lng, radiusMiles, category = null }) {
+  async getRankedDishes({ lat, lng, radiusMiles, category = null, limit = 100 }) {
     try {
       const { data, error } = await supabase.rpc('get_ranked_dishes', {
         user_lat: lat,
@@ -41,7 +42,10 @@ export const dishesApi = {
         throw createClassifiedError(error)
       }
 
-      return data || []
+      // Client-side limit to prevent huge result sets
+      // RPC returns all dishes in radius - limit for performance
+      const results = data || []
+      return results.slice(0, limit)
     } catch (error) {
       logger.error('Error fetching ranked dishes:', error)
       throw error.type ? error : createClassifiedError(error)

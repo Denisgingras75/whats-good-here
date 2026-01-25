@@ -1,6 +1,7 @@
 import { getCategoryImage } from '../constants/categoryImages'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
+import { getResponsiveImageProps } from '../utils/images'
 
 export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
   const {
@@ -20,6 +21,7 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
   } = dish
 
   const imgSrc = photo_url || getCategoryImage(category)
+  const imageProps = getResponsiveImageProps(imgSrc, [300, 400, 600])
   const isRanked = total_votes >= MIN_VOTES_FOR_RANKING
 
   // For parent dishes with variants, show best variant's rating instead of aggregate
@@ -45,9 +47,10 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
       {/* Image with rating badge */}
       <div className="relative aspect-[16/10] overflow-hidden">
         <img
-          src={imgSrc}
+          {...imageProps}
           alt={dish_name}
           loading="lazy"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
 
