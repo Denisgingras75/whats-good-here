@@ -81,6 +81,7 @@ export const dishesApi = {
    * Search dishes by name, category, tags, or cuisine
    * Searches ALL dishes regardless of category - categories are shortcuts, not containers
    * Results sorted by avg_rating (highest first) so best matches rise to top
+   * For multi-word queries like "Mexican food", searches for ANY word matching
    * @param {string} query - Search query
    * @param {number} limit - Max results
    * @returns {Promise<Array>} Array of matching dishes sorted by rating
@@ -92,6 +93,14 @@ export const dishesApi = {
     // Sanitize query to prevent SQL injection via LIKE patterns
     const sanitized = sanitizeSearchQuery(query, 50)
     if (!sanitized) return []
+
+    // Split into words for multi-word searches (e.g., "Mexican food" -> ["Mexican", "food"])
+    // Filter out common words and short words that don't help search
+    const stopWords = new Set(['food', 'foods', 'the', 'a', 'an', 'and', 'or', 'for', 'of', 'at', 'to', 'in', 'on', 'best', 'good', 'great', 'near', 'me'])
+    const words = sanitized.split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w.toLowerCase()))
+
+    // Use the first significant word for cuisine/tag search, or fall back to full query
+    const searchTerm = words[0] || sanitized
 
     const selectFields = `
       id,
@@ -110,30 +119,36 @@ export const dishesApi = {
       )
     `
 
+    // Build OR conditions for multi-word name/category search
+    // For "Mexican food" -> search for name containing "Mexican" OR "food"
+    const nameOrConditions = words.length > 0
+      ? words.map(w => `name.ilike.%${w}%,category.ilike.%${w}%`).join(',')
+      : `name.ilike.%${sanitized}%,category.ilike.%${sanitized}%`
+
     // Run all 3 search queries in parallel for better performance
     const [nameResult, cuisineResult, tagResult] = await Promise.all([
-      // Query 1: Search by dish name and category
+      // Query 1: Search by dish name and category (any word)
       supabase
         .from('dishes')
         .select(selectFields)
         .eq('restaurants.is_open', true)
-        .or(`name.ilike.%${sanitized}%,category.ilike.%${sanitized}%`)
+        .or(nameOrConditions)
         .order('avg_rating', { ascending: false, nullsFirst: false })
         .limit(limit),
-      // Query 2: Search by restaurant cuisine
+      // Query 2: Search by restaurant cuisine (first significant word)
       supabase
         .from('dishes')
         .select(selectFields)
         .eq('restaurants.is_open', true)
-        .ilike('restaurants.cuisine', `%${sanitized}%`)
+        .ilike('restaurants.cuisine', `%${searchTerm}%`)
         .order('avg_rating', { ascending: false, nullsFirst: false })
         .limit(limit),
-      // Query 3: Search by dish tags
+      // Query 3: Search by dish tags (first significant word)
       supabase
         .from('dishes')
         .select(selectFields)
         .eq('restaurants.is_open', true)
-        .contains('tags', [sanitized.toLowerCase()])
+        .contains('tags', [searchTerm.toLowerCase()])
         .order('avg_rating', { ascending: false, nullsFirst: false })
         .limit(limit),
     ])
