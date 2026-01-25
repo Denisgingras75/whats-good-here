@@ -50,8 +50,9 @@ export function VirtualizedDishList({
     )
   }, [dishes, itemsPerRow, columns, onDishClick, isFavorite, onToggleFavorite])
 
-  // Don't virtualize small lists - overhead not worth it
-  if (dishes.length <= 10) {
+  // Don't virtualize lists under 100 items - virtualization creates a fixed-height
+  // scroll container that conflicts with normal page scrolling for search results
+  if (dishes.length <= 100) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {dishes.map((dish) => (
