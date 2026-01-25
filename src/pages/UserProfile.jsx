@@ -3,18 +3,15 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { followsApi } from '../api/followsApi'
 import { votesApi } from '../api/votesApi'
-import { getCategoryImage } from '../constants/categoryImages'
 import { getRatingColor } from '../utils/ranking'
 import { FollowListModal } from '../components/FollowListModal'
 import { ProfileSkeleton } from '../components/Skeleton'
 import { CategoryIcon } from '../components/CategoryIcon'
-import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
-import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
+import { VotedDishCard, ReviewCard, ReviewDetailModal } from '../components/profile'
 import { supabase } from '../lib/supabase'
 import {
   calculateCategoryTiers,
   calculateCategoryProgress,
-  CATEGORY_INFO,
 } from '../hooks/useUserVotes'
 
 /**
@@ -504,7 +501,21 @@ export function UserProfile() {
           profile.recent_votes?.length > 0 ? (
             <div className="space-y-3">
               {(showAllRatings ? profile.recent_votes : profile.recent_votes.slice(0, 5)).map((vote, index) => (
-                <RecentVoteCard key={index} vote={vote} myRating={myRatings[vote.dish?.id]} />
+                <VotedDishCard
+                  key={index}
+                  dish={{
+                    dish_id: vote.dish?.id,
+                    dish_name: vote.dish?.name,
+                    photo_url: vote.dish?.photo_url,
+                    category: vote.dish?.category,
+                    restaurant_name: vote.dish?.restaurant_name,
+                    avg_rating: vote.dish?.avg_rating,
+                  }}
+                  variant="other-profile"
+                  theirRating={vote.rating}
+                  myRating={myRatings[vote.dish?.id]}
+                  wouldOrderAgain={vote.would_order_again}
+                />
               ))}
 
               {/* View more / View less button */}
@@ -542,7 +553,7 @@ export function UserProfile() {
           ) : userReviews.length > 0 ? (
             <div className="space-y-3">
               {(showAllReviews ? userReviews : userReviews.slice(0, 5)).map((review) => (
-                <UserReviewCard key={review.id} review={review} onClick={() => setSelectedReview(review)} />
+                <ReviewCard key={review.id} review={review} onClick={() => setSelectedReview(review)} />
               ))}
 
               {/* View more / View less button */}
@@ -589,252 +600,6 @@ export function UserProfile() {
           onClose={() => setSelectedReview(null)}
         />
       )}
-    </div>
-  )
-}
-
-// Recent vote card component
-function RecentVoteCard({ vote, myRating }) {
-  const navigate = useNavigate()
-  const { dish, rating, would_order_again } = vote
-
-  if (!dish) return null
-
-  const imgSrc = dish.photo_url || getCategoryImage(dish.category)
-
-  // Their rating (the friend's rating)
-  const theirRating = Number(rating) || 0
-
-  // My rating comparison (if I rated the same dish)
-  const myRatingNum = Number(myRating) || 0
-  const hasMyRating = myRating !== undefined && myRating !== null && myRatingNum >= 1 && myRatingNum <= 10
-
-  // Community average
-  const communityAvg = dish.avg_rating ? Number(dish.avg_rating) : null
-
-  return (
-    <button
-      onClick={() => navigate(`/dish/${dish.id}`)}
-      className="w-full flex items-center gap-3 p-3 rounded-xl transition-all active:scale-[0.99]"
-      style={{ background: 'var(--color-bg)', border: '1px solid var(--color-divider)' }}
-    >
-      {/* Dish Photo */}
-      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0" style={{ background: 'var(--color-surface)' }}>
-        <img src={imgSrc} alt={dish.name} className="w-full h-full object-cover" />
-      </div>
-
-      {/* Dish Info */}
-      <div className="flex-1 min-w-0 text-left">
-        <h4 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
-          {dish.name}
-        </h4>
-        <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-          {dish.restaurant_name}
-        </p>
-        {/* Community average */}
-        {communityAvg && (
-          <p className="text-xs mt-0.5">
-            <span style={{ color: 'var(--color-text-tertiary)' }}>Community: </span>
-            <span style={{ color: getRatingColor(communityAvg) }}>{communityAvg.toFixed(1)}</span>
-          </p>
-        )}
-        {/* Show if you also rated this */}
-        {hasMyRating && (
-          <p className="text-xs mt-0.5">
-            <span style={{ color: 'var(--color-text-tertiary)' }}>You: </span>
-            <span style={{ color: getRatingColor(myRatingNum) }}>
-              {myRatingNum % 1 === 0 ? myRatingNum : myRatingNum.toFixed(1)}
-            </span>
-          </p>
-        )}
-      </div>
-
-      {/* Their Rating */}
-      <div className="flex-shrink-0 text-right">
-        <div className="flex items-center gap-1">
-          <span className="text-lg font-bold" style={{ color: getRatingColor(theirRating) }}>
-            {theirRating % 1 === 0 ? theirRating : theirRating.toFixed(1)}
-          </span>
-          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
-        </div>
-        <div className="mt-1">
-          <span className="text-xs">
-            {would_order_again ? <ThumbsUpIcon size={20} /> : <ThumbsDownIcon size={20} />}
-          </span>
-        </div>
-      </div>
-    </button>
-  )
-}
-
-// User review card component
-function UserReviewCard({ review, onClick }) {
-  const dish = review.dishes
-
-  if (!dish) return null
-
-  const imgSrc = dish.photo_url || getCategoryImage(dish.category)
-
-  // Format date
-  const formattedDate = review.review_created_at
-    ? new Date(review.review_created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    : null
-
-  return (
-    <button
-      onClick={onClick}
-      className="w-full text-left rounded-xl transition-all active:scale-[0.99] overflow-hidden"
-      style={{ background: 'var(--color-bg)', border: '1px solid var(--color-divider)' }}
-    >
-      <div className="flex items-center gap-3 p-3">
-        {/* Dish Photo */}
-        <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0" style={{ background: 'var(--color-surface)' }}>
-          <img src={imgSrc} alt={dish.name} className="w-full h-full object-cover" />
-        </div>
-
-        {/* Dish Info */}
-        <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
-            {dish.name}
-          </h4>
-          <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-            {dish.restaurants?.name}
-          </p>
-        </div>
-
-        {/* Rating */}
-        {review.rating_10 && (
-          <div className="flex-shrink-0">
-            <span className="text-lg font-bold" style={{ color: getRatingColor(review.rating_10) }}>
-              {review.rating_10 % 1 === 0 ? review.rating_10 : review.rating_10.toFixed(1)}
-            </span>
-            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
-          </div>
-        )}
-      </div>
-
-      {/* Review text */}
-      <div className="px-3 pb-3 pt-0">
-        <p className="text-sm line-clamp-2 italic" style={{ color: 'var(--color-text-secondary)' }}>
-          "{review.review_text}"
-        </p>
-        {formattedDate && (
-          <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>{formattedDate}</p>
-        )}
-      </div>
-    </button>
-  )
-}
-
-// Review detail modal component
-function ReviewDetailModal({ review, reviewerName, onClose }) {
-  const navigate = useNavigate()
-  const dish = review.dishes
-
-  if (!dish) return null
-
-  const imgSrc = dish.photo_url || getCategoryImage(dish.category)
-
-  // Format date
-  const formattedDate = review.review_created_at
-    ? new Date(review.review_created_at).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
-      })
-    : null
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      onClick={onClose}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
-      {/* Modal */}
-      <div
-        className="relative w-full sm:max-w-md mx-auto bg-white rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-        style={{ background: 'var(--color-bg)' }}
-      >
-        {/* Header with dish image */}
-        <div className="relative">
-          <div className="aspect-[16/9] w-full overflow-hidden" style={{ background: 'var(--color-surface)' }}>
-            <img src={imgSrc} alt={dish.name} className="w-full h-full object-cover" />
-          </div>
-
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/50 text-white"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-            </svg>
-          </button>
-
-          {/* Rating badge */}
-          {review.rating_10 && (
-            <div className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm">
-              <span className="text-lg font-bold" style={{ color: getRatingColor(review.rating_10) }}>
-                {review.rating_10 % 1 === 0 ? review.rating_10 : review.rating_10.toFixed(1)}
-              </span>
-              <span className="text-sm text-white/70">/10</span>
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-4 flex-1 overflow-y-auto">
-          {/* Dish info */}
-          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {dish.name}
-          </h2>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-            {dish.restaurants?.name}
-          </p>
-
-          {/* Vote indicator */}
-          <div className="mt-4 flex items-center gap-3">
-            <div
-              className="flex items-center gap-2 px-3 py-2 rounded-xl"
-              style={{ background: 'var(--color-surface-elevated)' }}
-            >
-              <span className="text-xl">{review.would_order_again ? <ThumbsUpIcon size={28} /> : <ThumbsDownIcon size={28} />}</span>
-              <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                {review.would_order_again ? 'Would order again' : 'Would not order again'}
-              </span>
-            </div>
-          </div>
-
-          {/* Review text */}
-          <div className="mt-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--color-text-tertiary)' }}>
-              {reviewerName}'s Review
-            </h3>
-            <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
-              "{review.review_text}"
-            </p>
-            {formattedDate && (
-              <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
-                {formattedDate}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Footer - View dish button */}
-        <div className="p-4 border-t" style={{ borderColor: 'var(--color-divider)' }}>
-          <button
-            onClick={() => navigate(`/dish/${review.dish_id}`)}
-            className="w-full py-3 rounded-xl font-semibold text-white transition-colors"
-            style={{ background: 'var(--color-primary)' }}
-          >
-            View Dish Details
-          </button>
-        </div>
-      </div>
     </div>
   )
 }

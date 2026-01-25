@@ -33,6 +33,7 @@ describe('useVote Hook', () => {
         dishId: 'dish-1',
         wouldOrderAgain: true,
         rating10: 8,
+        reviewText: null,
       })
     })
 
@@ -96,6 +97,7 @@ describe('useVote Hook', () => {
         dishId: 'dish-1',
         wouldOrderAgain: false,
         rating10: undefined,
+        reviewText: null,
       })
     })
   })

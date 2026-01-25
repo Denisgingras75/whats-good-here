@@ -1,5 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { votesApi } from '../api/votesApi'
+import {
+  CATEGORY_INFO,
+  TIER_THRESHOLDS,
+  MAJOR_CATEGORIES,
+} from '../constants/categories'
+
+// Re-export for backwards compatibility
+export { CATEGORY_INFO, TIER_THRESHOLDS, MAJOR_CATEGORIES }
 
 /**
  * Transform raw vote data to dish format
@@ -18,66 +26,6 @@ function transformVote(vote) {
     voted_at: vote.created_at,
   }
 }
-
-/**
- * Category tier thresholds and titles
- */
-export const TIER_THRESHOLDS = [
-  { min: 50, level: 5, title: 'Master', icon: '👑' },
-  { min: 30, level: 4, title: 'Expert', icon: '⭐' },
-  { min: 20, level: 3, title: 'Connoisseur', icon: '💎' },
-  { min: 10, level: 2, title: 'Fan', icon: '🔥' },
-  { min: 5, level: 1, title: 'Explorer', icon: '🌱' },
-]
-
-/**
- * Category display info
- */
-export const CATEGORY_INFO = {
-  'pizza': { emoji: '🍕', label: 'Pizza' },
-  'burger': { emoji: '🍔', label: 'Burger' },
-  'taco': { emoji: '🌮', label: 'Taco' },
-  'wings': { emoji: '🍗', label: 'Wings' },
-  'sushi': { emoji: '🍣', label: 'Sushi' },
-  'sandwich': { emoji: '🥪', label: 'Sandwich' },
-  'breakfast sandwich': { emoji: '🥯', label: 'Breakfast Sandwich' },
-  'pasta': { emoji: '🍝', label: 'Pasta' },
-  'pokebowl': { emoji: '🥗', label: 'Poke' },
-  'lobster roll': { emoji: '🦞', label: 'Lobster Roll' },
-  'seafood': { emoji: '🦐', label: 'Seafood' },
-  'chowder': { emoji: '🍲', label: 'Chowder' },
-  'soup': { emoji: '🍜', label: 'Soup' },
-  'breakfast': { emoji: '🍳', label: 'Breakfast' },
-  'salad': { emoji: '🥗', label: 'Salad' },
-  'fries': { emoji: '🍟', label: 'Fries' },
-  'tendys': { emoji: '🍗', label: 'Tendys' },
-  'fried chicken': { emoji: '🍗', label: 'Fried Chicken' },
-  'apps': { emoji: '🧆', label: 'Apps' },
-  'entree': { emoji: '🥩', label: 'Entree' },
-}
-
-/**
- * Major categories eligible for profile rank display
- * Sub-categories like fries, apps, tendys, breakfast sandwich are excluded
- */
-export const MAJOR_CATEGORIES = new Set([
-  'pizza',
-  'burger',
-  'taco',
-  'wings',
-  'sushi',
-  'sandwich',
-  'pasta',
-  'pokebowl',
-  'lobster roll',
-  'seafood',
-  'chowder',
-  'soup',
-  'breakfast',
-  'salad',
-  'fried chicken',
-  'entree',
-])
 
 /**
  * Get tier for a vote count

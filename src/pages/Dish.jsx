@@ -14,31 +14,9 @@ import { LoginModal } from '../components/Auth/LoginModal'
 import { VariantSelector } from '../components/VariantPicker'
 import { getCategoryImage } from '../constants/categoryImages'
 import { getRatingColor, formatScore10 } from '../utils/ranking'
+import { formatRelativeTime } from '../utils/formatters'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
-
-// Helper for relative time display
-function formatRelativeTime(dateString) {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now - date
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays < 1) {
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-    if (diffHours < 1) {
-      const diffMins = Math.floor(diffMs / (1000 * 60))
-      return diffMins < 1 ? 'just now' : `${diffMins}m ago`
-    }
-    return `${diffHours}h ago`
-  }
-  if (diffDays === 1) return 'yesterday'
-  if (diffDays < 7) return `${diffDays}d ago`
-
-  // For older dates, show absolute date
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined })
-}
 
 export function Dish() {
   const { dishId } = useParams()

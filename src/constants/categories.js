@@ -1,7 +1,24 @@
 // Centralized category definitions for the app
-// Used for Browse shortcuts, category picker, and fuzzy matching
+// Used for Browse shortcuts, category picker, fuzzy matching, and profile stats
 
-// Main categories shown in Browse and category picker
+// Browse shortcuts - curated high-frequency categories for Browse page
+// Note: Categories are shortcuts, NOT containers. All dishes are searchable regardless of category.
+export const BROWSE_CATEGORIES = [
+  { id: 'pizza', label: 'Pizza', emoji: '🍕' },
+  { id: 'burger', label: 'Burgers', emoji: '🍔' },
+  { id: 'taco', label: 'Tacos', emoji: '🌮' },
+  { id: 'wings', label: 'Wings', emoji: '🍗' },
+  { id: 'sushi', label: 'Sushi', emoji: '🍣' },
+  { id: 'breakfast', label: 'Breakfast', emoji: '🍳' },
+  { id: 'lobster roll', label: 'Lobster Rolls', emoji: '🦞' },
+  { id: 'chowder', label: 'Chowder', emoji: '🍲' },
+  { id: 'pasta', label: 'Pasta', emoji: '🍝' },
+  { id: 'steak', label: 'Steak', emoji: '🥩' },
+  { id: 'sandwich', label: 'Sandwiches', emoji: '🥪' },
+  { id: 'salad', label: 'Salads', emoji: '🥗' },
+]
+
+// Main categories shown in category picker (singular labels)
 export const MAIN_CATEGORIES = [
   { id: 'pizza', label: 'Pizza', emoji: '🍕' },
   { id: 'burger', label: 'Burger', emoji: '🍔' },
@@ -110,3 +127,58 @@ export function getCategoryNeonImage(id) {
   if (!id) return null
   return CATEGORY_NEON_IMAGES[id.toLowerCase()] || null
 }
+
+// Category display info - used for profile stats and tier display
+// Maps category id to emoji and label
+export const CATEGORY_INFO = {
+  'pizza': { emoji: '🍕', label: 'Pizza' },
+  'burger': { emoji: '🍔', label: 'Burger' },
+  'taco': { emoji: '🌮', label: 'Taco' },
+  'wings': { emoji: '🍗', label: 'Wings' },
+  'sushi': { emoji: '🍣', label: 'Sushi' },
+  'sandwich': { emoji: '🥪', label: 'Sandwich' },
+  'breakfast sandwich': { emoji: '🥯', label: 'Breakfast Sandwich' },
+  'pasta': { emoji: '🍝', label: 'Pasta' },
+  'pokebowl': { emoji: '🥗', label: 'Poke' },
+  'lobster roll': { emoji: '🦞', label: 'Lobster Roll' },
+  'seafood': { emoji: '🦐', label: 'Seafood' },
+  'chowder': { emoji: '🍲', label: 'Chowder' },
+  'soup': { emoji: '🍜', label: 'Soup' },
+  'breakfast': { emoji: '🍳', label: 'Breakfast' },
+  'salad': { emoji: '🥗', label: 'Salad' },
+  'fries': { emoji: '🍟', label: 'Fries' },
+  'tendys': { emoji: '🍗', label: 'Tendys' },
+  'fried chicken': { emoji: '🍗', label: 'Fried Chicken' },
+  'apps': { emoji: '🧆', label: 'Apps' },
+  'entree': { emoji: '🥩', label: 'Entree' },
+}
+
+// Category tier thresholds for profile rank display
+export const TIER_THRESHOLDS = [
+  { min: 50, level: 5, title: 'Master', icon: '👑' },
+  { min: 30, level: 4, title: 'Expert', icon: '⭐' },
+  { min: 20, level: 3, title: 'Connoisseur', icon: '💎' },
+  { min: 10, level: 2, title: 'Fan', icon: '🔥' },
+  { min: 5, level: 1, title: 'Explorer', icon: '🌱' },
+]
+
+// Major categories eligible for profile rank display
+// Sub-categories like fries, apps, tendys, breakfast sandwich are excluded
+export const MAJOR_CATEGORIES = new Set([
+  'pizza',
+  'burger',
+  'taco',
+  'wings',
+  'sushi',
+  'sandwich',
+  'pasta',
+  'pokebowl',
+  'lobster roll',
+  'seafood',
+  'chowder',
+  'soup',
+  'breakfast',
+  'salad',
+  'fried chicken',
+  'entree',
+])

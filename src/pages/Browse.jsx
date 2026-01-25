@@ -7,6 +7,7 @@ import { useSavedDishes } from '../hooks/useSavedDishes'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { dishesApi } from '../api/dishesApi'
 import { getStorageItem, setStorageItem } from '../lib/storage'
+import { BROWSE_CATEGORIES } from '../constants/categories'
 import { BrowseCard } from '../components/BrowseCard'
 import { DishModal } from '../components/DishModal'
 import { getPendingVoteFromStorage } from '../components/ReviewFlow'
@@ -23,22 +24,8 @@ const SORT_OPTIONS = [
   { id: 'closest', label: 'Closest', icon: '📍' },
 ]
 
-// Browse shortcuts - curated high-frequency categories only
-// Categories are shortcuts, NOT containers. All dishes are searchable regardless of category.
-const CATEGORIES = [
-  { id: 'pizza', label: 'Pizza', emoji: '🍕' },
-  { id: 'burger', label: 'Burgers', emoji: '🍔' },
-  { id: 'taco', label: 'Tacos', emoji: '🌮' },
-  { id: 'wings', label: 'Wings', emoji: '🍗' },
-  { id: 'sushi', label: 'Sushi', emoji: '🍣' },
-  { id: 'breakfast', label: 'Breakfast', emoji: '🍳' },
-  { id: 'lobster roll', label: 'Lobster Rolls', emoji: '🦞' },
-  { id: 'chowder', label: 'Chowder', emoji: '🍲' },
-  { id: 'pasta', label: 'Pasta', emoji: '🍝' },
-  { id: 'steak', label: 'Steak', emoji: '🥩' },
-  { id: 'sandwich', label: 'Sandwiches', emoji: '🥪' },
-  { id: 'salad', label: 'Salads', emoji: '🥗' },
-]
+// Use centralized browse categories
+const CATEGORIES = BROWSE_CATEGORIES
 
 export function Browse() {
   const [searchParams, setSearchParams] = useSearchParams()
