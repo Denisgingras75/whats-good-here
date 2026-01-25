@@ -18,6 +18,30 @@ import { formatRelativeTime } from '../utils/formatters'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 
+/**
+ * Transform raw dish data from API to component format
+ */
+function transformDish(data) {
+  return {
+    dish_id: data.id,
+    dish_name: data.name,
+    restaurant_id: data.restaurant_id,
+    restaurant_name: data.restaurants?.name || 'Unknown',
+    restaurant_address: data.restaurants?.address,
+    category: data.category,
+    price: data.price,
+    photo_url: data.photo_url,
+    total_votes: data.total_votes || 0,
+    yes_votes: data.yes_votes || 0,
+    percent_worth_it: data.total_votes > 0
+      ? Math.round((data.yes_votes / data.total_votes) * 100)
+      : 0,
+    avg_rating: data.avg_rating,
+    parent_dish_id: data.parent_dish_id,
+    has_variants: data.has_variants,
+  }
+}
+
 export function Dish() {
   const { dishId } = useParams()
   const navigate = useNavigate()
@@ -55,27 +79,7 @@ export function Dish() {
         setError(null)
 
         const data = await dishesApi.getDishById(dishId)
-
-        // Transform to match expected format
-        const transformedDish = {
-          dish_id: data.id,
-          dish_name: data.name,
-          restaurant_id: data.restaurant_id,
-          restaurant_name: data.restaurants?.name || 'Unknown',
-          restaurant_address: data.restaurants?.address,
-          category: data.category,
-          price: data.price,
-          photo_url: data.photo_url,
-          total_votes: data.total_votes || 0,
-          yes_votes: data.yes_votes || 0,
-          percent_worth_it: data.total_votes > 0
-            ? Math.round((data.yes_votes / data.total_votes) * 100)
-            : 0,
-          avg_rating: data.avg_rating,
-          parent_dish_id: data.parent_dish_id,
-          has_variants: data.has_variants,
-        }
-
+        const transformedDish = transformDish(data)
         setDish(transformedDish)
 
         // Track dish view - valuable for restaurants!
@@ -235,24 +239,7 @@ export function Dish() {
         dishesApi.getDishById(dishId),
         votesApi.getReviewsForDish(dishId, { limit: 20 }),
       ])
-      const transformedDish = {
-        dish_id: data.id,
-        dish_name: data.name,
-        restaurant_id: data.restaurant_id,
-        restaurant_name: data.restaurants?.name || 'Unknown',
-        restaurant_address: data.restaurants?.address,
-        category: data.category,
-        price: data.price,
-        photo_url: data.photo_url,
-        total_votes: data.total_votes || 0,
-        yes_votes: data.yes_votes || 0,
-        percent_worth_it: data.total_votes > 0
-          ? Math.round((data.yes_votes / data.total_votes) * 100)
-          : 0,
-        avg_rating: data.avg_rating,
-        parent_dish_id: data.parent_dish_id,
-        has_variants: data.has_variants,
-      }
+      const transformedDish = transformDish(data)
       setDish(transformedDish)
       setReviews(reviewsData)
     } catch (err) {
