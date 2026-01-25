@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { ReviewFlow } from './ReviewFlow'
 import { PhotoUploadButton } from './PhotoUploadButton'
@@ -112,6 +112,33 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
     onClose()
   }
 
+  // Share functionality
+  const handleShare = useCallback(async () => {
+    if (!dish) return
+
+    const shareUrl = `${window.location.origin}/dish/${dish.dish_id}`
+    const shareData = {
+      title: `${dish.dish_name} at ${dish.restaurant_name}`,
+      text: `Check out ${dish.dish_name} at ${dish.restaurant_name} on What's Good Here!`,
+      url: shareUrl,
+    }
+
+    try {
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData)
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareUrl)
+        // Could show a toast here, but keeping it simple
+      }
+    } catch (err) {
+      // User cancelled or error - silently ignore
+      if (err.name !== 'AbortError') {
+        logger.warn('Share failed:', err)
+      }
+    }
+  }, [dish])
+
   // Photos to display in the grid (first 4 of community, or all if showing all)
   const displayPhotos = showAllPhotos ? allPhotos : communityPhotos.slice(0, 4)
   const hasMorePhotos = allPhotos.length > 4 && !showAllPhotos
@@ -160,30 +187,55 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
           boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
         }}
       >
-        {/* Close button */}
-        <button
-          onClick={handleClose}
-          aria-label="Close modal"
-          className="tap-target"
-          style={{
-            position: 'absolute',
-            top: '8px',
-            right: '8px',
-            width: '44px',
-            height: '44px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--color-divider)',
-            color: 'var(--color-text-secondary)',
-            border: 'none',
-            fontSize: '20px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          ×
-        </button>
+        {/* Action buttons - top right */}
+        <div style={{ position: 'absolute', top: '8px', right: '8px', display: 'flex', gap: '8px' }}>
+          {/* Share button */}
+          <button
+            onClick={handleShare}
+            aria-label="Share dish"
+            className="tap-target"
+            style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--color-divider)',
+              color: 'var(--color-text-secondary)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+              <polyline points="16 6 12 2 8 6" />
+              <line x1="12" y1="2" x2="12" y2="15" />
+            </svg>
+          </button>
+
+          {/* Close button */}
+          <button
+            onClick={handleClose}
+            aria-label="Close modal"
+            className="tap-target"
+            style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--color-divider)',
+              color: 'var(--color-text-secondary)',
+              border: 'none',
+              fontSize: '20px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            ×
+          </button>
+        </div>
 
         {/* Show photo confirmation if just uploaded */}
         {photoUploaded ? (
