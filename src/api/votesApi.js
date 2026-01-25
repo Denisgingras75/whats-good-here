@@ -3,6 +3,17 @@ import posthog from 'posthog-js'
 import { checkVoteRateLimit } from '../lib/rateLimiter'
 import { containsBlockedContent } from '../lib/reviewBlocklist'
 import { MAX_REVIEW_LENGTH } from '../constants/app'
+import { classifyError } from '../utils/errorHandler'
+
+/**
+ * Create a classified error with type information
+ */
+function createClassifiedError(error) {
+  const classifiedError = new Error(error.message || 'An error occurred')
+  classifiedError.type = classifyError(error)
+  classifiedError.originalError = error
+  return classifiedError
+}
 
 /**
  * Votes API - Centralized data fetching and mutation for votes
@@ -78,7 +89,7 @@ export const votesApi = {
         })
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       posthog.capture('vote_submitted', {
@@ -108,7 +119,7 @@ export const votesApi = {
         .eq('user_id', user.id)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       // Return as a map for easy lookup
@@ -121,7 +132,7 @@ export const votesApi = {
       }, {})
     } catch (error) {
       console.error('Error fetching user votes:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -158,13 +169,13 @@ export const votesApi = {
         .order('created_at', { ascending: false })
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       console.error('Error fetching detailed votes:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -188,13 +199,13 @@ export const votesApi = {
         .eq('user_id', user.id)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return { success: true }
     } catch (error) {
       console.error('Error deleting vote:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -215,7 +226,7 @@ export const votesApi = {
         .select('dish_id')
         .eq('user_id', userId)
 
-      if (votesError) throw votesError
+      if (votesError) throw createClassifiedError(votesError)
       if (!userVotes?.length) return 0
 
       const dishIds = userVotes.map(v => v.dish_id)
@@ -226,7 +237,7 @@ export const votesApi = {
         .select('dish_id')
         .in('dish_id', dishIds)
 
-      if (countError) throw countError
+      if (countError) throw createClassifiedError(countError)
 
       // Group by dish_id and count those with 5+
       const counts = {}
@@ -239,7 +250,7 @@ export const votesApi = {
       return rankedCount
     } catch (error) {
       console.error('Error getting dishes helped rank:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
