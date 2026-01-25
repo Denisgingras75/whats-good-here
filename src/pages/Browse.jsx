@@ -290,7 +290,13 @@ export function Browse() {
   const filteredDishes = useMemo(() => {
     // When searching, use search results from API (handles cuisine/tag searches)
     // When browsing by category, use dishes from useDishes()
-    let result = debouncedSearchQuery.trim() ? searchResults : dishes
+    // Ensure we always have an array to work with
+    let result = debouncedSearchQuery.trim()
+      ? (Array.isArray(searchResults) ? searchResults : [])
+      : (Array.isArray(dishes) ? dishes : [])
+
+    // Filter out any null/undefined entries and ensure each has required fields
+    result = result.filter(d => d && d.dish_id)
 
     // Then sort based on selected option
     switch (sortBy) {
@@ -328,23 +334,27 @@ export function Browse() {
   const autocompleteSuggestions = useMemo(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) return []
 
-    // Use dish suggestions from API
-    const dishMatches = dishSuggestions.map(d => ({
-      type: 'dish',
-      id: d.dish_id,
-      name: d.dish_name,
-      subtitle: d.restaurant_name,
-      data: d,
-    }))
+    // Use dish suggestions from API (filter out invalid entries)
+    const dishMatches = (Array.isArray(dishSuggestions) ? dishSuggestions : [])
+      .filter(d => d && d.dish_id && d.dish_name)
+      .map(d => ({
+        type: 'dish',
+        id: d.dish_id,
+        name: d.dish_name,
+        subtitle: d.restaurant_name || '',
+        data: d,
+      }))
 
-    // Use restaurant suggestions from API
-    const restaurantMatches = restaurantSuggestions.map(r => ({
-      type: 'restaurant',
-      id: r.id,
-      name: r.name,
-      subtitle: r.address,
-      data: r,
-    }))
+    // Use restaurant suggestions from API (filter out invalid entries)
+    const restaurantMatches = (Array.isArray(restaurantSuggestions) ? restaurantSuggestions : [])
+      .filter(r => r && r.id && r.name)
+      .map(r => ({
+        type: 'restaurant',
+        id: r.id,
+        name: r.name,
+        subtitle: r.address || '',
+        data: r,
+      }))
 
     return [...dishMatches, ...restaurantMatches]
   }, [searchQuery, dishSuggestions, restaurantSuggestions])

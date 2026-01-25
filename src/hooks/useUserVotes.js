@@ -64,6 +64,7 @@ export function getNextTierInfo(count) {
  */
 export function calculateCategoryProgress(categoryCounts) {
   const progress = []
+  if (!categoryCounts || typeof categoryCounts !== 'object') return progress
 
   for (const [category, count] of Object.entries(categoryCounts)) {
     // Only show major categories
@@ -120,6 +121,7 @@ function getRatingPersonality(avgRating) {
  */
 export function calculateCategoryTiers(categoryCounts) {
   const tiers = []
+  if (!categoryCounts || typeof categoryCounts !== 'object') return tiers
 
   for (const [category, count] of Object.entries(categoryCounts)) {
     // Only show major categories
