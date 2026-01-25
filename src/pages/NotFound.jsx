@@ -1,0 +1,51 @@
+import { Link } from 'react-router-dom'
+
+export function NotFound() {
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{ background: 'var(--color-surface)' }}
+    >
+      <div className="text-center max-w-sm">
+        <div
+          className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center text-4xl"
+          style={{ background: 'var(--color-surface-elevated)' }}
+        >
+          🍽️
+        </div>
+        <h1
+          className="text-2xl font-bold mb-2"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          Page not found
+        </h1>
+        <p
+          className="text-sm mb-8"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          Looks like this dish isn't on the menu. Let's get you back to exploring.
+        </p>
+        <div className="space-y-3">
+          <Link
+            to="/"
+            className="block w-full py-3 px-6 rounded-xl font-semibold text-center transition-all hover:opacity-90"
+            style={{ background: 'var(--color-primary)', color: 'white' }}
+          >
+            Go to Home
+          </Link>
+          <Link
+            to="/browse"
+            className="block w-full py-3 px-6 rounded-xl font-medium text-center border-2 transition-all"
+            style={{
+              background: 'var(--color-surface-elevated)',
+              borderColor: 'var(--color-divider)',
+              color: 'var(--color-text-primary)',
+            }}
+          >
+            Browse Dishes
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
