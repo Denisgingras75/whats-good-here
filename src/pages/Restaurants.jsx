@@ -140,6 +140,7 @@ export function Restaurants() {
         {/* Search bar - context-aware */}
         <div className="relative">
           <svg
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -152,6 +153,7 @@ export function Restaurants() {
           <input
             type="text"
             placeholder={selectedRestaurant ? `Search dishes at ${selectedRestaurant.name}...` : "Search restaurants..."}
+            aria-label={selectedRestaurant ? `Search dishes at ${selectedRestaurant.name}` : "Search restaurants"}
             value={selectedRestaurant ? dishSearchQuery : searchQuery}
             onChange={(e) => selectedRestaurant ? setDishSearchQuery(e.target.value) : setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 rounded-xl border focus:ring-2 transition-all"
@@ -166,10 +168,11 @@ export function Restaurants() {
           {selectedRestaurant && dishSearchQuery && (
             <button
               onClick={() => setDishSearchQuery('')}
+              aria-label="Clear search"
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors"
               style={{ color: 'var(--color-text-tertiary)' }}
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
