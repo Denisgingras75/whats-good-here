@@ -3,6 +3,16 @@ import { classifyError } from '../utils/errorHandler'
 import { sanitizeSearchQuery } from '../utils/sanitize'
 
 /**
+ * Create a classified error with type information
+ */
+function createClassifiedError(error) {
+  const classifiedError = new Error(error.message || 'An error occurred')
+  classifiedError.type = classifyError(error)
+  classifiedError.originalError = error
+  return classifiedError
+}
+
+/**
  * Dishes API - Centralized data fetching for dishes
  */
 
@@ -27,16 +37,13 @@ export const dishesApi = {
       })
 
       if (error) {
-        const classifiedError = new Error(error.message)
-        classifiedError.type = classifyError(error)
-        classifiedError.originalError = error
-        throw classifiedError
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       console.error('Error fetching ranked dishes:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -55,16 +62,13 @@ export const dishesApi = {
       })
 
       if (error) {
-        const classifiedError = new Error(error.message)
-        classifiedError.type = classifyError(error)
-        classifiedError.originalError = error
-        throw classifiedError
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       console.error('Error fetching restaurant dishes:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -112,7 +116,7 @@ export const dishesApi = {
 
     if (nameError) {
       console.error('Error searching dishes by name:', nameError)
-      throw nameError
+      throw createClassifiedError(nameError)
     }
 
     // Query 2: Search by restaurant cuisine
@@ -176,16 +180,13 @@ export const dishesApi = {
       })
 
       if (error) {
-        const classifiedError = new Error(error.message)
-        classifiedError.type = classifyError(error)
-        classifiedError.originalError = error
-        throw classifiedError
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       console.error('Error fetching dish variants:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -313,10 +314,7 @@ export const dishesApi = {
         .single()
 
       if (dishError) {
-        const classifiedError = new Error(dishError.message)
-        classifiedError.type = classifyError(dishError)
-        classifiedError.originalError = dishError
-        throw classifiedError
+        throw createClassifiedError(dishError)
       }
 
       // Fetch vote stats to calculate accurate avg_rating
