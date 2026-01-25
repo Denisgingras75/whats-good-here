@@ -1,7 +1,20 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.jsx'
+
+// Configure React Query for data caching
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // Data stays fresh for 2 minutes
+      gcTime: 1000 * 60 * 10, // Cache garbage collected after 10 minutes
+      retry: 2, // Retry failed requests twice
+      refetchOnWindowFocus: false, // Don't refetch on tab focus
+    },
+  },
+})
 
 // Silence console in production (errors still go to Sentry)
 if (import.meta.env.PROD) {
@@ -86,6 +99,8 @@ if (typeof window !== 'undefined') {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </StrictMode>,
 )

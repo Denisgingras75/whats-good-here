@@ -1,114 +1,54 @@
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { dishesApi } from '../api/dishesApi'
-import { withRetry, getUserMessage } from '../utils/errorHandler'
+import { getUserMessage } from '../utils/errorHandler'
 import { logger } from '../utils/logger'
 
+/**
+ * Fetch and cache dishes using React Query
+ * Supports both location-based ranked dishes and restaurant-specific dishes
+ */
 export function useDishes(location, radius, category = null, restaurantId = null) {
-  const [dishes, setDishes] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const queryKey = restaurantId
+    ? ['dishes', 'restaurant', restaurantId, category]
+    : ['dishes', 'ranked', location?.lat, location?.lng, radius, category]
 
-  useEffect(() => {
-    if (!location) {
-      setLoading(false)
-      return
-    }
+  const enabled = restaurantId ? !!restaurantId : !!location
 
-    let cancelled = false
-
-    async function fetchDishes() {
-      try {
-        setLoading(true)
-        setError(null)
-
-        let data
-        try {
-          if (restaurantId) {
-            // Fetch dishes for a specific restaurant
-            data = await withRetry(() =>
-              dishesApi.getDishesForRestaurant({ restaurantId, category })
-            )
-          } else {
-            // Fetch ranked dishes by location
-            data = await withRetry(() =>
-              dishesApi.getRankedDishes({
-                lat: location.lat,
-                lng: location.lng,
-                radiusMiles: radius,
-                category,
-              })
-            )
-          }
-          // Only update state if effect is still active
-          if (!cancelled) {
-            setDishes(data || [])
-          }
-        } catch (apiError) {
-          if (!cancelled) {
-            const errorMessage = getUserMessage(apiError, 'loading dishes')
-            setError({
-              message: errorMessage,
-              originalError: apiError,
-              type: apiError.type,
-            })
-            logger.error('Error fetching dishes:', apiError)
-          }
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
-    }
-
-    fetchDishes()
-
-    return () => {
-      cancelled = true
-    }
-  }, [location, radius, category, restaurantId])
-
-  const refetch = async () => {
-    if (!location) return
-
-    try {
-      setLoading(true)
-
-      let data
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
+    queryKey,
+    queryFn: async () => {
       if (restaurantId) {
-        data = await withRetry(() =>
-          dishesApi.getDishesForRestaurant({ restaurantId, category })
-        )
-      } else {
-        data = await withRetry(() =>
-          dishesApi.getRankedDishes({
-            lat: location.lat,
-            lng: location.lng,
-            radiusMiles: radius,
-            category,
-          })
-        )
+        return dishesApi.getDishesForRestaurant({ restaurantId, category })
       }
-
-      setDishes(data || [])
-      setError(null)
-    } catch (err) {
-      const errorMessage = getUserMessage(err, 'refreshing dishes')
-      setError({
-        message: errorMessage,
-        originalError: err,
-        type: err.type,
+      return dishesApi.getRankedDishes({
+        lat: location.lat,
+        lng: location.lng,
+        radiusMiles: radius,
+        category,
       })
-      logger.error('Error refetching dishes:', err)
-    } finally {
-      setLoading(false)
-    }
+    },
+    enabled,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  })
+
+  // Transform error to user-friendly format
+  const transformedError = error
+    ? {
+        message: getUserMessage(error, 'loading dishes'),
+        originalError: error,
+        type: error.type,
+      }
+    : null
+
+  if (error) {
+    logger.error('Error fetching dishes:', error)
   }
 
   return {
-    dishes,
-    loading,
-    error,
+    dishes: data || [],
+    loading: isLoading,
+    error: transformedError,
     refetch,
+    isFetching, // Additional state for background refetching
   }
 }

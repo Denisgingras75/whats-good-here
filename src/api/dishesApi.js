@@ -106,47 +106,51 @@ export const dishesApi = {
       )
     `
 
-    // Query 1: Search by dish name and category
-    const { data: nameData, error: nameError } = await supabase
-      .from('dishes')
-      .select(selectFields)
-      .eq('restaurants.is_open', true)
-      .or(`name.ilike.%${sanitized}%,category.ilike.%${sanitized}%`)
-      .order('avg_rating', { ascending: false, nullsFirst: false })
-      .limit(limit)
+    // Run all 3 search queries in parallel for better performance
+    const [nameResult, cuisineResult, tagResult] = await Promise.all([
+      // Query 1: Search by dish name and category
+      supabase
+        .from('dishes')
+        .select(selectFields)
+        .eq('restaurants.is_open', true)
+        .or(`name.ilike.%${sanitized}%,category.ilike.%${sanitized}%`)
+        .order('avg_rating', { ascending: false, nullsFirst: false })
+        .limit(limit),
+      // Query 2: Search by restaurant cuisine
+      supabase
+        .from('dishes')
+        .select(selectFields)
+        .eq('restaurants.is_open', true)
+        .ilike('restaurants.cuisine', `%${sanitized}%`)
+        .order('avg_rating', { ascending: false, nullsFirst: false })
+        .limit(limit),
+      // Query 3: Search by dish tags
+      supabase
+        .from('dishes')
+        .select(selectFields)
+        .eq('restaurants.is_open', true)
+        .contains('tags', [sanitized.toLowerCase()])
+        .order('avg_rating', { ascending: false, nullsFirst: false })
+        .limit(limit),
+    ])
 
-    if (nameError) {
-      logger.error('Error searching dishes by name:', nameError)
-      throw createClassifiedError(nameError)
+    // Check for errors
+    if (nameResult.error) {
+      logger.error('Error searching dishes by name:', nameResult.error)
+      throw createClassifiedError(nameResult.error)
+    }
+    if (cuisineResult.error) {
+      logger.error('Error searching dishes by cuisine:', cuisineResult.error)
+      throw createClassifiedError(cuisineResult.error)
+    }
+    if (tagResult.error) {
+      logger.error('Error searching dishes by tags:', tagResult.error)
+      throw createClassifiedError(tagResult.error)
     }
 
-    // Query 2: Search by restaurant cuisine
-    const { data: cuisineData, error: cuisineError } = await supabase
-      .from('dishes')
-      .select(selectFields)
-      .eq('restaurants.is_open', true)
-      .ilike('restaurants.cuisine', `%${sanitized}%`)
-      .order('avg_rating', { ascending: false, nullsFirst: false })
-      .limit(limit)
-
-    if (cuisineError) {
-      logger.error('Error searching dishes by cuisine:', cuisineError)
-      throw createClassifiedError(cuisineError)
-    }
-
-    // Query 3: Search by dish tags
-    const { data: tagData, error: tagError } = await supabase
-      .from('dishes')
-      .select(selectFields)
-      .eq('restaurants.is_open', true)
-      .contains('tags', [sanitized.toLowerCase()])
-      .order('avg_rating', { ascending: false, nullsFirst: false })
-      .limit(limit)
-
-    if (tagError) {
-      logger.error('Error searching dishes by tags:', tagError)
-      throw createClassifiedError(tagError)
-    }
+    const nameData = nameResult.data
+    const cuisineData = cuisineResult.data
+    const tagData = tagResult.data
 
     // Merge all results, removing duplicates
     const allResults = [...(nameData || [])]
@@ -328,16 +332,21 @@ export const dishesApi = {
         throw createClassifiedError(dishError)
       }
 
-      // Fetch vote stats to calculate accurate avg_rating
-      const { data: votes, error: votesError } = await supabase
-        .from('votes')
-        .select('rating_10, would_order_again')
-        .eq('dish_id', dishId)
+      // Fetch votes and check variants in parallel for better performance
+      const [votesResult, hasVariantsResult] = await Promise.all([
+        supabase
+          .from('votes')
+          .select('rating_10, would_order_again')
+          .eq('dish_id', dishId),
+        this.hasVariants(dishId),
+      ])
+
+      const { data: votes, error: votesError } = votesResult
 
       if (votesError) {
         logger.error('Error fetching votes for dish:', votesError)
         // Continue with dish data even if votes fail
-        return dish
+        return { ...dish, has_variants: hasVariantsResult }
       }
 
       // Calculate stats from votes
@@ -346,9 +355,6 @@ export const dishesApi = {
       const avgRating = totalVotes > 0
         ? Math.round((votes.reduce((sum, v) => sum + (v.rating_10 || 0), 0) / totalVotes) * 10) / 10
         : null
-
-      // Check if this dish has variants (is a parent)
-      const hasVariantsResult = await this.hasVariants(dishId)
 
       return {
         ...dish,
