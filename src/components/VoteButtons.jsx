@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useVote } from '../hooks/useVote'
 import { authApi } from '../api/authApi'
+import { ThumbsUpIcon } from './ThumbsUpIcon'
+import { ThumbsDownIcon } from './ThumbsDownIcon'
 
 export function VoteButtons({ dishId, onVote, onLoginRequired }) {
   const { user } = useAuth()
@@ -79,7 +81,7 @@ export function VoteButtons({ dishId, onVote, onLoginRequired }) {
         )}
 
         <span className="text-xl relative z-10">
-          {currentVote === true ? '✅' : '👍'}
+          {currentVote === true ? '✅' : <ThumbsUpIcon size={28} />}
         </span>
         <span className="relative z-10">Good Here</span>
       </button>
@@ -109,7 +111,7 @@ export function VoteButtons({ dishId, onVote, onLoginRequired }) {
         )}
 
         <span className="text-xl relative z-10">
-          {currentVote === false ? '❌' : '👎'}
+          {currentVote === false ? '❌' : <ThumbsDownIcon size={28} />}
         </span>
         <span className="relative z-10">Not Good</span>
       </button>

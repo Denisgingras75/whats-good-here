@@ -4,6 +4,7 @@ import { ReviewFlow } from './ReviewFlow'
 import { getWorthItBadge, formatScore10, calculateWorthItScore10, getRatingColor } from '../utils/ranking'
 import { getCategoryImage } from '../constants/categoryImages'
 import { votesApi } from '../api/votesApi'
+import { ThumbsUpIcon } from './ThumbsUpIcon'
 
 export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFavorite, showOrderAgainPercent = false }) {
   const {
@@ -66,8 +67,8 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
         {/* Rating badge - bottom left (only show if 10+ votes) */}
         {totalVotes >= 10 && (
           <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm">
-            <span className="text-sm font-semibold text-white">
-              👍 {Math.round(percent_worth_it)}%
+            <span className="text-sm font-semibold text-white flex items-center gap-1">
+              <ThumbsUpIcon size={24} /> {Math.round(percent_worth_it)}%
             </span>
           </div>
         )}

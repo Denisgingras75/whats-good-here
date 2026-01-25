@@ -24,13 +24,15 @@ import { CategoryPicker } from '../components/CategoryPicker'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { HeartIcon } from '../components/HeartIcon'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
+import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
+import { HearingIcon } from '../components/HearingIcon'
 import { getRatingColor } from '../utils/ranking'
 
 const TABS = [
   { id: 'unrated', label: 'Unrated', emoji: '📷' },
-  { id: 'worth-it', label: "Good Here", emoji: '👍' },
-  { id: 'avoid', label: "Not Good", emoji: '👎' },
-  { id: 'saved', label: 'Heard Good Here', emoji: '❤️' },
+  { id: 'worth-it', label: "Good Here", emoji: null, icon: 'thumbsUp' },
+  { id: 'avoid', label: "Not Good Here", emoji: null, icon: 'thumbsDown' },
+  { id: 'saved', label: 'Heard it was Good Here', emoji: null, icon: 'hearing' },
   { id: 'reviews', label: 'Reviews', emoji: '📝' },
 ]
 
@@ -309,6 +311,40 @@ export function Profile() {
             </div>
           </div>
 
+          {/* Unrated Photos Banner - shown when user has photos to rate */}
+          {unratedCount > 0 && (
+            <div className="px-4 py-3" style={{ background: 'var(--color-surface)' }}>
+              <button
+                onClick={() => {
+                  // Open the first unrated dish
+                  if (unratedDishes.length > 0) {
+                    handleUnratedDishClick(unratedDishes[0])
+                  }
+                }}
+                className="w-full rounded-xl p-4 flex items-center gap-4 transition-all hover:scale-[0.99] active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(135deg, var(--color-primary) 0%, #ff8a3d 100%)',
+                  boxShadow: '0 4px 12px rgba(244, 122, 31, 0.3)'
+                }}
+              >
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                  <span className="text-2xl">📷</span>
+                </div>
+                <div className="flex-1 text-left">
+                  <h3 className="font-bold text-white text-lg">
+                    {unratedCount} photo{unratedCount === 1 ? '' : 's'} to rate
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    Tap to rate your dishes
+                  </p>
+                </div>
+                <svg className="w-6 h-6 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
+
           {/* Tabs */}
           <div className="border-b py-2" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}>
             <div className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
@@ -325,7 +361,7 @@ export function Profile() {
                     ? { background: 'var(--color-primary)' }
                     : { background: 'var(--color-surface-elevated)' }}
                 >
-                  {tab.id === 'saved' ? <HeartIcon size={24} active={activeTab === tab.id} /> : tab.id === 'worth-it' ? <ThumbsUpIcon size={24} active={activeTab === tab.id} /> : <span>{tab.emoji}</span>}
+                  {tab.id === 'saved' ? <HearingIcon size={40} active={activeTab === tab.id} /> : tab.id === 'worth-it' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.id === 'avoid' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : <span>{tab.emoji}</span>}
                   <span>{tab.label}</span>
                   <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
                     activeTab === tab.id ? 'bg-white/20' : 'bg-black/20'
@@ -370,15 +406,20 @@ export function Profile() {
                     />
                   ))
                 ) : (
-                  // Other tabs
-                  visibleDishes.map((dish) => (
-                    <ProfileDishCard
-                      key={dish.dish_id}
-                      dish={dish}
-                      tab={activeTab}
-                      onUnsave={activeTab === 'saved' ? () => unsaveDish(dish.dish_id) : null}
-                    />
-                  ))
+                  // Other tabs - Good Here, Not Good Here, Heard it was Good Here
+                  visibleDishes.map((dish) => {
+                    // Find review for this dish (for Good Here and Not Good Here tabs)
+                    const review = userReviews.find(r => r.dish_id === dish.dish_id)
+                    return (
+                      <ProfileDishCard
+                        key={dish.dish_id}
+                        dish={dish}
+                        tab={activeTab}
+                        onUnsave={activeTab === 'saved' ? () => unsaveDish(dish.dish_id) : null}
+                        reviewText={review?.review_text}
+                      />
+                    )
+                  })
                 )}
 
                 {/* View more / View less button */}
@@ -632,7 +673,7 @@ export function Profile() {
 }
 
 // Compact dish card for profile tabs
-function ProfileDishCard({ dish, tab, onUnsave }) {
+function ProfileDishCard({ dish, tab, onUnsave, reviewText }) {
   const imageUrl = dish.photo_url || getCategoryImage(dish.category)
 
   // Calculate difference between user rating and community average
@@ -640,62 +681,73 @@ function ProfileDishCard({ dish, tab, onUnsave }) {
   const ratingDiff = hasComparison ? dish.rating_10 - dish.community_avg : null
 
   return (
-    <div className="rounded-xl border overflow-hidden flex" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
-      {/* Image */}
-      <div className="w-24 h-24 flex-shrink-0" style={{ background: 'var(--color-surface-elevated)' }}>
-        <img
-          src={imageUrl}
-          alt={dish.dish_name}
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
-        <div>
-          <h3 className="font-semibold text-[color:var(--color-text-primary)] truncate">{dish.dish_name}</h3>
-          <p className="text-sm text-[color:var(--color-text-secondary)] truncate">{dish.restaurant_name}</p>
+    <div className="rounded-xl border overflow-hidden" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
+      <div className="flex">
+        {/* Image */}
+        <div className="w-24 h-24 flex-shrink-0" style={{ background: 'var(--color-surface-elevated)' }}>
+          <img
+            src={imageUrl}
+            alt={dish.dish_name}
+            className="w-full h-full object-cover"
+          />
         </div>
 
-        <div className="flex items-center justify-between">
-          {/* Rating comparison */}
-          <div className="flex items-center gap-2">
-            {dish.rating_10 && (
-              <span className="text-sm font-semibold" style={{ color: getRatingColor(dish.rating_10) }}>
-                {dish.rating_10}
-              </span>
-            )}
-            {hasComparison && (
-              <span className="text-xs text-[color:var(--color-text-tertiary)]">
-                · avg {dish.community_avg.toFixed(1)}
-                {ratingDiff !== 0 && (
-                  <span className={ratingDiff > 0 ? 'text-emerald-500' : 'text-red-400'}>
-                    {' '}({ratingDiff > 0 ? '+' : ''}{ratingDiff.toFixed(1)})
-                  </span>
-                )}
-              </span>
-            )}
+        {/* Info */}
+        <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
+          <div>
+            <h3 className="font-semibold text-[color:var(--color-text-primary)] truncate">{dish.dish_name}</h3>
+            <p className="text-sm text-[color:var(--color-text-secondary)] truncate">{dish.restaurant_name}</p>
           </div>
 
-          {/* Tab-specific indicator */}
-          {tab === 'worth-it' && (
-            <span className="text-emerald-500 text-lg">👍</span>
-          )}
-          {tab === 'avoid' && (
-            <span className="text-red-500 text-lg">👎</span>
-          )}
-          {tab === 'saved' && onUnsave && (
-            <button
-              onClick={onUnsave}
-              className="text-red-500 hover:text-red-600 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
-              </svg>
-            </button>
-          )}
+          <div className="flex items-center justify-between">
+            {/* Rating comparison */}
+            <div className="flex items-center gap-2">
+              {dish.rating_10 && (
+                <span className="text-sm font-semibold" style={{ color: getRatingColor(dish.rating_10) }}>
+                  {dish.rating_10 % 1 === 0 ? dish.rating_10 : dish.rating_10.toFixed(1)}
+                </span>
+              )}
+              {hasComparison && (
+                <span className="text-xs text-[color:var(--color-text-tertiary)]">
+                  · avg {dish.community_avg.toFixed(1)}
+                  {ratingDiff !== 0 && (
+                    <span className={ratingDiff > 0 ? 'text-emerald-500' : 'text-red-400'}>
+                      {' '}({ratingDiff > 0 ? '+' : ''}{ratingDiff.toFixed(1)})
+                    </span>
+                  )}
+                </span>
+              )}
+            </div>
+
+            {/* Tab-specific indicator */}
+            {tab === 'worth-it' && (
+              <ThumbsUpIcon size={28} />
+            )}
+            {tab === 'avoid' && (
+              <ThumbsDownIcon size={28} />
+            )}
+            {tab === 'saved' && onUnsave && (
+              <button
+                onClick={onUnsave}
+                className="text-red-500 hover:text-red-600 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                  <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Inline Review */}
+      {reviewText && (
+        <div className="px-3 pb-3 pt-0">
+          <p className="text-sm text-[color:var(--color-text-secondary)] line-clamp-2 italic">
+            "{reviewText}"
+          </p>
+        </div>
+      )}
     </div>
   )
 }
@@ -735,7 +787,7 @@ function ProfileReviewCard({ review }) {
             </div>
             {review.rating_10 && (
               <span className="text-sm font-bold flex-shrink-0" style={{ color: getRatingColor(review.rating_10) }}>
-                {review.rating_10}
+                {review.rating_10 % 1 === 0 ? review.rating_10 : review.rating_10.toFixed(1)}
               </span>
             )}
           </div>
@@ -764,17 +816,20 @@ function EmptyState({ tab }) {
       description: 'Add photos of dishes you try - rate them now or later!',
     },
     'worth-it': {
-      emoji: '👍',
+      emoji: null,
+      icon: 'thumbsUp',
       title: "Nothing good here yet",
       description: "Dishes you'd order again will appear here",
     },
     'avoid': {
-      emoji: '👎',
+      emoji: null,
+      icon: 'thumbsDown',
       title: "Nothing to skip yet",
       description: "Dishes that weren't good will appear here",
     },
     'saved': {
-      emoji: '❤️',
+      emoji: null,
+      icon: 'hearing',
       title: "No dishes saved yet",
       description: 'Save dishes you heard were good to try later',
     },
@@ -785,11 +840,13 @@ function EmptyState({ tab }) {
     },
   }
 
-  const { emoji, title, description } = content[tab]
+  const { emoji, icon, title, description } = content[tab]
 
   return (
     <div className="rounded-2xl border p-8 text-center" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
-      <div className="text-4xl mb-3">{emoji}</div>
+      <div className="text-4xl mb-3">
+        {icon === 'thumbsUp' ? <ThumbsUpIcon size={52} /> : icon === 'thumbsDown' ? <ThumbsDownIcon size={52} /> : icon === 'hearing' ? <HearingIcon size={64} /> : emoji}
+      </div>
       <h3 className="font-semibold text-[color:var(--color-text-primary)]">{title}</h3>
       <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">{description}</p>
     </div>
@@ -1290,7 +1347,7 @@ function EditFavoritesSection({
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
-            <HeartIcon size={32} />
+            <HeartIcon size={40} />
           </div>
           <div className="text-left">
             <span className="font-medium text-[color:var(--color-text-primary)]">Favorite Categories</span>

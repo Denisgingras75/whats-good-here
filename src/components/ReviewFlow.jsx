@@ -7,6 +7,8 @@ import { authApi } from '../api/authApi'
 import { badgesApi } from '../api/badgesApi'
 import { FoodRatingSlider } from './FoodRatingSlider'
 import { showBadgeUnlockToasts } from './BadgeUnlockToast'
+import { ThumbsUpIcon } from './ThumbsUpIcon'
+import { ThumbsDownIcon } from './ThumbsDownIcon'
 
 // Helper to get/set pending vote from localStorage (survives OAuth redirect)
 const PENDING_VOTE_KEY = 'whats_good_here_pending_vote'
@@ -286,7 +288,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         <div className="p-4 rounded-xl" style={{ background: 'color-mix(in srgb, var(--color-success) 15%, var(--color-surface-elevated))', border: '1px solid color-mix(in srgb, var(--color-success) 30%, transparent)' }}>
           <p className="text-sm font-medium text-center mb-2" style={{ color: 'var(--color-success)' }}>Your review</p>
           <div className="flex items-center justify-center gap-4">
-            <span className="text-2xl">{userVote ? '👍' : '👎'}</span>
+            {userVote ? <ThumbsUpIcon size={32} /> : <ThumbsDownIcon size={32} />}
             <span className="text-xl font-bold" style={{ color: 'var(--color-success)' }}>{Number(userRating).toFixed(1)}</span>
           </div>
           {userReviewText && (
@@ -297,11 +299,11 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         </div>
         <div className="flex items-center justify-center gap-4 text-sm">
           <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-success)' }}>
-            <span>👍</span> {localYesVotes} <span className="font-normal opacity-80">({yesPercent}%)</span>
+            <ThumbsUpIcon size={22} /> {localYesVotes} <span className="font-normal opacity-80">({yesPercent}%)</span>
           </span>
           <span style={{ color: 'var(--color-divider)' }}>|</span>
           <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-danger)' }}>
-            <span>👎</span> {noVotes} <span className="font-normal opacity-80">({noPercent}%)</span>
+            <ThumbsDownIcon size={18} /> {noVotes} <span className="font-normal opacity-80">({noPercent}%)</span>
           </span>
         </div>
         <button
@@ -337,7 +339,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         {awaitingLogin && pendingVote !== null && (
           <div className="p-3 rounded-xl text-center" style={{ background: 'var(--color-primary-muted)' }}>
             <p className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
-              {pendingVote ? '👍' : '👎'} Vote selected — sign in to save it
+              {pendingVote ? <ThumbsUpIcon size={22} /> : <ThumbsDownIcon size={22} />} Vote selected — sign in to save it
             </p>
           </div>
         )}
@@ -345,11 +347,11 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         {localTotalVotes > 0 && !awaitingLogin ? (
           <div className="flex items-center justify-center gap-4 text-sm">
             <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-success)' }}>
-              <span>👍</span> {localYesVotes} <span className="font-normal opacity-80">({yesPercent}%)</span>
+              <ThumbsUpIcon size={22} /> {localYesVotes} <span className="font-normal opacity-80">({yesPercent}%)</span>
             </span>
             <span style={{ color: 'var(--color-divider)' }}>|</span>
             <span className="flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-danger)' }}>
-              <span>👎</span> {noVotes} <span className="font-normal opacity-80">({noPercent}%)</span>
+              <ThumbsDownIcon size={18} /> {noVotes} <span className="font-normal opacity-80">({noPercent}%)</span>
             </span>
           </div>
         ) : !awaitingLogin ? (
@@ -368,7 +370,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             {showConfirmation && confirmationType === 'yes' ? (
               <span className="text-2xl text-white animate-pulse">✓</span>
             ) : (
-              <><span className="text-xl">👍</span><span>Yes</span></>
+              <><ThumbsUpIcon size={30} /><span>Yes</span></>
             )}
           </button>
           <button
@@ -382,7 +384,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             {showConfirmation && confirmationType === 'no' ? (
               <span className="text-2xl text-white animate-pulse">✓</span>
             ) : (
-              <><span className="text-xl">👎</span><span>No</span></>
+              <><ThumbsDownIcon size={30} /><span>No</span></>
             )}
           </button>
         </div>
@@ -437,7 +439,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
 
         {/* Summary of vote */}
         <div className="p-3 rounded-xl flex items-center justify-center gap-4" style={{ background: 'var(--color-surface-elevated)', border: '1px solid var(--color-divider)' }}>
-          <span className="text-xl">{pendingVote ? '👍' : '👎'}</span>
+          {pendingVote ? <ThumbsUpIcon size={28} /> : <ThumbsDownIcon size={28} />}
           <span className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{sliderValue.toFixed(1)}</span>
         </div>
 

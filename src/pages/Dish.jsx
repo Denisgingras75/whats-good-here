@@ -13,6 +13,8 @@ import { PhotoUploadConfirmation } from '../components/PhotoUploadConfirmation'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { getCategoryImage } from '../constants/categoryImages'
 import { getRatingColor, formatScore10 } from '../utils/ranking'
+import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
+import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 
 // Helper for relative time display
 function formatRelativeTime(dateString) {
@@ -444,8 +446,8 @@ export function Dish() {
                         <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
                           {vote.display_name || 'Anonymous'}
                         </p>
-                        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                          {vote.would_order_again ? '👍 Would order again' : '👎 Would skip'}
+                        <p className="text-xs flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                          {vote.would_order_again ? <><ThumbsUpIcon size={20} /> Would order again</> : <><ThumbsDownIcon size={20} /> Would skip</>}
                         </p>
                       </div>
 
@@ -548,7 +550,7 @@ export function Dish() {
                           </div>
                         </Link>
                         <div className="flex items-center gap-2">
-                          <span className="text-lg">{review.would_order_again ? '👍' : '👎'}</span>
+                          <span className="text-lg">{review.would_order_again ? <ThumbsUpIcon size={26} /> : <ThumbsDownIcon size={26} />}</span>
                           <span className="text-lg font-bold" style={{ color: getRatingColor(review.rating_10) }}>
                             {review.rating_10 ? formatScore10(review.rating_10) : ''}
                           </span>

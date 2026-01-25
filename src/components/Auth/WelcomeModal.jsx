@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext'
 import { useProfile } from '../../hooks/useProfile'
 import { CategoryPicker } from '../CategoryPicker'
 import { HeartIcon } from '../HeartIcon'
+import { ThumbsUpIcon } from '../ThumbsUpIcon'
+import { ThumbsDownIcon } from '../ThumbsDownIcon'
 import posthog from 'posthog-js'
 
 const STEPS = [
@@ -15,7 +17,8 @@ const STEPS = [
   },
   {
     id: 'how-it-works',
-    emoji: '👍',
+    emoji: null,
+    icon: 'thumbsUp',
     title: 'Vote on dishes you\'ve tried',
     subtitle: 'Good Here or Not Good — it\'s that simple',
     description: 'Rate 1-10, and watch dishes climb the rankings as the community votes.',
@@ -29,7 +32,8 @@ const STEPS = [
   },
   {
     id: 'favorites',
-    emoji: '❤️',
+    emoji: null,
+    icon: 'heart',
     title: 'Pick your favorites',
     subtitle: 'We\'ll build your personal Top 10',
     description: 'Choose up to 3 categories you love most.',
@@ -152,7 +156,7 @@ export function WelcomeModal() {
             className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center shadow-lg transition-all"
             style={{ background: 'var(--color-primary)' }}
           >
-            {currentStep.id === 'favorites' ? <HeartIcon size={48} /> : <span className="text-4xl">{currentStep.emoji}</span>}
+            {currentStep.id === 'favorites' ? <HeartIcon size={56} /> : currentStep.icon === 'thumbsUp' ? <ThumbsUpIcon size={52} /> : <span className="text-4xl">{currentStep.emoji}</span>}
           </div>
 
           {/* Header */}
@@ -174,11 +178,11 @@ export function WelcomeModal() {
           {currentStep.id === 'how-it-works' && (
             <div className="flex justify-center gap-4 mb-6">
               <div className="flex flex-col items-center p-3 bg-emerald-50 rounded-xl">
-                <span className="text-2xl mb-1">👍</span>
+                <span className="text-2xl mb-1"><ThumbsUpIcon size={32} /></span>
                 <span className="text-xs font-medium text-emerald-700">Good Here</span>
               </div>
               <div className="flex flex-col items-center p-3 bg-red-50 rounded-xl">
-                <span className="text-2xl mb-1">👎</span>
+                <span className="text-2xl mb-1"><ThumbsDownIcon size={32} /></span>
                 <span className="text-xs font-medium text-red-600">Not Good</span>
               </div>
               <div className="flex flex-col items-center p-3 bg-amber-50 rounded-xl">

@@ -8,6 +8,8 @@ import { getRatingColor } from '../utils/ranking'
 import { FollowListModal } from '../components/FollowListModal'
 import { ProfileSkeleton } from '../components/Skeleton'
 import { CategoryIcon } from '../components/CategoryIcon'
+import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
+import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 import { supabase } from '../lib/supabase'
 import {
   calculateCategoryTiers,
@@ -640,7 +642,9 @@ function RecentVoteCard({ vote, myRating }) {
         {hasMyRating && (
           <p className="text-xs mt-0.5">
             <span style={{ color: 'var(--color-text-tertiary)' }}>You: </span>
-            <span style={{ color: getRatingColor(myRatingNum) }}>{myRatingNum}</span>
+            <span style={{ color: getRatingColor(myRatingNum) }}>
+              {myRatingNum % 1 === 0 ? myRatingNum : myRatingNum.toFixed(1)}
+            </span>
           </p>
         )}
       </div>
@@ -649,13 +653,13 @@ function RecentVoteCard({ vote, myRating }) {
       <div className="flex-shrink-0 text-right">
         <div className="flex items-center gap-1">
           <span className="text-lg font-bold" style={{ color: getRatingColor(theirRating) }}>
-            {theirRating}
+            {theirRating % 1 === 0 ? theirRating : theirRating.toFixed(1)}
           </span>
           <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
         </div>
         <div className="mt-1">
           <span className="text-xs">
-            {would_order_again ? '👍' : '👎'}
+            {would_order_again ? <ThumbsUpIcon size={20} /> : <ThumbsDownIcon size={20} />}
           </span>
         </div>
       </div>
@@ -702,7 +706,7 @@ function UserReviewCard({ review, onClick }) {
         {review.rating_10 && (
           <div className="flex-shrink-0">
             <span className="text-lg font-bold" style={{ color: getRatingColor(review.rating_10) }}>
-              {review.rating_10}
+              {review.rating_10 % 1 === 0 ? review.rating_10 : review.rating_10.toFixed(1)}
             </span>
             <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>/10</span>
           </div>
@@ -774,7 +778,7 @@ function ReviewDetailModal({ review, reviewerName, onClose }) {
           {review.rating_10 && (
             <div className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm">
               <span className="text-lg font-bold" style={{ color: getRatingColor(review.rating_10) }}>
-                {review.rating_10}
+                {review.rating_10 % 1 === 0 ? review.rating_10 : review.rating_10.toFixed(1)}
               </span>
               <span className="text-sm text-white/70">/10</span>
             </div>
@@ -797,7 +801,7 @@ function ReviewDetailModal({ review, reviewerName, onClose }) {
               className="flex items-center gap-2 px-3 py-2 rounded-xl"
               style={{ background: 'var(--color-surface-elevated)' }}
             >
-              <span className="text-xl">{review.would_order_again ? '👍' : '👎'}</span>
+              <span className="text-xl">{review.would_order_again ? <ThumbsUpIcon size={28} /> : <ThumbsDownIcon size={28} />}</span>
               <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
                 {review.would_order_again ? 'Would order again' : 'Would not order again'}
               </span>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { authApi } from '../../api'
 import { getPendingVoteFromStorage } from '../ReviewFlow'
+import { ThumbsUpIcon } from '../ThumbsUpIcon'
+import { ThumbsDownIcon } from '../ThumbsDownIcon'
 
 const REMEMBERED_EMAIL_KEY = 'whats-good-here-email'
 
@@ -205,7 +207,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
 
           {/* Icon */}
           <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: hasPendingVote ? (pendingVote.vote ? '#10b981' : '#ef4444') : 'var(--color-primary)' }}>
-            <span className="text-3xl">{hasPendingVote ? (pendingVote.vote ? '👍' : '👎') : '🍽️'}</span>
+            <span className="text-3xl">{hasPendingVote ? (pendingVote.vote ? <ThumbsUpIcon size={40} /> : <ThumbsDownIcon size={40} />) : '🍽️'}</span>
           </div>
 
           {/* Header */}

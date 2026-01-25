@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
 import { WelcomeSplash } from '../components/WelcomeSplash'
+import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
+import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 
 const REMEMBERED_EMAIL_KEY = 'whats-good-here-email'
 
@@ -246,7 +248,7 @@ export function Login() {
               </h3>
               <div className="space-y-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 <div className="flex items-center gap-3">
-                  <span className="text-lg">👍👎</span>
+                  <span className="text-lg flex items-center gap-0.5"><ThumbsUpIcon size={26} /><ThumbsDownIcon size={26} /></span>
                   <p><strong style={{ color: 'var(--color-text-primary)' }}>Would you order it again?</strong> Quick yes or no vote</p>
                 </div>
                 <div className="flex items-center gap-3">
