@@ -49,6 +49,7 @@ export function LocationPicker({
       return (
         <button
           onClick={() => setShowLocationSheet(true)}
+          aria-label="Location: Martha's Vineyard. Tap to change location settings"
           className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors"
           style={{
             background: 'var(--color-primary-muted)',
@@ -56,7 +57,7 @@ export function LocationPicker({
             color: 'var(--color-primary)'
           }}
         >
-          <span>📍</span>
+          <span aria-hidden="true">📍</span>
           <span>Martha's Vineyard</span>
           <span className="text-xs opacity-70">(tap to update)</span>
         </button>
@@ -68,6 +69,7 @@ export function LocationPicker({
       return (
         <button
           onClick={() => setShowLocationSheet(true)}
+          aria-label="Location: Martha's Vineyard. Tap to change location settings"
           className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors"
           style={{
             background: 'var(--color-surface-elevated)',
@@ -75,9 +77,9 @@ export function LocationPicker({
             color: 'var(--color-text-primary)'
           }}
         >
-          <span>📍</span>
+          <span aria-hidden="true">📍</span>
           <span>Martha's Vineyard</span>
-          <svg className="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg aria-hidden="true" className="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
@@ -88,6 +90,7 @@ export function LocationPicker({
     return (
       <button
         onClick={() => setShowLocationSheet(true)}
+        aria-label="Using your location. Tap to change location settings"
         className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-colors"
         style={{
           background: 'color-mix(in srgb, var(--color-success) 15%, var(--color-bg))',
@@ -95,9 +98,9 @@ export function LocationPicker({
           color: 'var(--color-success)'
         }}
       >
-        <span>📍</span>
+        <span aria-hidden="true">📍</span>
         <span>Near you</span>
-        <svg className="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg aria-hidden="true" className="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       </button>
@@ -115,6 +118,7 @@ export function LocationPicker({
           {/* Radius Chip */}
           <button
             onClick={() => setShowRadiusSheet(true)}
+            aria-label={`Search radius: ${radius} miles. Tap to change`}
             className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-all hover:border-neutral-300"
             style={{
               background: 'var(--color-surface)',
@@ -124,6 +128,7 @@ export function LocationPicker({
           >
             <span>Within {radius} mi</span>
             <svg
+              aria-hidden="true"
               className="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
