@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { votesApi } from '../api/votesApi'
 import {
-  CATEGORY_INFO,
+  getCategoryInfo,
   TIER_THRESHOLDS,
   MAJOR_CATEGORIES,
 } from '../constants/categories'
@@ -73,7 +73,7 @@ export function calculateCategoryProgress(categoryCounts) {
 
     // Only show progress if there's a next tier to reach
     if (nextInfo) {
-      const info = CATEGORY_INFO[category] || { emoji: '🍽️', label: category }
+      const info = getCategoryInfo(category)
       const currentTier = getTierForCount(count)
 
       progress.push({
@@ -127,7 +127,7 @@ export function calculateCategoryTiers(categoryCounts) {
 
     const tier = getTierForCount(count)
     if (tier) {
-      const info = CATEGORY_INFO[category] || { emoji: '🍽️', label: category }
+      const info = getCategoryInfo(category)
       tiers.push({
         category,
         count,

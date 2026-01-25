@@ -132,25 +132,54 @@ export function getCategoryNeonImage(id) {
 // Maps category id to emoji and label
 export const CATEGORY_INFO = {
   'pizza': { emoji: '🍕', label: 'Pizza' },
-  'burger': { emoji: '🍔', label: 'Burger' },
-  'taco': { emoji: '🌮', label: 'Taco' },
+  'burger': { emoji: '🍔', label: 'Burgers' },
+  'taco': { emoji: '🌮', label: 'Tacos' },
   'wings': { emoji: '🍗', label: 'Wings' },
   'sushi': { emoji: '🍣', label: 'Sushi' },
-  'sandwich': { emoji: '🥪', label: 'Sandwich' },
-  'breakfast sandwich': { emoji: '🥯', label: 'Breakfast Sandwich' },
+  'sandwich': { emoji: '🥪', label: 'Sandwiches' },
+  'breakfast sandwich': { emoji: '🥯', label: 'Breakfast Sandwiches' },
   'pasta': { emoji: '🍝', label: 'Pasta' },
   'pokebowl': { emoji: '🥗', label: 'Poke' },
-  'lobster roll': { emoji: '🦞', label: 'Lobster Roll' },
+  'lobster roll': { emoji: '🦞', label: 'Lobster Rolls' },
   'seafood': { emoji: '🦐', label: 'Seafood' },
   'chowder': { emoji: '🍲', label: 'Chowder' },
   'soup': { emoji: '🍜', label: 'Soup' },
   'breakfast': { emoji: '🍳', label: 'Breakfast' },
-  'salad': { emoji: '🥗', label: 'Salad' },
+  'salad': { emoji: '🥗', label: 'Salads' },
   'fries': { emoji: '🍟', label: 'Fries' },
   'tendys': { emoji: '🍗', label: 'Tendys' },
   'fried chicken': { emoji: '🍗', label: 'Fried Chicken' },
   'apps': { emoji: '🧆', label: 'Apps' },
-  'entree': { emoji: '🥩', label: 'Entree' },
+  'entree': { emoji: '🥩', label: 'Entrees' },
+  'steak': { emoji: '🥩', label: 'Steak' },
+}
+
+// Get category info with fuzzy matching
+// Handles case differences and strips trailing IDs/characters
+export function getCategoryInfo(category) {
+  if (!category) return { emoji: '🍽️', label: 'Food' }
+
+  // Normalize: lowercase, trim, remove trailing IDs (e.g., "_abc123")
+  const normalized = category.toLowerCase().trim().replace(/_[a-z0-9]+$/i, '')
+
+  // Direct match
+  if (CATEGORY_INFO[normalized]) {
+    return CATEGORY_INFO[normalized]
+  }
+
+  // Try matching just the first word for compound categories
+  const firstWord = normalized.split(/[\s&,]+/)[0]
+  if (CATEGORY_INFO[firstWord]) {
+    return CATEGORY_INFO[firstWord]
+  }
+
+  // Fallback: capitalize the normalized category name
+  const fallbackLabel = normalized
+    .split(/[\s_-]+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+
+  return { emoji: '🍽️', label: fallbackLabel }
 }
 
 // Category tier thresholds for profile rank display
