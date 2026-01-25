@@ -100,7 +100,27 @@ export const dishesApi = {
     const words = sanitized.split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w.toLowerCase()))
 
     // Use the first meaningful word, or fall back to full sanitized query
-    const searchTerm = words.length > 0 ? words[0] : sanitized
+    let searchTerm = words.length > 0 ? words[0] : sanitized
+
+    // Normalize common misspellings and variations to match stored cuisine values
+    const synonyms = {
+      'indiana': 'indian',
+      'indain': 'indian',
+      'italien': 'italian',
+      'italain': 'italian',
+      'mexcian': 'mexican',
+      'maxican': 'mexican',
+      'chineese': 'chinese',
+      'chinease': 'chinese',
+      'japaneese': 'japanese',
+      'japenese': 'japanese',
+      'thia': 'thai',
+      'tai': 'thai',
+    }
+    const normalized = synonyms[searchTerm.toLowerCase()]
+    if (normalized) {
+      searchTerm = normalized
+    }
 
     const selectFields = `
       id,
