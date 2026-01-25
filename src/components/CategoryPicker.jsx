@@ -72,8 +72,8 @@ export const CategoryPicker = memo(function CategoryPicker({
               onClick={() => !disabled && toggleCategory(category.id)}
               disabled={disabled}
               className={`
-                flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium
-                transition-all duration-200
+                flex items-center gap-1.5 px-4 py-3 rounded-xl text-sm font-medium
+                transition-all duration-200 min-h-[44px]
                 ${disabled ? 'opacity-40 cursor-not-allowed' : 'active:scale-95'}
               `}
               style={{
@@ -139,8 +139,8 @@ export const CategoryPicker = memo(function CategoryPicker({
                   onClick={() => !disabled && toggleCategory(category.id)}
                   disabled={disabled}
                   className={`
-                    flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium
-                    transition-all duration-200 animate-fade-in-up
+                    flex items-center gap-1.5 px-4 py-3 rounded-xl text-sm font-medium
+                    transition-all duration-200 animate-fade-in-up min-h-[44px]
                     ${disabled ? 'opacity-40 cursor-not-allowed' : 'active:scale-95'}
                   `}
                   style={{
