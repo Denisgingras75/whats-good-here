@@ -44,6 +44,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [confirmationType, setConfirmationType] = useState(null)
   const [awaitingLogin, setAwaitingLogin] = useState(false)
+  const [announcement, setAnnouncement] = useState('') // For screen reader announcements
   const confirmationTimerRef = useRef(null)
 
   const noVotes = localTotalVotes - localYesVotes
@@ -226,6 +227,10 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     // Haptic success feedback
     hapticSuccess()
 
+    // Announce for screen readers
+    setAnnouncement('Vote submitted successfully')
+    setTimeout(() => setAnnouncement(''), 1000)
+
     // Fire onVote callback immediately - closes modal, shows success
     onVote?.()
 
@@ -304,6 +309,10 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
 
     return (
       <div className="space-y-3">
+        {/* Screen reader announcement region */}
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {announcement}
+        </div>
         <p className="text-sm font-medium text-center" style={{ color: 'var(--color-text-secondary)' }}>Would you order this again?</p>
 
         {/* Show "sign in to continue" note when awaiting login */}
