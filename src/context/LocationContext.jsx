@@ -52,9 +52,14 @@ export function LocationProvider({ children }) {
     return 5
   })
 
+  // Log whenever radius state changes
+  console.log('[LocationProvider] current radius state:', radius)
+
   // Wrap setRadius to track filter changes and persist to localStorage
   const setRadius = useCallback((newRadius) => {
+    console.log('[setRadius] called with:', newRadius)
     setRadiusState(prevRadius => {
+      console.log('[setRadius] prevRadius:', prevRadius, '-> newRadius:', newRadius)
       if (newRadius !== prevRadius) {
         capture('filter_applied', {
           filter_type: 'radius',
