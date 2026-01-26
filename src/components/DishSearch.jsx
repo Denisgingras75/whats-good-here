@@ -184,7 +184,10 @@ export function DishSearch({ loading = false }) {
 
         <input
           ref={inputRef}
+          id="dish-search"
+          name="dish-search"
           type="text"
+          autoComplete="off"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}

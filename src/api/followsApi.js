@@ -76,9 +76,9 @@ export const followsApi = {
       .select('id')
       .eq('follower_id', user.id)
       .eq('followed_id', followedId)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       logger.error('Error checking follow status:', error)
       throw error
     }

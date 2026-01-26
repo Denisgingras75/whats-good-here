@@ -21,13 +21,13 @@ export const profileApi = {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         throw error
       }
 
-      return data || null
+      return data
     } catch (error) {
       logger.error('Error fetching profile:', error)
       throw error

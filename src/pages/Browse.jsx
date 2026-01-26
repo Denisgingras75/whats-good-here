@@ -482,7 +482,10 @@ export function Browse() {
                 </svg>
                 <input
                   ref={searchInputRef}
+                  id="browse-search"
+                  name="browse-search"
                   type="text"
+                  autoComplete="off"
                   placeholder="Find the best ___ near you"
                   value={searchQuery}
                   onChange={(e) => {

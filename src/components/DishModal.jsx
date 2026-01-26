@@ -90,6 +90,33 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
     }
   }, [dish?.dish_id, handleClose])
 
+  // Share functionality - must be before early return to satisfy hooks rules
+  const handleShare = useCallback(async () => {
+    if (!dish) return
+
+    const shareUrl = `${window.location.origin}/dish/${dish.dish_id}`
+    const shareData = {
+      title: `${dish.dish_name} at ${dish.restaurant_name}`,
+      text: `Check out ${dish.dish_name} at ${dish.restaurant_name} on What's Good Here!`,
+      url: shareUrl,
+    }
+
+    try {
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData)
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareUrl)
+        // Could show a toast here, but keeping it simple
+      }
+    } catch (err) {
+      // User cancelled or error - silently ignore
+      if (err.name !== 'AbortError') {
+        logger.warn('Share failed:', err)
+      }
+    }
+  }, [dish])
+
   // Fetch photos when modal opens
   useEffect(() => {
     if (!dish?.dish_id) return
@@ -142,33 +169,6 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
     setPhotoUploaded(null)
     onClose()
   }
-
-  // Share functionality
-  const handleShare = useCallback(async () => {
-    if (!dish) return
-
-    const shareUrl = `${window.location.origin}/dish/${dish.dish_id}`
-    const shareData = {
-      title: `${dish.dish_name} at ${dish.restaurant_name}`,
-      text: `Check out ${dish.dish_name} at ${dish.restaurant_name} on What's Good Here!`,
-      url: shareUrl,
-    }
-
-    try {
-      if (navigator.share && navigator.canShare?.(shareData)) {
-        await navigator.share(shareData)
-      } else {
-        // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(shareUrl)
-        // Could show a toast here, but keeping it simple
-      }
-    } catch (err) {
-      // User cancelled or error - silently ignore
-      if (err.name !== 'AbortError') {
-        logger.warn('Share failed:', err)
-      }
-    }
-  }, [dish])
 
   // Photos to display in the grid (first 4 of community, or all if showing all)
   const displayPhotos = showAllPhotos ? allPhotos : communityPhotos.slice(0, 4)

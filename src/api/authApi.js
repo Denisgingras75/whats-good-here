@@ -105,9 +105,9 @@ export const authApi = {
         .from('profiles')
         .select('id')
         .ilike('display_name', sanitizedUsername)
-        .single()
+        .maybeSingle()
 
-      if (usernameError && usernameError.code !== 'PGRST116') {
+      if (usernameError) {
         throw usernameError
       }
 
@@ -235,16 +235,15 @@ export const authApi = {
         .from('profiles')
         .select('id')
         .ilike('display_name', sanitizedUsername)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
-        throw error
+      if (error) {
+        logger.error('Error checking username:', error)
+        throw new Error('Unable to check username availability')
       }
 
       return !data
     } catch (error) {
-      // PGRST116 means no rows found, which means username is available
-      if (error.code === 'PGRST116') return true
       logger.error('Error checking username:', error)
       throw new Error('Unable to check username availability')
     }
@@ -267,14 +266,13 @@ export const authApi = {
         .select('would_order_again, rating_10, review_text, review_created_at')
         .eq('dish_id', dishId)
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned, which is fine
+      if (error) {
         throw error
       }
 
-      return data || null
+      return data
     } catch (error) {
       logger.error('Error fetching user vote:', error)
       throw error

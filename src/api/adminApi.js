@@ -25,9 +25,9 @@ export const adminApi = {
         .from('admins')
         .select('id')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         logger.error('Error checking admin status:', error)
         return false
       }

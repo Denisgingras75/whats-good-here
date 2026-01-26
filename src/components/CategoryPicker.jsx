@@ -100,6 +100,8 @@ export const CategoryPicker = memo(function CategoryPicker({
       <div className="mt-4">
         <div className="relative">
           <input
+            id="category-search"
+            name="category-search"
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

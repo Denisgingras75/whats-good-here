@@ -70,7 +70,10 @@ export function UserSearch({ onClose }) {
         </svg>
         <input
           ref={inputRef}
+          id="user-search"
+          name="user-search"
           type="text"
+          autoComplete="off"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}

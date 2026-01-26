@@ -101,6 +101,8 @@ export function CategoryGrid({
             </svg>
             <input
               ref={searchInputRef}
+              id="category-grid-search"
+              name="category-grid-search"
               type="text"
               placeholder="Find the best ___ near you"
               value={searchQuery}
