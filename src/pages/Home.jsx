@@ -35,11 +35,11 @@ export function Home() {
     loading: locationLoading
   } = useLocationContext()
 
-  // Debug: log what radius is being used
-  console.log('[Home] Using radius:', radius, 'localStorage:', localStorage.getItem('wgh_radius'))
-
   // Fetch ALL dishes once, then filter by category client-side
   const { dishes, loading, error } = useDishes(location, radius, null, null)
+
+  // DEBUG: Show values on screen (remove after debugging)
+  const debugInfo = `Radius in context: ${radius} | localStorage: ${localStorage.getItem('wgh_radius')} | Total dishes fetched: ${dishes?.length || 0}`
 
   // Group dishes by category and get top 3 for each featured category
   const categoryRankings = useMemo(() => {
@@ -121,6 +121,11 @@ export function Home() {
           className="h-[100px] md:h-[120px] lg:h-[140px] w-auto object-contain"
         />
       </header>
+
+      {/* DEBUG BANNER - REMOVE AFTER FIXING */}
+      <div className="px-4 py-2 text-xs font-mono" style={{ background: '#ff0', color: '#000' }}>
+        {debugInfo}
+      </div>
 
       {/* Location Picker */}
       <LocationPicker
