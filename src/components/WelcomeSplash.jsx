@@ -1,10 +1,20 @@
 import { useState, useEffect } from 'react'
 
+// Module-level flag - persists across re-renders, resets on app reload
+let hasShownThisSession = false
+
 export function WelcomeSplash({ onComplete }) {
   const [phase, setPhase] = useState('pre-entry')
-  const [shouldShow, setShouldShow] = useState(true)
+  const [shouldShow, setShouldShow] = useState(() => !hasShownThisSession)
 
   useEffect(() => {
+    // Already shown this session, skip
+    if (hasShownThisSession) {
+      onComplete?.()
+      return
+    }
+
+    hasShownThisSession = true
     const timers = []
 
     // Animation timeline: fade in (300ms) → hold (1.9s) → fade out (300ms) = 2.5s total
@@ -20,6 +30,7 @@ export function WelcomeSplash({ onComplete }) {
 
   const handleSkip = () => {
     if (phase !== 'pre-entry' && phase !== 'fade-out') {
+      hasShownThisSession = true
       setShouldShow(false)
       onComplete?.()
     }
