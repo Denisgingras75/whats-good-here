@@ -13,6 +13,8 @@ export default defineConfig({
       workbox: {
         // Cache JS, CSS, and image assets
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,woff2}'],
+        // Allow larger files (splash image is ~2.4MB)
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MiB
         // Runtime caching for API calls and images
         runtimeCaching: [
           {
