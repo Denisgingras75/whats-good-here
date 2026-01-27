@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
-import { WelcomeSplash } from '../components/WelcomeSplash'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 
@@ -17,7 +16,6 @@ export function Login() {
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [message, setMessage] = useState(null)
-  const [splashComplete, setSplashComplete] = useState(false)
   const [showLogin, setShowLogin] = useState(false) // Controls welcome vs login view
   const [mode, setMode] = useState('options') // 'options' | 'signin' | 'signup' | 'forgot'
   const [usernameStatus, setUsernameStatus] = useState(null) // null | 'checking' | 'available' | 'taken'
@@ -143,15 +141,10 @@ export function Login() {
   }
 
   return (
-    <>
-      {/* Animated Welcome Splash */}
-      <WelcomeSplash onComplete={() => setSplashComplete(true)} />
-
-      {/* Content - fades in after splash */}
-      <div
-        className={`min-h-screen flex flex-col transition-opacity duration-500 ${splashComplete ? 'opacity-100' : 'opacity-0'}`}
-        style={{ background: 'var(--color-surface)' }}
-      >
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: 'var(--color-surface)' }}
+    >
         {/* Header */}
         <header className="px-4 pt-6 pb-4">
           <button
@@ -576,7 +569,6 @@ export function Login() {
             </p>
           </div>
         )}
-      </div>
-    </>
+    </div>
   )
 }
