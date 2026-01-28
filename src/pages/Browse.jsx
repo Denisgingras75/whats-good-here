@@ -638,7 +638,7 @@ export function Browse() {
                 </p>
                 <p className="text-sm mb-4" style={{ color: 'var(--color-text-tertiary)' }}>
                   {debouncedSearchQuery
-                    ? 'Try something similar:'
+                    ? 'Explore similar:'
                     : 'Be the first to add one!'
                   }
                 </p>

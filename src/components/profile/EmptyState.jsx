@@ -23,7 +23,7 @@ export function EmptyState({ tab }) {
     },
     'worth-it': {
       icon: 'thumbsUp',
-      title: "Nothing good here yet",
+      title: "Start voting to build your list",
       description: "Dishes you'd order again will appear here",
       ctaText: 'Find Something Good',
       ctaLink: '/browse',

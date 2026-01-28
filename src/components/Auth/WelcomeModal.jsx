@@ -26,9 +26,9 @@ const STEPS = [
   {
     id: 'name',
     emoji: '👋',
-    title: 'What should we call you?',
+    title: 'Enter your name',
     subtitle: 'Join the community',
-    description: null,
+    description: 'Friends can find you by your name',
   },
   {
     id: 'favorites',

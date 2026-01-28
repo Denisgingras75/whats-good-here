@@ -323,7 +323,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         <div aria-live="polite" aria-atomic="true" className="sr-only">
           {announcement}
         </div>
-        <p className="text-sm font-medium text-center" style={{ color: 'var(--color-text-secondary)' }}>Would you order this again?</p>
+        <p className="text-sm font-medium text-center" style={{ color: 'var(--color-text-secondary)' }}>Worth ordering again?</p>
 
         {/* Show "sign in to continue" note when awaiting login */}
         {awaitingLogin && pendingVote !== null && (
@@ -345,7 +345,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             </span>
           </div>
         ) : !awaitingLogin ? (
-          <p className="text-xs text-center" style={{ color: 'var(--color-text-tertiary)' }}>Help rank this dish — be first to vote!</p>
+          <p className="text-xs text-center" style={{ color: 'var(--color-text-tertiary)' }}>Be the first to rank this dish!</p>
         ) : null}
 
         <div className="grid grid-cols-2 gap-3">
@@ -434,7 +434,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         </div>
 
         <p className="text-center text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          Want to add a quick review?
+          Add a quick review
         </p>
 
         <div className="grid grid-cols-2 gap-3">
