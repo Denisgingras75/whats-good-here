@@ -86,7 +86,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
           {sortedDishes.filtered
             ? `Results for "${searchQuery}"`
             : rankedCount > 0
-              ? 'What should I order?'
+              ? "What's Good Here"
               : 'Help decide what to order here'
           }
         </h3>
