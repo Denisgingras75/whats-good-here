@@ -119,7 +119,7 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
               ? 'Be first to rate'
               : totalVotes < 10
                 ? `${totalVotes} ${totalVotes === 1 ? 'vote' : 'votes'} so far`
-                : `${totalVotes} votes · ${Math.round(percent_worth_it)}% say it's good here`
+                : `${totalVotes} votes · ${Math.round(percent_worth_it)}% would order again`
             }
           </p>
         </div>
@@ -151,7 +151,7 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
                       {Math.round(percent_worth_it)}%
                     </div>
                     <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                      say it's good here
+                      would order again
                     </div>
                   </div>
                   <div className="text-center">
@@ -179,7 +179,7 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
                       {Math.round(percent_worth_it)}%
                     </div>
                     <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                      say it's good here
+                      would order again
                     </div>
                   </div>
                 </>
