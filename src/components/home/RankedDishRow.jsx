@@ -1,25 +1,22 @@
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getCategoryImage } from '../../constants/categoryImages'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
 import { getRatingColor } from '../../utils/ranking'
+import { RestaurantAvatar } from '../RestaurantAvatar'
 
 // Compact dish row for homepage rankings
 export const RankedDishRow = memo(function RankedDishRow({ dish, rank }) {
   const navigate = useNavigate()
-  const [imageLoaded, setImageLoaded] = useState(false)
   const {
     dish_id,
     dish_name,
     restaurant_name,
-    category,
-    photo_url,
+    restaurant_town,
     avg_rating,
     total_votes,
     distance_miles,
   } = dish
 
-  const imgSrc = photo_url || getCategoryImage(category)
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
 
   const handleClick = () => {
@@ -63,29 +60,12 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank }) {
         )}
       </div>
 
-      {/* Photo */}
-      <div
-        className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 image-placeholder"
-        style={{ background: 'var(--color-surface)' }}
-      >
-        <img
-          src={imgSrc}
-          alt={dish_name}
-          loading="lazy"
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onError={(e) => {
-            // Fall back to category image if photo_url fails to load
-            const fallback = getCategoryImage(category)
-            if (e.target.src !== fallback) {
-              e.target.src = fallback
-            }
-            setImageLoaded(true)
-          }}
-        />
-      </div>
+      {/* Restaurant Avatar */}
+      <RestaurantAvatar
+        name={restaurant_name}
+        town={restaurant_town}
+        size={48}
+      />
 
       {/* Dish Info */}
       <div className="flex-1 min-w-0 text-left">
