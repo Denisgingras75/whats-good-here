@@ -18,9 +18,7 @@ export function SearchHero({ radius, onRadiusChange, loading }) {
       {/* Value proposition */}
       <div className="mb-4 text-center">
         <h1 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
-          What are the best dishes on
-          <br />
-          Martha's Vineyard?
+          Find What's Good on the Vineyard
         </h1>
         <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           Ranked by locals and people who know
