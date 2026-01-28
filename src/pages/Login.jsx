@@ -264,9 +264,9 @@ export function Login() {
           <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
             {/* Logo */}
             <img
-              src="/wgh-splash.png"
+              src="/logo.png"
               alt="What's Good Here"
-              className="w-40 h-auto mb-6"
+              className="w-48 h-auto mb-6"
             />
 
             {/* Heading */}
