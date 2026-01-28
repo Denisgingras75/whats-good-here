@@ -23,7 +23,7 @@ export function SearchHero({ radius, onRadiusChange, loading }) {
           Martha's Vineyard?
         </h1>
         <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          Crowd-ranked by locals and visitors
+          Ranked by locals and people who know
         </p>
       </div>
 
