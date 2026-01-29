@@ -393,14 +393,6 @@ export function Browse() {
             </div>
           )}
 
-          {/* Search results heading */}
-          {debouncedSearchQuery.trim() && !selectedCategory && (
-            <div className="px-4 py-3">
-              <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                Best "{debouncedSearchQuery}" {town ? `in ${town}` : 'near you'}
-              </h1>
-            </div>
-          )}
         </header>
       )}
 
