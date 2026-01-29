@@ -27,7 +27,7 @@ const CATEGORIES = BROWSE_CATEGORIES
 const CUISINE_TYPES = new Set([
   'mexican', 'chinese', 'thai', 'japanese', 'italian', 'indian', 'vietnamese',
   'korean', 'greek', 'french', 'spanish', 'mediterranean', 'american', 'brazilian',
-  'cuban', 'caribbean', 'ethiopian', 'moroccan', 'turkish', 'lebanese', 'persian',
+  'cuban', 'caribbean', 'jamaican', 'ethiopian', 'moroccan', 'turkish', 'lebanese', 'persian',
   'german', 'british', 'irish', 'polish', 'russian', 'african', 'asian', 'european',
   'latin', 'southern', 'cajun', 'creole', 'hawaiian', 'filipino', 'indonesian',
   'malaysian', 'singaporean', 'taiwanese', 'cantonese', 'szechuan', 'hunan',
