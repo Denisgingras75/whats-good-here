@@ -146,20 +146,32 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
             )}
           </div>
 
-          {/* Rating Info - Single metric: would order again % */}
-          <div className="mt-2">
+          {/* Rating Info - Score on left, % would order again on right */}
+          <div className="mt-2 flex items-center justify-between">
             {isRanked ? (
-              <div className="flex items-center gap-2">
-                <span
-                  className="text-lg font-bold"
-                  style={{ color: getRatingColor(percent_worth_it / 10) }}
-                >
-                  {Math.round(percent_worth_it)}%
-                </span>
-                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                  would order again · {votes} votes
-                </span>
-              </div>
+              <>
+                {/* Left: Rating Score */}
+                <div className="flex items-center gap-2">
+                  <span
+                    className="text-lg font-bold"
+                    style={{ color: getRatingColor(displayRating) }}
+                  >
+                    {displayRating}
+                  </span>
+                  <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+                    · {votes} votes
+                  </span>
+                </div>
+                {/* Right: Would Order Again % */}
+                <div className="flex items-center gap-1">
+                  <span className="text-sm font-semibold" style={{ color: 'var(--color-success)' }}>
+                    {Math.round(percent_worth_it)}%
+                  </span>
+                  <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+                    would order again
+                  </span>
+                </div>
+              </>
             ) : (
               <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                 {votes > 0 ? `Early · ${votes} vote${votes === 1 ? '' : 's'} so far` : 'Be first to vote'}
