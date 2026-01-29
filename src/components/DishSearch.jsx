@@ -6,6 +6,7 @@ import { getCategoryImage } from '../constants/categoryImages'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
 import { logger } from '../utils/logger'
+import { RestaurantAvatar } from './RestaurantAvatar'
 const MIN_SEARCH_LENGTH = 2
 const MAX_DISH_RESULTS = 5
 const MAX_CATEGORY_RESULTS = 2
@@ -29,7 +30,7 @@ const BROWSE_CATEGORIES = [
   { id: 'tendys', label: 'Tendys' },
 ]
 
-export function DishSearch({ loading = false, placeholder = "Find What's Good near you" }) {
+export function DishSearch({ loading = false, placeholder = "Find What's Good near you", town = null }) {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
@@ -62,7 +63,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Fetch search results from API (searches ALL dishes island-wide)
+  // Fetch search results from API (respects town filter if set)
   useEffect(() => {
     if (query.length < MIN_SEARCH_LENGTH) {
       setSearchResults([])
@@ -72,7 +73,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
     const fetchResults = async () => {
       setSearching(true)
       try {
-        const results = await dishesApi.search(query, MAX_DISH_RESULTS)
+        const results = await dishesApi.search(query, MAX_DISH_RESULTS, town)
         // Only update state if still mounted
         if (mountedRef.current) {
           setSearchResults(results)
@@ -92,7 +93,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
     // Debounce the search
     const timer = setTimeout(fetchResults, 150)
     return () => clearTimeout(timer)
-  }, [query])
+  }, [query, town])
 
   // Find matching categories (client-side since it's a small constant array)
   const matchingCategories = useMemo(() => {
@@ -266,7 +267,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                 <div>
                   <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
                     <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-                      Best Matches
+                      {town ? `Best in ${town}` : 'Best Matches'}
                     </span>
                   </div>
                   {results.dishes.map((dish, index) => (
@@ -316,6 +317,7 @@ function DishResult({ dish, rank, onClick }) {
   const {
     dish_name,
     restaurant_name,
+    restaurant_town,
     category,
     photo_url,
     avg_rating,
@@ -332,6 +334,9 @@ function DishResult({ dish, rank, onClick }) {
       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
     >
+      {/* Restaurant avatar with town color */}
+      <RestaurantAvatar name={restaurant_name} town={restaurant_town} size={24} />
+
       {/* Rank badge */}
       <div
         className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"

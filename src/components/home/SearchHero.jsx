@@ -22,8 +22,8 @@ export function SearchHero({ town, onTownChange, loading }) {
         </p>
       </div>
 
-      {/* Search - hero element */}
-      <DishSearch loading={loading} placeholder="Search dishes or categories" />
+      {/* Search - hero element (respects town filter) */}
+      <DishSearch loading={loading} placeholder="Search dishes or categories" town={town} />
 
       {/* Town filter dropdown */}
       <div className="mt-3 text-center">

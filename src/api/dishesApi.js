@@ -84,10 +84,11 @@ export const dishesApi = {
    * For multi-word queries like "Mexican food", extracts the meaningful word
    * @param {string} query - Search query
    * @param {number} limit - Max results
+   * @param {string|null} town - Optional town filter (e.g., 'Oak Bluffs')
    * @returns {Promise<Array>} Array of matching dishes sorted by rating
    * @throws {Error} On API failure
    */
-  async search(query, limit = 5) {
+  async search(query, limit = 5, town = null) {
     if (!query?.trim()) return []
 
     // Sanitize query to prevent SQL injection via LIKE patterns
@@ -135,36 +136,41 @@ export const dishesApi = {
         id,
         name,
         is_open,
-        cuisine
+        cuisine,
+        town
       )
     `
+
+    // Build query helper that applies common filters
+    // Note: For Supabase foreign table filtering, we need to apply filters in the right order
+    const runSearchQuery = async (additionalFilter) => {
+      let query = supabase
+        .from('dishes')
+        .select(selectFields)
+        .eq('restaurants.is_open', true)
+
+      // Apply town filter if specified
+      if (town) {
+        query = query.eq('restaurants.town', town)
+      }
+
+      // Apply the additional search-specific filter
+      query = additionalFilter(query)
+
+      // Apply ordering and limit
+      return query
+        .order('avg_rating', { ascending: false, nullsFirst: false })
+        .limit(limit)
+    }
 
     // Run all 3 search queries in parallel for better performance
     const [nameResult, cuisineResult, tagResult] = await Promise.all([
       // Query 1: Search by dish name and category
-      supabase
-        .from('dishes')
-        .select(selectFields)
-        .eq('restaurants.is_open', true)
-        .or(`name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)
-        .order('avg_rating', { ascending: false, nullsFirst: false })
-        .limit(limit),
+      runSearchQuery((q) => q.or(`name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)),
       // Query 2: Search by restaurant cuisine
-      supabase
-        .from('dishes')
-        .select(selectFields)
-        .eq('restaurants.is_open', true)
-        .ilike('restaurants.cuisine', `%${searchTerm}%`)
-        .order('avg_rating', { ascending: false, nullsFirst: false })
-        .limit(limit),
+      runSearchQuery((q) => q.ilike('restaurants.cuisine', `%${searchTerm}%`)),
       // Query 3: Search by dish tags
-      supabase
-        .from('dishes')
-        .select(selectFields)
-        .eq('restaurants.is_open', true)
-        .contains('tags', [searchTerm.toLowerCase()])
-        .order('avg_rating', { ascending: false, nullsFirst: false })
-        .limit(limit),
+      runSearchQuery((q) => q.contains('tags', [searchTerm.toLowerCase()])),
     ])
 
     // Check for errors
@@ -214,6 +220,7 @@ export const dishesApi = {
         restaurant_id: dish.restaurants?.id,
         restaurant_name: dish.restaurants?.name,
         restaurant_cuisine: dish.restaurants?.cuisine,
+        restaurant_town: dish.restaurants?.town,
       }))
   },
 
