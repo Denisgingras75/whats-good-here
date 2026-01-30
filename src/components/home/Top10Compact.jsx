@@ -14,6 +14,7 @@ export function Top10Compact({
   personalDishes,
   showToggle = false,
   initialCount = 3,
+  town,
 }) {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('mv') // 'mv' or 'personal'
@@ -58,7 +59,7 @@ export function Top10Compact({
               color: activeTab === 'mv' ? 'white' : 'var(--color-text-secondary)',
             }}
           >
-            MV Top 10
+            {town || 'MV'} Top 10
           </button>
           <button
             role="tab"
@@ -87,7 +88,7 @@ export function Top10Compact({
           }}
         >
           <span aria-hidden="true">🏆</span>
-          Top 10 on the Island
+          Top 10 {town ? `in ${town}` : 'on the Island'}
         </h3>
       )}
 

@@ -89,6 +89,7 @@ export function Home() {
               personalDishes={personalTop10Dishes}
               showToggle={showPersonalToggle}
               initialCount={3}
+              town={town}
             />
           </div>
         ) : (
