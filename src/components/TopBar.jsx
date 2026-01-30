@@ -12,7 +12,7 @@ export function TopBar() {
           src="/mv-outline.png"
           alt="Martha's Vineyard"
           className="top-bar-icon"
-          style={{ height: '20px', width: 'auto', opacity: 0.9 }}
+          style={{ height: '28px', width: 'auto', opacity: 0.9 }}
         />
 
         {/* Notification Bell */}
