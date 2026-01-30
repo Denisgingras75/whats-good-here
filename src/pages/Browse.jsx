@@ -648,12 +648,11 @@ export function Browse() {
                     : 'No dishes in this category yet'
                   }
                 </p>
-                <p className="text-sm mb-4" style={{ color: 'var(--color-text-tertiary)' }}>
-                  {debouncedSearchQuery
-                    ? 'Explore similar:'
-                    : 'Be the first to add one!'
-                  }
-                </p>
+                {debouncedSearchQuery && (
+                  <p className="text-sm mb-4" style={{ color: 'var(--color-text-tertiary)' }}>
+                    Explore similar:
+                  </p>
+                )}
 
                 {/* Contextual suggestions */}
                 {debouncedSearchQuery && (
