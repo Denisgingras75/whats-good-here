@@ -24,21 +24,22 @@ export function CategoryImageCard({
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center transition-all duration-200 active:scale-[0.97]"
+      className="group flex flex-col items-center transition-all duration-200 active:scale-[0.97]"
       style={{ gap: '18px' }}
     >
       {/* Plate with food icon */}
-      <PlateIcon size={size}>
-        {imageSrc ? (
-          <div
-            className="w-full h-full rounded-full overflow-hidden"
-            style={{
-              // Food glow - warm gold glow for appetite appeal
-              boxShadow: isActive
-                ? '0 0 14px rgba(217, 167, 101, 0.5), 0 0 6px rgba(217, 167, 101, 0.3)'
-                : '0 0 8px rgba(217, 167, 101, 0.15)',
-            }}
-          >
+      <div className="transition-all duration-200" style={{ filter: 'drop-shadow(0 0 0px transparent)' }} onMouseEnter={(e) => e.currentTarget.style.filter = 'drop-shadow(0 2px 8px rgba(217, 167, 101, 0.15))'} onMouseLeave={(e) => e.currentTarget.style.filter = 'drop-shadow(0 0 0px transparent)'}>
+        <PlateIcon size={size}>
+          {imageSrc ? (
+            <div
+              className="w-full h-full rounded-full overflow-hidden"
+              style={{
+                // Food glow - warm gold glow for appetite appeal
+                boxShadow: isActive
+                  ? '0 0 14px rgba(217, 167, 101, 0.5), 0 0 6px rgba(217, 167, 101, 0.3)'
+                  : '0 0 8px rgba(217, 167, 101, 0.15)',
+              }}
+            >
             <img
               src={imageSrc}
               alt={category.label}
@@ -60,11 +61,12 @@ export function CategoryImageCard({
             style={{ background: '#0D1B22' }}
           />
         )}
-      </PlateIcon>
+        </PlateIcon>
+      </div>
 
       {/* Label - secondary to plate */}
       <span
-        className="text-[12px] font-medium text-center leading-none"
+        className="text-[12px] font-medium text-center leading-none transition-all duration-200 group-hover:brightness-125"
         style={{
           color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
         }}

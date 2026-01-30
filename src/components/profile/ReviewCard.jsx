@@ -64,11 +64,18 @@ export function ReviewCard({ review, onClick }) {
 
       {/* Review text */}
       <div className="px-3 pb-3">
-        <p className="text-sm text-[color:var(--color-text-secondary)] line-clamp-2 italic">
-          "{review.review_text}"
+        <p
+          className="line-clamp-2 italic"
+          style={{
+            color: 'var(--color-text-secondary)',
+            fontSize: '13px',
+            lineHeight: '1.5',
+          }}
+        >
+          &ldquo;{review.review_text}&rdquo;
         </p>
         {formattedDate && (
-          <p className="text-xs text-[color:var(--color-text-tertiary)] mt-1">{formattedDate}</p>
+          <p className="mt-1.5" style={{ color: 'var(--color-text-tertiary)', fontSize: '11px' }}>{formattedDate}</p>
         )}
       </div>
     </>
@@ -80,7 +87,11 @@ export function ReviewCard({ review, onClick }) {
       <button
         onClick={onClick}
         className="w-full text-left rounded-xl transition-all active:scale-[0.99] overflow-hidden"
-        style={{ background: 'var(--color-bg)', border: '1px solid var(--color-divider)' }}
+        style={{
+          background: 'var(--color-bg)',
+          border: '1px solid var(--color-divider)',
+          boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.3)',
+        }}
       >
         {cardContent}
       </button>
@@ -90,8 +101,12 @@ export function ReviewCard({ review, onClick }) {
   return (
     <Link
       to={`/dish/${review.dish_id}`}
-      className="block rounded-xl border overflow-hidden"
-      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
+      className="block rounded-xl border overflow-hidden transition-all"
+      style={{
+        background: 'var(--color-card)',
+        borderColor: 'var(--color-divider)',
+        boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(217, 167, 101, 0.04)',
+      }}
     >
       {cardContent}
     </Link>

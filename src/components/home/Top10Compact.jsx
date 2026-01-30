@@ -19,6 +19,7 @@ export function Top10Compact({
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('mv') // 'mv' or 'personal'
   const [expanded, setExpanded] = useState(false)
+  const [prevExpanded, setPrevExpanded] = useState(false)
 
   // Which dishes to show based on active tab
   const activeDishes = activeTab === 'personal' && showToggle
@@ -31,14 +32,18 @@ export function Top10Compact({
 
   const hasMore = activeDishes.length > initialCount
 
+  // Track whether we just expanded (for stagger animation)
+  const justExpanded = expanded && !prevExpanded
+
   if (!dishes?.length) return null
 
   return (
     <section
-      className="rounded-2xl p-4"
+      className="rounded-2xl p-5"
       style={{
         background: 'var(--color-bg)',
         border: '1px solid var(--color-divider)',
+        boxShadow: '0 4px 16px -4px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(217, 167, 101, 0.06)',
       }}
     >
       {/* Header with optional toggle */}
@@ -81,10 +86,12 @@ export function Top10Compact({
         </div>
       ) : (
         <h3
-          className="font-bold text-base mb-4 pb-2 flex items-center gap-2"
+          className="font-bold mb-4 pb-2.5 flex items-center gap-2"
           style={{
             color: 'var(--color-text-primary)',
             borderBottom: '2px solid var(--color-accent-gold)',
+            fontSize: '15px',
+            letterSpacing: '-0.01em',
           }}
         >
           <span aria-hidden="true">🏆</span>
@@ -93,13 +100,15 @@ export function Top10Compact({
       )}
 
       {/* Dishes list */}
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {displayedDishes.length > 0 ? (
           displayedDishes.map((dish, index) => (
             <Top10Row
               key={dish.dish_id}
               dish={dish}
               rank={index + 1}
+              isNewlyRevealed={justExpanded && index >= initialCount}
+              revealIndex={index - initialCount}
               onClick={() => navigate(`/dish/${dish.dish_id}`)}
             />
           ))
@@ -122,11 +131,15 @@ export function Top10Compact({
       {/* Expand/collapse button */}
       {hasMore && displayedDishes.length > 0 && (
         <button
-          onClick={() => setExpanded(!expanded)}
-          className="w-full mt-3 pt-3 border-t text-sm font-medium flex items-center justify-center gap-1 transition-colors"
+          onClick={() => {
+            setPrevExpanded(expanded)
+            setExpanded(!expanded)
+          }}
+          className="w-full mt-3 pt-3 border-t font-semibold flex items-center justify-center gap-1 transition-opacity hover:opacity-80"
           style={{
             borderColor: 'var(--color-divider)',
             color: 'var(--color-primary)',
+            fontSize: '13px',
           }}
         >
           {expanded ? (
@@ -151,7 +164,7 @@ export function Top10Compact({
 }
 
 // Compact row for Top 10 list
-const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
+const Top10Row = memo(function Top10Row({ dish, rank, isNewlyRevealed, revealIndex, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
 
@@ -161,60 +174,64 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
     : `Rank ${rank}: ${dish_name} at ${restaurant_name}, ${total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'new dish'}`
 
   return (
-    <button
-      onClick={onClick}
-      aria-label={accessibleLabel}
-      className="w-full flex items-center gap-2 py-2 px-2 rounded-lg transition-colors text-left group"
-      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
-      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+    <div
+      className={isNewlyRevealed ? 'animate-expand-in' : ''}
+      style={isNewlyRevealed ? { animationDelay: `${(revealIndex || 0) * 50}ms`, opacity: 0, animationFillMode: 'forwards' } : undefined}
     >
-      {/* Rank - medals for top 3 */}
-      {rank <= 3 ? (
-        <span aria-hidden="true" className="text-base flex-shrink-0 w-5 text-center">
-          {rank === 1 && '🥇'}
-          {rank === 2 && '🥈'}
-          {rank === 3 && '🥉'}
-        </span>
-      ) : (
-        <span
-          aria-hidden="true"
-          className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-          style={{
-            background: 'var(--color-surface)',
-            color: 'var(--color-text-tertiary)',
-          }}
-        >
-          {rank}
-        </span>
-      )}
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-          {dish_name}
-        </p>
-        <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
-          {restaurant_name}
-        </p>
-      </div>
-
-      {/* Rating or vote count */}
-      <div className="flex-shrink-0 text-right">
-        {isRanked ? (
-          <div className="flex flex-col items-end">
-            <span className="text-sm font-bold leading-tight" style={{ color: getRatingColor(avg_rating) }}>
-              {avg_rating}
-            </span>
-            <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
-              {total_votes} votes
-            </span>
-          </div>
+      <button
+        onClick={onClick}
+        aria-label={accessibleLabel}
+        className="w-full flex items-center gap-2.5 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[#162B35]"
+      >
+        {/* Rank - medals for top 3 */}
+        {rank <= 3 ? (
+          <span aria-hidden="true" className="text-base flex-shrink-0 w-6 text-center">
+            {rank === 1 && '🥇'}
+            {rank === 2 && '🥈'}
+            {rank === 3 && '🥉'}
+          </span>
         ) : (
-          <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
-            {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+          <span
+            aria-hidden="true"
+            className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+            style={{
+              background: 'var(--color-surface)',
+              color: 'var(--color-text-tertiary)',
+              border: '1px solid rgba(217, 167, 101, 0.15)',
+            }}
+          >
+            {rank}
           </span>
         )}
-      </div>
-    </button>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+            {dish_name}
+          </p>
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+            {restaurant_name}
+          </p>
+        </div>
+
+        {/* Rating or vote count */}
+        <div className="flex-shrink-0 text-right">
+          {isRanked ? (
+            <div className="flex flex-col items-end">
+              <span className="text-sm font-bold leading-tight" style={{ color: getRatingColor(avg_rating) }}>
+                {avg_rating}
+              </span>
+              <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+                {total_votes} votes
+              </span>
+            </div>
+          ) : (
+            <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+              {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+            </span>
+          )}
+        </div>
+      </button>
+    </div>
   )
 })

@@ -72,19 +72,48 @@ export function EmptyState({ tab }) {
 
   return (
     <div
-      className="rounded-2xl border p-8 text-center"
-      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
+      className="rounded-2xl border p-10 text-center"
+      style={{
+        background: `
+          radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200, 90, 84, 0.04) 0%, transparent 70%),
+          var(--color-card)
+        `,
+        borderColor: 'var(--color-divider)',
+        boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.3)',
+      }}
     >
-      <div className="text-4xl mb-3">
+      <div className="text-4xl mb-4">
         {renderIcon()}
       </div>
-      <h3 className="font-semibold text-[color:var(--color-text-primary)]">{title}</h3>
-      <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">{description}</p>
+      <h3
+        className="font-bold"
+        style={{
+          color: 'var(--color-text-primary)',
+          fontSize: '16px',
+          letterSpacing: '-0.01em',
+        }}
+      >
+        {title}
+      </h3>
+      <p
+        className="mt-1.5 font-medium"
+        style={{
+          color: 'var(--color-text-tertiary)',
+          fontSize: '13px',
+        }}
+      >
+        {description}
+      </p>
       {ctaText && ctaLink && (
         <Link
           to={ctaLink}
-          className="inline-block mt-4 px-6 py-2 rounded-full text-sm font-medium transition-opacity hover:opacity-90"
-          style={{ background: 'var(--color-primary)', color: 'white' }}
+          className="inline-block mt-5 px-7 py-2.5 rounded-full font-semibold transition-all hover:opacity-90 active:scale-[0.97]"
+          style={{
+            background: 'var(--color-primary)',
+            color: 'white',
+            fontSize: '13px',
+            boxShadow: '0 2px 12px -4px rgba(200, 90, 84, 0.3)',
+          }}
         >
           {ctaText}
         </Link>

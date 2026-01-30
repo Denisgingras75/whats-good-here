@@ -67,12 +67,38 @@ export function HeroIdentityCard({
   const nearTermGoal = getNearTermGoal()
 
   return (
-    <div className="border-b px-4 py-6" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
+    <div
+      className="relative px-4 pt-8 pb-6 overflow-hidden"
+      style={{
+        background: `
+          radial-gradient(ellipse 90% 50% at 20% 0%, rgba(200, 90, 84, 0.06) 0%, transparent 70%),
+          radial-gradient(ellipse 70% 60% at 80% 100%, rgba(217, 167, 101, 0.04) 0%, transparent 70%),
+          var(--color-bg)
+        `,
+      }}
+    >
+      {/* Bottom divider */}
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px"
+        style={{
+          width: '90%',
+          background: 'linear-gradient(90deg, transparent, var(--color-divider), transparent)',
+        }}
+      />
+
       {/* Avatar + Name row */}
       <div className="flex items-center gap-4">
-        {/* Avatar */}
-        <div className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ background: 'var(--color-primary)' }}>
-          {profile?.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+        {/* Avatar with glow ring */}
+        <div className="relative flex-shrink-0">
+          <div
+            className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+            style={{
+              background: 'var(--color-primary)',
+              boxShadow: '0 4px 20px -4px rgba(200, 90, 84, 0.4), 0 0 0 3px rgba(200, 90, 84, 0.15)',
+            }}
+          >
+            {profile?.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+          </div>
         </div>
 
         <div className="flex-1 min-w-0">
@@ -132,33 +158,39 @@ export function HeroIdentityCard({
           ) : (
             <button
               onClick={() => setEditingName(true)}
-              className="text-xl font-bold transition-colors flex items-center gap-2"
-              style={{ color: 'var(--color-text-primary)' }}
+              className="font-bold transition-colors flex items-center gap-2"
+              style={{
+                color: 'var(--color-text-primary)',
+                fontSize: '22px',
+                letterSpacing: '-0.02em',
+                lineHeight: '1.2',
+              }}
             >
               {profile?.display_name || 'Set your name'}
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-[color:var(--color-text-tertiary)]">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 flex-shrink-0 text-[color:var(--color-text-tertiary)]">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
               </svg>
             </button>
           )}
 
           {/* Follow Stats */}
-          <div className="flex items-center gap-3 mt-1 text-sm">
+          <div className="flex items-center gap-2 mt-1.5" style={{ fontSize: '13px' }}>
             <button
               onClick={() => setFollowListModal('followers')}
-              className="hover:underline"
+              className="hover:underline transition-colors"
               style={{ color: 'var(--color-text-secondary)' }}
             >
-              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>
                 {followCounts.followers}
               </span> followers
             </button>
+            <span style={{ color: 'var(--color-text-tertiary)' }}>&middot;</span>
             <button
               onClick={() => setFollowListModal('following')}
-              className="hover:underline"
+              className="hover:underline transition-colors"
               style={{ color: 'var(--color-text-secondary)' }}
             >
-              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>
                 {followCounts.following}
               </span> following
             </button>
@@ -167,12 +199,25 @@ export function HeroIdentityCard({
       </div>
 
       {/* Primary Identity Title */}
-      <div className="mt-4">
-        <h2 className="text-lg font-bold" style={{ color: 'var(--color-primary)' }}>
+      <div className="mt-5">
+        <h2
+          className="font-bold"
+          style={{
+            color: 'var(--color-primary)',
+            fontSize: '17px',
+            letterSpacing: '-0.01em',
+          }}
+        >
           {getPrimaryTitle()}
         </h2>
         {/* Secondary line: rank info + badges */}
-        <p className="text-sm text-[color:var(--color-text-secondary)] mt-0.5">
+        <p
+          className="mt-1 font-medium"
+          style={{
+            color: 'var(--color-text-tertiary)',
+            fontSize: '13px',
+          }}
+        >
           {stats.totalVotes > 0 ? `${stats.totalVotes} ratings` : 'Getting started'}
           {badgeCount > 0 && ` \u00B7 ${badgeCount} badge${badgeCount === 1 ? '' : 's'} earned`}
         </p>
@@ -182,22 +227,30 @@ export function HeroIdentityCard({
       {nearTermGoal && (
         <button
           onClick={() => navigate('/badges')}
-          className="mt-4 w-full p-3 rounded-xl text-left transition-colors hover:opacity-90"
+          className="mt-5 w-full p-3.5 rounded-xl text-left transition-all hover:opacity-90 active:scale-[0.99]"
           style={{
             background: 'var(--color-primary-muted)',
-            border: '1px solid var(--color-primary)'
+            border: '1px solid var(--color-primary)',
+            boxShadow: '0 2px 12px -4px rgba(200, 90, 84, 0.2)',
           }}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wide">
+              <p
+                className="font-semibold uppercase"
+                style={{
+                  color: 'var(--color-text-tertiary)',
+                  fontSize: '10px',
+                  letterSpacing: '0.1em',
+                }}
+              >
                 Next Goal
               </p>
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
+              <p className="font-semibold mt-0.5" style={{ color: 'var(--color-primary)', fontSize: '13px' }}>
                 {nearTermGoal}
               </p>
             </div>
-            <svg className="w-5 h-5" style={{ color: 'var(--color-primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--color-primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </div>

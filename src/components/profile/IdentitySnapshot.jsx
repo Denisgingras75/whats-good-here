@@ -51,21 +51,32 @@ export function IdentitySnapshot({ categoryTiers, categoryProgress }) {
   if (displayRows.length === 0) return null
 
   return (
-    <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-      <div className="space-y-2">
+    <div className="px-4 py-4 relative">
+      {/* Bottom divider */}
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px"
+        style={{
+          width: '90%',
+          background: 'linear-gradient(90deg, transparent, var(--color-divider), transparent)',
+        }}
+      />
+      <div className="space-y-1">
         {displayRows.map((row, idx) => (
           <button
             key={idx}
             onClick={() => navigate('/badges')}
-            className="w-full flex items-center justify-between py-2 px-3 rounded-lg transition-colors hover:bg-[color:var(--color-surface-elevated)]"
+            className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl transition-all hover:bg-[color:var(--color-surface-elevated)] active:scale-[0.99]"
           >
             <div className="flex items-center gap-3">
               <CategoryIcon category={row.categoryId} size={24} />
-              <span className="font-medium text-[color:var(--color-text-primary)]">{row.categoryLabel}</span>
-              <span className="text-[color:var(--color-text-tertiary)]">·</span>
+              <span className="font-medium text-[color:var(--color-text-primary)]" style={{ fontSize: '14px' }}>{row.categoryLabel}</span>
+              <span style={{ color: 'var(--color-text-tertiary)', fontSize: '10px' }}>&middot;</span>
               <span
                 className={`font-semibold ${row.isNear ? 'text-[color:var(--color-text-secondary)]' : ''}`}
-                style={!row.isNear ? { color: 'var(--color-primary)' } : undefined}
+                style={{
+                  ...(row.isNear ? {} : { color: 'var(--color-primary)' }),
+                  fontSize: '13px',
+                }}
               >
                 {row.tierIcon} {row.tier}
               </span>

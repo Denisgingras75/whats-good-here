@@ -276,7 +276,7 @@ export function Profile() {
   }
 
   return (
-    <div style={{ background: 'var(--color-surface)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
       <h1 className="sr-only">Your Profile</h1>
 
       {user ? (
@@ -318,7 +318,14 @@ export function Profile() {
           )}
 
           {/* Find Friends Section */}
-          <div className="px-4 py-3 border-b" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
+          <div className="px-4 py-4 relative" style={{ background: 'var(--color-bg)' }}>
+            <div
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px"
+              style={{
+                width: '90%',
+                background: 'linear-gradient(90deg, transparent, var(--color-divider), transparent)',
+              }}
+            />
             <div
               className="rounded-xl overflow-hidden"
               style={{ background: 'var(--color-primary)', padding: '2px' }}
@@ -329,7 +336,7 @@ export function Profile() {
 
           {/* Unrated Photos Banner - shown when user has photos to rate */}
           {unratedCount > 0 && (
-            <div className="px-4 py-3" style={{ background: 'var(--color-surface)' }}>
+            <div className="px-4 py-4" style={{ background: 'var(--color-surface)' }}>
               <button
                 onClick={() => {
                   // Open the first unrated dish
@@ -337,24 +344,24 @@ export function Profile() {
                     handleUnratedDishClick(unratedDishes[0])
                   }
                 }}
-                className="w-full rounded-xl p-4 flex items-center gap-4 transition-all hover:scale-[0.99] active:scale-[0.98]"
+                className="w-full rounded-2xl p-4 flex items-center gap-4 transition-all hover:scale-[0.99] active:scale-[0.98]"
                 style={{
-                  background: 'linear-gradient(135deg, var(--color-primary) 0%, #ff8a3d 100%)',
-                  boxShadow: '0 4px 12px rgba(244, 122, 31, 0.3)'
+                  background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-orange) 100%)',
+                  boxShadow: '0 4px 20px -4px rgba(200, 90, 84, 0.4), 0 2px 8px -2px rgba(0, 0, 0, 0.3)',
                 }}
               >
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <span className="text-2xl">📷</span>
                 </div>
                 <div className="flex-1 text-left">
-                  <h3 className="font-bold text-white text-lg">
+                  <h3 className="font-bold text-white" style={{ fontSize: '17px', letterSpacing: '-0.01em' }}>
                     {unratedCount} photo{unratedCount === 1 ? '' : 's'} to rate
                   </h3>
-                  <p className="text-white/80 text-sm">
+                  <p className="text-white/70" style={{ fontSize: '13px' }}>
                     Tap to rate your dishes
                   </p>
                 </div>
-                <svg className="w-6 h-6 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-white/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -362,26 +369,42 @@ export function Profile() {
           )}
 
           {/* Tabs */}
-          <div className="border-b py-2" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}>
-            <div className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
+          <div
+            className="sticky top-0 z-10 py-2.5"
+            style={{
+              background: 'var(--color-surface)',
+              boxShadow: '0 4px 12px -4px rgba(0, 0, 0, 0.2)',
+              borderBottom: '1px solid var(--color-divider)',
+            }}
+          >
+            <div className="flex gap-1.5 overflow-x-auto px-4 pb-0.5 scrollbar-hide">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                  className={`flex-shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all whitespace-nowrap active:scale-[0.97] ${
                     activeTab === tab.id
-                      ? 'text-white shadow-md'
+                      ? 'text-white'
                       : 'text-[color:var(--color-text-secondary)]'
                   }`}
-                  style={activeTab === tab.id
-                    ? { background: 'var(--color-primary)' }
-                    : { background: 'var(--color-surface-elevated)' }}
+                  style={{
+                    fontSize: '13px',
+                    ...(activeTab === tab.id
+                      ? {
+                          background: 'var(--color-primary)',
+                          boxShadow: '0 2px 8px -2px rgba(200, 90, 84, 0.4)',
+                        }
+                      : { background: 'var(--color-surface-elevated)' }),
+                  }}
                 >
                   {tab.id === 'saved' ? <HearingIcon size={40} active={activeTab === tab.id} /> : tab.id === 'worth-it' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.id === 'avoid' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : tab.id === 'unrated' ? <CameraIcon size={40} active={activeTab === tab.id} /> : tab.id === 'reviews' ? <ReviewsIcon size={40} active={activeTab === tab.id} /> : <span>{tab.emoji}</span>}
                   <span>{tab.label}</span>
-                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
-                    activeTab === tab.id ? 'bg-white/20' : 'bg-black/20'
-                  }`}>
+                  <span
+                    className={`ml-0.5 px-1.5 py-0.5 rounded-full font-semibold ${
+                      activeTab === tab.id ? 'bg-white/20' : 'bg-black/20'
+                    }`}
+                    style={{ fontSize: '11px' }}
+                  >
                     {tab.id === 'unrated' ? unratedCount :
                      tab.id === 'worth-it' ? worthItDishes.length :
                      tab.id === 'avoid' ? avoidDishes.length :
@@ -394,7 +417,7 @@ export function Profile() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-4">
+          <div className="p-4 pt-5">
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
@@ -402,7 +425,7 @@ export function Profile() {
                 ))}
               </div>
             ) : tabDishes.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 {activeTab === 'unrated' ? (
                   // Unrated dishes - clickable to rate
                   visibleDishes.map((dish) => (
@@ -443,10 +466,10 @@ export function Profile() {
                 {hasMoreDishes && (
                   <button
                     onClick={() => setExpandedTabs(prev => ({ ...prev, [activeTab]: !isTabExpanded }))}
-                    className="w-full py-3 text-center rounded-xl border-2 border-dashed hover:bg-[color:var(--color-surface-elevated)] transition-colors"
+                    className="w-full py-3 text-center rounded-xl border-2 border-dashed transition-all hover:bg-[color:var(--color-surface-elevated)] hover:border-[color:var(--color-primary)] active:scale-[0.99]"
                     style={{ borderColor: 'var(--color-divider)' }}
                   >
-                    <span className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
+                    <span className="font-semibold" style={{ color: 'var(--color-primary)', fontSize: '13px' }}>
                       {isTabExpanded
                         ? 'Show less'
                         : `View ${hiddenCount} more ${activeTab === 'reviews' ? (hiddenCount === 1 ? 'review' : 'reviews') : (hiddenCount === 1 ? 'dish' : 'dishes')}`
@@ -493,10 +516,30 @@ export function Profile() {
           )}
 
           {/* Settings */}
-          <div className="p-4 pt-0">
-            <div className="rounded-2xl border overflow-hidden" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
-              <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-                <h2 className="font-semibold text-[color:var(--color-text-primary)]">Settings</h2>
+          <div className="p-4 pt-2">
+            {/* Section divider dot */}
+            <div className="flex justify-center mb-5">
+              <div className="w-1 h-1 rounded-full" style={{ background: 'var(--color-accent-gold)' }} />
+            </div>
+            <div
+              className="rounded-2xl border overflow-hidden"
+              style={{
+                background: 'var(--color-card)',
+                borderColor: 'var(--color-divider)',
+                boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(217, 167, 101, 0.04)',
+              }}
+            >
+              <div className="px-4 py-3.5 border-b" style={{ borderColor: 'var(--color-divider)' }}>
+                <h2
+                  className="font-bold"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: '15px',
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  Settings
+                </h2>
               </div>
 
               {/* Edit Favorites */}
@@ -593,16 +636,42 @@ export function Profile() {
         </>
       ) : (
         /* Sign In Card */
-        <div className="p-4">
-          <div className="rounded-2xl border p-6" style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}>
-            <div className="text-center mb-6">
+        <div className="p-5 pt-8">
+          <div
+            className="rounded-2xl border p-7"
+            style={{
+              background: `
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(200, 90, 84, 0.05) 0%, transparent 70%),
+                var(--color-card)
+              `,
+              borderColor: 'var(--color-divider)',
+              boxShadow: '0 4px 24px -8px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(217, 167, 101, 0.06)',
+            }}
+          >
+            <div className="text-center mb-7">
               <img
                 src="/logo.png"
                 alt="What's Good Here"
-                className="w-40 h-auto mx-auto mb-4"
+                className="w-40 h-auto mx-auto mb-5"
               />
-              <h2 className="text-xl font-bold text-[color:var(--color-text-primary)]">Sign in to vote</h2>
-              <p className="text-sm text-[color:var(--color-text-secondary)] mt-1">
+              <h2
+                className="font-bold"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: '22px',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                Sign in to vote
+              </h2>
+              <p
+                className="mt-2 font-medium"
+                style={{
+                  color: 'var(--color-text-tertiary)',
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                }}
+              >
                 Track your votes, save favorites, and help others find great food
               </p>
             </div>
@@ -622,8 +691,13 @@ export function Profile() {
               <button
                 onClick={handleGoogleSignIn}
                 disabled={authLoading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border-2 rounded-xl font-semibold text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface-elevated)] active:scale-[0.98] transition-all disabled:opacity-50"
-                style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border rounded-xl font-semibold text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface-elevated)] active:scale-[0.98] transition-all disabled:opacity-50"
+                style={{
+                  background: 'var(--color-surface-elevated)',
+                  borderColor: 'var(--color-divider)',
+                  fontSize: '14px',
+                  boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.2)',
+                }}
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -649,14 +723,22 @@ export function Profile() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all mb-3"
-                  style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)', color: 'var(--color-text-primary)' }}
+                  className="w-full px-4 py-3 border rounded-xl focus:outline-none transition-all mb-3"
+                  style={{
+                    background: 'var(--color-surface-elevated)',
+                    borderColor: 'var(--color-divider)',
+                    color: 'var(--color-text-primary)',
+                    fontSize: '14px',
+                  }}
                 />
                 <button
                   type="submit"
                   disabled={authLoading}
                   className="w-full px-4 py-3 text-[color:var(--color-text-primary)] font-semibold rounded-xl active:scale-[0.98] transition-all disabled:opacity-50"
-                  style={{ background: 'var(--color-surface-elevated)' }}
+                  style={{
+                    background: 'var(--color-surface-elevated)',
+                    fontSize: '14px',
+                  }}
                 >
                   {authLoading ? 'Sending...' : 'Sign in with email'}
                 </button>

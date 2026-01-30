@@ -60,13 +60,17 @@ export function VotedDishCard({
   return (
     <CardWrapper
       {...cardProps}
-      className={`rounded-xl border overflow-hidden ${variant === 'other-profile' ? 'text-left hover:shadow-md transition-shadow active:scale-[0.99]' : ''}`}
-      style={{ background: 'var(--color-card)', borderColor: 'var(--color-divider)' }}
+      className={`rounded-xl border overflow-hidden ${variant === 'other-profile' ? 'text-left hover:shadow-md transition-all active:scale-[0.99]' : 'transition-all'}`}
+      style={{
+        background: 'var(--color-card)',
+        borderColor: 'var(--color-divider)',
+        boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(217, 167, 101, 0.04)',
+      }}
     >
       <div className="flex">
         {/* Image */}
         <div
-          className={`${variant === 'other-profile' ? 'w-14 h-14 rounded-lg m-3' : 'w-24 h-24'} flex-shrink-0 overflow-hidden`}
+          className={`${variant === 'other-profile' ? 'w-14 h-14 rounded-lg m-3' : 'w-24 h-24 rounded-l-xl'} flex-shrink-0 overflow-hidden`}
           style={{ background: 'var(--color-surface-elevated)' }}
         >
           <img
@@ -172,8 +176,15 @@ export function VotedDishCard({
       {/* Inline Review (own-profile only) */}
       {variant === 'own-profile' && reviewText && (
         <div className="px-3 pb-3 pt-0">
-          <p className="text-sm text-[color:var(--color-text-secondary)] line-clamp-2 italic">
-            "{reviewText}"
+          <p
+            className="line-clamp-2 italic"
+            style={{
+              color: 'var(--color-text-secondary)',
+              fontSize: '13px',
+              lineHeight: '1.5',
+            }}
+          >
+            &ldquo;{reviewText}&rdquo;
           </p>
         </div>
       )}

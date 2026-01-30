@@ -105,10 +105,15 @@ export function Home() {
         }}
       >
         {/* Section header */}
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
+          {/* Decorative gold dot */}
+          <div
+            className="w-1 h-1 rounded-full mx-auto mb-3"
+            style={{ background: 'var(--color-accent-gold)' }}
+          />
           <h2
             className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-2"
-            style={{ color: 'rgba(255, 255, 255, 0.45)' }}
+            style={{ color: 'var(--color-text-tertiary)' }}
           >
             The Best By Category
           </h2>
@@ -118,14 +123,15 @@ export function Home() {
         </div>
 
         {/* Category grid - 3 columns on mobile, 4 on desktop */}
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-6 justify-items-center max-w-2xl mx-auto">
-          {BROWSE_CATEGORIES.map((category) => (
-            <CategoryImageCard
-              key={category.id}
-              category={category}
-              onClick={() => navigate(`/browse?category=${encodeURIComponent(category.id)}`)}
-              size={72}
-            />
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-8 justify-items-center max-w-2xl mx-auto">
+          {BROWSE_CATEGORIES.map((category, index) => (
+            <div key={category.id} className="stagger-item" style={{ animationDelay: `${index * 50}ms` }}>
+              <CategoryImageCard
+                category={category}
+                onClick={() => navigate(`/browse?category=${encodeURIComponent(category.id)}`)}
+                size={72}
+              />
+            </div>
           ))}
         </div>
       </section>
