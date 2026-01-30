@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { capture } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
@@ -20,6 +20,8 @@ import { formatRelativeTime } from '../utils/formatters'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 import { HearingIcon } from '../components/HearingIcon'
+import { EarIconTooltip } from '../components/EarIconTooltip'
+import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../lib/storage'
 
 /**
  * Transform raw dish data from API to component format
@@ -71,6 +73,24 @@ export function Dish() {
   const [reviewsLoading, setReviewsLoading] = useState(false)
 
   const { isFavorite, toggleFavorite } = useFavorites(user?.id)
+
+  // Ear icon tooltip — show once per device
+  const [showEarTooltip, setShowEarTooltip] = useState(false)
+  const tooltipChecked = useRef(false)
+
+  useEffect(() => {
+    if (dish && !tooltipChecked.current) {
+      tooltipChecked.current = true
+      if (!getStorageItem(STORAGE_KEYS.HAS_SEEN_EAR_TOOLTIP)) {
+        setShowEarTooltip(true)
+      }
+    }
+  }, [dish])
+
+  function dismissEarTooltip() {
+    setShowEarTooltip(false)
+    setStorageItem(STORAGE_KEYS.HAS_SEEN_EAR_TOOLTIP, '1')
+  }
 
   // Fetch dish data
   useEffect(() => {
@@ -330,18 +350,24 @@ export function Dish() {
         </span>
 
         {/* Heard it was good here button */}
-        <button
-          onClick={handleToggleSave}
-          aria-label={isFavorite?.(dishId) ? 'Remove from heard list' : 'Mark as heard it was good'}
-          className={`ml-auto w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95 ${
-            isFavorite?.(dishId)
-              ? 'ring-2 ring-[var(--color-primary)]/50'
-              : 'opacity-80 hover:opacity-100'
-          }`}
-          style={{ background: 'var(--color-bg)' }}
-        >
-          <HearingIcon size={28} active={isFavorite?.(dishId)} />
-        </button>
+        <div className="ml-auto relative">
+          <button
+            onClick={(e) => {
+              if (showEarTooltip) dismissEarTooltip()
+              handleToggleSave(e)
+            }}
+            aria-label={isFavorite?.(dishId) ? 'Remove from heard list' : 'Mark as heard it was good'}
+            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+              isFavorite?.(dishId)
+                ? 'ring-2 ring-[var(--color-primary)]/50'
+                : 'opacity-80 hover:opacity-100'
+            }`}
+            style={{ background: 'var(--color-bg)' }}
+          >
+            <HearingIcon size={28} active={isFavorite?.(dishId)} />
+          </button>
+          <EarIconTooltip visible={showEarTooltip} onDismiss={dismissEarTooltip} />
+        </div>
       </header>
 
       {/* Photo confirmation after upload */}

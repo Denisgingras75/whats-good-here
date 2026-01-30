@@ -60,6 +60,11 @@ export function clearCacheKeys(keys) {
   keys.forEach(key => cache.delete(key))
 }
 
+// Storage key constants
+export const STORAGE_KEYS = {
+  HAS_SEEN_EAR_TOOLTIP: 'wgh_has_seen_ear_tooltip',
+}
+
 // Pending vote storage helpers (survives OAuth redirect)
 const PENDING_VOTE_KEY = 'whats_good_here_pending_vote'
 

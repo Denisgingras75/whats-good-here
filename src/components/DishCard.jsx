@@ -1,10 +1,12 @@
-import { memo } from 'react'
+import { memo, useState, useEffect, useRef } from 'react'
 import { ReviewFlow } from './ReviewFlow'
 import { getWorthItBadge, formatScore10, calculateWorthItScore10, getRatingColor } from '../utils/ranking'
 import { getCategoryImage } from '../constants/categoryImages'
 import { ThumbsUpIcon } from './ThumbsUpIcon'
 import { HearingIcon } from './HearingIcon'
 import { getResponsiveImageProps } from '../utils/images'
+import { EarIconTooltip } from './EarIconTooltip'
+import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../lib/storage'
 
 export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, isFavorite, onToggleFavorite, showOrderAgainPercent = false }) {
   const {
@@ -25,6 +27,24 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
   const totalVotes = total_votes || 0
   const worthItScore10 = calculateWorthItScore10(percent_worth_it || 0)
   const badge = getWorthItBadge(worthItScore10, totalVotes)
+
+  // Ear icon tooltip — show once per device
+  const [showEarTooltip, setShowEarTooltip] = useState(false)
+  const tooltipChecked = useRef(false)
+
+  useEffect(() => {
+    if (onToggleFavorite && !tooltipChecked.current) {
+      tooltipChecked.current = true
+      if (!getStorageItem(STORAGE_KEYS.HAS_SEEN_EAR_TOOLTIP)) {
+        setShowEarTooltip(true)
+      }
+    }
+  }, [onToggleFavorite])
+
+  function dismissEarTooltip() {
+    setShowEarTooltip(false)
+    setStorageItem(STORAGE_KEYS.HAS_SEEN_EAR_TOOLTIP, '1')
+  }
 
   // Use photo_url if dish has one, otherwise use category-based image
   const imageUrl = photo_url || getCategoryImage(category)
@@ -60,20 +80,24 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
         <div className="absolute top-3 right-3 flex items-center gap-2">
           {/* Heard it was good here button */}
           {onToggleFavorite && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onToggleFavorite(dish_id)
-              }}
-              aria-label={isFavorite ? 'Remove from heard list' : 'Mark as heard it was good'}
-              className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 ${
-                isFavorite
-                  ? 'bg-black/90 backdrop-blur-sm ring-2 ring-[var(--color-primary)]/50'
-                  : 'bg-black/60 backdrop-blur-sm hover:bg-black/80'
-              }`}
-            >
-              <HearingIcon size={26} className="md:w-7 md:h-7" active={isFavorite} />
-            </button>
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (showEarTooltip) dismissEarTooltip()
+                  onToggleFavorite(dish_id)
+                }}
+                aria-label={isFavorite ? 'Remove from heard list' : 'Mark as heard it was good'}
+                className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 ${
+                  isFavorite
+                    ? 'bg-black/90 backdrop-blur-sm ring-2 ring-[var(--color-primary)]/50'
+                    : 'bg-black/60 backdrop-blur-sm hover:bg-black/80'
+                }`}
+              >
+                <HearingIcon size={26} className="md:w-7 md:h-7" active={isFavorite} />
+              </button>
+              <EarIconTooltip visible={showEarTooltip} onDismiss={dismissEarTooltip} />
+            </div>
           )}
 
           {/* Distance badge */}
