@@ -2,7 +2,6 @@ import { useState, useMemo, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useBadges } from '../hooks/useBadges'
-import { RANKS } from '../constants/ranks'
 import {
   RARITY_LABELS,
   BADGE_FAMILY,
@@ -33,17 +32,6 @@ export function Badges() {
   // Unlocked counts
   const unlockedBadges = useMemo(() => badges.filter(b => b.unlocked), [badges])
 
-  // Current rank
-  const currentRank = useMemo(() => {
-    const count = unlockedBadges.length
-    for (let i = RANKS.length - 1; i >= 0; i--) {
-      if (count >= RANKS[i].minBadges) return { ...RANKS[i], index: i }
-    }
-    return { ...RANKS[0], index: 0 }
-  }, [unlockedBadges.length])
-
-  const nextRank = RANKS[currentRank.index + 1] || null
-
   // 3 closest-to-unlock badges
   const pathForward = useMemo(() => {
     return badges
@@ -58,8 +46,8 @@ export function Badges() {
     setExpandedFamilies(prev => ({ ...prev, [family]: !prev[family] }))
   }
 
-  // Only category mastery badges are displayed
-  const familyOrder = [BADGE_FAMILY.CATEGORY]
+  // All 4 badge families
+  const familyOrder = [BADGE_FAMILY.CATEGORY, BADGE_FAMILY.DISCOVERY, BADGE_FAMILY.CONSISTENCY, BADGE_FAMILY.INFLUENCE]
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
@@ -86,165 +74,66 @@ export function Badges() {
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
 
-        {/* Section 1: Your Rank (transparent) */}
+        {/* Badge Overview */}
         {user && !loading && (
           <div
             className="rounded-2xl p-6 relative overflow-hidden"
             style={{
-              background: `linear-gradient(135deg, ${currentRank.color}15 0%, ${currentRank.color}30 100%)`,
-              border: `2px solid ${currentRank.color}50`,
+              background: 'linear-gradient(135deg, rgba(200, 90, 84, 0.08) 0%, rgba(200, 90, 84, 0.15) 100%)',
+              border: '2px solid rgba(200, 90, 84, 0.3)',
             }}
           >
-            <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full opacity-20" style={{ background: currentRank.color }} />
-            <div className="absolute -right-4 -bottom-4 w-20 h-20 rounded-full opacity-10" style={{ background: currentRank.color }} />
-
             <div className="relative">
-              {/* Rank header with arrow to next */}
               <div className="flex items-center gap-4 mb-4">
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-lg"
-                  style={{ background: currentRank.color }}
+                  style={{ background: 'var(--color-primary)' }}
                 >
-                  {currentRank.emoji}
+                  🏅
                 </div>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide" style={{ color: currentRank.color }}>
-                    Your Rank
+                  <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--color-primary)' }}>
+                    Your Badges
                   </p>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                      {currentRank.title}
-                    </h2>
-                    {nextRank && (
-                      <>
-                        <svg className="w-5 h-5" style={{ color: 'var(--color-text-tertiary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span className="text-lg font-semibold" style={{ color: nextRank.color }}>
-                          {nextRank.emoji} {nextRank.title}
-                        </span>
-                      </>
-                    )}
-                  </div>
+                  <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                    {unlockedBadges.length} of {badges.length}
+                  </h2>
                 </div>
               </div>
 
-              {/* Badge count and what's needed */}
-              {nextRank && (
-                <div className="mt-3 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.6)' }}>
-                  <p className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-primary)' }}>
-                    You have {unlockedBadges.length} badge{unlockedBadges.length === 1 ? '' : 's'}. {nextRank.title} needs {nextRank.minBadges}.
+              {/* Path forward — 3 closest badges */}
+              {pathForward.length > 0 && (
+                <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.6)' }}>
+                  <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                    Closest to unlock
                   </p>
-
-                  {/* Path forward — 3 closest badges */}
-                  {pathForward.length > 0 && (
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--color-text-tertiary)' }}>
-                        Your path forward
-                      </p>
-                      <div className="space-y-2">
-                        {pathForward.map(badge => (
-                          <div key={badge.key} className="flex items-center gap-2.5">
-                            <span className="text-lg flex-shrink-0">{badge.icon}</span>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
-                                  {badge.name}
-                                </span>
-                                <span className="text-xs font-medium" style={{ color: getRarityColor(badge.rarity) }}>
-                                  {badge.percentage}%
-                                </span>
-                              </div>
-                              {badge.requirementText && (
-                                <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                                  {badge.requirementText}
-                                </p>
-                              )}
-                            </div>
+                  <div className="space-y-2">
+                    {pathForward.map(badge => (
+                      <div key={badge.key} className="flex items-center gap-2.5">
+                        <span className="text-lg flex-shrink-0">{badge.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                              {badge.name}
+                            </span>
+                            <span className="text-xs font-medium" style={{ color: getRarityColor(badge.rarity) }}>
+                              {badge.percentage}%
+                            </span>
                           </div>
-                        ))}
+                          {badge.requirementText && (
+                            <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                              {badge.requirementText}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {!nextRank && (
-                <div className="mt-4 p-3 rounded-xl text-center" style={{ background: 'rgba(255,255,255,0.5)' }}>
-                  <p className="font-semibold" style={{ color: currentRank.color }}>
-                    You've reached the highest rank!
-                  </p>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         )}
-
-        {/* Rank Journey Map */}
-        <div className="rounded-2xl p-6" style={{ background: 'var(--color-surface-elevated)', border: '1px solid var(--color-divider)' }}>
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-            Rank Journey
-          </h2>
-          <div className="relative">
-            <div className="absolute left-6 top-8 bottom-8 w-0.5 transition-all duration-1000" style={{ background: 'var(--color-divider)' }} />
-            <div className="space-y-4">
-              {RANKS.map((rank, index) => {
-                const isCurrentRank = currentRank.index === index
-                const isAchieved = currentRank.index >= index
-                const isNext = currentRank.index + 1 === index
-
-                return (
-                  <div
-                    key={rank.title}
-                    className={`flex items-center gap-4 p-3 rounded-xl relative transition-all ${isCurrentRank ? 'scale-[1.02]' : ''}`}
-                    style={{
-                      background: isCurrentRank
-                        ? `linear-gradient(135deg, ${rank.color}20 0%, ${rank.color}10 100%)`
-                        : isNext ? 'linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%)' : 'transparent',
-                      border: isCurrentRank
-                        ? `2px solid ${rank.color}`
-                        : isNext ? '2px dashed #F59E0B' : '2px solid transparent',
-                    }}
-                  >
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center text-xl z-10 ${isAchieved ? 'shadow-md' : ''}`}
-                      style={{
-                        background: isAchieved ? rank.color : 'var(--color-surface)',
-                        border: isAchieved ? 'none' : '2px solid var(--color-divider)',
-                        opacity: isAchieved ? 1 : 0.5,
-                      }}
-                    >
-                      {isAchieved ? rank.emoji : '\uD83D\uDD12'}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold" style={{ color: isAchieved ? rank.color : 'var(--color-text-tertiary)' }}>
-                          {rank.title}
-                        </span>
-                        {isCurrentRank && (
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium text-white" style={{ background: rank.color }}>YOU</span>
-                        )}
-                        {isNext && (
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700">NEXT</span>
-                        )}
-                      </div>
-                      <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {rank.minBadges} badges required
-                      </p>
-                    </div>
-                    {isAchieved && !isCurrentRank && (
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#10B981' }}>
-                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
 
         {/* How It Works */}
         <details className="rounded-2xl overflow-hidden" style={{ background: 'var(--color-surface-elevated)', border: '1px solid var(--color-divider)' }}>
@@ -257,36 +146,56 @@ export function Badges() {
             </svg>
           </summary>
           <div className="px-5 pb-5 space-y-4">
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              <strong>41 badges</strong> across 4 families. Every badge answers: "Does this help someone trust this person's opinion?"
+            </p>
+
             <div className="p-4 rounded-xl" style={{ background: 'var(--color-bg)' }}>
-              <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Category Mastery</h4>
+              <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>🏅 Category Mastery (30)</h4>
+              <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                15 food categories, 2 tiers each. Rate consensus-rated dishes with low bias.
+              </p>
+              <div className="space-y-1.5">
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ color: '#3B82F6', background: '#3B82F620' }}>Specialist</span>
+                  <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>10+ consensus-rated, bias within 1.5</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ color: '#9333EA', background: '#9333EA20' }}>Authority</span>
+                  <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>20+ consensus-rated, bias within 1.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl" style={{ background: 'var(--color-bg)' }}>
+              <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>🔍 Discovery (6)</h4>
               <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                34 badges across 17 food categories, each with two tiers: <strong>Specialist</strong> and <strong>Authority</strong>. Earn them by rating dishes with both volume and accuracy.
+                Found hidden gems before they blew up, or called #1 dishes before anyone else. 3 tiers each for gems found and predictions made.
               </p>
             </div>
 
             <div className="p-4 rounded-xl" style={{ background: 'var(--color-bg)' }}>
-              <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Rarity Tiers</h4>
-              <p className="text-sm mb-3" style={{ color: 'var(--color-text-secondary)' }}>
-                Each badge has a rarity tier. Higher rarity = bigger celebration when you unlock it.
+              <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>🎯 Consistency (3)</h4>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                Your rating style after 20+ votes: Steady Hand (consistent ratings), Tough Critic (high standards), or Generous Spirit (finds the good in most dishes).
               </p>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(RARITY_LABELS).map(([rarity]) => (
-                  <RarityPill key={rarity} rarity={rarity} />
-                ))}
-              </div>
             </div>
 
             <div className="p-4 rounded-xl" style={{ background: 'var(--color-bg)' }}>
-              <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Ranks</h4>
-              <div className="flex flex-wrap gap-2">
-                {RANKS.map((rank) => (
-                  <div key={rank.title} className="flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{ background: `${rank.color}20`, color: rank.color }}>
-                    <span>{rank.emoji}</span>
-                    <span className="font-medium">{rank.title}</span>
-                    <span className="opacity-70">({rank.minBadges}+)</span>
-                  </div>
-                ))}
-              </div>
+              <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>📡 Influence (2)</h4>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                People follow your taste. Taste Maker at 10+ followers, Trusted Voice at 25+.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl" style={{ background: 'var(--color-bg)' }}>
+              <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Key Terms</h4>
+              <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                <strong>Consensus-rated</strong> = a dish where enough people voted to establish a community rating.
+              </p>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                <strong>Bias</strong> = how far your ratings drift from the community average. Rate honestly and it stays low.
+              </p>
             </div>
           </div>
         </details>
@@ -298,7 +207,7 @@ export function Badges() {
               Sign in to track your progress
             </h3>
             <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              Create an account to start earning badges and climbing the ranks!
+              Create an account to start earning badges!
             </p>
             <button
               onClick={() => navigate('/login')}
@@ -320,15 +229,28 @@ export function Badges() {
           const earned = familyBadges.filter(b => b.unlocked).length
           const isExpanded = expandedFamilies[family] !== false // default open
 
+          if (family === BADGE_FAMILY.CATEGORY) {
+            return (
+              <CategoryMasterySection
+                key={family}
+                badges={familyBadges}
+                info={info}
+                earned={earned}
+                isExpanded={isExpanded}
+                onToggle={() => toggleFamily(family)}
+                loading={loading}
+              />
+            )
+          }
+
           return (
-            <CategoryMasterySection
+            <BadgeListSection
               key={family}
               badges={familyBadges}
               info={info}
               earned={earned}
               isExpanded={isExpanded}
               onToggle={() => toggleFamily(family)}
-              loading={loading}
             />
           )
         })}
@@ -363,6 +285,71 @@ export function Badges() {
     </div>
   )
 }
+
+// Generic badge list section for Discovery, Consistency, Influence
+const BadgeListSection = memo(function BadgeListSection({ badges, info, earned, isExpanded, onToggle }) {
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--color-surface-elevated)', border: '1px solid var(--color-divider)' }}>
+      <button onClick={onToggle} className="w-full px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{info.emoji}</span>
+          <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{info.label}</h3>
+          <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: earned > 0 ? 'var(--color-primary-muted)' : 'var(--color-divider)', color: earned > 0 ? 'var(--color-primary)' : 'var(--color-text-tertiary)' }}>
+            {earned}/{badges.length}
+          </span>
+        </div>
+        <svg className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: 'var(--color-text-tertiary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isExpanded && (
+        <div className="px-5 pb-5 space-y-2.5">
+          {badges.map(badge => {
+            const rarityColor = getRarityColor(badge.rarity)
+            return (
+              <div
+                key={badge.key}
+                className="flex items-center gap-3 p-3 rounded-xl"
+                style={{
+                  background: badge.unlocked ? `${rarityColor}08` : 'var(--color-bg)',
+                  border: `1px solid ${badge.unlocked ? `${rarityColor}30` : 'var(--color-divider)'}`,
+                  opacity: badge.unlocked ? 1 : 0.7,
+                }}
+              >
+                <span className="text-xl flex-shrink-0">{badge.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold truncate" style={{ color: badge.unlocked ? rarityColor : 'var(--color-text-primary)' }}>
+                      {badge.name}
+                    </span>
+                    <RarityPill rarity={badge.rarity} small />
+                    {badge.unlocked && (
+                      <span className="text-xs text-emerald-500">&#10003;</span>
+                    )}
+                  </div>
+                  {!badge.unlocked && badge.requirementText && (
+                    <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {badge.requirementText}
+                    </p>
+                  )}
+                  {!badge.unlocked && badge.target > 1 && (
+                    <div className="mt-1.5 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${badge.percentage}%`, background: rarityColor }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+})
 
 // Category Mastery section with transparent requirement breakdowns
 const CategoryMasterySection = memo(function CategoryMasterySection({ badges, info, earned, isExpanded, onToggle, loading }) {

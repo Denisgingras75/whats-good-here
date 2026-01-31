@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
+import { CameraIcon } from '../components/CameraIcon'
 
 // SECURITY: Email is NOT persisted to storage to prevent XSS exposure of PII
 
@@ -223,7 +224,7 @@ export function Login() {
                   <p><strong style={{ color: 'var(--color-text-primary)' }}>Rate 1-10</strong> for more detail on how good it was</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-lg">📸</span>
+                  <CameraIcon size={20} />
                   <p><strong style={{ color: 'var(--color-text-primary)' }}>Snap a photo</strong> — yours could become the featured image! If not, it'll still show in the community gallery.</p>
                 </div>
               </div>

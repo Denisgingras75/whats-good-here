@@ -32,7 +32,6 @@ import {
   EmptyState,
   UnratedDishCard,
   HeroIdentityCard,
-  IdentitySnapshot,
   EditFavoritesSection,
   PhotosInfoSection,
   MissionSection,
@@ -40,6 +39,7 @@ import {
   RevealNotification,
   ImpactCard,
 } from '../components/profile'
+import { SimilarTasteUsers } from '../components/SimilarTasteUsers'
 
 const TABS = [
   { id: 'worth-it', label: "Good Here", emoji: null, icon: 'thumbsUp' },
@@ -325,11 +325,6 @@ export function Profile() {
             </div>
           )}
 
-          {/* Compact Identity Snapshot - Category tiers without progress bars */}
-          {(stats.categoryTiers.length > 0 || stats.categoryProgress.length > 0) && (
-            <IdentitySnapshot categoryTiers={stats.categoryTiers} categoryProgress={stats.categoryProgress} />
-          )}
-
           {/* Find Friends Section */}
           <div className="px-4 py-4 relative" style={{ background: 'var(--color-bg)' }}>
             <div
@@ -346,6 +341,9 @@ export function Profile() {
               <UserSearch />
             </div>
           </div>
+
+          {/* Similar Taste Users */}
+          {stats.totalVotes >= 5 && <SimilarTasteUsers />}
 
           {/* Unrated Photos Banner - shown when user has photos to rate */}
           {unratedCount > 0 && (

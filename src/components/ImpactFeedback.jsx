@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { ThumbsUpIcon } from './ThumbsUpIcon'
 
 /**
- * Calculate impact message based on before/after vote data
+ * Calculate impact message based on before/after vote data.
  */
 export function getImpactMessage(before, after, beforeRank, afterRank) {
   // Just became ranked (hit 5 votes)

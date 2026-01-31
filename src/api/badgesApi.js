@@ -135,6 +135,32 @@ export const badgesApi = {
   },
 
   /**
+   * Get expert vote counts per dish for a restaurant
+   * @param {string} restaurantId - Restaurant UUID
+   * @returns {Promise<Object>} Map of dish_id → { specialist_count, authority_count }
+   */
+  async getExpertVotesForRestaurant(restaurantId) {
+    const { data, error } = await supabase.rpc('get_expert_votes_for_restaurant', {
+      p_restaurant_id: restaurantId,
+    })
+
+    if (error) {
+      logger.error('Error fetching expert votes for restaurant:', error)
+      return {}
+    }
+
+    // Convert array to map keyed by dish_id
+    const map = {}
+    ;(data || []).forEach(row => {
+      map[row.dish_id] = {
+        specialist_count: row.specialist_count || 0,
+        authority_count: row.authority_count || 0,
+      }
+    })
+    return map
+  },
+
+  /**
    * Evaluate and award any newly unlocked badges for a user
    * Call this after a vote is submitted
    * @param {string} userId - User ID

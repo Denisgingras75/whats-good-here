@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AuthProvider } from './context/AuthContext'
 import { LocationProvider } from './context/LocationContext'
+import { CelebrationProvider } from './context/CelebrationContext'
+import { CelebrationOrchestrator } from './components/celebrations'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Layout } from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -96,6 +98,7 @@ function App() {
         }}
       />
       <AuthProvider>
+      <CelebrationProvider>
       <LocationProvider>
         <BrowserRouter>
           <RouteProgress />
@@ -122,6 +125,8 @@ function App() {
           </Suspense>
         </BrowserRouter>
       </LocationProvider>
+      <CelebrationOrchestrator />
+      </CelebrationProvider>
       </AuthProvider>
     </ErrorBoundary>
   )

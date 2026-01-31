@@ -28,14 +28,45 @@ export const RARITY_LABELS = {
   [RARITY.LEGENDARY]: 'Legendary',
 }
 
-// Badge families — only Category Mastery is displayed
+// Badge families
 export const BADGE_FAMILY = {
   CATEGORY: 'category',
+  DISCOVERY: 'discovery',
+  CONSISTENCY: 'consistency',
+  INFLUENCE: 'influence',
 }
 
 // Family display info
 export const FAMILY_INFO = {
   [BADGE_FAMILY.CATEGORY]: { emoji: '🏅', label: 'Category Mastery' },
+  [BADGE_FAMILY.DISCOVERY]: { emoji: '🔍', label: 'Discovery' },
+  [BADGE_FAMILY.CONSISTENCY]: { emoji: '🎯', label: 'Consistency' },
+  [BADGE_FAMILY.INFLUENCE]: { emoji: '📡', label: 'Influence' },
+}
+
+// Discovery badge thresholds
+// Hidden gems: voted early on dishes that later became top-rated
+// Called it: predicted #1 dishes before they got there
+export const DISCOVERY_BADGES = {
+  hidden_gem_finder: { type: 'gem', threshold: 1 },
+  gem_hunter: { type: 'gem', threshold: 5 },
+  gem_collector: { type: 'gem', threshold: 10 },
+  good_call: { type: 'prediction', threshold: 1 },
+  taste_prophet: { type: 'prediction', threshold: 3 },
+  oracle: { type: 'prediction', threshold: 5 },
+}
+
+// Consistency badge thresholds — requires 20+ ratings minimum
+export const CONSISTENCY_BADGES = {
+  steady_hand: { stat: 'variance', maxVariance: 1.0, minVotes: 20 },
+  tough_critic: { stat: 'avgRating', maxAvgRating: 6.0, minVotes: 20 },
+  generous_spirit: { stat: 'avgRating', minAvgRating: 8.5, minVotes: 20 },
+}
+
+// Influence badge thresholds
+export const INFLUENCE_BADGES = {
+  taste_maker: { minFollowers: 10 },
+  trusted_voice: { minFollowers: 25 },
 }
 
 // Maps rarity to celebration tier
@@ -50,8 +81,8 @@ export const CELEBRATION_TIER_MAP = {
 
 // Category badge tiers
 export const CATEGORY_BADGE_TIERS = {
-  specialist: { volumeThreshold: 15, maxAbsBias: 1.5 },
-  authority: { volumeThreshold: 30, maxAbsBias: 1.0 },
+  specialist: { volumeThreshold: 10, maxAbsBias: 1.5 },
+  authority: { volumeThreshold: 20, maxAbsBias: 1.0 },
 }
 
 // Generate a category badge key from category id and tier

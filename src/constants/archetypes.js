@@ -8,8 +8,8 @@ export const ARCHETYPES = [
     label: 'The Specialist',
     description: 'Deep expertise in your favorite category',
     color: '#F59E0B',
-    // Triggers: high concentration in one category + at least Fan tier
-    thresholds: { categoryConcentration: 0.45, minTopTierLevel: 2 },
+    // Triggers: high concentration in one category + at least 1 category badge
+    thresholds: { categoryConcentration: 0.45, minCategoryBadges: 1 },
   },
   {
     id: 'purist',

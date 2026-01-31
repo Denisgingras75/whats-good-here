@@ -199,42 +199,22 @@ export function getCategoryInfo(category) {
   return { emoji: '🍽️', label: fallbackLabel }
 }
 
-// Category tier thresholds for profile rank display
-export const TIER_THRESHOLDS = [
-  { min: 50, level: 5, title: 'Master', icon: '👑' },
-  { min: 30, level: 4, title: 'Expert', icon: '⭐' },
-  { min: 20, level: 3, title: 'Connoisseur', icon: '💎' },
-  { min: 10, level: 2, title: 'Fan', icon: '🔥' },
-  { min: 5, level: 1, title: 'Explorer', icon: '🌱' },
-]
-
-// Tier descriptions — what each tier means (honest, no fake unlocks)
-export const TIER_DESCRIPTIONS = {
-  Explorer:    'Getting started \u2014 building your taste profile',
-  Fan:         'Developing expertise \u2014 your preferences are forming',
-  Connoisseur: 'Deep knowledge \u2014 badge visible on your public profile',
-  Expert:      'Authority level \u2014 one of the most experienced raters',
-  Master:      'Elite status \u2014 among the top voices in this category',
-}
-
-// Major categories eligible for profile rank display
-// Sub-categories like fries, apps, tendys, breakfast sandwich are excluded
+// Major categories eligible for badges
+// Matches BROWSE_CATEGORIES — the categories users see on the homepage
 export const MAJOR_CATEGORIES = new Set([
   'pizza',
   'burger',
-  'taco',
+  'seafood',
   'wings',
   'sushi',
-  'sandwich',
-  'pasta',
-  'pokebowl',
-  'lobster roll',
-  'seafood',
-  'chowder',
-  'soup',
   'breakfast',
+  'lobster roll',
+  'chowder',
+  'pasta',
+  'steak',
+  'sandwich',
   'salad',
-  'fried chicken',
-  'entree',
+  'taco',
+  'tendys',
   'dessert',
 ])

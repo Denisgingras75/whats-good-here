@@ -4,7 +4,7 @@ import { ARCHETYPES, CONFIDENCE_THRESHOLDS } from '../constants/archetypes'
  * Pure function to determine a user's archetype from their stats.
  *
  * @param {Object} stats - From useUserVotes: totalVotes, avgRating, ratingVariance,
- *                         categoryConcentration, categoryTiers
+ *                         categoryConcentration, categoryBadgeCount
  * @param {Object} ratingIdentity - From useRatingIdentity: ratingBias
  * @param {Object} followCounts - { followers, following }
  * @returns {{ id: string, confidence: 'none'|'emerging'|'established' } | null}
@@ -21,10 +21,8 @@ export function calculateArchetype(stats, ratingIdentity, followCounts) {
 
   const confidence = totalVotes >= CONFIDENCE_THRESHOLDS.established ? 'established' : 'emerging'
 
-  // Find the top category tier level
-  const topTierLevel = stats.categoryTiers && stats.categoryTiers.length > 0
-    ? stats.categoryTiers[0].level || 0
-    : 0
+  // Count category badges earned
+  const categoryBadgeCount = stats.categoryBadgeCount || 0
 
   // Try each archetype in priority order
   for (const archetype of ARCHETYPES) {
@@ -34,7 +32,7 @@ export function calculateArchetype(stats, ratingIdentity, followCounts) {
       case 'specialist':
         if (
           (stats.categoryConcentration || 0) > t.categoryConcentration &&
-          topTierLevel >= t.minTopTierLevel
+          categoryBadgeCount >= t.minCategoryBadges
         ) {
           return { id: archetype.id, confidence }
         }

@@ -10,7 +10,7 @@ import { useFavorites } from '../hooks/useFavorites'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { dishesApi } from '../api/dishesApi'
 import { getStorageItem, setStorageItem } from '../lib/storage'
-import { BROWSE_CATEGORIES } from '../constants/categories'
+import { BROWSE_CATEGORIES, CATEGORY_INFO } from '../constants/categories'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRelatedSuggestions } from '../constants/searchSuggestions'
 import { RankedDishRow } from '../components/home/RankedDishRow'
@@ -21,6 +21,7 @@ import { ImpactFeedback, getImpactMessage } from '../components/ImpactFeedback'
 import { SortDropdown, CategoryGrid } from '../components/browse'
 import { CategoryImageCard } from '../components/CategoryImageCard'
 import { badgesApi } from '../api/badgesApi'
+import { useBadges } from '../hooks/useBadges'
 
 // Use centralized browse categories
 const CATEGORIES = BROWSE_CATEGORIES
@@ -65,9 +66,11 @@ export function Browse() {
   const [restaurantSuggestions, setRestaurantSuggestions] = useState([])
 
   const [categoryExperts, setCategoryExperts] = useState([])
+  const [nudgeDismissed, setNudgeDismissed] = useState(false)
 
   const { location, radius, town } = useLocationContext()
   const { stats: userStats } = useUserVotes(user?.id)
+  const { badges: badgesList } = useBadges(user?.id)
 
   // Search results from API using React Query hook
   // Handles cuisine/tag searches with proper caching and error handling
@@ -112,6 +115,41 @@ export function Browse() {
       .catch(() => { if (!cancelled) setCategoryExperts([]) })
     return () => { cancelled = true }
   }, [selectedCategory])
+
+  // Reset nudge dismissed state when category changes
+  useEffect(() => {
+    setNudgeDismissed(false)
+  }, [selectedCategory])
+
+  // Compute near-badge nudge for current category
+  const nearBadgeNudge = useMemo(() => {
+    if (!selectedCategory || !user || nudgeDismissed || !badgesList.length) return null
+
+    const catKey = selectedCategory.replace(/\s+/g, '_')
+    const specialist = badgesList.find(b => b.key === `specialist_${catKey}`)
+    const authority = badgesList.find(b => b.key === `authority_${catKey}`)
+    const catInfo = CATEGORY_INFO[selectedCategory]
+    if (!catInfo) return null
+
+    if (authority?.unlocked) return null
+
+    if (specialist?.unlocked && authority) {
+      const remaining = authority.target - authority.progress
+      if (remaining >= 1 && remaining <= 3) {
+        return { remaining, label: `${catInfo.label} Authority`, emoji: catInfo.emoji }
+      }
+      return null
+    }
+
+    if (specialist && !specialist.unlocked) {
+      const remaining = specialist.target - specialist.progress
+      if (remaining >= 1 && remaining <= 3) {
+        return { remaining, label: `${catInfo.label} Specialist`, emoji: catInfo.emoji }
+      }
+    }
+
+    return null
+  }, [selectedCategory, badgesList, user, nudgeDismissed])
 
   // Debounce search query by 300ms - only when already showing dishes
   // On categories page, search only triggers on Enter key
@@ -240,8 +278,7 @@ export function Browse() {
     if (after.total_votes > pendingVoteData.total_votes) {
       const afterRank = getDishRank(pendingVoteData.dish_id, dishes)
       const impact = getImpactMessage(
-        pendingVoteData, after, pendingVoteData.rank, afterRank,
-        userStats?.categoryProgress, after.category
+        pendingVoteData, after, pendingVoteData.rank, afterRank
       )
       setImpactFeedback(impact)
       setPendingVoteData(null)
@@ -667,6 +704,31 @@ export function Browse() {
                     </span>
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Near-badge nudge */}
+          {nearBadgeNudge && !debouncedSearchQuery.trim() && (
+            <div className="px-4 pt-3">
+              <div
+                className="flex items-center gap-2 rounded-xl p-3"
+                style={{ background: 'var(--color-surface-elevated)', border: '1px solid var(--color-divider)' }}
+              >
+                <span className="text-sm flex-shrink-0">{nearBadgeNudge.emoji}</span>
+                <p className="text-sm flex-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  You're <strong>{nearBadgeNudge.remaining}</strong> rating{nearBadgeNudge.remaining === 1 ? '' : 's'} away from <strong>{nearBadgeNudge.label}</strong>
+                </p>
+                <button
+                  onClick={() => setNudgeDismissed(true)}
+                  className="flex-shrink-0 p-1 rounded-full transition-colors"
+                  style={{ color: 'var(--color-text-tertiary)' }}
+                  aria-label="Dismiss"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
           )}

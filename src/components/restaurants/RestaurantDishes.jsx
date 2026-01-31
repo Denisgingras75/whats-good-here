@@ -6,7 +6,7 @@ import { TopDishCard } from './TopDishCard'
 const TOP_DISHES_COUNT = 5
 
 // Restaurant dishes component - Job #2: "What should I order?"
-export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isFavorite, onToggleFavorite, user, searchQuery = '', friendsVotesByDish = {} }) {
+export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isFavorite, onToggleFavorite, user, searchQuery = '', friendsVotesByDish = {}, expertVotesByDish = {} }) {
   const [showAllDishes, setShowAllDishes] = useState(false)
 
   // Filter and sort dishes
@@ -174,6 +174,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
               isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
               onToggleFavorite={handleToggleSave}
               friendVotes={friendsVotesByDish[dish.dish_id]}
+              expertVotes={expertVotesByDish[dish.dish_id]}
             />
           ))}
         </div>
@@ -237,6 +238,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
                   isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
                   onToggleFavorite={handleToggleSave}
                   friendVotes={friendsVotesByDish[dish.dish_id]}
+                  expertVotes={expertVotesByDish[dish.dish_id]}
                 />
               ))}
             </div>

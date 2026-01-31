@@ -8,7 +8,7 @@ import { HearingIcon } from '../HearingIcon'
 
 // Compact dish card for restaurant view - shows order again % prominently
 // Now supports variants with expandable list
-export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, onToggleFavorite, friendVotes }) {
+export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, onToggleFavorite, friendVotes, expertVotes }) {
   const navigate = useNavigate()
   const [showVariants, setShowVariants] = useState(false)
   const {
@@ -189,6 +189,24 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
               </span>
             )}
           </div>
+
+          {/* Expert-rated indicator */}
+          {expertVotes && (expertVotes.authority_count > 0 || expertVotes.specialist_count > 0) && (() => {
+            const { authority_count, specialist_count } = expertVotes
+            let label
+            if (authority_count > 0 && specialist_count > 0) {
+              label = `Rated by ${authority_count} ${authority_count === 1 ? 'Authority' : 'Authorities'} + ${specialist_count} ${specialist_count === 1 ? 'Specialist' : 'Specialists'}`
+            } else if (authority_count > 0) {
+              label = `Rated by ${authority_count} ${category ? `${category.charAt(0).toUpperCase() + category.slice(1)} ` : ''}${authority_count === 1 ? 'Authority' : 'Authorities'}`
+            } else {
+              label = 'Expert-rated'
+            }
+            return (
+              <p className="mt-1.5" style={{ color: 'var(--color-text-secondary)', fontSize: '11px' }}>
+                <span style={{ color: 'var(--color-accent-gold)' }}>&#x2728;</span> {label}
+              </p>
+            )
+          })()}
 
           {/* Friend votes indicator */}
           {friendVotes && friendVotes.length > 0 && (() => {

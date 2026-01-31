@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useDishPhotos } from '../hooks/useDishPhotos'
 import { useAuth } from '../context/AuthContext'
+import { CameraIcon } from './CameraIcon'
 
 export function PhotoUploadButton({
   dishId,
@@ -66,7 +67,7 @@ export function PhotoUploadButton({
           {isProcessing ? (
             <span className="upload-spinner" />
           ) : (
-            <span>📷</span>
+            <CameraIcon size={18} />
           )}
         </button>
       </>
@@ -101,7 +102,7 @@ export function PhotoUploadButton({
           </>
         ) : (
           <>
-            <span>📷</span>
+            <CameraIcon size={18} />
             <span>Add Photo</span>
           </>
         )}

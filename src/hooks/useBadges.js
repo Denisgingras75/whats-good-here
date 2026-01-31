@@ -3,6 +3,9 @@ import { badgesApi } from '../api/badgesApi'
 import { logger } from '../utils/logger'
 import {
   CATEGORY_BADGE_TIERS,
+  DISCOVERY_BADGES,
+  CONSISTENCY_BADGES,
+  INFLUENCE_BADGES,
   isCategoryBadge,
   parseCategoryBadgeKey,
 } from '../constants/badgeDefinitions'
@@ -56,7 +59,52 @@ function computeBadgeProgress(badge, evalStats) {
     }
   }
 
-  // Fallback for non-category badges (still awarded by SQL, just no progress UI)
+  // Discovery badges
+  if (family === 'discovery' && DISCOVERY_BADGES[badge.key]) {
+    const def = DISCOVERY_BADGES[badge.key]
+    const gems = evalStats.hiddenGemsFound || 0
+    const predictions = evalStats.calledItCount || 0
+    const current = def.type === 'gem' ? gems : predictions
+    const label = def.type === 'gem' ? 'hidden gem' : 'correct prediction'
+    const remaining = def.threshold - current
+    return {
+      progress: Math.min(current, def.threshold),
+      target: def.threshold,
+      accuracyStatus: null,
+      requirementText: remaining > 0 ? `Find ${remaining} more ${label}${remaining === 1 ? '' : 's'}` : null,
+    }
+  }
+
+  // Consistency badges
+  if (family === 'consistency' && CONSISTENCY_BADGES[badge.key]) {
+    const def = CONSISTENCY_BADGES[badge.key]
+    const consensusVotes = evalStats.votesWithConsensus || 0
+    if (consensusVotes < def.minVotes) {
+      return {
+        progress: consensusVotes,
+        target: def.minVotes,
+        accuracyStatus: null,
+        requirementText: `Rate ${def.minVotes - consensusVotes} more consensus-rated dish${def.minVotes - consensusVotes === 1 ? '' : 'es'}`,
+      }
+    }
+    // Has enough votes — check if the stat condition is met
+    return { progress: consensusVotes, target: def.minVotes, accuracyStatus: null, requirementText: null }
+  }
+
+  // Influence badges
+  if (family === 'influence' && INFLUENCE_BADGES[badge.key]) {
+    const def = INFLUENCE_BADGES[badge.key]
+    const followers = evalStats.followerCount || 0
+    const remaining = def.minFollowers - followers
+    return {
+      progress: Math.min(followers, def.minFollowers),
+      target: def.minFollowers,
+      accuracyStatus: null,
+      requirementText: remaining > 0 ? `Gain ${remaining} more follower${remaining === 1 ? '' : 's'}` : null,
+    }
+  }
+
+  // Fallback for unrecognized badges
   return { progress: 0, target: 1, requirementText: null }
 }
 

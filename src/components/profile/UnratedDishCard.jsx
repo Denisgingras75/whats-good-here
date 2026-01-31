@@ -1,4 +1,5 @@
 import { getCategoryImage } from '../../constants/categoryImages'
+import { CameraIcon } from '../CameraIcon'
 
 /**
  * Card for unrated dishes (dishes with photos but no vote)
@@ -41,7 +42,7 @@ export function UnratedDishCard({ dish, onClick, onDelete }) {
         />
         {dish.user_photo_url && (
           <div className="absolute bottom-1 left-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
-            <span>📷</span>
+            <CameraIcon size={14} />
             <span>Your photo</span>
           </div>
         )}

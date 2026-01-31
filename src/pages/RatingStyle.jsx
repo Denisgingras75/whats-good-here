@@ -180,16 +180,71 @@ export function RatingStyle() {
           </p>
         </div>
 
+        {/* Badges & Your Rating Style */}
+        <div
+          className="p-5 rounded-2xl border"
+          style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}
+        >
+          <h2 className="text-lg font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+            How Accuracy Unlocks Badges
+          </h2>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+            Your rating accuracy directly affects which badges you can earn.
+            <strong style={{ color: '#3B82F6' }}> Category Mastery</strong> badges require both volume <em>and</em> accuracy in a specific food category.
+          </p>
+
+          <div className="mt-4 space-y-3">
+            <div className="p-3 rounded-xl" style={{ background: 'var(--color-bg)' }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                  style={{ color: '#3B82F6', background: '#3B82F618', border: '1px solid #3B82F630' }}
+                >
+                  Rare
+                </span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  Specialist
+                </span>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                10+ consensus-rated dishes in a category with |bias| &le; 1.5
+              </p>
+            </div>
+            <div className="p-3 rounded-xl" style={{ background: 'var(--color-bg)' }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                  style={{ color: '#9333EA', background: '#9333EA18', border: '1px solid #9333EA30' }}
+                >
+                  Epic
+                </span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  Authority
+                </span>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                20+ consensus-rated dishes in a category with |bias| &le; 1.0
+              </p>
+            </div>
+          </div>
+
+          <p className="text-sm mt-4 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+            <strong style={{ color: '#10B981' }}>Consistency</strong> badges also depend on your overall rating style.
+            <em> Steady Hand</em> rewards low bias (|bias| &le; 0.5 with 20+ consensus ratings), while <em>Tough Critic</em> and <em>Generous Spirit</em> recognize strong rating tendencies.
+          </p>
+        </div>
+
         {/* Early Voters */}
         <div
           className="p-5 rounded-2xl border"
           style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}
         >
           <h2 className="text-lg font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
-            Early Voters
+            Early Voters & Discovery
           </h2>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-            Be one of the first 3 people to rate a dish? You're an <strong style={{ color: 'var(--color-primary)' }}>Early Voter</strong> — you helped establish the consensus before others could see it. That takes guts!
+            Be one of the first 3 people to rate a dish? You're an <strong style={{ color: 'var(--color-primary)' }}>Early Voter</strong> — you helped establish the consensus before others could see it. This earns progress toward
+            <strong style={{ color: '#3B82F6' }}> Discovery</strong> badges.
           </p>
           {ratingIdentity && ratingIdentity.dishesHelpedEstablish > 0 && (
             <p className="text-sm mt-3 font-medium" style={{ color: 'var(--color-primary)' }}>

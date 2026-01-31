@@ -1,26 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { RANKS, getRankForBadgeCount } from '../../constants/ranks'
-import { TIER_DESCRIPTIONS } from '../../constants/categories'
 import { calculateArchetype, getArchetypeById } from '../../utils/calculateArchetype'
+import { BADGE_FAMILY } from '../../constants/badgeDefinitions'
 
 /**
  * Hero Identity Card for the Profile page
- * Shows user avatar, name, follow stats, primary title, and near-term goal
- *
- * Props:
- * - user: Auth user object
- * - profile: User profile data
- * - stats: User statistics (categoryTiers, categoryProgress, totalVotes, ratingPersonality)
- * - badges: User badges array
- * - followCounts: { followers, following }
- * - editingName: Boolean for name edit mode
- * - newName: Current value in name edit input
- * - nameStatus: 'checking' | 'available' | 'taken' | 'same' | null
- * - setEditingName: Setter for edit mode
- * - setNewName: Setter for name value
- * - setNameStatus: Setter for name status
- * - handleSaveName: Callback to save name
- * - setFollowListModal: Setter to open follow list modal
+ * Shows user avatar, name, follow stats, archetype, and badge count
  */
 export function HeroIdentityCard({
   user,
@@ -40,11 +24,19 @@ export function HeroIdentityCard({
 }) {
   const navigate = useNavigate()
 
-  // Derive primary identity title from highest tier or rating personality
+  // Calculate badges earned
+  const unlockedBadges = badges?.filter(b => b.unlocked) || []
+  const badgeCount = unlockedBadges.length
+  const categoryBadgeCount = unlockedBadges.filter(b => b.family === BADGE_FAMILY.CATEGORY).length
+
+  // Calculate archetype
+  const archetypeResult = calculateArchetype({ ...stats, categoryBadgeCount }, ratingIdentity, followCounts)
+  const archetype = archetypeResult.id ? getArchetypeById(archetypeResult.id) : null
+
+  // Primary identity title from archetype or rating personality
   const getPrimaryTitle = () => {
-    if (stats.categoryTiers.length > 0) {
-      const highestTier = stats.categoryTiers[0]
-      return `${highestTier.label} ${highestTier.title}`
+    if (archetype && archetypeResult.confidence === 'established') {
+      return `${archetype.emoji} ${archetype.label}`
     }
     if (stats.ratingPersonality) {
       return stats.ratingPersonality.title
@@ -52,29 +44,12 @@ export function HeroIdentityCard({
     return 'Food Explorer'
   }
 
-  // Calculate badges earned
-  const unlockedBadges = badges?.filter(b => b.unlocked) || []
-  const badgeCount = unlockedBadges.length
-
-  // Calculate rank
-  const currentRank = getRankForBadgeCount(badgeCount)
-
-  // Calculate archetype
-  const archetypeResult = calculateArchetype(stats, ratingIdentity, followCounts)
-  const archetype = archetypeResult.id ? getArchetypeById(archetypeResult.id) : null
-
-  // Top category for expertise progress
-  const topProgress = stats.categoryProgress.length > 0 ? stats.categoryProgress[0] : null
-  const topTier = stats.categoryTiers.length > 0 ? stats.categoryTiers[0] : null
-  const expertiseCategory = topProgress || topTier
-  const isCloseToNextTier = topProgress && topProgress.votesNeeded <= 3
-
   return (
     <div
       className="relative px-4 pt-8 pb-6 overflow-hidden"
       style={{
         background: `
-          radial-gradient(ellipse 90% 50% at 20% 0%, ${currentRank.color}08 0%, transparent 70%),
+          radial-gradient(ellipse 90% 50% at 20% 0%, var(--color-primary-rgb, 200 90 84) / 0.03 0%, transparent 70%),
           radial-gradient(ellipse 70% 60% at 80% 100%, rgba(217, 167, 101, 0.04) 0%, transparent 70%),
           var(--color-bg)
         `,
@@ -91,24 +66,24 @@ export function HeroIdentityCard({
 
       {/* Avatar + Name row */}
       <div className="flex items-center gap-4">
-        {/* Avatar with rank-colored ring */}
+        {/* Avatar */}
         <div className="relative flex-shrink-0">
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold"
             style={{
               background: 'var(--color-primary)',
-              boxShadow: `0 4px 20px -4px ${currentRank.color}60, 0 0 0 ${badgeCount >= 5 ? '4px' : badgeCount >= 1 ? '3px' : '2px'} ${currentRank.color}30`,
+              boxShadow: '0 4px 20px -4px rgba(200, 90, 84, 0.4), 0 0 0 3px rgba(200, 90, 84, 0.2)',
             }}
           >
             {profile?.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
           </div>
-          {/* Rank emoji badge */}
+          {/* Badge count indicator */}
           {badgeCount >= 1 && (
             <div
-              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-sm shadow-md"
-              style={{ background: currentRank.color, border: '2px solid var(--color-bg)' }}
+              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md"
+              style={{ background: 'var(--color-primary)', border: '2px solid var(--color-bg)' }}
             >
-              {currentRank.emoji}
+              {badgeCount}
             </div>
           )}
         </div>
@@ -210,37 +185,20 @@ export function HeroIdentityCard({
         </div>
       </div>
 
-      {/* Rank Title + Archetype */}
+      {/* Identity Title */}
       <div className="mt-5">
-        {/* Rank name */}
         <h2
           className="font-bold"
           style={{
-            color: currentRank.color,
+            color: 'var(--color-primary)',
             fontSize: '17px',
             letterSpacing: '-0.01em',
           }}
         >
-          {currentRank.emoji} {currentRank.title}
+          {getPrimaryTitle()}
         </h2>
 
-        {/* Category title */}
-        <p
-          className="font-bold mt-0.5"
-          style={{
-            color: 'var(--color-primary)',
-            fontSize: '15px',
-          }}
-        >
-          {getPrimaryTitle()}
-        </p>
-
-        {/* Archetype subtitle */}
-        {archetype && archetypeResult.confidence === 'established' && (
-          <p className="mt-1 font-medium" style={{ color: archetype.color, fontSize: '13px' }}>
-            {archetype.emoji} {archetype.label}
-          </p>
-        )}
+        {/* Archetype subtitle (emerging) */}
         {archetype && archetypeResult.confidence === 'emerging' && (
           <p className="mt-1" style={{ color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
             trending toward {archetype.label.replace('The ', '')}
@@ -251,10 +209,30 @@ export function HeroIdentityCard({
       {/* Compact Stats Row */}
       <div className="flex items-center gap-4 mt-3" style={{ fontSize: '13px' }}>
         {badgeCount > 0 && (
-          <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-            <span style={{ color: currentRank.color }}>{currentRank.emoji}</span>
+          <button
+            onClick={() => navigate('/badges')}
+            className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            <span>🏅</span>
             <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{badgeCount}</span>
-          </span>
+            <span>badge{badgeCount !== 1 ? 's' : ''}</span>
+          </button>
+        )}
+        {ratingIdentity && ratingIdentity.votesWithConsensus > 0 && (
+          <button
+            onClick={() => navigate('/rating-style')}
+            className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            <span style={{
+              color: ratingIdentity.ratingBias < 0 ? '#f97316' : ratingIdentity.ratingBias > 0 ? '#22c55e' : 'var(--color-text-secondary)',
+              fontWeight: 700,
+            }}>
+              {ratingIdentity.ratingBias > 0 ? '+' : ''}{ratingIdentity.ratingBias?.toFixed(1) || '0.0'}
+            </span>
+            <span>{ratingIdentity.biasLabel}</span>
+          </button>
         )}
         {stats.totalVotes > 0 && (
           <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
@@ -269,41 +247,6 @@ export function HeroIdentityCard({
           </span>
         )}
       </div>
-
-      {/* Expertise Progress */}
-      {topProgress && (
-        <button
-          onClick={() => navigate('/badges')}
-          className="mt-4 w-full text-left p-3.5 rounded-xl transition-all hover:opacity-90 active:scale-[0.99]"
-          style={{
-            background: 'var(--color-surface-elevated)',
-            border: `1px solid ${isCloseToNextTier ? 'rgba(245, 158, 11, 0.4)' : 'var(--color-divider)'}`,
-          }}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              {topProgress.emoji} {topProgress.label}: {topProgress.currentTier?.title || 'Newcomer'} → {topProgress.nextTier.title}
-            </span>
-            <span className="text-xs font-bold" style={{ color: isCloseToNextTier ? '#F59E0B' : 'var(--color-text-tertiary)' }}>
-              {topProgress.count}/{topProgress.nextTier.min}
-            </span>
-          </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
-            <div
-              className={`h-full rounded-full transition-all duration-1000 ${isCloseToNextTier ? 'animate-glow-breathe' : ''}`}
-              style={{
-                width: `${Math.min(topProgress.progress * 100, 100)}%`,
-                background: isCloseToNextTier
-                  ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
-                  : 'var(--color-primary)',
-              }}
-            />
-          </div>
-          <p className="text-xs mt-1.5" style={{ color: 'var(--color-text-tertiary)' }}>
-            {TIER_DESCRIPTIONS[topProgress.nextTier.title] || ''}
-          </p>
-        </button>
-      )}
     </div>
   )
 }

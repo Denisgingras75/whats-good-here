@@ -8,15 +8,9 @@ import { FollowListModal } from '../components/FollowListModal'
 import { ProfileSkeleton } from '../components/Skeleton'
 import { VotedDishCard, ReviewCard, ReviewDetailModal } from '../components/profile'
 import { supabase } from '../lib/supabase'
-import {
-  calculateCategoryTiers,
-  calculateCategoryProgress,
-} from '../hooks/useUserVotes'
 import { useRatingIdentity } from '../hooks/useRatingIdentity'
-import { getRankForBadgeCount } from '../constants/ranks'
-import { TIER_DESCRIPTIONS } from '../constants/categories'
 import { calculateArchetype, getArchetypeById } from '../utils/calculateArchetype'
-import { getRarityColor, RARITY_LABELS } from '../constants/badgeDefinitions'
+import { getRarityColor, RARITY_LABELS, BADGE_FAMILY } from '../constants/badgeDefinitions'
 
 /**
  * Public User Profile Page
@@ -217,10 +211,10 @@ export function UserProfile() {
     return { emoji: '😤', title: 'Tough Critic' }
   }
 
-  // Calculate category tiers, progress, and archetype stats from recent_votes
-  const { categoryTiers, categoryProgress, ratingVariance, categoryConcentration, uniqueRestaurants } = useMemo(() => {
+  // Calculate archetype stats from recent_votes
+  const { ratingVariance, categoryConcentration, uniqueRestaurants } = useMemo(() => {
     if (!profile?.recent_votes?.length) {
-      return { categoryTiers: [], categoryProgress: [], ratingVariance: 0, categoryConcentration: 0, uniqueRestaurants: 0 }
+      return { ratingVariance: 0, categoryConcentration: 0, uniqueRestaurants: 0 }
     }
 
     // Count votes per category + unique restaurants
@@ -251,8 +245,6 @@ export function UserProfile() {
       : 0
 
     return {
-      categoryTiers: calculateCategoryTiers(categoryCounts),
-      categoryProgress: calculateCategoryProgress(categoryCounts),
       ratingVariance: variance,
       categoryConcentration: concentration,
       uniqueRestaurants: restaurantNames.size,
@@ -286,32 +278,26 @@ export function UserProfile() {
 
   const personality = getRatingPersonality(profile.stats?.avg_rating)
 
-  // Rank from badge count
   const badgeCount = profile.badges?.length || 0
-  const currentRank = getRankForBadgeCount(badgeCount)
+  const categoryBadgeCount = profile.badges?.filter(b => b.family === BADGE_FAMILY.CATEGORY).length || 0
   const totalVotes = profile.stats?.total_votes || 0
 
   // Archetype
   const archetypeResult = calculateArchetype(
-    { totalVotes, avgRating: profile.stats?.avg_rating || 0, ratingVariance, categoryConcentration, categoryTiers },
+    { totalVotes, avgRating: profile.stats?.avg_rating || 0, ratingVariance, categoryConcentration, categoryBadgeCount },
     ratingIdentity,
     { followers: profile.follower_count || 0, following: profile.following_count || 0 }
   )
   const archetype = archetypeResult.id ? getArchetypeById(archetypeResult.id) : null
 
-  // Primary title from highest tier or personality
+  // Primary identity title
   const getPrimaryTitle = () => {
-    if (categoryTiers.length > 0) {
-      const highestTier = categoryTiers[0]
-      return `${highestTier.label} ${highestTier.title}`
+    if (archetype && archetypeResult.confidence === 'established') {
+      return `${archetype.emoji} ${archetype.label}`
     }
     if (personality) return personality.title
     return 'Food Explorer'
   }
-
-  // Top category progress
-  const topProgress = categoryProgress.length > 0 ? categoryProgress[0] : null
-  const isCloseToNextTier = topProgress && topProgress.votesNeeded <= 3
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
@@ -321,7 +307,7 @@ export function UserProfile() {
         className="relative px-4 pt-8 pb-6 overflow-hidden"
         style={{
           background: `
-            radial-gradient(ellipse 90% 50% at 20% 0%, ${currentRank.color}08 0%, transparent 70%),
+            radial-gradient(ellipse 90% 50% at 20% 0%, rgba(200, 90, 84, 0.03) 0%, transparent 70%),
             radial-gradient(ellipse 70% 60% at 80% 100%, rgba(217, 167, 101, 0.04) 0%, transparent 70%),
             var(--color-bg)
           `,
@@ -338,24 +324,24 @@ export function UserProfile() {
 
         {/* Avatar + Name row */}
         <div className="flex items-center gap-4">
-          {/* Avatar with rank-colored ring */}
+          {/* Avatar */}
           <div className="relative flex-shrink-0">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold"
               style={{
                 background: 'var(--color-primary)',
-                boxShadow: `0 4px 20px -4px ${currentRank.color}60, 0 0 0 ${badgeCount >= 5 ? '4px' : badgeCount >= 1 ? '3px' : '2px'} ${currentRank.color}30`,
+                boxShadow: '0 4px 20px -4px rgba(200, 90, 84, 0.4), 0 0 0 3px rgba(200, 90, 84, 0.2)',
               }}
             >
               {profile.display_name?.charAt(0).toUpperCase() || '?'}
             </div>
-            {/* Rank emoji badge */}
+            {/* Badge count indicator */}
             {badgeCount >= 1 && (
               <div
-                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-sm shadow-md"
-                style={{ background: currentRank.color, border: '2px solid var(--color-bg)' }}
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md"
+                style={{ background: 'var(--color-primary)', border: '2px solid var(--color-bg)' }}
               >
-                {currentRank.emoji}
+                {badgeCount}
               </div>
             )}
           </div>
@@ -437,32 +423,18 @@ export function UserProfile() {
           </div>
         )}
 
-        {/* Rank Title + Archetype */}
+        {/* Identity Title */}
         <div className="mt-5">
           <h3
             className="font-bold"
             style={{
-              color: currentRank.color,
+              color: 'var(--color-primary)',
               fontSize: '17px',
               letterSpacing: '-0.01em',
             }}
           >
-            {currentRank.emoji} {currentRank.title}
-          </h3>
-          <p
-            className="font-bold mt-0.5"
-            style={{
-              color: 'var(--color-primary)',
-              fontSize: '15px',
-            }}
-          >
             {getPrimaryTitle()}
-          </p>
-          {archetype && archetypeResult.confidence === 'established' && (
-            <p className="mt-1 font-medium" style={{ color: archetype.color, fontSize: '13px' }}>
-              {archetype.emoji} {archetype.label}
-            </p>
-          )}
+          </h3>
           {archetype && archetypeResult.confidence === 'emerging' && (
             <p className="mt-1" style={{ color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
               trending toward {archetype.label.replace('The ', '')}
@@ -474,8 +446,19 @@ export function UserProfile() {
         <div className="flex items-center gap-4 mt-3" style={{ fontSize: '13px' }}>
           {badgeCount > 0 && (
             <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-              <span style={{ color: currentRank.color }}>{currentRank.emoji}</span>
+              <span>🏅</span>
               <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{badgeCount}</span>
+            </span>
+          )}
+          {ratingIdentity && ratingIdentity.votesWithConsensus > 0 && (
+            <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <span style={{
+                color: ratingIdentity.ratingBias < 0 ? '#f97316' : ratingIdentity.ratingBias > 0 ? '#22c55e' : 'var(--color-text-secondary)',
+                fontWeight: 700,
+              }}>
+                {ratingIdentity.ratingBias > 0 ? '+' : ''}{ratingIdentity.ratingBias?.toFixed(1) || '0.0'}
+              </span>
+              <span>{ratingIdentity.biasLabel}</span>
             </span>
           )}
           {totalVotes > 0 && (
@@ -525,40 +508,6 @@ export function UserProfile() {
             </button>
           )}
         </div>
-
-        {/* Expertise Progress */}
-        {topProgress && (
-          <div
-            className="mt-4 w-full text-left p-3.5 rounded-xl"
-            style={{
-              background: 'var(--color-surface-elevated)',
-              border: `1px solid ${isCloseToNextTier ? 'rgba(245, 158, 11, 0.4)' : 'var(--color-divider)'}`,
-            }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                {topProgress.emoji} {topProgress.label}: {topProgress.currentTier?.title || 'Newcomer'} → {topProgress.nextTier.title}
-              </span>
-              <span className="text-xs font-bold" style={{ color: isCloseToNextTier ? '#F59E0B' : 'var(--color-text-tertiary)' }}>
-                {topProgress.count}/{topProgress.nextTier.min}
-              </span>
-            </div>
-            <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-divider)' }}>
-              <div
-                className={`h-full rounded-full transition-all duration-1000 ${isCloseToNextTier ? 'animate-glow-breathe' : ''}`}
-                style={{
-                  width: `${Math.min(topProgress.progress * 100, 100)}%`,
-                  background: isCloseToNextTier
-                    ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
-                    : 'var(--color-primary)',
-                }}
-              />
-            </div>
-            <p className="text-xs mt-1.5" style={{ color: 'var(--color-text-tertiary)' }}>
-              {TIER_DESCRIPTIONS[topProgress.nextTier.title] || ''}
-            </p>
-          </div>
-        )}
 
         {/* Badges */}
         {profile.badges?.length > 0 && (

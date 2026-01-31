@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { votesApi } from '../api/votesApi'
-import {
-  getCategoryInfo,
-  TIER_THRESHOLDS,
-  MAJOR_CATEGORIES,
-} from '../constants/categories'
+import { MAJOR_CATEGORIES } from '../constants/categories'
 import { logger } from '../utils/logger'
 
 /**
@@ -26,79 +22,6 @@ function transformVote(vote) {
 }
 
 /**
- * Get tier for a vote count
- */
-export function getTierForCount(count) {
-  for (const tier of TIER_THRESHOLDS) {
-    if (count >= tier.min) {
-      return tier
-    }
-  }
-  return null
-}
-
-/**
- * Get next tier info for a vote count
- */
-export function getNextTierInfo(count) {
-  // Find the next tier threshold above current count
-  const sortedThresholds = [...TIER_THRESHOLDS].sort((a, b) => a.min - b.min)
-
-  for (const tier of sortedThresholds) {
-    if (count < tier.min) {
-      return {
-        nextTier: tier,
-        votesNeeded: tier.min - count,
-        progress: count / tier.min,
-      }
-    }
-  }
-
-  // Already at max tier
-  return null
-}
-
-/**
- * Calculate progress towards next tier for each category
- * Only includes major categories
- */
-export function calculateCategoryProgress(categoryCounts) {
-  const progress = []
-  if (!categoryCounts || typeof categoryCounts !== 'object') return progress
-
-  for (const [category, count] of Object.entries(categoryCounts)) {
-    // Only show major categories
-    if (!MAJOR_CATEGORIES.has(category)) continue
-
-    const nextInfo = getNextTierInfo(count)
-
-    // Only show progress if there's a next tier to reach
-    if (nextInfo) {
-      const info = getCategoryInfo(category)
-      const currentTier = getTierForCount(count)
-
-      progress.push({
-        category,
-        count,
-        ...info,
-        currentTier,
-        nextTier: nextInfo.nextTier,
-        votesNeeded: nextInfo.votesNeeded,
-        progress: nextInfo.progress,
-      })
-    }
-  }
-
-  // Sort by progress (closest to next tier first), then by count
-  progress.sort((a, b) => {
-    if (b.progress !== a.progress) return b.progress - a.progress
-    return b.count - a.count
-  })
-
-  return progress
-}
-
-/**
  * Get rating personality based on average rating
  */
 function getRatingPersonality(avgRating) {
@@ -113,39 +36,6 @@ function getRatingPersonality(avgRating) {
   } else {
     return { title: 'Loves Everything', emoji: '🥰', description: 'You\'re easy to please!' }
   }
-}
-
-/**
- * Calculate category tiers from vote counts
- * Only includes major categories
- */
-export function calculateCategoryTiers(categoryCounts) {
-  const tiers = []
-  if (!categoryCounts || typeof categoryCounts !== 'object') return tiers
-
-  for (const [category, count] of Object.entries(categoryCounts)) {
-    // Only show major categories
-    if (!MAJOR_CATEGORIES.has(category)) continue
-
-    const tier = getTierForCount(count)
-    if (tier) {
-      const info = getCategoryInfo(category)
-      tiers.push({
-        category,
-        count,
-        ...tier,
-        ...info,
-      })
-    }
-  }
-
-  // Sort by level (highest first), then by count
-  tiers.sort((a, b) => {
-    if (b.level !== a.level) return b.level - a.level
-    return b.count - a.count
-  })
-
-  return tiers
 }
 
 /**
@@ -188,12 +78,6 @@ function calculateStats(data) {
     ? catValues.reduce((sum, c) => sum + Math.pow(c / catTotal, 2), 0)
     : 0
 
-  // Category tiers (only categories with 5+ votes)
-  const categoryTiers = calculateCategoryTiers(categoryCounts)
-
-  // Category progress (categories working towards next tier)
-  const categoryProgress = calculateCategoryProgress(categoryCounts)
-
   // Rating personality
   const ratingPersonality = getRatingPersonality(avgRating)
 
@@ -222,8 +106,6 @@ function calculateStats(data) {
     topCategory,
     favoriteRestaurant,
     uniqueRestaurants,
-    categoryTiers,
-    categoryProgress,
     ratingPersonality,
     categoryCounts,
   }
@@ -244,8 +126,6 @@ export function useUserVotes(userId) {
     topCategory: null,
     favoriteRestaurant: null,
     uniqueRestaurants: 0,
-    categoryTiers: [],
-    categoryProgress: [],
     ratingPersonality: null,
     categoryCounts: {},
     dishesHelpedRank: 0,
@@ -284,8 +164,6 @@ export function useUserVotes(userId) {
         topCategory: null,
         favoriteRestaurant: null,
         uniqueRestaurants: 0,
-        categoryTiers: [],
-        categoryProgress: [],
         ratingPersonality: null,
         categoryCounts: {},
         dishesHelpedRank: 0,
