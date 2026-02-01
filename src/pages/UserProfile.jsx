@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
+import { getCompatColor } from '../utils/formatters'
 import { followsApi } from '../api/followsApi'
 import { votesApi } from '../api/votesApi'
 import { FollowListModal } from '../components/FollowListModal'
@@ -441,16 +442,16 @@ export function UserProfile() {
             className="mt-4 px-3.5 py-3 rounded-xl"
             style={{
               background: tasteCompat.compatibility_pct != null
-                ? 'linear-gradient(135deg, rgba(244, 122, 31, 0.08) 0%, rgba(217, 167, 101, 0.06) 100%)'
+                ? `linear-gradient(135deg, ${getCompatColor(tasteCompat.compatibility_pct)}14 0%, ${getCompatColor(tasteCompat.compatibility_pct)}0A 100%)`
                 : 'var(--color-surface-elevated)',
               border: tasteCompat.compatibility_pct != null
-                ? '1px solid rgba(244, 122, 31, 0.15)'
+                ? `1px solid ${getCompatColor(tasteCompat.compatibility_pct)}26`
                 : '1px solid var(--color-divider)',
             }}
           >
             {tasteCompat.compatibility_pct != null ? (
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
+                <span className="text-2xl font-bold" style={{ color: getCompatColor(tasteCompat.compatibility_pct) }}>
                   {tasteCompat.compatibility_pct}%
                 </span>
                 <div>

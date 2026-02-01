@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { capture } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
+import { getCompatColor } from '../utils/formatters'
 import { dishesApi } from '../api/dishesApi'
 import { followsApi } from '../api/followsApi'
 import { dishPhotosApi } from '../api/dishPhotosApi'
@@ -564,7 +565,7 @@ export function Dish() {
                           <p className="text-xs flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
                             {vote.would_order_again ? <><ThumbsUpIcon size={20} /> Would order again</> : <><ThumbsDownIcon size={20} /> Would skip</>}
                             {friendsCompat[vote.user_id] != null && (
-                              <span className="ml-1.5 font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                              <span className="ml-1.5 font-medium" style={{ color: getCompatColor(friendsCompat[vote.user_id]) }}>
                                 · {friendsCompat[vote.user_id]}% match
                               </span>
                             )}

@@ -36,6 +36,19 @@ export function formatRelativeTime(dateString) {
 }
 
 /**
+ * Get color for a taste compatibility percentage
+ * Green (high match) → Yellow → Red (low match)
+ * @param {number} pct - Compatibility percentage (0-100)
+ * @returns {string} Hex color
+ */
+export function getCompatColor(pct) {
+  if (pct >= 80) return '#22C55E' // green
+  if (pct >= 60) return '#EAB308' // yellow
+  if (pct >= 40) return '#F97316' // orange
+  return '#EF4444' // red
+}
+
+/**
  * Format a number with appropriate decimal places
  * @param {number} value - Number to format
  * @param {number} decimals - Max decimal places (default 1)
