@@ -212,7 +212,7 @@ export const followsApi = {
       if (!user) return { shared_dishes: 0, avg_difference: null, compatibility_pct: null }
 
       const { data, error } = await supabase
-        .rpc('calculate_taste_compatibility', {
+        .rpc('get_taste_compatibility', {
           p_user_id: user.id,
           p_other_user_id: otherUserId,
         })
