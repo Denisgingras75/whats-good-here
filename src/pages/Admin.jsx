@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
@@ -35,6 +35,20 @@ export function Admin() {
   const [inviteLink, setInviteLink] = useState('')
   const [managers, setManagers] = useState([])
   const [managersLoading, setManagersLoading] = useState(false)
+  const [inviteSearch, setInviteSearch] = useState('')
+  const [inviteDropdownOpen, setInviteDropdownOpen] = useState(false)
+  const inviteSearchRef = useRef(null)
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (inviteSearchRef.current && !inviteSearchRef.current.contains(e.target)) {
+        setInviteDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Form state
   const [restaurantId, setRestaurantId] = useState('')
@@ -586,28 +600,81 @@ export function Admin() {
             Restaurant Managers
           </h2>
 
-          {/* Restaurant selector */}
-          <div className="mb-4">
+          {/* Restaurant selector (searchable) */}
+          <div className="mb-4 relative" ref={inviteSearchRef}>
             <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-primary)' }}>
               Restaurant
             </label>
-            <select
-              value={inviteRestaurantId}
+            <input
+              type="text"
+              value={inviteSearch}
               onChange={(e) => {
-                setInviteRestaurantId(e.target.value)
-                setInviteLink('')
-                fetchManagers(e.target.value)
+                setInviteSearch(e.target.value)
+                setInviteDropdownOpen(true)
+                if (inviteRestaurantId) {
+                  setInviteRestaurantId('')
+                  setInviteLink('')
+                  setManagers([])
+                }
               }}
+              onFocus={() => setInviteDropdownOpen(true)}
+              placeholder="Search restaurants..."
               className="w-full px-3 py-2 border rounded-lg text-sm"
               style={{ borderColor: 'var(--color-divider)', background: 'var(--color-bg)' }}
-            >
-              <option value="">Select a restaurant...</option>
-              {restaurants.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name} - {r.address}
-                </option>
-              ))}
-            </select>
+            />
+            {inviteRestaurantId && (
+              <button
+                onClick={() => {
+                  setInviteRestaurantId('')
+                  setInviteSearch('')
+                  setInviteLink('')
+                  setManagers([])
+                }}
+                className="absolute right-2 top-[34px] text-sm px-1"
+                style={{ color: 'var(--color-text-tertiary)' }}
+              >
+                ✕
+              </button>
+            )}
+            {inviteDropdownOpen && !inviteRestaurantId && (
+              <div
+                className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto rounded-lg border shadow-lg"
+                style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}
+              >
+                {restaurants
+                  .filter((r) => {
+                    if (!inviteSearch.trim()) return true
+                    const q = inviteSearch.toLowerCase()
+                    return r.name.toLowerCase().includes(q) || (r.address || '').toLowerCase().includes(q)
+                  })
+                  .map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => {
+                        setInviteRestaurantId(r.id)
+                        setInviteSearch(r.name)
+                        setInviteDropdownOpen(false)
+                        setInviteLink('')
+                        fetchManagers(r.id)
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-[color:var(--color-surface-elevated)] transition-colors"
+                      style={{ color: 'var(--color-text-primary)' }}
+                    >
+                      <span className="font-medium">{r.name}</span>
+                      <span className="ml-1" style={{ color: 'var(--color-text-tertiary)' }}>- {r.address}</span>
+                    </button>
+                  ))}
+                {restaurants.filter((r) => {
+                  if (!inviteSearch.trim()) return true
+                  const q = inviteSearch.toLowerCase()
+                  return r.name.toLowerCase().includes(q) || (r.address || '').toLowerCase().includes(q)
+                }).length === 0 && (
+                  <p className="px-3 py-2 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                    No restaurants found
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Generate Invite */}
