@@ -159,8 +159,8 @@ export function LocationProvider({ children }) {
         permissionStatus = result
         setPermissionState(result.state)
 
-        // Auto-request if permission granted, or prompt if never asked
-        if (result.state === 'granted' || result.state === 'prompt') {
+        // Auto-request only if permission was previously granted
+        if (result.state === 'granted') {
           requestLocation()
         }
 

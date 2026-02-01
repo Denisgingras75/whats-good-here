@@ -16,15 +16,6 @@ const queryClient = new QueryClient({
   },
 })
 
-// Silence console in production (errors still go to Sentry)
-if (import.meta.env.PROD) {
-  console.log = () => {}
-  console.warn = () => {}
-  console.info = () => {}
-  console.debug = () => {}
-  // Keep console.error - it's caught by Sentry
-}
-
 // Defer third-party analytics loading until after hydration
 // This keeps them off the critical path for faster TTI
 function initAnalytics() {
@@ -76,8 +67,8 @@ function initAnalytics() {
         integrations: [
           Sentry.browserTracingIntegration(),
           Sentry.replayIntegration({
-            maskAllText: false,
-            blockAllMedia: false,
+            maskAllText: true,
+            blockAllMedia: true,
           }),
         ],
         // Performance monitoring
