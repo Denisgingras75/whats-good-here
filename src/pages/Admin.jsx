@@ -703,9 +703,32 @@ export function Admin() {
                     />
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(inviteLink)
-                          .then(() => setMessage({ type: 'success', text: 'Link copied!' }))
-                          .catch(() => setMessage({ type: 'error', text: 'Failed to copy. Select and copy manually.' }))
+                        // Try modern clipboard API first, fall back to execCommand for mobile Safari
+                        if (navigator.clipboard?.writeText) {
+                          navigator.clipboard.writeText(inviteLink)
+                            .then(() => setMessage({ type: 'success', text: 'Link copied!' }))
+                            .catch(() => {
+                              // Fallback for when clipboard API is denied
+                              const input = document.querySelector('input[readonly][value="' + CSS.escape(inviteLink) + '"]')
+                              if (input) {
+                                input.select()
+                                document.execCommand('copy')
+                                setMessage({ type: 'success', text: 'Link copied!' })
+                              } else {
+                                setMessage({ type: 'error', text: 'Failed to copy. Select and copy manually.' })
+                              }
+                            })
+                        } else {
+                          const textarea = document.createElement('textarea')
+                          textarea.value = inviteLink
+                          textarea.style.position = 'fixed'
+                          textarea.style.opacity = '0'
+                          document.body.appendChild(textarea)
+                          textarea.select()
+                          document.execCommand('copy')
+                          document.body.removeChild(textarea)
+                          setMessage({ type: 'success', text: 'Link copied!' })
+                        }
                       }}
                       className="px-3 py-1 rounded text-xs font-medium text-white"
                       style={{ background: 'var(--color-primary)' }}
