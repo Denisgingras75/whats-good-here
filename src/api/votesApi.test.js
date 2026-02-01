@@ -170,17 +170,13 @@ describe('votesApi', () => {
       })).rejects.toThrow('Server rate limit exceeded')
     })
 
-    it('should allow vote if server rate limit check fails (graceful degradation)', async () => {
+    it('should block vote if server rate limit check fails (fail closed)', async () => {
       supabase.rpc.mockResolvedValue({ data: null, error: { message: 'RPC error' } })
-      const upsertMock = vi.fn().mockResolvedValue({ error: null })
-      supabase.from.mockReturnValue({ upsert: upsertMock })
 
-      const result = await votesApi.submitVote({
+      await expect(votesApi.submitVote({
         dishId: 'dish-1',
         wouldOrderAgain: true,
-      })
-
-      expect(result).toEqual({ success: true })
+      })).rejects.toThrow('Unable to verify vote limit. Please try again.')
     })
 
     it('should track vote submission in PostHog', async () => {
