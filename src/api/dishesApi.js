@@ -1,17 +1,7 @@
 import { supabase } from '../lib/supabase'
-import { classifyError } from '../utils/errorHandler'
+import { createClassifiedError } from '../utils/errorHandler'
 import { sanitizeSearchQuery } from '../utils/sanitize'
 import { logger } from '../utils/logger'
-
-/**
- * Create a classified error with type information
- */
-function createClassifiedError(error) {
-  const classifiedError = new Error(error.message || 'An error occurred')
-  classifiedError.type = classifyError(error)
-  classifiedError.originalError = error
-  return classifiedError
-}
 
 /**
  * Dishes API - Centralized data fetching for dishes

@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { capture } from '../lib/analytics'
+import { createClassifiedError } from '../utils/errorHandler'
 import { logger } from '../utils/logger'
 import { sanitizeSearchQuery } from '../utils/sanitize'
 
@@ -50,12 +51,12 @@ export const authApi = {
       })
       if (error) {
         capture('login_failed', { method: 'google', error: error.message })
-        throw error
+        throw createClassifiedError(error)
       }
       return { success: true }
     } catch (error) {
       logger.error('Error signing in with Google:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -77,13 +78,13 @@ export const authApi = {
       })
       if (error) {
         capture('login_failed', { method: 'magic_link', error: error.message })
-        throw error
+        throw createClassifiedError(error)
       }
       capture('magic_link_sent')
       return { success: true }
     } catch (error) {
       logger.error('Error sending magic link:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -108,7 +109,7 @@ export const authApi = {
         .maybeSingle()
 
       if (usernameError) {
-        throw usernameError
+        throw createClassifiedError(usernameError)
       }
 
       if (existingUser) {
@@ -127,7 +128,7 @@ export const authApi = {
 
       if (error) {
         capture('signup_failed', { method: 'password', error: error.message })
-        throw error
+        throw createClassifiedError(error)
       }
 
       // Update the profile with the display name
@@ -138,7 +139,7 @@ export const authApi = {
           .eq('id', data.user.id)
 
         if (profileError) {
-          throw profileError
+          throw createClassifiedError(profileError)
         }
       }
 
@@ -146,7 +147,7 @@ export const authApi = {
       return { success: true, user: data.user }
     } catch (error) {
       logger.error('Error signing up:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -167,14 +168,14 @@ export const authApi = {
 
       if (error) {
         capture('login_failed', { method: 'password', error: error.message })
-        throw error
+        throw createClassifiedError(error)
       }
 
       capture('login_completed', { method: 'password' })
       return { success: true, user: data.user }
     } catch (error) {
       logger.error('Error signing in:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -190,13 +191,13 @@ export const authApi = {
       })
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return { success: true }
     } catch (error) {
       logger.error('Error sending password reset:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -212,13 +213,13 @@ export const authApi = {
       })
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return { success: true }
     } catch (error) {
       logger.error('Error updating password:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -239,13 +240,13 @@ export const authApi = {
 
       if (error) {
         logger.error('Error checking username:', error)
-        throw new Error('Unable to check username availability')
+        throw createClassifiedError(error)
       }
 
       return !data
     } catch (error) {
       logger.error('Error checking username:', error)
-      throw new Error('Unable to check username availability')
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -269,13 +270,13 @@ export const authApi = {
         .maybeSingle()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data
     } catch (error) {
       logger.error('Error fetching user vote:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 }

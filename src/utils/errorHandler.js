@@ -116,6 +116,18 @@ export function getUserMessage(error, context = '') {
 }
 
 /**
+ * Create an Error with a classified .type property attached
+ * @param {Error} error - The original error
+ * @returns {Error} New error with .type and .originalError
+ */
+export function createClassifiedError(error) {
+  const classifiedError = new Error(error.message || 'An error occurred')
+  classifiedError.type = classifyError(error)
+  classifiedError.originalError = error
+  return classifiedError
+}
+
+/**
  * Determine if an error is retryable
  * @param {Error} error - The error
  * @returns {boolean} Whether the error is retryable

@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { createClassifiedError } from '../utils/errorHandler'
 import { logger } from '../utils/logger'
 
 /**
@@ -24,13 +25,13 @@ export const profileApi = {
         .maybeSingle()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data
     } catch (error) {
       logger.error('Error fetching profile:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -58,13 +59,13 @@ export const profileApi = {
         .single()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data
     } catch (error) {
       logger.error('Error creating profile:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -89,13 +90,13 @@ export const profileApi = {
         .single()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data
     } catch (error) {
       logger.error('Error updating profile:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -113,7 +114,7 @@ export const profileApi = {
         p_user_id: userId,
       })
 
-      if (error) throw error
+      if (error) throw createClassifiedError(error)
 
       return data?.categoryStats || []
     } catch (error) {
@@ -135,7 +136,7 @@ export const profileApi = {
         target_user_id: userId,
       })
 
-      if (error) throw error
+      if (error) throw createClassifiedError(error)
 
       const row = data?.[0] || data
       return {
@@ -171,7 +172,7 @@ export const profileApi = {
       return await this.createProfile()
     } catch (error) {
       logger.error('Error getting or creating profile:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 }

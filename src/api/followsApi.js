@@ -1,6 +1,68 @@
 import { supabase } from '../lib/supabase'
+import { createClassifiedError } from '../utils/errorHandler'
 import { sanitizeSearchQuery } from '../utils/sanitize'
 import { logger } from '../utils/logger'
+
+/**
+ * Shared paginated follows query.
+ * @param {string} userId - User ID
+ * @param {'followers'|'following'} direction - Which direction to query
+ * @param {Object} options
+ * @param {number} options.limit - Page size (default 20)
+ * @param {string|null} options.cursor - Cursor for pagination
+ * @returns {Promise<{users: Array, hasMore: boolean}>}
+ */
+async function _paginateFollows(userId, direction, { limit = 20, cursor = null } = {}) {
+  const isFollowers = direction === 'followers'
+  const filterCol = isFollowers ? 'followed_id' : 'follower_id'
+  const selectCol = isFollowers ? 'follower_id' : 'followed_id'
+
+  let query = supabase
+    .from('follows')
+    .select(`${selectCol}, created_at`)
+    .eq(filterCol, userId)
+    .order('created_at', { ascending: false })
+    .limit(limit + 1)
+
+  if (cursor) {
+    query = query.lt('created_at', cursor)
+  }
+
+  const { data: followData, error: followError } = await query
+
+  if (followError) {
+    throw createClassifiedError(followError)
+  }
+
+  if (!followData || followData.length === 0) {
+    return { users: [], hasMore: false }
+  }
+
+  const hasMore = followData.length > limit
+  const results = hasMore ? followData.slice(0, limit) : followData
+
+  const userIds = results.map(f => f[selectCol])
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, display_name, follower_count')
+    .in('id', userIds)
+
+  if (profileError) {
+    // Continue without profile data
+  }
+
+  const profileMap = {}
+  ;(profiles || []).forEach(p => { profileMap[p.id] = p })
+
+  const users = results.map(f => ({
+    id: f[selectCol],
+    display_name: profileMap[f[selectCol]]?.display_name || 'Anonymous',
+    follower_count: profileMap[f[selectCol]]?.follower_count || 0,
+    followed_at: f.created_at,
+  }))
+
+  return { users, hasMore }
+}
 
 /**
  * Follows API - Social connections
@@ -35,7 +97,7 @@ export const followsApi = {
       if (error.code === '23505') {
         return // Already following, success
       }
-      throw error
+      throw createClassifiedError(error)
     }
   },
 
@@ -58,7 +120,7 @@ export const followsApi = {
       .eq('followed_id', followedId)
 
     if (error) {
-      throw error
+      throw createClassifiedError(error)
     }
   },
 
@@ -80,7 +142,7 @@ export const followsApi = {
 
     if (error) {
       logger.error('Error checking follow status:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     return !!data
@@ -94,56 +156,8 @@ export const followsApi = {
    * @param {string} options.cursor - Cursor for pagination (created_at of last item)
    * @returns {Promise<{users: Array, hasMore: boolean}>}
    */
-  async getFollowers(userId, { limit = 20, cursor = null } = {}) {
-    // Build query with cursor-based pagination
-      let query = supabase
-        .from('follows')
-        .select('follower_id, created_at')
-        .eq('followed_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit + 1) // Fetch one extra to check if there's more
-
-      // Apply cursor filter if provided
-      if (cursor) {
-        query = query.lt('created_at', cursor)
-      }
-
-      const { data: followData, error: followError } = await query
-
-      if (followError) {
-        throw new Error('Failed to fetch followers')
-      }
-
-      if (!followData || followData.length === 0) {
-        return { users: [], hasMore: false }
-      }
-
-      // Check if there are more results
-      const hasMore = followData.length > limit
-      const results = hasMore ? followData.slice(0, limit) : followData
-
-      // Get profile info for each follower
-      const followerIds = results.map(f => f.follower_id)
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, display_name, follower_count')
-        .in('id', followerIds)
-
-      if (profileError) {
-        // Continue without profile data
-      }
-
-      const profileMap = {}
-      ;(profiles || []).forEach(p => { profileMap[p.id] = p })
-
-      const users = results.map(f => ({
-        id: f.follower_id,
-        display_name: profileMap[f.follower_id]?.display_name || 'Anonymous',
-        follower_count: profileMap[f.follower_id]?.follower_count || 0,
-        followed_at: f.created_at,
-      }))
-
-      return { users, hasMore }
+  async getFollowers(userId, options) {
+    return _paginateFollows(userId, 'followers', options)
   },
 
   /**
@@ -154,56 +168,8 @@ export const followsApi = {
    * @param {string} options.cursor - Cursor for pagination (created_at of last item)
    * @returns {Promise<{users: Array, hasMore: boolean}>}
    */
-  async getFollowing(userId, { limit = 20, cursor = null } = {}) {
-    // Build query with cursor-based pagination
-      let query = supabase
-        .from('follows')
-        .select('followed_id, created_at')
-        .eq('follower_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit + 1) // Fetch one extra to check if there's more
-
-      // Apply cursor filter if provided
-      if (cursor) {
-        query = query.lt('created_at', cursor)
-      }
-
-      const { data: followData, error: followError } = await query
-
-      if (followError) {
-        throw new Error('Failed to fetch following')
-      }
-
-      if (!followData || followData.length === 0) {
-        return { users: [], hasMore: false }
-      }
-
-      // Check if there are more results
-      const hasMore = followData.length > limit
-      const results = hasMore ? followData.slice(0, limit) : followData
-
-      // Get profile info for each followed user
-      const followedIds = results.map(f => f.followed_id)
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, display_name, follower_count')
-        .in('id', followedIds)
-
-      if (profileError) {
-        // Continue without profile data
-      }
-
-      const profileMap = {}
-      ;(profiles || []).forEach(p => { profileMap[p.id] = p })
-
-      const users = results.map(f => ({
-        id: f.followed_id,
-        display_name: profileMap[f.followed_id]?.display_name || 'Anonymous',
-        follower_count: profileMap[f.followed_id]?.follower_count || 0,
-        followed_at: f.created_at,
-      }))
-
-      return { users, hasMore }
+  async getFollowing(userId, options) {
+    return _paginateFollows(userId, 'following', options)
   },
 
   /**
@@ -226,7 +192,7 @@ export const followsApi = {
 
     if (followerError || followingError) {
       logger.error('Error fetching follow counts:', followerError || followingError)
-      throw (followerError || followingError)
+      throw createClassifiedError(followerError || followingError)
     }
 
     return {
@@ -253,7 +219,7 @@ export const followsApi = {
 
       if (error) {
         logger.error('Error fetching taste compatibility:', error)
-        throw new Error('Failed to fetch taste compatibility')
+        throw createClassifiedError(error)
       }
 
       // RPC returns an array with one row
@@ -282,7 +248,7 @@ export const followsApi = {
 
       if (error) {
         logger.error('Error fetching friends votes for restaurant:', error)
-        throw new Error('Failed to fetch friends votes for restaurant')
+        throw createClassifiedError(error)
       }
 
       return data || []
@@ -310,7 +276,7 @@ export const followsApi = {
 
       if (error) {
         logger.error('Error fetching friends votes:', error)
-        throw new Error('Failed to fetch friends votes')
+        throw createClassifiedError(error)
       }
 
       return data || []
@@ -342,7 +308,7 @@ export const followsApi = {
 
       if (error) {
         logger.error('Error searching users:', error)
-        throw new Error('Failed to search users')
+        throw createClassifiedError(error)
       }
 
       if (!data || data.length === 0) return []

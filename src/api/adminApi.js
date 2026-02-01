@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { createClassifiedError } from '../utils/errorHandler'
 import { sanitizeSearchQuery } from '../utils/sanitize'
 import { logger } from '../utils/logger'
 
@@ -60,13 +61,13 @@ export const adminApi = {
         .limit(limit)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       logger.error('Error fetching recent dishes:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -94,13 +95,13 @@ export const adminApi = {
         .select()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data?.[0] || null
     } catch (error) {
       logger.error('Error adding dish:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -117,13 +118,13 @@ export const adminApi = {
         .eq('id', dishId)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return { success: true }
     } catch (error) {
       logger.error('Error deleting dish:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -153,13 +154,13 @@ export const adminApi = {
         .select()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data?.[0] || null
     } catch (error) {
       logger.error('Error updating dish:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -193,13 +194,13 @@ export const adminApi = {
         .limit(limit)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       logger.error('Error searching dishes:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 }

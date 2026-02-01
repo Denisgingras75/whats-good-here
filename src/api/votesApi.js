@@ -3,18 +3,8 @@ import { capture } from '../lib/analytics'
 import { checkVoteRateLimit } from '../lib/rateLimiter'
 import { containsBlockedContent } from '../lib/reviewBlocklist'
 import { MAX_REVIEW_LENGTH } from '../constants/app'
-import { classifyError } from '../utils/errorHandler'
+import { createClassifiedError } from '../utils/errorHandler'
 import { logger } from '../utils/logger'
-
-/**
- * Create a classified error with type information
- */
-function createClassifiedError(error) {
-  const classifiedError = new Error(error.message || 'An error occurred')
-  classifiedError.type = classifyError(error)
-  classifiedError.originalError = error
-  return classifiedError
-}
 
 /**
  * Votes API - Centralized data fetching and mutation for votes
