@@ -199,22 +199,3 @@ export function getCategoryInfo(category) {
   return { emoji: '🍽️', label: fallbackLabel }
 }
 
-// Major categories eligible for badges
-// Matches BROWSE_CATEGORIES — the categories users see on the homepage
-export const MAJOR_CATEGORIES = new Set([
-  'pizza',
-  'burger',
-  'seafood',
-  'wings',
-  'sushi',
-  'breakfast',
-  'lobster roll',
-  'chowder',
-  'pasta',
-  'steak',
-  'sandwich',
-  'salad',
-  'taco',
-  'tendys',
-  'dessert',
-])

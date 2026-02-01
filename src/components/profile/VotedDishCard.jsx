@@ -147,13 +147,17 @@ export function VotedDishCard({
                     </span>
                   </span>
                 )}
-                {!hasMyRating && communityAvg && (
-                  <span className="text-xs text-[color:var(--color-text-tertiary)]">
-                    · avg {communityAvg.toFixed(1)}
-                  </span>
-                )}
               </div>
-              {wouldOrderAgain ? <ThumbsUpIcon size={28} /> : <ThumbsDownIcon size={28} />}
+              {communityAvg ? (
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <span className="text-sm font-bold" style={{ color: getRatingColor(communityAvg) }}>
+                    {communityAvg.toFixed(1)}
+                  </span>
+                  <span className="text-xs text-[color:var(--color-text-tertiary)]">avg</span>
+                </div>
+              ) : (
+                wouldOrderAgain ? <ThumbsUpIcon size={28} /> : <ThumbsDownIcon size={28} />
+              )}
             </div>
           )}
         </div>

@@ -314,6 +314,46 @@ export const votesApi = {
   },
 
   /**
+   * Get community averages for a set of dishes
+   * @param {string[]} dishIds - Array of dish IDs
+   * @returns {Promise<Object>} Map of dish ID to { avg, count }
+   */
+  async getCommunityAvgsForDishes(dishIds) {
+    try {
+      if (!dishIds || dishIds.length === 0) return {}
+
+      const { data, error } = await supabase
+        .from('votes')
+        .select('dish_id, rating_10')
+        .in('dish_id', dishIds)
+        .not('rating_10', 'is', null)
+
+      if (error) {
+        throw createClassifiedError(error)
+      }
+
+      // Aggregate client-side: group by dish_id, compute avg and count
+      const grouped = {}
+      for (const row of (data || [])) {
+        if (!grouped[row.dish_id]) {
+          grouped[row.dish_id] = { sum: 0, count: 0 }
+        }
+        grouped[row.dish_id].sum += row.rating_10
+        grouped[row.dish_id].count += 1
+      }
+
+      const result = {}
+      for (const [dishId, { sum, count }] of Object.entries(grouped)) {
+        result[dishId] = { avg: sum / count, count }
+      }
+      return result
+    } catch (error) {
+      logger.error('Error fetching community averages:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
+
+  /**
    * Get all reviews written by a user with dish info
    * @param {string} userId - User ID
    * @param {Object} options - Pagination options

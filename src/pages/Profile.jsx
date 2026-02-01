@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
 import { authApi } from '../api/authApi'
 import { adminApi } from '../api/adminApi'
+import { profileApi } from '../api/profileApi'
 import { followsApi } from '../api/followsApi'
 import { votesApi } from '../api/votesApi'
 import { dishPhotosApi } from '../api/dishPhotosApi'
@@ -33,8 +34,6 @@ import {
   PhotosInfoSection,
   MissionSection,
 } from '../components/profile'
-import { FoodMap } from '../components/profile/FoodMap'
-import { TasteProfile } from '../components/profile/TasteProfile'
 import { SimilarTasteUsers } from '../components/SimilarTasteUsers'
 
 const TABS = [
@@ -75,6 +74,7 @@ export function Profile() {
   const [editedCategories, setEditedCategories] = useState([])
   const [userReviews, setUserReviews] = useState([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [ratingBias, setRatingBias] = useState(null)
 
   // Check admin status from database (matches RLS policies)
   useEffect(() => {
@@ -95,6 +95,18 @@ export function Profile() {
       })
   }, [user])
 
+  // Fetch rating deviation score
+  useEffect(() => {
+    if (!user) {
+      setRatingBias(null)
+      return
+    }
+    profileApi.getRatingBias(user.id)
+      .then(setRatingBias)
+      .catch((error) => {
+        logger.error('Failed to fetch rating bias:', error)
+      })
+  }, [user])
 
   // Set initial name for editing
   useEffect(() => {
@@ -290,17 +302,119 @@ export function Profile() {
             setFollowListModal={setFollowListModal}
           />
 
-          {/* Food Map — exploration progress */}
-          {stats.totalVotes > 0 && (
-            <div className="px-4 pt-4">
-              <FoodMap stats={stats} />
+          {/* Rating Style + Deviation Score */}
+          {(stats.ratingStyle || (ratingBias && ratingBias.votesWithConsensus > 0)) && (
+            <div className="px-4 pt-4 flex gap-2.5">
+              {stats.ratingStyle && (
+                <div
+                  className="flex-1 rounded-2xl border px-4 py-3.5"
+                  style={{
+                    background: 'var(--color-card)',
+                    borderColor: 'var(--color-divider)',
+                    boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(217, 167, 101, 0.04)',
+                  }}
+                >
+                  <p
+                    className="text-sm font-bold"
+                    style={{
+                      color: stats.ratingStyle.level === 'generous' || stats.ratingStyle.level === 'easy'
+                        ? '#10b981'
+                        : stats.ratingStyle.level === 'tough'
+                        ? '#ef4444'
+                        : '#f97316',
+                    }}
+                  >
+                    {stats.ratingStyle.label}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                    avg {stats.avgRating.toFixed(1)}/10
+                  </p>
+                </div>
+              )}
+              {ratingBias && ratingBias.votesWithConsensus > 0 && (
+                <div
+                  className="flex-1 rounded-2xl border px-4 py-3.5"
+                  style={{
+                    background: 'var(--color-card)',
+                    borderColor: 'var(--color-divider)',
+                    boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(217, 167, 101, 0.04)',
+                  }}
+                >
+                  <p className="text-sm font-bold" style={{
+                    color: (() => {
+                      const isAbove = stats.ratingStyle?.level === 'generous' || stats.ratingStyle?.level === 'easy'
+                      if (isAbove) {
+                        return ratingBias.ratingBias < 1.0 ? '#10b981' : '#22c55e'
+                      }
+                      const isBelow = stats.ratingStyle?.level === 'tough'
+                      if (isBelow) {
+                        return ratingBias.ratingBias < 1.0 ? '#f87171' : '#ef4444'
+                      }
+                      return '#f97316' // fair judge — orange
+                    })(),
+                  }}>
+                    {ratingBias.biasLabel}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                    {ratingBias.ratingBias.toFixed(1)} pts from crowd
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Taste Profile — plain-English taste description */}
-          {stats.totalVotes >= 5 && (
-            <div className="px-4 pt-4">
-              <TasteProfile userId={user.id} />
+          {/* Standout Picks */}
+          {stats.totalVotes >= 3 && Object.keys(stats.standoutPicks).length > 0 && (
+            <div className="px-4 pt-3 flex flex-col gap-2.5">
+              {stats.standoutPicks.bestFind && (
+                <div
+                  className="rounded-xl border px-3.5 py-3 flex items-center gap-3"
+                  style={{
+                    background: 'var(--color-card)',
+                    borderColor: 'var(--color-divider)',
+                  }}
+                >
+                  <span className="text-lg flex-shrink-0" style={{ color: 'var(--color-accent-gold)' }}>
+                    {'\u2B50'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>
+                      Your top pick
+                    </p>
+                    <p className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {stats.standoutPicks.bestFind.dish_name}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                      {stats.standoutPicks.bestFind.restaurant_name} &middot; You: {stats.standoutPicks.bestFind.userRating}/10
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {stats.standoutPicks.harshestTake && (
+                <div
+                  className="rounded-xl border px-3.5 py-3 flex items-center gap-3"
+                  style={{
+                    background: 'var(--color-card)',
+                    borderColor: 'rgba(239, 68, 68, 0.2)',
+                  }}
+                >
+                  <span className="text-lg flex-shrink-0" style={{ color: '#ef4444' }}>
+                    {'\uD83C\uDF36\uFE0F'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold" style={{ color: '#ef4444' }}>
+                      Your hottest take
+                    </p>
+                    <p className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {stats.standoutPicks.harshestTake.dish_name}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                      {stats.standoutPicks.harshestTake.restaurant_name} &middot; You: {stats.standoutPicks.harshestTake.userRating}/10, Crowd: {stats.standoutPicks.harshestTake.communityAvg.toFixed(1)}/10
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

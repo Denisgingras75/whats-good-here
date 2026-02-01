@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { votesApi } from '../api/votesApi'
-import { MAJOR_CATEGORIES } from '../constants/categories'
 import { logger } from '../utils/logger'
 
 /**
@@ -22,20 +21,125 @@ function transformVote(vote) {
 }
 
 /**
- * Get rating personality based on average rating
+ * Compute rating style from avgRating and ratingVariance
  */
-function getRatingPersonality(avgRating) {
+function computeRatingStyle(avgRating, ratingVariance) {
   if (avgRating === null) return null
 
+  // Level based on average rating
+  let level, emoji
   if (avgRating < 6.0) {
-    return { title: 'Tough Critic', emoji: '🧐', description: 'You have high standards' }
+    level = 'tough'
+    emoji = '\uD83E\uDDD0' // monocle face
   } else if (avgRating < 7.5) {
-    return { title: 'Fair Judge', emoji: '⚖️', description: 'You call it like you see it' }
+    level = 'fair'
+    emoji = '\u2696\uFE0F' // balance scale
   } else if (avgRating < 8.5) {
-    return { title: 'Generous Rater', emoji: '😊', description: 'You find the good in most dishes' }
+    level = 'generous'
+    emoji = '\uD83D\uDE0A' // smiling face
   } else {
-    return { title: 'Loves Everything', emoji: '🥰', description: 'You\'re easy to please!' }
+    level = 'easy'
+    emoji = '\uD83E\uDD70' // smiling face with hearts
   }
+
+  // Consistency based on variance
+  const consistency = ratingVariance < 1.5 ? 'consistent' : 'varied'
+
+  // Compose label
+  const levelLabels = {
+    tough: 'Tough Critic',
+    fair: 'Fair Judge',
+    generous: 'Generous Rater',
+    easy: 'Easy to Please',
+  }
+  const label = levelLabels[level]
+
+  return { level, consistency, label, emoji }
+}
+
+/**
+ * Compute standout picks by comparing user ratings to community averages
+ */
+function computeStandoutPicks(data, communityAvgs) {
+  const MIN_COMMUNITY_VOTES = 3
+  const picks = {}
+
+  // Build per-dish comparisons
+  const comparisons = []
+  for (const vote of data) {
+    if (vote.rating_10 == null) continue
+    const dishId = vote.dishes.id
+    const community = communityAvgs[dishId]
+    if (!community || community.count < MIN_COMMUNITY_VOTES) continue
+
+    const diff = vote.rating_10 - community.avg
+    comparisons.push({
+      dish_id: dishId,
+      dish_name: vote.dishes.name,
+      category: vote.dishes.category,
+      restaurant_name: vote.dishes.restaurants?.name,
+      userRating: vote.rating_10,
+      communityAvg: community.avg,
+      diff,
+    })
+  }
+
+  if (comparisons.length === 0) return picks
+
+  // Best find: highest user rating, tie-break by biggest positive diff
+  const sorted = comparisons.slice().sort((a, b) => {
+    if (b.userRating !== a.userRating) return b.userRating - a.userRating
+    return b.diff - a.diff
+  })
+  picks.bestFind = sorted[0]
+
+  // Hottest take: biggest negative diff (user rates much lower than community), min -1.0
+  const harsh = comparisons.slice().sort((a, b) => a.diff - b.diff)
+  if (harsh[0] && harsh[0].diff <= -1.0) {
+    picks.harshestTake = harsh[0]
+  }
+
+  return picks
+}
+
+/**
+ * Compute category comparison from user votes and community averages
+ */
+function computeCategoryComparison(data, communityAvgs) {
+  const MIN_COMMUNITY_VOTES = 3
+  const MIN_DISHES_PER_CATEGORY = 2
+
+  // Group votes by category
+  const catGroups = {}
+  for (const vote of data) {
+    if (vote.rating_10 == null) continue
+    const cat = vote.dishes.category
+    if (!cat) continue
+    if (!catGroups[cat]) catGroups[cat] = []
+    catGroups[cat].push(vote)
+  }
+
+  const result = {}
+  for (const [cat, votes] of Object.entries(catGroups)) {
+    // Only include dishes with enough community data
+    const withCommunity = votes.filter(v => {
+      const c = communityAvgs[v.dishes.id]
+      return c && c.count >= MIN_COMMUNITY_VOTES
+    })
+
+    if (withCommunity.length < MIN_DISHES_PER_CATEGORY) continue
+
+    const userAvg = withCommunity.reduce((sum, v) => sum + v.rating_10, 0) / withCommunity.length
+    const communityAvg = withCommunity.reduce((sum, v) => sum + communityAvgs[v.dishes.id].avg, 0) / withCommunity.length
+
+    result[cat] = {
+      userAvg,
+      communityAvg,
+      difference: userAvg - communityAvg,
+    }
+  }
+
+  return result
 }
 
 /**
@@ -64,22 +168,29 @@ function calculateStats(data) {
     ? Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0][0]
     : null
 
-  // Rating variance (std dev of ratings) — 0-3.5 typical range
+  // Top categories: categories with 3+ votes, sorted by count, top 2-3
+  const topCategories = Object.entries(categoryCounts)
+    .filter(([, count]) => count >= 3)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([cat]) => cat)
+
+  // Rating variance (std dev of ratings)
   const ratingVariance = ratingsWithValue.length > 1
     ? Math.sqrt(
         ratingsWithValue.reduce((sum, v) => sum + Math.pow(v.rating_10 - avgRating, 2), 0) / ratingsWithValue.length
       )
     : 0
 
-  // Category concentration (Herfindahl index) — 1.0 = all one category, ~0.07 = perfectly spread
+  // Rating style
+  const ratingStyle = computeRatingStyle(avgRating, ratingVariance)
+
+  // Category concentration (Herfindahl index)
   const catValues = Object.values(categoryCounts)
   const catTotal = catValues.reduce((a, b) => a + b, 0)
   const categoryConcentration = catTotal > 0
     ? catValues.reduce((sum, c) => sum + Math.pow(c / catTotal, 2), 0)
     : 0
-
-  // Rating personality
-  const ratingPersonality = getRatingPersonality(avgRating)
 
   // Favorite restaurant (most votes)
   const restaurantCounts = {}
@@ -104,12 +215,18 @@ function calculateStats(data) {
     ratingVariance,
     categoryConcentration,
     topCategory,
+    topCategories,
+    ratingStyle,
     favoriteRestaurant,
     uniqueRestaurants,
-    ratingPersonality,
     categoryCounts,
+    // These will be filled after community data loads
+    categoryComparison: {},
+    standoutPicks: {},
   }
 }
+
+const COMMUNITY_CACHE_TTL = 30 * 60 * 1000 // 30 minutes
 
 export function useUserVotes(userId) {
   const [votes, setVotes] = useState([])
@@ -124,18 +241,22 @@ export function useUserVotes(userId) {
     ratingVariance: 0,
     categoryConcentration: 0,
     topCategory: null,
+    topCategories: [],
+    ratingStyle: null,
     favoriteRestaurant: null,
     uniqueRestaurants: 0,
-    ratingPersonality: null,
     categoryCounts: {},
     dishesHelpedRank: 0,
+    categoryComparison: {},
+    standoutPicks: {},
   })
 
-  const processVotes = useCallback((data, helpedCount = 0) => {
+  const communityCache = useRef({ data: null, timestamp: 0 })
+
+  const processVotes = useCallback(async (data, helpedCount = 0) => {
     setVotes(data)
 
     // Split into worth it and avoid, then sort by rating (highest first)
-    // Dishes without ratings go to the end
     const sortByRating = (a, b) => {
       if (a.rating_10 == null && b.rating_10 == null) return 0
       if (a.rating_10 == null) return 1
@@ -148,7 +269,32 @@ export function useUserVotes(userId) {
 
     setWorthItDishes(worthIt)
     setAvoidDishes(avoid)
-    setStats({ ...calculateStats(data), dishesHelpedRank: helpedCount })
+
+    const baseStats = { ...calculateStats(data), dishesHelpedRank: helpedCount }
+    setStats(baseStats)
+
+    // Fetch community averages for rated dishes
+    const ratedDishIds = data
+      .filter(v => v.rating_10 != null)
+      .map(v => v.dishes.id)
+
+    if (ratedDishIds.length === 0) return
+
+    try {
+      const now = Date.now()
+      let communityAvgs = communityCache.current.data
+      if (!communityAvgs || (now - communityCache.current.timestamp) > COMMUNITY_CACHE_TTL) {
+        communityAvgs = await votesApi.getCommunityAvgsForDishes(ratedDishIds)
+        communityCache.current = { data: communityAvgs, timestamp: now }
+      }
+
+      const categoryComparison = computeCategoryComparison(data, communityAvgs)
+      const standoutPicks = computeStandoutPicks(data, communityAvgs)
+
+      setStats(prev => ({ ...prev, categoryComparison, standoutPicks }))
+    } catch (error) {
+      logger.error('Error fetching community averages:', error)
+    }
   }, [])
 
   useEffect(() => {
@@ -162,11 +308,14 @@ export function useUserVotes(userId) {
         avoidCount: 0,
         avgRating: null,
         topCategory: null,
+        topCategories: [],
+        ratingStyle: null,
         favoriteRestaurant: null,
         uniqueRestaurants: 0,
-        ratingPersonality: null,
         categoryCounts: {},
         dishesHelpedRank: 0,
+        categoryComparison: {},
+        standoutPicks: {},
       })
       setLoading(false)
       return
@@ -179,7 +328,7 @@ export function useUserVotes(userId) {
           votesApi.getDetailedVotesForUser(userId),
           votesApi.getDishesHelpedRank(userId)
         ])
-        processVotes(data, helpedCount)
+        await processVotes(data, helpedCount)
       } catch (error) {
         logger.error('Error fetching votes:', error)
       }
@@ -197,7 +346,9 @@ export function useUserVotes(userId) {
         votesApi.getDetailedVotesForUser(userId),
         votesApi.getDishesHelpedRank(userId)
       ])
-      processVotes(data, helpedCount)
+      // Invalidate community cache on refetch
+      communityCache.current = { data: null, timestamp: 0 }
+      await processVotes(data, helpedCount)
     } catch (error) {
       logger.error('Error refetching votes:', error)
     }
