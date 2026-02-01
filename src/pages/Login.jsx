@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { authApi } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
@@ -11,6 +11,7 @@ import { CameraIcon } from '../components/CameraIcon'
 
 export function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   useAuth() // Hook must be called for context to work
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -69,7 +70,11 @@ export function Login() {
       setLoading(true)
       setMessage(null)
       await authApi.signInWithPassword(email, password)
-      navigate('/')
+      const fromLocation = location.state?.from
+      const from = fromLocation
+        ? fromLocation.pathname + (fromLocation.search || '') + (fromLocation.hash || '')
+        : '/'
+      navigate(from)
     } catch (error) {
       setMessage({ type: 'error', text: error.message })
     } finally {

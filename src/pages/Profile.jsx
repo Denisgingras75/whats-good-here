@@ -11,6 +11,7 @@ import { useProfile } from '../hooks/useProfile'
 import { useUserVotes } from '../hooks/useUserVotes'
 import { useFavorites } from '../hooks/useFavorites'
 import { useUnratedDishes } from '../hooks/useUnratedDishes'
+import { useRestaurantManager } from '../hooks/useRestaurantManager'
 import { isSoundMuted, toggleSoundMute } from '../lib/sounds'
 import { DishModal } from '../components/DishModal'
 import { LoginModal } from '../components/Auth/LoginModal'
@@ -66,6 +67,7 @@ export function Profile() {
   const [selectedDish, setSelectedDish] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const { isManager: isRestaurantManager } = useRestaurantManager()
   const [expandedTabs, setExpandedTabs] = useState({}) // Track which tabs show all dishes
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 })
   const [followListModal, setFollowListModal] = useState(null) // 'followers' | 'following' | null
@@ -558,6 +560,19 @@ export function Profile() {
                   className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
                 >
                   <span className="font-medium text-[color:var(--color-text-primary)]">Admin Panel</span>
+                  <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              )}
+
+              {/* Manage Restaurant Link - only visible to restaurant managers */}
+              {isRestaurantManager && (
+                <Link
+                  to="/manage"
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
+                >
+                  <span className="font-medium text-[color:var(--color-text-primary)]">Manage Restaurant</span>
                   <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>

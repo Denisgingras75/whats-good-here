@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { BROWSE_CATEGORIES } from '../../constants/categories'
 import { restaurantsApi } from '../../api/restaurantsApi'
 
@@ -8,7 +7,6 @@ import { restaurantsApi } from '../../api/restaurantsApi'
  * Shows how much of the island's food scene the user has explored
  */
 export function FoodMap({ stats, title }) {
-  const navigate = useNavigate()
   const [totalRestaurants, setTotalRestaurants] = useState(null)
 
   useEffect(() => {
@@ -70,10 +68,9 @@ export function FoodMap({ stats, title }) {
         {topCategories.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
             {topCategories.map(cat => (
-              <button
+              <span
                 key={cat.id}
-                onClick={() => navigate(`/browse?category=${encodeURIComponent(cat.id)}`)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors hover:opacity-80"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
                 style={{
                   background: 'var(--color-primary-muted)',
                   color: 'var(--color-primary)',
@@ -81,7 +78,7 @@ export function FoodMap({ stats, title }) {
               >
                 {cat.emoji} {cat.label}
                 <span className="opacity-60">{categoryCounts[cat.id]}</span>
-              </button>
+              </span>
             ))}
           </div>
         )}

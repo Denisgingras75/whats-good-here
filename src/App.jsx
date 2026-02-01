@@ -43,6 +43,8 @@ const Terms = lazyWithRetry(() => import('./pages/Terms'), 'Terms')
 const UserProfile = lazyWithRetry(() => import('./pages/UserProfile'), 'UserProfile')
 const Discover = lazyWithRetry(() => import('./pages/Discover'), 'Discover')
 const ResetPassword = lazyWithRetry(() => import('./pages/ResetPassword'), 'ResetPassword')
+const AcceptInvite = lazyWithRetry(() => import('./pages/AcceptInvite'), 'AcceptInvite')
+const ManageRestaurant = lazyWithRetry(() => import('./pages/ManageRestaurant'), 'ManageRestaurant')
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound')
 
 // Prefetch functions for smoother navigation - call on hover/focus
@@ -111,6 +113,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/invite/:token" element={<AcceptInvite />} />
+              <Route path="/manage" element={<ProtectedRoute><ManageRestaurant /></ProtectedRoute>} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="*" element={<NotFound />} />

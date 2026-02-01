@@ -306,6 +306,8 @@ export function Dish() {
   const handleBack = () => {
     if (window.history.length > 1) {
       navigate(-1)
+    } else if (dish?.restaurant_id) {
+      navigate(`/restaurants/${dish.restaurant_id}`)
     } else {
       navigate('/')
     }

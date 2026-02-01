@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { adminApi } from '../api/adminApi'
+import { restaurantManagerApi } from '../api/restaurantManagerApi'
 import { CATEGORY_IMAGES } from '../constants/categoryImages'
 
 const CATEGORIES = Object.keys(CATEGORY_IMAGES)
@@ -28,6 +29,12 @@ export function Admin() {
 
   // Edit mode state
   const [editingDishId, setEditingDishId] = useState(null)
+
+  // Restaurant manager state
+  const [inviteRestaurantId, setInviteRestaurantId] = useState('')
+  const [inviteLink, setInviteLink] = useState('')
+  const [managers, setManagers] = useState([])
+  const [managersLoading, setManagersLoading] = useState(false)
 
   // Form state
   const [restaurantId, setRestaurantId] = useState('')
@@ -211,6 +218,53 @@ export function Admin() {
     } catch (error) {
       logger.error('Error deleting dish:', error)
       setMessage({ type: 'error', text: `Failed to delete: ${error.message}` })
+    }
+  }
+
+  async function handleGenerateInvite() {
+    if (!inviteRestaurantId) {
+      setMessage({ type: 'error', text: 'Select a restaurant first' })
+      return
+    }
+
+    try {
+      const { token } = await restaurantManagerApi.createInvite(inviteRestaurantId)
+      const link = `${window.location.origin}/invite/${token}`
+      setInviteLink(link)
+      setMessage({ type: 'success', text: 'Invite link generated!' })
+    } catch (error) {
+      logger.error('Error generating invite:', error)
+      setMessage({ type: 'error', text: `Failed to generate invite: ${error.message}` })
+    }
+  }
+
+  async function fetchManagers(selectedRestaurantId) {
+    if (!selectedRestaurantId) {
+      setManagers([])
+      return
+    }
+
+    setManagersLoading(true)
+    try {
+      const data = await restaurantManagerApi.getManagersForRestaurant(selectedRestaurantId)
+      setManagers(data)
+    } catch (err) {
+      logger.error('Error fetching managers:', err)
+    } finally {
+      setManagersLoading(false)
+    }
+  }
+
+  async function handleRevokeManager(managerId, name) {
+    if (!confirm(`Revoke manager access for ${name || 'this user'}?`)) return
+
+    try {
+      await restaurantManagerApi.removeManager(managerId)
+      setManagers(prev => prev.filter(m => m.id !== managerId))
+      setMessage({ type: 'success', text: 'Manager access revoked' })
+    } catch (error) {
+      logger.error('Error revoking manager:', error)
+      setMessage({ type: 'error', text: `Failed to revoke: ${error.message}` })
     }
   }
 
@@ -524,6 +578,119 @@ export function Admin() {
               </p>
             )}
           </div>
+        </div>
+
+        {/* Restaurant Managers Section */}
+        <div className="mt-8 pt-8 border-t" style={{ borderColor: 'var(--color-divider)' }}>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+            Restaurant Managers
+          </h2>
+
+          {/* Restaurant selector */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              Restaurant
+            </label>
+            <select
+              value={inviteRestaurantId}
+              onChange={(e) => {
+                setInviteRestaurantId(e.target.value)
+                setInviteLink('')
+                fetchManagers(e.target.value)
+              }}
+              className="w-full px-3 py-2 border rounded-lg text-sm"
+              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-bg)' }}
+            >
+              <option value="">Select a restaurant...</option>
+              {restaurants.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name} - {r.address}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Generate Invite */}
+          {inviteRestaurantId && (
+            <div className="mb-4">
+              <button
+                onClick={handleGenerateInvite}
+                className="px-4 py-2 rounded-lg font-medium text-white transition-all text-sm"
+                style={{ background: 'var(--color-primary)' }}
+              >
+                Generate Invite Link
+              </button>
+
+              {inviteLink && (
+                <div className="mt-3 p-3 rounded-lg border" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
+                  <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                    Invite Link (expires in 7 days):
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={inviteLink}
+                      className="flex-1 px-2 py-1 border rounded text-xs"
+                      style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(inviteLink)
+                          .then(() => setMessage({ type: 'success', text: 'Link copied!' }))
+                          .catch(() => setMessage({ type: 'error', text: 'Failed to copy. Select and copy manually.' }))
+                      }}
+                      className="px-3 py-1 rounded text-xs font-medium text-white"
+                      style={{ background: 'var(--color-primary)' }}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Current Managers */}
+          {inviteRestaurantId && (
+            <div>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                Current Managers
+              </h3>
+              {managersLoading ? (
+                <p className="text-sm py-2" style={{ color: 'var(--color-text-tertiary)' }}>Loading...</p>
+              ) : managers.length > 0 ? (
+                <div className="space-y-2">
+                  {managers.map((mgr) => (
+                    <div
+                      key={mgr.id}
+                      className="flex items-center justify-between p-3 rounded-lg border"
+                      style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}
+                    >
+                      <div>
+                        <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                          {mgr.profiles?.display_name || 'Unknown'}
+                        </p>
+                        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                          {mgr.role} · joined {mgr.accepted_at ? new Date(mgr.accepted_at).toLocaleDateString() : 'pending'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleRevokeManager(mgr.id, mgr.profiles?.display_name)}
+                        className="text-red-500 hover:text-red-700 text-sm font-medium"
+                      >
+                        Revoke
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm py-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                  No managers assigned yet
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
