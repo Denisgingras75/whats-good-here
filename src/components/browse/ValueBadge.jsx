@@ -15,7 +15,7 @@ export function ValueBadge({ valuePercentile }) {
         background: 'rgba(16, 185, 129, 0.15)',
       }}
     >
-      Best Value
+      Great Value
     </span>
   )
 }
