@@ -124,3 +124,21 @@ export function getCategoryBadgeName(key) {
 export function getMajorCategoryIds() {
   return Array.from(MAJOR_CATEGORIES)
 }
+
+// Filter out specialist badges when the authority badge for the same category exists
+export function filterSupersededBadges(badges) {
+  const authorityCategories = new Set()
+  badges.forEach(b => {
+    const parsed = parseCategoryBadgeKey(b.key || b.badge_key || '')
+    if (parsed && parsed.tier === 'authority') {
+      authorityCategories.add(parsed.categoryId)
+    }
+  })
+  return badges.filter(b => {
+    const parsed = parseCategoryBadgeKey(b.key || b.badge_key || '')
+    if (parsed && parsed.tier === 'specialist' && authorityCategories.has(parsed.categoryId)) {
+      return false
+    }
+    return true
+  })
+}

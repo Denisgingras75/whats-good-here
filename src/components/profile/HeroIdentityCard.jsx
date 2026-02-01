@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { calculateArchetype, getArchetypeById } from '../../utils/calculateArchetype'
-import { BADGE_FAMILY } from '../../constants/badgeDefinitions'
+import { BADGE_FAMILY, filterSupersededBadges } from '../../constants/badgeDefinitions'
 
 /**
  * Hero Identity Card for the Profile page
@@ -24,8 +24,8 @@ export function HeroIdentityCard({
 }) {
   const navigate = useNavigate()
 
-  // Calculate badges earned
-  const unlockedBadges = badges?.filter(b => b.unlocked) || []
+  // Calculate badges earned (exclude specialist when authority exists for same category)
+  const unlockedBadges = filterSupersededBadges(badges?.filter(b => b.unlocked) || [])
   const badgeCount = unlockedBadges.length
   const categoryBadgeCount = unlockedBadges.filter(b => b.family === BADGE_FAMILY.CATEGORY).length
 

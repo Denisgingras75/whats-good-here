@@ -10,7 +10,7 @@ import { VotedDishCard, ReviewCard, ReviewDetailModal } from '../components/prof
 import { supabase } from '../lib/supabase'
 import { useRatingIdentity } from '../hooks/useRatingIdentity'
 import { calculateArchetype, getArchetypeById } from '../utils/calculateArchetype'
-import { getRarityColor, RARITY_LABELS, BADGE_FAMILY } from '../constants/badgeDefinitions'
+import { getRarityColor, RARITY_LABELS, BADGE_FAMILY, filterSupersededBadges } from '../constants/badgeDefinitions'
 
 /**
  * Public User Profile Page
@@ -278,8 +278,9 @@ export function UserProfile() {
 
   const personality = getRatingPersonality(profile.stats?.avg_rating)
 
-  const badgeCount = profile.badges?.length || 0
-  const categoryBadgeCount = profile.badges?.filter(b => b.family === BADGE_FAMILY.CATEGORY).length || 0
+  const displayBadges = filterSupersededBadges(profile.badges || [])
+  const badgeCount = displayBadges.length
+  const categoryBadgeCount = displayBadges.filter(b => b.family === BADGE_FAMILY.CATEGORY).length
   const totalVotes = profile.stats?.total_votes || 0
 
   // Archetype
@@ -516,7 +517,7 @@ export function UserProfile() {
               Badges
             </h3>
             <div className="flex flex-wrap gap-2">
-              {profile.badges.map((badge) => {
+              {filterSupersededBadges(profile.badges).map((badge) => {
                 const rarityColor = getRarityColor(badge.rarity)
                 const isRarePlus = badge.rarity === 'rare' || badge.rarity === 'epic' || badge.rarity === 'legendary'
                 return (
