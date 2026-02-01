@@ -11,7 +11,7 @@ import { restaurantsApi } from '../api/restaurantsApi'
 import { dishesApi } from '../api/dishesApi'
 import { getStorageItem, setStorageItem } from '../lib/storage'
 import { BROWSE_CATEGORIES, CATEGORY_INFO } from '../constants/categories'
-import { MIN_VOTES_FOR_RANKING, MIN_VOTES_FOR_VALUE } from '../constants/app'
+import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRelatedSuggestions } from '../constants/searchSuggestions'
 import { RankedDishRow } from '../components/home/RankedDishRow'
 import { getPendingVoteFromStorage } from '../lib/storage'
@@ -53,10 +53,7 @@ export function Browse() {
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [impactFeedback, setImpactFeedback] = useState(null)
   const [pendingVoteData, setPendingVoteData] = useState(null)
-  const [sortBy, setSortBy] = useState(() => {
-    const stored = getStorageItem('browse_sort')
-    return (stored === 'top_rated' || stored === 'best_value') ? stored : 'top_rated'
-  })
+  const [sortBy, setSortBy] = useState('top_rated')
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
 
   // Autocomplete state
@@ -271,16 +268,6 @@ export function Browse() {
 
     // Then sort based on selected option
     switch (sortBy) {
-      case 'best_value':
-        result = result.slice().sort((a, b) => {
-          const aHas = a.value_score != null && (a.total_votes || 0) >= MIN_VOTES_FOR_VALUE
-          const bHas = b.value_score != null && (b.total_votes || 0) >= MIN_VOTES_FOR_VALUE
-          if (aHas && !bHas) return -1
-          if (!aHas && bHas) return 1
-          if (!aHas && !bHas) return (b.avg_rating || 0) - (a.avg_rating || 0)
-          return (b.value_score || 0) - (a.value_score || 0)
-        })
-        break
       case 'top_rated':
       default:
         // Sort by avg_rating (1-10 scale) for Discovery view

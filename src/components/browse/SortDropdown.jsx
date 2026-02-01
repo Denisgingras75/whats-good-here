@@ -2,7 +2,6 @@ import { useRef, useEffect } from 'react'
 
 const SORT_OPTIONS = [
   { id: 'top_rated', label: 'Top Rated', icon: '⭐' },
-  { id: 'best_value', label: 'Best Value', icon: '💰' },
 ]
 
 export function SortDropdown({ sortBy, onSortChange, isOpen, onToggle }) {
