@@ -42,7 +42,7 @@ supabase/
 - **No direct Supabase calls** - All data access goes through `src/api/`
 - **`supabase/schema.sql` is the source of truth** - Update it first when making DB changes, then run in SQL Editor
 - **React Query is the data fetching layer** - Use `useQuery`/`useMutation` for all server state. Never add raw `useEffect` + `fetch` patterns.
-- **New API files follow the `dishesApi.js` pattern** - `selectFields` string, `.map()` transform, `createClassifiedError()` on all errors. Don't invent a different structure.
+- **New API files that query tables follow the `dishesApi.js` pattern** - `selectFields` string, `.map()` transform. RPC-only or storage APIs won't need this structure, but all API files must use `createClassifiedError()` on errors.
 
 ## Design Tokens
 Primary: `#F47A1F` (orange) | Rating: `#E6B84C` (gold)
