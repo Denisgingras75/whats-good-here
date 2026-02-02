@@ -60,6 +60,9 @@ Defined in `src/index.css`
 ### Error Handling
 - **Never render error objects directly** - Always use `{error?.message || error}`, never `{error}`
 - **Errors should be user-friendly strings** - Transform API errors before displaying
+- **All API errors must use `createClassifiedError()`** - Don't throw raw Supabase errors. See `dishesApi.js` for the pattern.
+- **Every page needs a loading state** - Never return an empty `<div>` while fetching. Use a skeleton or spinner.
+- **New fields from Supabase must be added in two places** - Both `selectFields` and the `.map()` transform in the API file
 
 ### Constants & Configuration
 - **Centralize constants in `src/constants/`** - Never duplicate magic numbers across files
