@@ -20,6 +20,7 @@ npm run lint     # eslint
 - `NOTES.md` - Design tokens, architecture, file locations, category system
 - `BACKLOG.md` - Future feature ideas
 - `DEVLOG.md` - Recent work history
+- `CLAUDE-EXPERT.md` - Tips for writing better prompts and working efficiently with Claude
 
 ## Project Structure
 ```
