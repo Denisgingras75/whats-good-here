@@ -260,7 +260,9 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 
 
 -- 1s. category_median_prices (view)
-CREATE OR REPLACE VIEW category_median_prices AS
+-- SECURITY INVOKER ensures this runs with the querying user's permissions, not the creator's
+CREATE OR REPLACE VIEW category_median_prices
+WITH (security_invoker = true) AS
 SELECT category,
   PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price) AS median_price,
   COUNT(*) AS dish_count
