@@ -251,6 +251,43 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
       })
   }
 
+  // Browser back button navigates back through vote flow steps instead of leaving the dish page
+  const prevStepRef = useRef(step)
+  const sharePromptRef = useRef(showSharePrompt)
+
+  useEffect(() => {
+    const wasStep = prevStepRef.current
+    const wasSharePrompt = sharePromptRef.current
+    prevStepRef.current = step
+    sharePromptRef.current = showSharePrompt
+
+    // Push history entry when moving forward in the flow (step 1→2, 2→3, 3→4, or share prompt)
+    const movedForward = step > wasStep || (showSharePrompt && !wasSharePrompt)
+    if (!movedForward) return
+
+    window.history.pushState({ reviewStep: step, sharePrompt: showSharePrompt, dishId }, '')
+  }, [step, showSharePrompt, dishId])
+
+  useEffect(() => {
+    const handlePopState = () => {
+      // Back from share prompt → dismiss and refresh
+      if (showSharePrompt) {
+        setShowSharePrompt(false)
+        setLastSubmission(null)
+        onVote?.()
+        return
+      }
+      // Back from steps 2-4 → go to previous step
+      if (step > 1) {
+        prevStepRef.current = step - 1 // Prevent re-pushing history
+        setStep(step - 1)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [step, showSharePrompt, dishId, onVote])
+
   const handleShareDish = async () => {
     if (!lastSubmission) return
     const shareData = buildPostVoteShareData(
@@ -273,16 +310,14 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
       toast.success('Link copied!', { duration: 2000 })
     }
 
-    setShowSharePrompt(false)
-    setLastSubmission(null)
-    onVote?.()
+    // history.back() triggers popstate handler which cleans up state + calls onVote
+    window.history.back()
   }
 
   const handleShareDismiss = () => {
     capture('share_dismissed', { context: 'post_vote', dish_id: dishId })
-    setShowSharePrompt(false)
-    setLastSubmission(null)
-    onVote?.()
+    // history.back() triggers popstate handler which cleans up state + calls onVote
+    window.history.back()
   }
 
   // Share prompt after voting
