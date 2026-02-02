@@ -4,7 +4,7 @@ import { extractSafeFilename } from '../utils/sanitize'
 import { logger } from '../utils/logger'
 
 // Upload constraints - enforced client-side and in Supabase Storage policies
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024 // 10MB
 
 /**
@@ -28,7 +28,7 @@ export const dishPhotosApi = {
       }
 
       if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-        throw new Error('Invalid file type. Please upload a JPEG, PNG, or WebP image.')
+        throw new Error('Invalid file type. Please upload a JPEG, PNG, WebP, or HEIC image.')
       }
 
       if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -60,7 +60,7 @@ export const dishPhotosApi = {
       }
 
       // Generate unique filename with validated extension from MIME type (not user-provided filename)
-      const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
+      const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic' }
       const fileExt = mimeToExt[file.type] || 'jpg'
       const fileName = `${user.id}/${dishId}.${fileExt}`
 
