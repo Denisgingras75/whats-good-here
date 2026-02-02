@@ -68,6 +68,10 @@ Defined in `src/index.css`
 ### Styling
 - **Use CSS variables, not Tailwind color classes** - `style={{ color: 'var(--color-text-primary)' }}` not `className="text-gray-900"`. All colors come from `var(--color-*)` defined in `src/index.css`.
 
+### Supabase Queries
+- **Use `.maybeSingle()` for lookups that might return zero rows** - `.single()` throws on zero results, which crashes error handling when "not found" is a valid state (e.g., checking if a user already voted)
+- **Optimistic updates must have rollback** - Any UI that updates before the server confirms must revert to previous state on error, never leave stale optimistic data in place
+
 ### Auth-Gated Actions
 - **Voting, favorites, and photo uploads require login** - Check `user` first, show `<LoginModal>` if null. See `Browse.jsx:234` for the pattern.
 
