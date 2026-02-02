@@ -40,6 +40,7 @@ supabase/
 - **Categories are shortcuts, NOT containers** - Browse shows 14 curated shortcuts, not all categories
 - **Search is the universal access layer** - Any dish is searchable even without a Browse shortcut
 - **No direct Supabase calls** - All data access goes through `src/api/`
+- **`supabase/schema.sql` is the source of truth** - Update it first when making DB changes, then run in SQL Editor
 
 ## Design Tokens
 Primary: `#F47A1F` (orange) | Rating: `#E6B84C` (gold)
@@ -63,6 +64,12 @@ Defined in `src/index.css`
 - **All API errors must use `createClassifiedError()`** - Don't throw raw Supabase errors. See `dishesApi.js` for the pattern.
 - **Every page needs a loading state** - Never return an empty `<div>` while fetching. Use a skeleton or spinner.
 - **New fields from Supabase must be added in two places** - Both `selectFields` and the `.map()` transform in the API file
+
+### Styling
+- **Use CSS variables, not Tailwind color classes** - `style={{ color: 'var(--color-text-primary)' }}` not `className="text-gray-900"`. All colors come from `var(--color-*)` defined in `src/index.css`.
+
+### Auth-Gated Actions
+- **Voting, favorites, and photo uploads require login** - Check `user` first, show `<LoginModal>` if null. See `Browse.jsx:234` for the pattern.
 
 ### Constants & Configuration
 - **Centralize constants in `src/constants/`** - Never duplicate magic numbers across files
