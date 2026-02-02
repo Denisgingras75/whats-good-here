@@ -71,6 +71,8 @@ Defined in `src/index.css`
 ### Supabase Queries
 - **Use `.maybeSingle()` for lookups that might return zero rows** - `.single()` throws on zero results, which crashes error handling when "not found" is a valid state (e.g., checking if a user already voted)
 - **Optimistic updates must have rollback** - Any UI that updates before the server confirms must revert to previous state on error, never leave stale optimistic data in place
+- **`.rpc()` function names must exactly match `schema.sql`** - Don't rename based on Postgres hint messages. Verify the actual function name in the schema before changing code.
+- **`ROUND()` needs `::NUMERIC` cast on float expressions** - `ROUND(double precision, int)` doesn't exist in Postgres. Use `ROUND(expression::NUMERIC, 2)` with `LOG()`, `PERCENT_RANK()`, and similar.
 
 ### Auth-Gated Actions
 - **Voting, favorites, and photo uploads require login** - Check `user` first, show `<LoginModal>` if null. See `Browse.jsx:234` for the pattern.
@@ -105,6 +107,9 @@ src/components/
 - **Use `logger` from `src/utils/logger.js`** - Never use `console.*` directly
 - `logger.error()` / `logger.warn()` - Always logged (errors go to Sentry in prod)
 - `logger.info()` / `logger.debug()` - Only logged in development
+
+### Deployment
+- **CSP in `vercel.json` — external resources need `connect-src` too** - The service worker fetches images via `fetch()` which uses `connect-src`, not `img-src`. Add new external domains to both.
 
 ### Verification (before calling anything done)
 - **`npm run build` must pass** - Don't say "done" if it doesn't compile
