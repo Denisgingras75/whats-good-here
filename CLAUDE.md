@@ -92,6 +92,13 @@ src/components/
 - `logger.error()` / `logger.warn()` - Always logged (errors go to Sentry in prod)
 - `logger.info()` / `logger.debug()` - Only logged in development
 
+### Verification (before calling anything done)
+- **`npm run build` must pass** - Don't say "done" if it doesn't compile
+- **`npm run test` must pass** - Run tests, don't assume they still pass
+- **If you touched Supabase schema/RPC:** verify the function returns the new columns with a sample query
+- **If you touched a sort or filter:** confirm edge cases (null values, 0 votes, missing price) don't crash or sort wrong
+- **If you added a new component:** verify it's exported from the barrel index and actually imported where needed
+
 ### What NOT to Commit
 - Unused components or hooks
 - Duplicate constants
