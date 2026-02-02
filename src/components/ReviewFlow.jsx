@@ -16,6 +16,7 @@ import {
 import { logger } from '../utils/logger'
 import { hapticLight, hapticSuccess } from '../utils/haptics'
 import { shareOrCopy, buildPostVoteShareData } from '../utils/share'
+import { setBackButtonInterceptor, clearBackButtonInterceptor } from '../utils/backButtonInterceptor'
 
 export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, category, price, totalVotes = 0, yesVotes = 0, onVote, onLoginRequired }) {
   const { user } = useAuth()
@@ -251,42 +252,36 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
       })
   }
 
-  // Browser back button navigates back through vote flow steps instead of leaving the dish page
-  const prevStepRef = useRef(step)
-  const sharePromptRef = useRef(showSharePrompt)
-
+  // Intercept browser back button during vote flow — navigate between steps instead of leaving.
+  // The interceptor was registered in main.jsx BEFORE React Router, so its popstate listener
+  // fires first (AT_TARGET phase = registration order). It calls stopImmediatePropagation to
+  // prevent React Router from processing the navigation, then pushes the dish URL back.
   useEffect(() => {
-    const wasStep = prevStepRef.current
-    const wasSharePrompt = sharePromptRef.current
-    prevStepRef.current = step
-    sharePromptRef.current = showSharePrompt
+    if (step <= 1 && !showSharePrompt) {
+      clearBackButtonInterceptor()
+      return
+    }
 
-    // Push history entry when moving forward in the flow (step 1→2, 2→3, 3→4, or share prompt)
-    const movedForward = step > wasStep || (showSharePrompt && !wasSharePrompt)
-    if (!movedForward) return
+    // Save the dish page URL/state now — by the time popstate fires, the browser
+    // has already changed the URL to the previous page
+    const currentUrl = window.location.href
+    const currentState = window.history.state
 
-    window.history.pushState({ reviewStep: step, sharePrompt: showSharePrompt, dishId }, '')
-  }, [step, showSharePrompt, dishId])
+    setBackButtonInterceptor(() => {
+      // Restore the dish page in the history stack
+      window.history.pushState(currentState, '', currentUrl)
 
-  useEffect(() => {
-    const handlePopState = () => {
-      // Back from share prompt → dismiss and refresh
       if (showSharePrompt) {
         setShowSharePrompt(false)
         setLastSubmission(null)
         onVote?.()
-        return
-      }
-      // Back from steps 2-4 → go to previous step
-      if (step > 1) {
-        prevStepRef.current = step - 1 // Prevent re-pushing history
+      } else if (step > 1) {
         setStep(step - 1)
       }
-    }
+    })
 
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [step, showSharePrompt, dishId, onVote])
+    return () => clearBackButtonInterceptor()
+  }, [step, showSharePrompt, onVote])
 
   const handleShareDish = async () => {
     if (!lastSubmission) return
@@ -310,14 +305,16 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
       toast.success('Link copied!', { duration: 2000 })
     }
 
-    // history.back() triggers popstate handler which cleans up state + calls onVote
-    window.history.back()
+    setShowSharePrompt(false)
+    setLastSubmission(null)
+    onVote?.()
   }
 
   const handleShareDismiss = () => {
     capture('share_dismissed', { context: 'post_vote', dish_id: dishId })
-    // history.back() triggers popstate handler which cleans up state + calls onVote
-    window.history.back()
+    setShowSharePrompt(false)
+    setLastSubmission(null)
+    onVote?.()
   }
 
   // Share prompt after voting

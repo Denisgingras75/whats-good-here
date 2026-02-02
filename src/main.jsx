@@ -1,8 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { initBackButtonInterceptor } from './utils/backButtonInterceptor'
 import './index.css'
 import App from './App.jsx'
+
+// Register popstate interceptor BEFORE React Router mounts so it fires first.
+// Used by ReviewFlow to navigate between vote flow steps on browser back.
+initBackButtonInterceptor()
 
 // Configure React Query for data caching
 const queryClient = new QueryClient({
