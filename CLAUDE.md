@@ -3,7 +3,7 @@
 Mobile-first food discovery app for Martha's Vineyard. Ranks dishes by crowd-sourced "Would you order this again?" votes.
 
 ## Tech Stack
-- **Frontend:** React 19, Vite, Tailwind CSS, React Router
+- **Frontend:** React 19, Vite, Tailwind CSS, React Router v7
 - **Backend:** Supabase (PostgreSQL, Auth, Storage)
 - **Hosting:** Vercel (whats-good-here.vercel.app)
 - **Analytics:** PostHog, Sentry
@@ -12,141 +12,276 @@ Mobile-first food discovery app for Martha's Vineyard. Ranks dishes by crowd-sou
 ```bash
 npm run dev      # localhost:5173
 npm run build    # production build
-npm run test     # run tests
+npm run test     # run tests (vitest)
 npm run lint     # eslint
 ```
 
-## Key Docs (read these for full context)
+## Key Docs
+- `SPEC.md` - Full system specification (data model, features, RPCs, RLS)
+- `TASKS.md` - Prioritized backlog of high-leverage tasks
 - `NOTES.md` - Design tokens, architecture, file locations, category system
 - `BACKLOG.md` - Future feature ideas
 - `DEVLOG.md` - Recent work history
-- `CLAUDE-EXPERT.md` - Tips for writing better prompts and working efficiently with Claude
 
-## Project Structure
+---
+
+## 1. Non-Negotiables (Hard Rules)
+
+These rules are absolute. Violating any of them is a bug.
+
+### 1.1 Browser Compatibility
+- **No `toSorted()` or ES2023+ array methods.** Use `slice().sort()`. Crashes Safari <16, Chrome <110.
+- **No `Array.at()`.** Use `arr[arr.length - 1]` for last element.
+- **Test:** `npm run build` must succeed with no ES2023+ in output.
+
+### 1.2 Error Handling
+- **Never render error objects directly.** Always `{error?.message || error}`, never `{error}`.
+- **All API errors must use `createClassifiedError()`.** No raw Supabase errors thrown to callers. See `src/api/dishesApi.js` for the canonical pattern.
+- **Every page must have a loading state.** No empty `<div>` while fetching. Use skeleton or spinner.
+- **New Supabase fields must be added in two places:** `selectFields` string AND `.map()` transform.
+- **Test:** Grep for `throw error` in API files — each must be wrapped in `createClassifiedError()`.
+
+### 1.3 Styling
+- **All colors via CSS variables.** `style={{ color: 'var(--color-text-primary)' }}` not `className="text-gray-900"`.
+- **Never hardcode hex colors in components.** All colors defined in `src/index.css`.
+- **Tailwind is for layout/spacing only.** `className` for flexbox, padding, margin, grid. `style` for colors, backgrounds, borders.
+- **Test:** Grep for `text-gray`, `text-white`, `bg-gray`, `bg-blue`, etc. in JSX — should return zero results.
+
+### 1.4 Data Access
+- **No direct Supabase calls from components or hooks.** All data access goes through `src/api/`.
+- **React Query is the data fetching layer.** Use `useQuery`/`useMutation` for all server state. No raw `useEffect` + `fetch` patterns for data fetching.
+- **`supabase/schema.sql` is the source of truth.** Update it first when making DB changes, then run in SQL Editor.
+- **`.rpc()` function names must exactly match `schema.sql`.** Don't rename based on Postgres hint messages.
+- **Test:** Grep for `supabase.` in `src/pages/` and `src/components/` — should return zero results.
+
+### 1.5 Supabase Query Safety
+- **Use `.maybeSingle()` for lookups that might return zero rows.** `.single()` throws on zero results.
+- **Optimistic updates must have rollback.** Revert to previous state on error, never leave stale data.
+- **`ROUND()` needs `::NUMERIC` cast on float expressions.** `ROUND(expression::NUMERIC, 2)`.
+- **New RPC functions must be run in Supabase SQL Editor.** Adding to `schema.sql` does NOT deploy. Run the CREATE FUNCTION, then verify with a test call.
+
+### 1.6 Auth Gates
+- **Voting, favorites, and photo uploads require login.** Check `user` from `useAuth()` first, show `<LoginModal>` if null. Pattern: `Browse.jsx`.
+
+### 1.7 Logging
+- **Use `logger` from `src/utils/logger.js`.** Never use `console.*` directly.
+- `logger.error()` / `logger.warn()` — always logged (errors go to Sentry in prod).
+- `logger.info()` / `logger.debug()` — only in development.
+- **Test:** Grep for `console\.log|console\.error|console\.warn` in `src/` excluding `utils/logger.js` — should return zero results.
+
+### 1.8 Storage
+- **All localStorage access via `src/lib/storage.js`.** Use `getStorageItem`/`setStorageItem`/`removeStorageItem`. No direct `localStorage.*` calls in components, hooks, or context.
+- **Exception:** `src/lib/supabase.js` passes `window.localStorage` to Supabase Auth config (required by SDK).
+- **Test:** Grep for `localStorage\.` in `src/` excluding `lib/storage.js` and `lib/supabase.js` — should return zero results.
+
+---
+
+## 2. Standard Workflow
+
+For any non-trivial change, follow this sequence:
+
+1. **Read `SPEC.md`** — understand the current system state
+2. **Check `TASKS.md`** — see if the work is already scoped
+3. **Update `schema.sql` first** — if touching database (schema is source of truth)
+4. **Make small, focused diffs** — one concern per change
+5. **Run in SQL Editor** — if you added/changed RPCs or schema
+6. **Verify:**
+   - `npm run build` passes
+   - `npm run test` passes
+   - If you touched schema/RPC: test call returns expected result
+   - If you touched sort/filter: edge cases (null, 0 votes, missing price) don't crash
+   - If you added a component: exported from barrel index, imported where needed
+7. **Update `SPEC.md`** — if the change adds/modifies features, tables, or RPCs
+8. **Update `TASKS.md`** — mark task done or add follow-ups
+
+---
+
+## 3. Forbidden Actions
+
+Never do these. If tempted, stop and reconsider.
+
+- **Don't commit unused components, hooks, or dead code.** Delete immediately.
+- **Don't duplicate constants.** Everything in `src/constants/`.
+- **Don't commit direct `console.*` calls.** Use `logger`.
+- **Don't commit ES2023+ syntax without polyfills.**
+- **Don't commit direct `localStorage` calls.** Use `src/lib/storage.js`.
+- **Don't add features not in `TASKS.md` or explicitly requested.** No speculative work.
+- **Don't modify `schema.sql` without running the change in SQL Editor.**
+- **Don't guess RPC function names.** Look them up in `schema.sql`.
+- **Don't skip `npm run build` before saying "done".**
+
+---
+
+## 4. Project Conventions (inferred from code)
+
+### 4.1 Project Structure
 ```
 src/
-├── api/           # API layer (dishesApi, votesApi, etc.)
-├── components/    # Shared components
-├── context/       # AuthContext, LocationContext
-├── hooks/         # Custom React hooks
-├── lib/           # Supabase client
-├── pages/         # Page components
-└── utils/         # Helpers (distance, ranking, errorHandler)
+├── api/           # API layer — one file per domain (dishesApi, votesApi, etc.)
+│   └── index.js   # Barrel export for all API modules
+├── components/    # Shared + feature-grouped components
+│   ├── Auth/      # Authentication (LoginModal, WelcomeModal)
+│   ├── browse/    # Browse page components
+│   ├── home/      # Home page components (SearchHero, Top10Compact)
+│   ├── profile/   # Profile page components
+│   ├── restaurants/ # Restaurant page components
+│   ├── restaurant-admin/ # Manager portal components
+│   └── foods/     # Food icon SVGs
+├── constants/     # App-wide constants (app.js, categories.js, towns.js, tags.js)
+├── context/       # React Context providers (AuthContext, LocationContext)
+├── hooks/         # Custom React hooks (useDishes, useVote, etc.)
+├── lib/           # Infrastructure (supabase.js, analytics.js, storage.js, sounds.js)
+├── pages/         # Page components (one per route)
+├── utils/         # Pure utility functions (errorHandler, ranking, distance, sanitize)
+└── test/          # Test setup (setup.js)
 supabase/
-├── schema.sql     # Database schema + RLS
-└── seed.sql       # Sample data
+├── schema.sql     # Single source of truth — complete database schema
+├── migrations/    # Standalone migration scripts (run manually in SQL Editor)
+├── seed/          # Seed data files (17+ SQL files, run manually)
+├── tests/         # RLS validation tests
+└── _archive/      # Old incremental migrations (historical reference only)
 ```
 
-## Key Hooks (check before building new ones)
-- `useVote` - Vote submission with rating, review, duplicate prevention
-- `useFavorites` - Optimistic favorite toggling with analytics
-- `useUserVotes` - User's vote history with stats (rating style, standout picks)
-- `useDishes` - Location-based ranked dishes via React Query
-- `useDishPhotos` - Photo upload with quality analysis, validation, progress
-- `useDishSearch` - Debounced dish search (2+ chars)
-- `useLeaderboard` - Friends leaderboard with weekly reset countdown
-- `useStreak` - Voting streak tracking
+### 4.2 API Layer Pattern
+Every API file follows this structure:
+```js
+import { supabase } from '../lib/supabase'
+import { createClassifiedError } from '../utils/errorHandler'
+import { logger } from '../utils/logger'
 
-## Key Supabase RPCs
-- `get_ranked_dishes` - Main Browse feed (ranked by votes)
-- `get_restaurant_dishes` - Dishes for a specific restaurant
-- `get_dish_variants` - Variants/sizes for a dish
-- `check_vote_rate_limit` - Server-side vote rate limiting
-- `check_photo_upload_rate_limit` - Photo upload rate limiting
-- `get_taste_compatibility` - Taste match % between two users
-- `get_similar_taste_users` - Users with similar taste you don't follow
-- `get_friends_leaderboard` - Friends ranked by votes
-- `get_user_rating_identity` - Rating style analysis (generous, tough, etc.)
-- `get_friends_votes_for_dish` / `get_friends_votes_for_restaurant` - Social context
-
-## Architecture Principles
-- **Categories are shortcuts, NOT containers** - Browse shows 14 curated shortcuts, not all categories
-- **Search is the universal access layer** - Any dish is searchable even without a Browse shortcut
-- **No direct Supabase calls** - All data access goes through `src/api/`
-- **`supabase/schema.sql` is the source of truth** - Update it first when making DB changes, then run in SQL Editor
-- **React Query is the data fetching layer** - Use `useQuery`/`useMutation` for all server state. Never add raw `useEffect` + `fetch` patterns.
-- **New API files that query tables follow the `dishesApi.js` pattern** - `selectFields` string, `.map()` transform. RPC-only or storage APIs won't need this structure, but all API files must use `createClassifiedError()` on errors.
-
-## Design Tokens
-Primary: `#F47A1F` (orange) | Rating: `#E6B84C` (gold)
-Text: `#1F1F1F` / `#6B6B6B` / `#9A9A9A`
-Defined in `src/index.css` — **supports dark mode** via `[data-theme="dark"]`. Never hardcode colors; always use `var(--color-*)`.
-
-## localStorage Keys
-- `wgh_has_seen_splash` - Welcome splash shown
-- `wgh_has_onboarded` - Welcome modal shown
-- `wgh_pending_vote` - Vote saved before auth
-
-## Coding Standards (Do NOT Violate)
-
-### Browser Compatibility
-- **No `toSorted()` or ES2023+ array methods** - Crashes Safari <16, Chrome <110. Use `slice().sort()` instead
-- **No `Array.at()`** - Use bracket notation `arr[arr.length - 1]` for last element
-
-### Error Handling
-- **Never render error objects directly** - Always use `{error?.message || error}`, never `{error}`
-- **Errors should be user-friendly strings** - Transform API errors before displaying
-- **All API errors must use `createClassifiedError()`** - Don't throw raw Supabase errors. See `dishesApi.js` for the pattern.
-- **Every page needs a loading state** - Never return an empty `<div>` while fetching. Use a skeleton or spinner.
-- **New fields from Supabase must be added in two places** - Both `selectFields` and the `.map()` transform in the API file
-
-### Styling
-- **Use CSS variables, not Tailwind color classes** - `style={{ color: 'var(--color-text-primary)' }}` not `className="text-gray-900"`. All colors come from `var(--color-*)` defined in `src/index.css`.
-
-### Supabase Queries
-- **Use `.maybeSingle()` for lookups that might return zero rows** - `.single()` throws on zero results, which crashes error handling when "not found" is a valid state (e.g., checking if a user already voted)
-- **Optimistic updates must have rollback** - Any UI that updates before the server confirms must revert to previous state on error, never leave stale optimistic data in place
-- **`.rpc()` function names must exactly match `schema.sql`** - Don't rename based on Postgres hint messages. Verify the actual function name in the schema before changing code.
-- **`ROUND()` needs `::NUMERIC` cast on float expressions** - `ROUND(double precision, int)` doesn't exist in Postgres. Use `ROUND(expression::NUMERIC, 2)` with `LOG()`, `PERCENT_RANK()`, and similar.
-- **New RPC functions must be run in Supabase SQL Editor** - Adding a function to `schema.sql` does NOT deploy it. After adding to `schema.sql`, you MUST run the CREATE FUNCTION statement in the SQL Editor. Verify with a test call before marking done.
-
-### Auth-Gated Actions
-- **Voting, favorites, and photo uploads require login** - Check `user` first, show `<LoginModal>` if null. See `Browse.jsx:234` for the pattern.
-
-### Constants & Configuration
-- **Centralize constants in `src/constants/`** - Never duplicate magic numbers across files
-- **`MIN_VOTES_FOR_RANKING`** and **`MAX_REVIEW_LENGTH`** live in `src/constants/app.js`
-- **Category definitions** live in `src/constants/categories.js`
-
-### Naming Conventions
-- **Use "favorites" not "saved"** - Database table is `favorites`, so use `useFavorites`, `isFavorite`, `toggleFavorite`
-- **Components are PascalCase**, hooks are `useCamelCase`, utilities are `camelCase`
-
-### File Organization
-- **Storage helpers go in `src/lib/storage.js`** - Not scattered in components
-- **Extract components when files exceed ~400 lines** - Keep pages focused on orchestration
-- **Use barrel exports** - Import from `'../components/home'` not individual files
-- **Delete unused code immediately** - Don't let dead code accumulate
-
-### Component Structure
+export const fooApi = {
+  async getSomething(params) {
+    try {
+      const { data, error } = await supabase.rpc('rpc_name', { ... })
+      if (error) throw createClassifiedError(error)
+      return data || []
+    } catch (error) {
+      logger.error('Context:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
+}
 ```
-src/components/
-├── home/           # Home page components
-├── browse/         # Browse page components
-├── restaurants/    # Restaurants page components
-├── profile/        # Profile page components
-├── Auth/           # Authentication components
-└── foods/          # Food icon SVGs
+For table queries (not RPCs), use `selectFields` string + `.map()` transform. See `dishesApi.search()`.
+
+### 4.3 Hook Pattern
+```js
+import { useQuery } from '@tanstack/react-query'
+import { fooApi } from '../api/fooApi'
+import { getUserMessage } from '../utils/errorHandler'
+
+export function useFoo(params) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['foo', params],
+    queryFn: () => fooApi.getSomething(params),
+    enabled: !!params,
+  })
+  return {
+    foos: data || [],
+    loading: isLoading,
+    error: error ? { message: getUserMessage(error, 'loading foos') } : null,
+    refetch,
+  }
+}
 ```
 
-### Logging
-- **Use `logger` from `src/utils/logger.js`** - Never use `console.*` directly
-- `logger.error()` / `logger.warn()` - Always logged (errors go to Sentry in prod)
-- `logger.info()` / `logger.debug()` - Only logged in development
+### 4.4 Naming Conventions
+| Type | Convention | Example |
+|---|---|---|
+| Components | PascalCase named exports | `export function DishCard()` |
+| Hooks | `use` prefix, camelCase | `useDishes`, `useVote` |
+| API files | camelCase + `Api` suffix | `dishesApi`, `votesApi` |
+| Constants | UPPER_SNAKE_CASE | `MIN_VOTES_FOR_RANKING` |
+| Utility functions | camelCase | `createClassifiedError` |
+| CSS variables | `--color-*` prefix | `var(--color-primary)` |
+| Use "favorites" not "saved" | Database table is `favorites` | `useFavorites`, `isFavorite` |
 
-### Deployment
-- **CSP in `vercel.json` — external resources need `connect-src` too** - The service worker fetches images via `fetch()` which uses `connect-src`, not `img-src`. Add new external domains to both.
+### 4.5 Design Tokens (Island Depths Theme)
+Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode.
 
-### Verification (before calling anything done)
-- **`npm run build` must pass** - Don't say "done" if it doesn't compile
-- **`npm run test` must pass** - Run tests, don't assume they still pass
-- **If you touched Supabase schema/RPC:** verify the function was actually run in the SQL Editor and returns the expected result with a sample query
-- **If you touched a sort or filter:** confirm edge cases (null values, 0 votes, missing price) don't crash or sort wrong
-- **If you added a new component:** verify it's exported from the barrel index and actually imported where needed
+| Token | Value | Usage |
+|---|---|---|
+| `--color-primary` | `#C85A54` (Deep Rust) | CTAs, primary actions, danger |
+| `--color-accent-gold` | `#D9A765` (Warm Gold) | Links, secondary accents |
+| `--color-accent-orange` | `#E07856` (Warm Orange) | Hover states |
+| `--color-rating` | `#6BB384` (Muted Green) | Rating displays, success |
+| `--color-text-primary` | `#F5F1E8` (Soft Cream) | Main text |
+| `--color-text-secondary` | `#B8A99A` (Warm Taupe) | Secondary text |
+| `--color-text-tertiary` | `#7D7168` (Brown Gray) | Tertiary text |
+| `--color-bg` | `#0D1B22` (Deep Charcoal-Navy) | Page background |
+| `--color-surface` | `#0F1F2B` | Slightly lighter surface |
+| `--color-card` | `#1A3A42` (Navy-Teal) | Card backgrounds |
 
-### What NOT to Commit
-- Unused components or hooks
-- Duplicate constants
-- Direct `console.*` calls (use `logger` utility instead)
-- ES2023+ syntax without polyfills
-- Direct localStorage calls (use `src/lib/storage.js`)
+### 4.6 Constants & Configuration
+- **`MIN_VOTES_FOR_RANKING` = 5** — `src/constants/app.js` — dishes below this show as "Early"
+- **`MAX_REVIEW_LENGTH` = 200** — `src/constants/app.js` — enforced client + DB constraint
+- **`MIN_VOTES_FOR_VALUE` = 8** — `src/constants/app.js` — value score eligibility
+- **Category definitions** — `src/constants/categories.js` — `BROWSE_CATEGORIES` (15 shortcuts), `MAIN_CATEGORIES`, `ALL_CATEGORIES`
+- **Categories are shortcuts, NOT containers** — Browse shows 15 curated shortcuts. Search covers all dishes regardless of category.
+
+### 4.7 localStorage Keys
+| Key | Purpose | Location |
+|---|---|---|
+| `wgh_has_seen_splash` | Welcome splash shown | `WelcomeSplash.jsx` |
+| `wgh_has_onboarded` | Welcome modal shown | `WelcomeModal.jsx` |
+| `whats_good_here_pending_vote` | Vote saved before auth redirect | `src/lib/storage.js` |
+| `wgh_has_seen_ear_tooltip` | Ear icon tooltip shown | `src/lib/storage.js` |
+| `wgh_radius` | Radius filter preference | `LocationContext.jsx` |
+| `wgh_town` | Town filter preference | `LocationContext.jsx` |
+| `whats-good-here-auth` | Supabase auth session | `src/lib/supabase.js` |
+| `whats-good-here-location-permission` | Geolocation permission state | `LocationContext.jsx` |
+
+### 4.8 Key Hooks (check before building new ones)
+- `useVote` — Vote submission with rating, review, duplicate prevention
+- `useFavorites` — Optimistic favorite toggling with analytics
+- `useUserVotes` — User's vote history with stats (rating style, standout picks)
+- `useDishes` — Location-based ranked dishes via React Query
+- `useDishPhotos` — Photo upload with quality analysis, validation, progress
+- `useDishSearch` — Debounced dish search (2+ chars)
+- `useLeaderboard` — Friends leaderboard with weekly reset countdown
+- `useStreak` — Voting streak tracking
+- `useProfile` — User profile data
+- `useRestaurantManager` — Manager portal data
+- `useSpecials` — Restaurant specials management
+- `useUnratedDishes` — Dishes user hasn't voted on yet
+- `useFocusTrap` — Keyboard focus trap for modals
+- `useDish` — Single dish by ID
+
+### 4.9 Key Supabase RPCs
+- `get_ranked_dishes` — Main Browse feed (ranked by votes, distance, variants, value score)
+- `get_restaurant_dishes` — Dishes for a specific restaurant
+- `get_dish_variants` — Variants/sizes for a dish
+- `get_smart_snippet` — Best review snippet for a dish
+- `check_vote_rate_limit` — Server-side vote rate limiting (10/min)
+- `check_photo_upload_rate_limit` — Photo upload rate limiting (5/min)
+- `get_taste_compatibility` — Taste match % between two users
+- `get_similar_taste_users` — Users with similar taste you don't follow
+- `get_friends_leaderboard` — Friends ranked by votes
+- `get_user_rating_identity` — Rating style analysis (MAD-based bias)
+- `get_friends_votes_for_dish` / `get_friends_votes_for_restaurant` — Social context
+- `evaluate_user_badges` — Award badges based on stats
+- `get_user_streak_info` — Streak status and stats
+- `get_invite_details` / `accept_restaurant_invite` — Manager invite flow
+
+### 4.10 File Organization
+- **Storage helpers go in `src/lib/storage.js`** — not scattered in components
+- **Extract components when files exceed ~400 lines** — keep pages focused on orchestration
+- **Use barrel exports** — import from `'../components/home'` not individual files
+- **Delete unused code immediately** — don't let dead code accumulate
+- **Component subdirectories match pages** — `components/browse/` for Browse page components
+
+### 4.11 Deployment
+- **CSP in `vercel.json`** — external resources need `connect-src` too. Add new external domains to both `img-src` and `connect-src`.
+
+---
+
+## 5. Architecture Principles
+
+- **Categories are shortcuts, NOT containers.** Browse shows 15 curated shortcuts, not all categories. Search is the universal access layer — any dish is searchable.
+- **No direct Supabase calls from UI.** All data access through `src/api/`.
+- **`supabase/schema.sql` is the source of truth.** Update it first, then run in SQL Editor.
+- **React Query for server state.** `useQuery`/`useMutation` — never raw `useEffect` + `fetch`.
+- **Optimistic updates with rollback.** UI updates before server confirms, reverts on error.
+- **All errors classified.** `createClassifiedError()` on every API boundary.
+- **Lazy-loaded pages.** All pages use `lazyWithRetry()` for code splitting with chunk failure recovery.
+- **Dark theme is the only theme.** "Island Depths" — deep charcoal-navy surfaces, warm cream text. No light mode toggle.
