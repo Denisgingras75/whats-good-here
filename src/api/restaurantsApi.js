@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { logger } from '../utils/logger'
 import { sanitizeSearchQuery } from '../utils/sanitize'
+import { createClassifiedError } from '../utils/errorHandler'
 
 /**
  * Restaurants API - Centralized data fetching for restaurants
@@ -27,7 +28,7 @@ export const restaurantsApi = {
         .order('name')
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       // Transform to include dish count
@@ -38,7 +39,7 @@ export const restaurantsApi = {
       }))
     } catch (error) {
       logger.error('Error fetching restaurants:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -55,13 +56,13 @@ export const restaurantsApi = {
         .order('name')
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       logger.error('Error fetching open restaurants:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -88,7 +89,7 @@ export const restaurantsApi = {
 
     if (error) {
       logger.error('Error searching restaurants:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     return data || []
@@ -109,7 +110,7 @@ export const restaurantsApi = {
         .from('restaurants')
         .select('id', { count: 'exact', head: true })
 
-      if (error) throw error
+      if (error) throw createClassifiedError(error)
       return count || 0
     } catch (error) {
       logger.error('Error fetching restaurant count:', error)
@@ -126,13 +127,13 @@ export const restaurantsApi = {
         .single()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data
     } catch (error) {
       logger.error('Error fetching restaurant:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 }

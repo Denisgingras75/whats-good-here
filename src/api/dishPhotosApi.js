@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase'
 import { checkPhotoUploadRateLimit } from '../lib/rateLimiter'
 import { extractSafeFilename } from '../utils/sanitize'
 import { logger } from '../utils/logger'
+import { createClassifiedError } from '../utils/errorHandler'
 
 // Upload constraints - enforced client-side and in Supabase Storage policies
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
@@ -72,7 +73,7 @@ export const dishPhotosApi = {
         })
 
       if (uploadError) {
-        throw uploadError
+        throw createClassifiedError(uploadError)
       }
 
       // Get public URL
@@ -110,13 +111,13 @@ export const dishPhotosApi = {
         .single()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data
     } catch (error) {
       logger.error('Error uploading photo:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -134,13 +135,13 @@ export const dishPhotosApi = {
         .order('created_at', { ascending: false })
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       logger.error('Error fetching dish photos:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -180,7 +181,7 @@ export const dishPhotosApi = {
         .limit(100)
 
       if (photosError) {
-        throw photosError
+        throw createClassifiedError(photosError)
       }
 
       if (!photos?.length) {
@@ -195,7 +196,7 @@ export const dishPhotosApi = {
         .limit(500)
 
       if (votesError) {
-        throw votesError
+        throw createClassifiedError(votesError)
       }
 
       const votedDishIds = new Set((votes || []).map(v => v.dish_id))
@@ -217,7 +218,7 @@ export const dishPhotosApi = {
         }))
     } catch (error) {
       logger.error('Error fetching unrated dishes:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -242,13 +243,13 @@ export const dishPhotosApi = {
         .maybeSingle()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data
     } catch (error) {
       logger.error('Error fetching user photo:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -303,13 +304,13 @@ export const dishPhotosApi = {
         .eq('user_id', user.id)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return { success: true }
     } catch (error) {
       logger.error('Error deleting photo:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -328,7 +329,7 @@ export const dishPhotosApi = {
       return unrated.length
     } catch (error) {
       logger.error('Error getting unrated count:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -362,13 +363,13 @@ export const dishPhotosApi = {
         .maybeSingle()
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data
     } catch (error) {
       logger.error('Error fetching featured photo:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -388,13 +389,13 @@ export const dishPhotosApi = {
         .order('quality_score', { ascending: false })
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return data || []
     } catch (error) {
       logger.error('Error fetching community photos:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -415,7 +416,7 @@ export const dishPhotosApi = {
         .limit(limit)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       // Sort by status priority: featured > community > hidden
@@ -427,7 +428,7 @@ export const dishPhotosApi = {
       })
     } catch (error) {
       logger.error('Error fetching all photos:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -445,7 +446,7 @@ export const dishPhotosApi = {
         .in('status', ['featured', 'community', 'hidden'])
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       const counts = { featured: 0, community: 0, hidden: 0, total: 0 }
@@ -456,7 +457,7 @@ export const dishPhotosApi = {
       return counts
     } catch (error) {
       logger.error('Error fetching photo counts:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 }

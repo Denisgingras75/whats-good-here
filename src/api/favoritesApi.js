@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { logger } from '../utils/logger'
+import { createClassifiedError } from '../utils/errorHandler'
 
 /**
  * Favorites API - Centralized data fetching and mutation for saved dishes
@@ -25,13 +26,13 @@ export const favoritesApi = {
         .eq('user_id', user.id)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return (data || []).map(f => f.dish_id)
     } catch (error) {
       logger.error('Error fetching favorite IDs:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -57,13 +58,13 @@ export const favoritesApi = {
         if (error.code === '23505') {
           return { success: true } // Already favorited
         }
-        throw error
+        throw createClassifiedError(error)
       }
 
       return { success: true }
     } catch (error) {
       logger.error('Error adding favorite:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -87,13 +88,13 @@ export const favoritesApi = {
         .eq('dish_id', dishId)
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       return { success: true }
     } catch (error) {
       logger.error('Error removing favorite:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 
@@ -127,7 +128,7 @@ export const favoritesApi = {
         .order('created_at', { ascending: false })
 
       if (error) {
-        throw error
+        throw createClassifiedError(error)
       }
 
       const favoriteIds = (data || []).map(f => f.dish_id)
@@ -144,7 +145,7 @@ export const favoritesApi = {
       return { favoriteIds, favorites }
     } catch (error) {
       logger.error('Error fetching favorites:', error)
-      throw error
+      throw error.type ? error : createClassifiedError(error)
     }
   },
 }

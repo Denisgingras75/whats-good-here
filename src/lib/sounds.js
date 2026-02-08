@@ -1,4 +1,5 @@
 // Sound system for bite sounds
+import { getStorageItem, setStorageItem, STORAGE_KEYS } from './storage'
 
 let crunchSound = null
 
@@ -11,20 +12,12 @@ export function preloadSounds() {
 
 // Check if sounds are muted
 export function isSoundMuted() {
-  try {
-    return localStorage.getItem('soundMuted') === 'true'
-  } catch {
-    return false
-  }
+  return getStorageItem(STORAGE_KEYS.SOUND_MUTED) === 'true'
 }
 
 // Set mute state
 export function setSoundMuted(muted) {
-  try {
-    localStorage.setItem('soundMuted', String(muted))
-  } catch {
-    // localStorage may be unavailable
-  }
+  setStorageItem(STORAGE_KEYS.SOUND_MUTED, String(muted))
 }
 
 // Toggle mute state

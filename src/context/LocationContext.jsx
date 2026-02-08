@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { capture } from '../lib/analytics'
 import { logger } from '../utils/logger'
+import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../lib/storage'
 
 // Default location: Martha's Vineyard center (between Vineyard Haven, Oak Bluffs, Edgartown)
 const DEFAULT_LOCATION = {
@@ -9,26 +10,18 @@ const DEFAULT_LOCATION = {
   lng: -70.56,
 }
 
-const STORAGE_KEY = 'whats-good-here-location-permission'
-const RADIUS_STORAGE_KEY = 'wgh_radius'
-const TOWN_STORAGE_KEY = 'wgh_town'
-
 const LocationContext = createContext(null)
 
 export function LocationProvider({ children }) {
   // Start with default location immediately - don't block on geolocation
   const [location, setLocation] = useState(DEFAULT_LOCATION)
   const [radius, setRadiusState] = useState(() => {
-    try {
-      const saved = localStorage.getItem(RADIUS_STORAGE_KEY)
-      if (saved) {
-        const parsed = parseInt(saved, 10)
-        if (!isNaN(parsed) && parsed >= 1 && parsed <= 50) {
-          return parsed
-        }
+    const saved = getStorageItem(STORAGE_KEYS.RADIUS)
+    if (saved) {
+      const parsed = parseInt(saved, 10)
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 50) {
+        return parsed
       }
-    } catch {
-      // localStorage may be unavailable
     }
     return 5
   })
@@ -42,12 +35,7 @@ export function LocationProvider({ children }) {
           radius_miles: newRadius,
           previous_radius: prevRadius,
         })
-        // Save to localStorage
-        try {
-          localStorage.setItem(RADIUS_STORAGE_KEY, String(newRadius))
-        } catch {
-          // localStorage may be unavailable
-        }
+        setStorageItem(STORAGE_KEYS.RADIUS, String(newRadius))
       }
       return newRadius
     })
@@ -55,14 +43,9 @@ export function LocationProvider({ children }) {
 
   // Town filter state (null = All Island)
   const [town, setTownState] = useState(() => {
-    try {
-      const saved = localStorage.getItem(TOWN_STORAGE_KEY)
-      // Return null if empty string or not set (All Island)
-      return saved || null
-    } catch {
-      // localStorage may be unavailable
-      return null
-    }
+    const saved = getStorageItem(STORAGE_KEYS.TOWN)
+    // Return null if empty string or not set (All Island)
+    return saved || null
   })
 
   // Wrap setTown to track filter changes and persist to localStorage
@@ -74,12 +57,7 @@ export function LocationProvider({ children }) {
           town: newTown || 'all',
           previous_town: prevTown || 'all',
         })
-        // Save to localStorage
-        try {
-          localStorage.setItem(TOWN_STORAGE_KEY, newTown || '')
-        } catch {
-          // localStorage may be unavailable
-        }
+        setStorageItem(STORAGE_KEYS.TOWN, newTown || '')
       }
       return newTown
     })
@@ -91,13 +69,9 @@ export function LocationProvider({ children }) {
 
   // Check if we've asked before
   useEffect(() => {
-    try {
-      const asked = localStorage.getItem(STORAGE_KEY)
-      if (asked) {
-        setHasAskedBefore(true)
-      }
-    } catch {
-      // localStorage may be unavailable in private browsing or restricted contexts
+    const asked = getStorageItem(STORAGE_KEYS.LOCATION_PERMISSION)
+    if (asked) {
+      setHasAskedBefore(true)
     }
   }, [])
 
@@ -111,11 +85,7 @@ export function LocationProvider({ children }) {
 
     setLoading(true)
     setError(null)
-    try {
-      localStorage.setItem(STORAGE_KEY, 'true')
-    } catch {
-      // localStorage may be unavailable in private browsing or restricted contexts
-    }
+    setStorageItem(STORAGE_KEYS.LOCATION_PERMISSION, 'true')
     setHasAskedBefore(true)
 
     navigator.geolocation.getCurrentPosition(

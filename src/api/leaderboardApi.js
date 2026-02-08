@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { logger } from '../utils/logger'
+import { createClassifiedError } from '../utils/errorHandler'
 
 /**
  * Leaderboard API - Streaks and friends competition
@@ -27,7 +28,7 @@ export const leaderboardApi = {
 
     if (error) {
       logger.error('Error fetching streak:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     const row = data?.[0]
@@ -61,7 +62,7 @@ export const leaderboardApi = {
 
     if (error) {
       logger.error('Error fetching user streak:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     const row = data?.[0]
@@ -93,7 +94,7 @@ export const leaderboardApi = {
 
     if (error) {
       logger.error('Error fetching leaderboard:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     // Find the current user's rank
