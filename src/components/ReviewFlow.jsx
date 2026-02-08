@@ -335,7 +335,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         <button
           onClick={handleShareDish}
           className="w-full py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-98"
-          style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+          style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -442,7 +442,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             disabled={showConfirmation}
             className="relative overflow-hidden flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95"
             style={(showConfirmation && confirmationType === 'yes') || showPendingYes
-              ? { background: 'linear-gradient(to bottom right, #6BB384, #5A9E72)', color: 'white', boxShadow: '0 10px 15px -3px rgba(107, 179, 132, 0.3)', transform: 'scale(1.05)' }
+              ? { background: 'linear-gradient(to bottom right, var(--color-rating), #5A9E72)', color: 'white', boxShadow: '0 10px 15px -3px rgba(107, 179, 132, 0.3)', transform: 'scale(1.05)' }
               : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', border: '2px solid var(--color-divider)' }}
           >
             {showConfirmation && confirmationType === 'yes' ? (
@@ -456,7 +456,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             disabled={showConfirmation}
             className="relative overflow-hidden flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95"
             style={(showConfirmation && confirmationType === 'no') || showPendingNo
-              ? { background: 'linear-gradient(to bottom right, #C85A54, #B04E49)', color: 'white', boxShadow: '0 10px 15px -3px rgba(200, 90, 84, 0.3)', transform: 'scale(1.05)' }
+              ? { background: 'linear-gradient(to bottom right, var(--color-primary), #B04E49)', color: 'white', boxShadow: '0 10px 15px -3px rgba(200, 90, 84, 0.3)', transform: 'scale(1.05)' }
               : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', border: '2px solid var(--color-divider)' }}
           >
             {showConfirmation && confirmationType === 'no' ? (
@@ -495,7 +495,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         <button
           onClick={handleRatingNext}
           className="w-full py-4 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 ease-out focus-ring active:scale-98 hover:shadow-xl hover:opacity-90"
-          style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+          style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
         >
           Next
         </button>
@@ -538,7 +538,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             onClick={handleWriteReview}
             disabled={submitting}
             className="py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95"
-            style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
           >
             Write Review
           </button>
@@ -599,7 +599,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         disabled={submitting || reviewText.length > MAX_REVIEW_LENGTH}
         className={`w-full py-4 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 ease-out focus-ring
           ${submitting || reviewText.length > MAX_REVIEW_LENGTH ? 'opacity-50 cursor-not-allowed' : 'active:scale-98 hover:shadow-xl'}`}
-        style={{ background: 'linear-gradient(to right, #10B981, #14B8A6)', color: 'white', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.3)' }}
+        style={{ background: 'linear-gradient(to right, var(--color-emerald), #14B8A6)', color: 'white', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.3)' }}
       >
         {submitting ? 'Saving...' : 'Submit Review'}
       </button>

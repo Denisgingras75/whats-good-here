@@ -76,7 +76,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className="w-full flex gap-3 p-3.5 text-left transition-all cursor-pointer hover:bg-[#0F2028]"
+        className="w-full flex gap-3 p-3.5 text-left transition-all cursor-pointer hover:bg-[var(--color-surface)]"
         style={{ borderRadius: '0.75rem' }}
       >
         {/* Rank Badge */}

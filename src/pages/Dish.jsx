@@ -591,7 +591,7 @@ export function Dish() {
                                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0"
                                 style={{
                                   background: vote.category_expertise === 'authority' ? 'rgba(147, 51, 234, 0.12)' : 'rgba(59, 130, 246, 0.12)',
-                                  color: vote.category_expertise === 'authority' ? '#9333EA' : '#3B82F6',
+                                  color: vote.category_expertise === 'authority' ? 'var(--color-purple)' : 'var(--color-blue)',
                                 }}
                               >
                                 {expertiseLabel}

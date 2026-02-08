@@ -13,11 +13,11 @@ export function StreakBadge({ streak, status = 'active', size = 'sm' }) {
 
   const statusStyles = {
     active: {
-      background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+      background: 'linear-gradient(135deg, var(--color-orange) 0%, #EA580C 100%)',
       boxShadow: '0 0 8px rgba(249, 115, 22, 0.4)',
     },
     at_risk: {
-      background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)',
+      background: 'linear-gradient(135deg, var(--color-amber-light) 0%, var(--color-amber) 100%)',
       boxShadow: '0 0 6px rgba(251, 191, 36, 0.3)',
     },
     broken: {

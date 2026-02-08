@@ -469,7 +469,7 @@ export function Admin() {
             type="submit"
             disabled={submitting}
             className="w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-50"
-            style={{ background: editingDishId ? '#059669' : 'var(--color-primary)' }}
+            style={{ background: editingDishId ? 'var(--color-green-dark)' : 'var(--color-primary)' }}
           >
             {submitting
               ? (editingDishId ? 'Updating...' : 'Adding...')

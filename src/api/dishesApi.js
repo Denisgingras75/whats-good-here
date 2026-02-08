@@ -163,7 +163,7 @@ export const dishesApi = {
     // Run all 3 search queries in parallel for better performance
     const [nameResult, cuisineResult, tagResult] = await Promise.all([
       // Query 1: Search by dish name and category
-      runSearchQuery((q) => q.or(`name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)),
+      runSearchQuery((q) => q.or(`name.ilike.%${searchTerm.replace(/[.,()]/g, '')}%,category.ilike.%${searchTerm.replace(/[.,()]/g, '')}%`)),
       // Query 2: Search by restaurant cuisine
       runSearchQuery((q) => q.ilike('restaurants.cuisine', `%${searchTerm}%`)),
       // Query 3: Search by dish tags

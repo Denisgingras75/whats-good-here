@@ -42,7 +42,7 @@ export function Top10Sidebar({ dishes, showToggle, activeTab, onTabChange }) {
               }`}
               style={{
                 background: activeTab === 'personal' ? 'var(--color-accent-gold)' : 'var(--color-surface-elevated)',
-                color: activeTab === 'personal' ? '#1F1F1F' : 'var(--color-text-secondary)',
+                color: activeTab === 'personal' ? 'var(--color-text-on-primary)' : 'var(--color-text-secondary)',
               }}
             >
               My Top 10

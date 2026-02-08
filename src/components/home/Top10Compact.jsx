@@ -78,7 +78,7 @@ export function Top10Compact({
             }`}
             style={{
               background: activeTab === 'personal' ? 'var(--color-accent-gold)' : 'var(--color-surface-elevated)',
-              color: activeTab === 'personal' ? '#1F1F1F' : 'var(--color-text-secondary)',
+              color: activeTab === 'personal' ? 'var(--color-text-on-primary)' : 'var(--color-text-secondary)',
             }}
           >
             My Top 10
@@ -181,7 +181,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, isNewlyRevealed, revealInd
       <button
         onClick={onClick}
         aria-label={accessibleLabel}
-        className="w-full flex items-center gap-2.5 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[#162B35]"
+        className="w-full flex items-center gap-2.5 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[var(--color-surface-elevated)]"
       >
         {/* Rank - medals for top 3 */}
         {rank <= 3 ? (

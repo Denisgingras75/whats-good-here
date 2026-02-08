@@ -44,7 +44,7 @@ export function CategoryGrid({
     <div
       className="px-6 pt-5 pb-6 relative"
       style={{
-        background: 'linear-gradient(180deg, #1A3A42 0%, #122830 50%, #0D1B22 100%)',
+        background: 'linear-gradient(180deg, var(--color-card) 0%, var(--color-surface) 50%, var(--color-bg) 100%)',
         minHeight: 'calc(100vh - 80px)',
       }}
     >

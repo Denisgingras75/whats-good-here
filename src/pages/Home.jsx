@@ -106,7 +106,7 @@ export function Home() {
       <section
         className="px-4 py-6"
         style={{
-          background: 'linear-gradient(180deg, #1A3A42 0%, #122830 50%, #0D1B22 100%)',
+          background: 'linear-gradient(180deg, var(--color-card) 0%, var(--color-surface) 50%, var(--color-bg) 100%)',
         }}
       >
         {/* Section header */}

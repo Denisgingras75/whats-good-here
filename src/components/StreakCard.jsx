@@ -50,13 +50,13 @@ export function StreakCard({ userId }) {
   const getCardStyle = () => {
     if (status === 'at_risk') {
       return {
-        background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
-        border: '2px solid #F59E0B',
+        background: 'linear-gradient(135deg, var(--color-streak-at-risk-bg) 0%, #FDE68A 100%)',
+        border: '2px solid var(--color-streak-at-risk-border)',
       }
     }
     if (status === 'active') {
       return {
-        background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
+        background: 'linear-gradient(135deg, var(--color-streak-active-bg) 0%, var(--color-streak-active-bg-end) 100%)',
         border: '2px solid var(--color-primary)',
       }
     }
@@ -106,10 +106,10 @@ export function StreakCard({ userId }) {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold" style={{ color: status === 'at_risk' ? '#92400E' : 'var(--color-primary)' }}>
+              <span className="text-2xl font-bold" style={{ color: status === 'at_risk' ? 'var(--color-amber-dark)' : 'var(--color-primary)' }}>
                 {currentStreak}
               </span>
-              <span className="text-sm font-medium" style={{ color: status === 'at_risk' ? '#92400E' : 'var(--color-text-secondary)' }}>
+              <span className="text-sm font-medium" style={{ color: status === 'at_risk' ? 'var(--color-amber-dark)' : 'var(--color-text-secondary)' }}>
                 day streak
               </span>
             </div>
@@ -130,10 +130,10 @@ export function StreakCard({ userId }) {
       {/* Weekly progress bar */}
       <div className="mb-2">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span style={{ color: isNearGoal ? '#92400E' : 'var(--color-text-secondary)' }}>
+          <span style={{ color: isNearGoal ? 'var(--color-amber-dark)' : 'var(--color-text-secondary)' }}>
             Weekly Progress
           </span>
-          <span className="font-semibold" style={{ color: isNearGoal ? '#F59E0B' : 'var(--color-primary)' }}>
+          <span className="font-semibold" style={{ color: isNearGoal ? 'var(--color-amber)' : 'var(--color-primary)' }}>
             {votesThisWeek}/{weeklyGoal}
           </span>
         </div>
@@ -143,7 +143,7 @@ export function StreakCard({ userId }) {
             style={{
               width: `${progressPercent}%`,
               background: isNearGoal
-                ? 'linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%)'
+                ? 'linear-gradient(90deg, var(--color-amber) 0%, var(--color-amber-light) 100%)'
                 : 'linear-gradient(90deg, var(--color-primary) 0%, #FB923C 100%)',
             }}
           />
@@ -153,7 +153,7 @@ export function StreakCard({ userId }) {
       {/* CTA */}
       <p
         className={`text-sm font-medium text-center mt-3 ${cta.urgent ? 'animate-pulse' : ''}`}
-        style={{ color: cta.urgent ? '#92400E' : 'var(--color-text-secondary)' }}
+        style={{ color: cta.urgent ? 'var(--color-amber-dark)' : 'var(--color-text-secondary)' }}
       >
         {cta.text}
       </p>
@@ -163,7 +163,7 @@ export function StreakCard({ userId }) {
         <button
           onClick={() => navigate('/')}
           className="w-full mt-3 py-2 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-          style={{ background: '#F59E0B', color: 'white' }}
+          style={{ background: 'var(--color-amber)', color: 'white' }}
         >
           Vote Now
         </button>

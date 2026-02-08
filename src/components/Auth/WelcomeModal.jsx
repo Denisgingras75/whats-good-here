@@ -127,7 +127,7 @@ export function WelcomeModal() {
       {/* Modal */}
       <div
         className="relative z-10 rounded-3xl max-w-md w-full shadow-xl overflow-hidden"
-        style={{ animationDelay: '0.1s', background: '#1A1A1A' }}
+        style={{ animationDelay: '0.1s', background: 'var(--color-text-on-primary)' }}
       >
         {/* Decorative gradient header */}
         <div className="h-2" style={{ background: 'var(--color-primary)' }} />
@@ -250,7 +250,7 @@ export function WelcomeModal() {
                 onClick={handleFinish}
                 disabled={saving}
                 className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-                style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
               >
                 {saving ? 'Saving...' : selectedCategories.length > 0 ? "Let's go! 🎉" : "Let's go!"}
               </button>
@@ -269,7 +269,7 @@ export function WelcomeModal() {
               <button
                 onClick={handleNext}
                 className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all"
-                style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
               >
                 Next
               </button>

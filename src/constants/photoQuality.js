@@ -61,21 +61,21 @@ export const PHOTO_TIERS = {
     label: 'Featured',
     description: 'Shown prominently in the community gallery',
     uploadDescription: 'Your photo will appear prominently in the community gallery for this dish.',
-    color: '#F59E0B', // amber
+    color: 'var(--color-tier-featured)',
   },
   community: {
     icon: '👥',
     label: 'Community',
     description: 'Appears in the Community Photos section',
     uploadDescription: 'Your photo is visible under Community Photos for this dish.',
-    color: '#3B82F6', // blue
+    color: 'var(--color-tier-community)',
   },
   hidden: {
     icon: '📁',
     label: 'Saved',
     description: 'Only shown under "See all photos"',
     uploadDescription: 'Your photo is saved and visible under "See all photos."',
-    color: '#6B7280', // gray
+    color: 'var(--color-tier-hidden)',
     tip: 'Tip: Better lighting or a closer shot can help it rank higher in the gallery.',
   },
 }

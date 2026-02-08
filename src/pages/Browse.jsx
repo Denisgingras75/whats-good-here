@@ -419,7 +419,7 @@ export function Browse() {
         <div
           className="px-6 pt-5 pb-6 relative"
           style={{
-            background: 'linear-gradient(180deg, #1A3A42 0%, #122830 50%, #0D1B22 100%)',
+            background: 'linear-gradient(180deg, var(--color-card) 0%, var(--color-surface) 50%, var(--color-bg) 100%)',
             minHeight: 'calc(100vh - 80px)',
           }}
         >
@@ -560,7 +560,7 @@ export function Browse() {
                       className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
                       style={{
                         background: suggestion.type === 'dish' ? 'var(--color-primary-muted)' : 'rgba(59, 130, 246, 0.15)',
-                        color: suggestion.type === 'dish' ? 'var(--color-primary)' : '#60A5FA'
+                        color: suggestion.type === 'dish' ? 'var(--color-primary)' : 'var(--color-blue-light)'
                       }}
                     >
                       {suggestion.type === 'dish' ? 'Dish' : 'Spot'}
@@ -680,7 +680,7 @@ export function Browse() {
                 <button
                   onClick={handleBackToCategories}
                   className="px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
-                  style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                 >
                   Browse Categories
                 </button>

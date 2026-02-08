@@ -234,7 +234,7 @@ Defined in `src/constants/photoQuality.js`:
 | `whats-good-here-auth` | Supabase auth session |
 | `wgh_has_seen_splash` | Welcome splash shown flag |
 | `wgh_has_onboarded` | Welcome modal (name entry) shown |
-| `wgh_pending_vote` | Vote data saved before auth |
+| `whats_good_here_pending_vote` | Vote data saved before auth (5-min TTL) |
 | `wgh_remembered_email` | Email for magic link convenience |
 
 ---

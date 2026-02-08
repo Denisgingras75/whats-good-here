@@ -6,8 +6,8 @@ import { OfflineIndicator } from './OfflineIndicator'
 export function Layout({ children }) {
   return (
     <div
-      className="bg-stone-50"
       style={{
+        backgroundColor: 'var(--color-bg)',
         minHeight: '100dvh',
         // 64px nav + safe area inset for devices with home indicator
         paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 16px))',

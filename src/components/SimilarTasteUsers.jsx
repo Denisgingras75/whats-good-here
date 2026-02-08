@@ -6,9 +6,9 @@ import { followsApi } from '../api/followsApi'
 import { logger } from '../utils/logger'
 
 function getCompatColor(pct) {
-  if (pct >= 75) return '#10B981' // green
-  if (pct >= 50) return '#F59E0B' // amber
-  return '#EF4444' // red
+  if (pct >= 75) return 'var(--color-emerald)'
+  if (pct >= 50) return 'var(--color-amber)'
+  return 'var(--color-red)'
 }
 
 export function SimilarTasteUsers() {

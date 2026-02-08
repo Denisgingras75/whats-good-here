@@ -162,7 +162,7 @@ export function Restaurants() {
   }, [restaurants, searchQuery])
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-surface) 0%, #0D1B22 100%)' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg) 100%)' }}>
       <h1 className="sr-only">Restaurants</h1>
 
       {/* Header */}

@@ -22,7 +22,7 @@ export function PlateIcon({
       style={{
         width: size,
         height: size,
-        background: '#0D1B22',
+        background: 'var(--color-bg)',
         border: '2px solid rgba(217, 167, 101, 0.12)',
         boxShadow: `
           0 10px 20px rgba(0, 0, 0, 0.6),

@@ -36,9 +36,9 @@ export function formatScore10(score) {
 export function getRatingColor(rating) {
   if (rating === null || rating === undefined) return 'var(--color-text-tertiary)'
   const score = Number(rating)
-  if (score >= 8.0) return '#16a34a' // green-600 - excellent
-  if (score >= 6.0) return '#f59e0b' // amber-500 - good
-  return '#ef4444' // red-500 - meh
+  if (score >= 8.0) return 'var(--color-green-deep)'
+  if (score >= 6.0) return 'var(--color-amber)'
+  return 'var(--color-red)'
 }
 
 /**
