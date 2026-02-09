@@ -32,7 +32,7 @@
 
 ---
 
-## T03: Fix stale design tokens in CLAUDE.md
+## ~~T03: Fix stale design tokens in CLAUDE.md~~ DONE
 
 **Why:** CLAUDE.md says primary is `#F47A1F` (orange) and rating is `#E6B84C` (gold), but actual CSS uses `#C85A54` (Deep Rust) and `#D9A765` (Warm Gold). This misleads anyone reading CLAUDE.md.
 
@@ -45,7 +45,7 @@
 
 ---
 
-## T04: Fix pending vote storage key mismatch in CLAUDE.md
+## ~~T04: Fix pending vote storage key mismatch in CLAUDE.md~~ DONE
 
 **Why:** CLAUDE.md says key is `wgh_pending_vote` but actual code uses `whats_good_here_pending_vote`. Anyone reading CLAUDE.md would use the wrong key.
 
@@ -56,7 +56,7 @@
 
 ---
 
-## T05: Migrate `useFavorites` to React Query
+## ~~T05: Migrate `useFavorites` to React Query~~ DONE
 
 **Why:** `useFavorites` uses raw `useEffect` + `useState` for data fetching, violating the stated architecture principle "React Query is the data fetching layer... Never add raw `useEffect` + `fetch` patterns." This means favorites don't benefit from React Query's caching, deduplication, or background refetching.
 
@@ -71,7 +71,7 @@
 
 ---
 
-## T06: Move `LocationContext` to use `storage.js` helpers
+## ~~T06: Move `LocationContext` to use `storage.js` helpers~~ DONE
 
 **Why:** `LocationContext.jsx` calls `localStorage.getItem/setItem` directly in 6+ places, violating the CLAUDE.md rule "Direct localStorage calls (use `src/lib/storage.js`)". This bypasses the in-memory cache and private-browsing safety wrappers in `storage.js`.
 
@@ -84,7 +84,7 @@
 
 ---
 
-## T07: Move `AuthContext` to use `storage.js` helpers for non-Supabase storage
+## ~~T07: Move `AuthContext` to use `storage.js` helpers for non-Supabase storage~~ DONE
 
 **Why:** `AuthContext.jsx:77-81` directly calls `sessionStorage.removeItem` and `localStorage.removeItem` to clear email. Should use storage helpers for consistency and private-browsing safety.
 
@@ -97,7 +97,7 @@
 
 ---
 
-## T08: `dishesApi.search` — audit string interpolation in `.or()` for injection safety
+## ~~T08: `dishesApi.search` — audit string interpolation in `.or()` for injection safety~~ DONE
 
 **Why:** `dishesApi.search` constructs a PostgREST `.or()` filter with string interpolation: `` .or(`name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`) ``. While `sanitizeSearchQuery` is called first, PostgREST filter syntax characters (`.`, `,`, `(`, `)`) in the search term could break the filter or produce unexpected behavior. The `.replace(/[.,()]/g, '')` only strips some characters.
 
@@ -149,7 +149,7 @@
 
 ---
 
-## T12: `ALL_CATEGORIES` has duplicate `seafood` entry
+## ~~T12: `ALL_CATEGORIES` has duplicate `seafood` entry~~ DONE
 
 **Why:** `categories.js` line 47 adds `{ id: 'seafood', label: 'Seafood', emoji: '🦐' }` to `ALL_CATEGORIES`, but `seafood` already exists in `MAIN_CATEGORIES` (line 38) which is spread into `ALL_CATEGORIES`. The duplicate means `getCategoryById('seafood')` may return inconsistent results and `matchCategories` returns duplicate suggestions.
 
@@ -202,7 +202,7 @@
 
 ---
 
-## T16: `_archive/` directory in `src/` contains stale backup
+## ~~T16: `_archive/` directory in `src/` contains stale backup~~ DONE
 
 **Why:** `src/_archive/BrowseCategoryGrid.jsx.bak` is dead code checked into the repo. Per CLAUDE.md: "Delete unused code immediately — Don't let dead code accumulate."
 
@@ -253,7 +253,7 @@
 
 ---
 
-## T20: CLAUDE.md project structure section lists `seed.sql` but actual structure is `seed/` directory
+## ~~T20: CLAUDE.md project structure section lists `seed.sql` but actual structure is `seed/` directory~~ DONE
 
 **Why:** CLAUDE.md says `supabase/seed.sql` but actual seed data is in `supabase/seed/` with 17+ files. This misleads developers looking for seed data.
 

@@ -44,9 +44,7 @@ export const MAIN_CATEGORIES = [
 // Used for fuzzy matching when user types custom input
 export const ALL_CATEGORIES = [
   ...MAIN_CATEGORIES,
-  { id: 'seafood', label: 'Seafood', emoji: '🦐' },
   { id: 'pokebowl', label: 'Poke Bowl', emoji: '🥗' },
-  { id: 'tendys', label: 'Chicken Tenders', emoji: '🍗' },
   { id: 'soup', label: 'Soup', emoji: '🍜' },
   { id: 'fries', label: 'Fries', emoji: '🍟' },
   { id: 'apps', label: 'Appetizers', emoji: '🍤' },
@@ -57,7 +55,6 @@ export const ALL_CATEGORIES = [
   { id: 'asian', label: 'Asian', emoji: '🥢' },
   { id: 'quesadilla', label: 'Quesadilla', emoji: '🫓' },
   { id: 'breakfast sandwich', label: 'Breakfast Sandwich', emoji: '🥯' },
-  { id: 'dessert', label: 'Dessert', emoji: '🍰' },
 ]
 
 // Fuzzy match a search term to existing categories
