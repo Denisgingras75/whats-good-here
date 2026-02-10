@@ -1669,6 +1669,51 @@ BEGIN
              AND votes.category_snapshot = v.category_snapshot), TRUE)
         WHERE user_id = v.user_id;
       END LOOP;
+    ELSE
+      -- Consensus already exists: score just this vote against updated consensus
+      SELECT name INTO dish_name_snapshot FROM dishes WHERE id = NEW.dish_id;
+
+      -- Refresh consensus to reflect the new vote
+      UPDATE dishes SET consensus_rating = consensus_avg,
+        consensus_votes = total_votes_count, consensus_calculated_at = NOW()
+      WHERE id = NEW.dish_id;
+
+      user_deviation := ROUND(NEW.rating_10 - consensus_avg, 1);
+      is_early := FALSE;
+
+      SELECT rating_bias INTO user_bias_before FROM user_rating_stats WHERE user_id = NEW.user_id;
+      IF user_bias_before IS NULL THEN user_bias_before := 0.0; END IF;
+
+      UPDATE votes SET scored_at = NOW() WHERE id = NEW.id;
+
+      SELECT ROUND(AVG(ABS(votes.rating_10 - d.consensus_rating)), 1) INTO user_bias_after
+      FROM votes JOIN dishes d ON votes.dish_id = d.id
+      WHERE votes.user_id = NEW.user_id AND d.consensus_ready = TRUE
+        AND votes.rating_10 IS NOT NULL AND votes.scored_at IS NOT NULL;
+
+      IF user_bias_after IS NULL THEN user_bias_after := ABS(user_deviation); END IF;
+
+      INSERT INTO bias_events (user_id, dish_id, dish_name, user_rating, consensus_rating, deviation, was_early_voter, bias_before, bias_after)
+      VALUES (NEW.user_id, NEW.dish_id, dish_name_snapshot, NEW.rating_10, consensus_avg, user_deviation, is_early, user_bias_before, user_bias_after);
+
+      INSERT INTO user_rating_stats (user_id, rating_bias, votes_with_consensus, votes_pending, dishes_helped_establish, bias_label)
+      VALUES (NEW.user_id, user_bias_after, 1, -1, 0, get_bias_label(user_bias_after))
+      ON CONFLICT (user_id) DO UPDATE SET
+        rating_bias = user_bias_after,
+        votes_with_consensus = user_rating_stats.votes_with_consensus + 1,
+        votes_pending = GREATEST(0, user_rating_stats.votes_pending - 1),
+        bias_label = get_bias_label(user_bias_after),
+        updated_at = NOW();
+
+      -- Category biases stay SIGNED
+      UPDATE user_rating_stats SET category_biases = jsonb_set(
+        COALESCE(category_biases, '{}'::jsonb), ARRAY[NEW.category_snapshot],
+        (SELECT to_jsonb(ROUND(AVG(votes.rating_10 - d.consensus_rating), 1))
+         FROM votes JOIN dishes d ON votes.dish_id = d.id
+         WHERE votes.user_id = NEW.user_id AND d.consensus_ready = TRUE
+           AND votes.rating_10 IS NOT NULL AND votes.scored_at IS NOT NULL
+           AND votes.category_snapshot = NEW.category_snapshot), TRUE)
+      WHERE user_id = NEW.user_id;
     END IF;
   END IF;
 

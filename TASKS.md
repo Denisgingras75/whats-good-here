@@ -162,7 +162,7 @@
 
 ---
 
-## T13: Consensus trigger doesn't re-score existing voters when new consensus is reached
+## ~~T13: Consensus trigger doesn't re-score existing voters when new consensus is reached~~ DONE
 
 **Why:** `check_consensus_after_vote` (schema.sql:1601-1677) only fires the consensus scoring loop when `consensus_ready` transitions from FALSE to TRUE. Votes cast after consensus is already reached are never scored — they don't get `scored_at` set, don't create `bias_events`, and don't update `user_rating_stats`. This means late voters never see how they compared.
 
