@@ -365,12 +365,6 @@ export function Restaurants() {
                             Closed for Season
                           </span>
                         )}
-                        <p className="mt-1 font-medium" style={{ color: stats.totalVotes > 0 ? 'var(--color-accent-gold)' : 'var(--color-text-tertiary)', fontSize: '12px' }}>
-                          {stats.totalVotes > 0
-                            ? `${stats.totalVotes} total dish votes`
-                            : 'No votes yet'
-                          }
-                        </p>
                       </div>
 
                       {/* Chevron */}
