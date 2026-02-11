@@ -24,6 +24,7 @@ export function Restaurants() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('top')
+  const [restaurantTab, setRestaurantTab] = useState('open')
   const [friendsVotesByDish, setFriendsVotesByDish] = useState({})
 
   const { location, radius } = useLocationContext()
@@ -166,12 +167,13 @@ export function Restaurants() {
     return stats
   }, [dishes])
 
-  // Filter restaurants by search and sort alphabetically
+  // Filter restaurants by open/closed tab, search, and sort alphabetically
   const filteredRestaurants = useMemo(() => {
     return restaurants
+      .filter(r => restaurantTab === 'open' ? r.is_open !== false : r.is_open === false)
       .filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
       .sort((a, b) => a.name.localeCompare(b.name))
-  }, [restaurants, searchQuery])
+  }, [restaurants, searchQuery, restaurantTab])
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg) 100%)' }}>
@@ -247,7 +249,7 @@ export function Restaurants() {
       {!selectedRestaurant && (
         <div className="p-4 pt-5">
           {/* Section Header */}
-          <div className="mb-5 flex items-center gap-3">
+          <div className="mb-4 flex items-center gap-3">
             <div
               className="w-1 h-6 rounded-full"
               style={{ background: 'linear-gradient(180deg, var(--color-primary) 0%, var(--color-accent-orange) 100%)' }}
@@ -262,6 +264,44 @@ export function Restaurants() {
             >
               Restaurants near you
             </h2>
+          </div>
+
+          {/* Open / Closed Tab Switcher */}
+          <div
+            className="flex rounded-xl p-1 mb-5"
+            style={{
+              background: 'var(--color-surface-elevated)',
+              border: '1px solid var(--color-divider)',
+            }}
+            role="tablist"
+            aria-label="Restaurant status filter"
+          >
+            <button
+              role="tab"
+              aria-selected={restaurantTab === 'open'}
+              onClick={() => setRestaurantTab('open')}
+              className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+              style={{
+                background: restaurantTab === 'open' ? 'var(--color-primary)' : 'transparent',
+                color: restaurantTab === 'open' ? 'white' : 'var(--color-text-secondary)',
+                boxShadow: restaurantTab === 'open' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+              }}
+            >
+              Open
+            </button>
+            <button
+              role="tab"
+              aria-selected={restaurantTab === 'closed'}
+              onClick={() => setRestaurantTab('closed')}
+              className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+              style={{
+                background: restaurantTab === 'closed' ? 'var(--color-primary)' : 'transparent',
+                color: restaurantTab === 'closed' ? 'white' : 'var(--color-text-secondary)',
+                boxShadow: restaurantTab === 'closed' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+              }}
+            >
+              Closed
+            </button>
           </div>
 
           {fetchError ? (
@@ -296,6 +336,7 @@ export function Restaurants() {
                       border: '1px solid rgba(217, 167, 101, 0.1)',
                       borderLeft: '3px solid var(--color-accent-gold)',
                       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(217, 167, 101, 0.04)',
+                      opacity: restaurant.is_open ? 1 : 0.6,
                     }}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -311,6 +352,19 @@ export function Restaurants() {
                         >
                           {restaurant.name}
                         </h3>
+                        {!restaurant.is_open && (
+                          <span
+                            className="inline-block mt-1 px-2 py-0.5 rounded-full font-semibold"
+                            style={{
+                              fontSize: '10px',
+                              background: 'rgba(200, 90, 84, 0.15)',
+                              color: 'var(--color-primary)',
+                              border: '1px solid rgba(200, 90, 84, 0.25)',
+                            }}
+                          >
+                            Closed for Season
+                          </span>
+                        )}
                         <p className="mt-1 font-medium" style={{ color: stats.totalVotes > 0 ? 'var(--color-accent-gold)' : 'var(--color-text-tertiary)', fontSize: '12px' }}>
                           {stats.totalVotes > 0
                             ? `${stats.totalVotes} total dish votes`
@@ -337,7 +391,14 @@ export function Restaurants() {
                     border: '1px solid var(--color-divider)',
                   }}
                 >
-                  <p className="font-medium" style={{ fontSize: '14px' }}>No restaurants found</p>
+                  <p className="font-medium" style={{ fontSize: '14px' }}>
+                    {searchQuery
+                      ? 'No restaurants found'
+                      : restaurantTab === 'open'
+                        ? 'No open restaurants found'
+                        : 'No closed restaurants'
+                    }
+                  </p>
                 </div>
               )}
             </div>
