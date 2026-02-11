@@ -23,7 +23,7 @@ export const restaurantsApi = {
           lat,
           lng,
           is_open,
-          dishes (id)
+          dishes (id, name, avg_rating, total_votes)
         `)
         .order('name')
 
@@ -31,12 +31,27 @@ export const restaurantsApi = {
         throw createClassifiedError(error)
       }
 
-      // Transform to include dish count
-      return (data || []).map(r => ({
-        ...r,
-        dishCount: r.dishes?.length || 0,
-        dishes: undefined, // Remove the dishes array, keep only count
-      }))
+      // Transform to include dish count and "known for" dish
+      return (data || []).map(r => {
+        const dishList = r.dishes || []
+
+        // Find highest-rated dish with 9.0+ rating and 10+ votes
+        let knownFor = null
+        dishList.forEach(d => {
+          if ((d.avg_rating || 0) >= 9.0 && (d.total_votes || 0) >= 10) {
+            if (!knownFor || d.avg_rating > knownFor.avg_rating) {
+              knownFor = { name: d.name, rating: d.avg_rating }
+            }
+          }
+        })
+
+        return {
+          ...r,
+          dishCount: dishList.length,
+          knownFor,
+          dishes: undefined,
+        }
+      })
     } catch (error) {
       logger.error('Error fetching restaurants:', error)
       throw error.type ? error : createClassifiedError(error)

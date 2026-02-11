@@ -11,6 +11,7 @@ import { useFavorites } from '../hooks/useFavorites'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { RestaurantDishes, RestaurantMenu } from '../components/restaurants'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
+import { getRatingColor } from '../utils/ranking'
 
 export function Restaurants() {
   const { user } = useAuth()
@@ -364,6 +365,24 @@ export function Restaurants() {
                           >
                             Closed for Season
                           </span>
+                        )}
+                        {restaurant.knownFor && (
+                          <p
+                            className="mt-1 font-medium"
+                            style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}
+                          >
+                            Known for{' '}
+                            <span style={{ color: 'var(--color-text-secondary)' }}>
+                              {restaurant.knownFor.name}
+                            </span>
+                            {' · '}
+                            <span
+                              className="font-bold"
+                              style={{ color: getRatingColor(restaurant.knownFor.rating) }}
+                            >
+                              {restaurant.knownFor.rating}
+                            </span>
+                          </p>
                         )}
                       </div>
 
