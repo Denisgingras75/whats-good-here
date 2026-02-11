@@ -112,7 +112,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
     return (
       <div className="px-4 py-6" role="status" aria-label="Loading menu">
         <div className="flex gap-4">
-          <div className="space-y-3" style={{ width: '110px' }}>
+          <div className="space-y-3" style={{ width: '33%' }}>
             {[...Array(5)].map((_, i) => (
               <div key={i} className="h-8 rounded-lg animate-pulse" style={{ background: 'var(--color-divider)' }} aria-hidden="true" />
             ))}
@@ -175,7 +175,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
       <nav
         className="flex-shrink-0 overflow-y-auto py-3"
         style={{
-          width: '108px',
+          width: '33%',
           background: 'linear-gradient(180deg, var(--color-bg) 0%, rgba(13, 27, 34, 0.95) 100%)',
           borderRight: '1px solid var(--color-divider)',
           scrollbarWidth: 'none',
