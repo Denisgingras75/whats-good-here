@@ -247,7 +247,7 @@ Evidence: `schema.sql:1534-1776`
 **Hooks:** `useDishes` (with restaurantId param)
 **API calls:** `dishesApi.getDishesForRestaurant()`, `restaurantsApi.getAll()`
 **Data reads:** `get_restaurant_dishes` RPC, restaurants table
-**Components:** `RestaurantDishes` (top-rated view), `RestaurantMenu` (split-pane menu view), `TopDishCard`, `MenuDishCard`
+**Components:** `RestaurantDishes` (top-rated view), `RestaurantMenu` (split-pane menu view), `TopDishCard`
 
 **Restaurant List:** Open/Closed tab switcher filters restaurants by `is_open`. Closed restaurants display at 0.6 opacity with a "Closed for Season" badge. Address links to Google Maps.
 

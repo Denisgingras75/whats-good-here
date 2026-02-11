@@ -304,7 +304,7 @@
 - Search filters work across sections
 - `npm run build` passes
 
-**Files:** `src/components/restaurants/RestaurantMenu.jsx`, `src/components/restaurants/MenuDishCard.jsx`, `src/components/restaurants/index.js`
+**Files:** `src/components/restaurants/RestaurantMenu.jsx`, `src/components/restaurants/index.js`
 
 ---
 
