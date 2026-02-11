@@ -1,9 +1,12 @@
-import { useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
-import { TopDishCard } from './TopDishCard'
+import { getRatingColor } from '../../utils/ranking'
 
-// Restaurant menu view - dishes grouped by menu_section to mirror the restaurant's actual menu
-export function RestaurantMenu({ dishes, loading, error, onVote, onLoginRequired, isFavorite, onToggleFavorite, user, searchQuery = '', friendsVotesByDish = {}, menuSectionOrder = [] }) {
+// Split-pane restaurant menu: section nav on left, dishes on right
+export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuSectionOrder = [] }) {
+  const [activeSection, setActiveSection] = useState(null)
+  const navigate = useNavigate()
 
   // Group dishes by menu_section, ordered by restaurant's menu_section_order
   const sectionGroups = useMemo(() => {
@@ -35,7 +38,7 @@ export function RestaurantMenu({ dishes, loading, error, onVote, onLoginRequired
       groups[section].push(dish)
     })
 
-    // Sort dishes within each group
+    // Sort dishes within each group by rating (highest first)
     const sortDishes = (arr) => {
       arr.sort((a, b) => {
         const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
@@ -55,7 +58,7 @@ export function RestaurantMenu({ dishes, loading, error, onVote, onLoginRequired
     Object.values(groups).forEach(sortDishes)
     sortDishes(uncategorized)
 
-    // Order sections by menu_section_order, then alphabetical for any not in the list
+    // Order sections by menu_section_order, then alphabetical
     const sectionKeys = Object.keys(groups)
     sectionKeys.sort((a, b) => {
       const aIndex = menuSectionOrder.indexOf(a)
@@ -75,21 +78,50 @@ export function RestaurantMenu({ dishes, loading, error, onVote, onLoginRequired
     }
   }, [dishes, searchQuery, menuSectionOrder])
 
-  const handleToggleSave = async (dishId) => {
-    if (!user) {
-      onLoginRequired()
-      return
+  // All sections including uncategorized
+  const allSections = useMemo(() => {
+    const result = sectionGroups.sections.slice()
+    if (sectionGroups.uncategorized.length > 0) {
+      result.push({ name: 'Other', dishes: sectionGroups.uncategorized })
     }
-    await onToggleFavorite(dishId)
-  }
+    return result
+  }, [sectionGroups])
+
+  // Auto-select first section
+  useEffect(() => {
+    if (allSections.length > 0 && !activeSection) {
+      setActiveSection(allSections[0].name)
+    }
+  }, [allSections, activeSection])
+
+  // Reset active section when search changes
+  useEffect(() => {
+    if (allSections.length > 0) {
+      setActiveSection(allSections[0].name)
+    } else {
+      setActiveSection(null)
+    }
+  }, [searchQuery]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const activeDishes = useMemo(() => {
+    const section = allSections.find(s => s.name === activeSection)
+    return section ? section.dishes : []
+  }, [allSections, activeSection])
 
   if (loading) {
     return (
       <div className="px-4 py-6" role="status" aria-label="Loading menu">
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-divider)' }} aria-hidden="true" />
-          ))}
+        <div className="flex gap-4">
+          <div className="space-y-3" style={{ width: '110px' }}>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-8 rounded-lg animate-pulse" style={{ background: 'var(--color-divider)' }} aria-hidden="true" />
+            ))}
+          </div>
+          <div className="flex-1 space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-14 rounded-lg animate-pulse" style={{ background: 'var(--color-divider)' }} aria-hidden="true" />
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -103,10 +135,7 @@ export function RestaurantMenu({ dishes, loading, error, onVote, onLoginRequired
     )
   }
 
-  const hasSections = sectionGroups.sections.length > 0
-  const hasUncategorized = sectionGroups.uncategorized.length > 0
-
-  if (!hasSections && !hasUncategorized) {
+  if (allSections.length === 0) {
     return (
       <div className="px-4 py-5">
         <div
@@ -134,110 +163,207 @@ export function RestaurantMenu({ dishes, loading, error, onVote, onLoginRequired
   }
 
   return (
-    <div className="px-4 py-5">
-      {sectionGroups.sections.map((section, sectionIndex) => (
-        <div key={section.name} className={sectionIndex > 0 ? 'mt-6' : ''}>
-          {/* Menu Section Header */}
-          <div
-            className="flex items-center gap-3 mb-3 pb-2"
+    <div
+      className="flex mx-3 my-4 rounded-xl overflow-hidden"
+      style={{
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-divider)',
+        minHeight: '420px',
+      }}
+    >
+      {/* Left: Section Navigation */}
+      <nav
+        className="flex-shrink-0 overflow-y-auto py-3"
+        style={{
+          width: '108px',
+          background: 'linear-gradient(180deg, var(--color-bg) 0%, rgba(13, 27, 34, 0.95) 100%)',
+          borderRight: '1px solid var(--color-divider)',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+        role="tablist"
+        aria-label="Menu sections"
+      >
+        {allSections.map((section) => {
+          const isActive = section.name === activeSection
+          return (
+            <button
+              key={section.name}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setActiveSection(section.name)}
+              className="w-full text-left px-3 py-2.5 transition-all relative"
+              style={{
+                background: isActive
+                  ? 'linear-gradient(90deg, rgba(217, 167, 101, 0.12) 0%, transparent 100%)'
+                  : 'transparent',
+              }}
+            >
+              {/* Gold accent bar */}
+              {isActive && (
+                <div
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 rounded-full"
+                  style={{
+                    height: '60%',
+                    background: 'linear-gradient(180deg, var(--color-accent-gold), rgba(217, 167, 101, 0.4))',
+                    boxShadow: '0 0 6px rgba(217, 167, 101, 0.3)',
+                  }}
+                />
+              )}
+              <span
+                className="block font-semibold leading-tight"
+                style={{
+                  fontSize: '12px',
+                  color: isActive ? 'var(--color-accent-gold)' : 'var(--color-text-tertiary)',
+                  letterSpacing: '0.01em',
+                }}
+              >
+                {section.name}
+              </span>
+              <span
+                className="block mt-0.5 font-medium"
+                style={{
+                  fontSize: '10px',
+                  color: isActive ? 'rgba(217, 167, 101, 0.6)' : 'rgba(125, 113, 104, 0.5)',
+                }}
+              >
+                {section.dishes.length} {section.dishes.length === 1 ? 'item' : 'items'}
+              </span>
+            </button>
+          )
+        })}
+      </nav>
+
+      {/* Right: Dish List */}
+      <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        {/* Section title */}
+        <div
+          className="sticky top-0 z-10 px-4 py-3"
+          style={{
+            background: 'linear-gradient(180deg, var(--color-surface) 85%, transparent)',
+            borderBottom: '1px solid var(--color-divider)',
+          }}
+        >
+          <h3
+            className="font-bold"
             style={{
-              borderBottom: '1px solid var(--color-divider)',
+              color: 'var(--color-text-primary)',
+              fontSize: '16px',
+              letterSpacing: '-0.02em',
             }}
           >
-            <div
-              className="w-0.5 h-5 rounded-full flex-shrink-0"
-              style={{ background: 'linear-gradient(180deg, var(--color-accent-gold) 0%, rgba(217, 167, 101, 0.3) 100%)' }}
-            />
-            <h3
-              className="font-bold"
-              style={{
-                color: 'var(--color-text-primary)',
-                fontSize: '15px',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {section.name}
-            </h3>
-            <span
-              className="font-medium"
-              style={{
-                color: 'var(--color-text-tertiary)',
-                fontSize: '12px',
-              }}
-            >
-              {section.dishes.length}
-            </span>
-          </div>
-
-          {/* Dishes in this section */}
-          <div className="space-y-3.5">
-            {section.dishes.map((dish) => (
-              <TopDishCard
-                key={dish.dish_id}
-                dish={dish}
-                rank={null}
-                onVote={onVote}
-                onLoginRequired={onLoginRequired}
-                isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
-                onToggleFavorite={handleToggleSave}
-                friendVotes={friendsVotesByDish[dish.dish_id]}
-              />
-            ))}
-          </div>
+            {activeSection}
+          </h3>
         </div>
-      ))}
 
-      {/* Uncategorized dishes (no menu_section set) */}
-      {hasUncategorized && (
-        <div className={hasSections ? 'mt-6' : ''}>
-          {hasSections && (
-            <div
-              className="flex items-center gap-3 mb-3 pb-2"
-              style={{
-                borderBottom: '1px solid var(--color-divider)',
-              }}
-            >
-              <div
-                className="w-0.5 h-5 rounded-full flex-shrink-0"
-                style={{ background: 'linear-gradient(180deg, var(--color-accent-gold) 0%, rgba(217, 167, 101, 0.3) 100%)' }}
-              />
-              <h3
-                className="font-bold"
+        {/* Dish rows */}
+        <div className="px-3 pb-4">
+          {activeDishes.map((dish, i) => {
+            const isRanked = (dish.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+            const votes = dish.total_votes || 0
+            const displayRating = (dish.has_variants && dish.best_variant_rating)
+              ? dish.best_variant_rating
+              : dish.avg_rating
+
+            return (
+              <button
+                key={dish.dish_id}
+                onClick={() => navigate(`/dish/${dish.dish_id}`)}
+                className="w-full text-left py-3 px-2 transition-all active:scale-[0.98] rounded-lg"
                 style={{
-                  color: 'var(--color-text-primary)',
-                  fontSize: '15px',
-                  letterSpacing: '-0.01em',
+                  borderBottom: i < activeDishes.length - 1
+                    ? '1px solid var(--color-divider)'
+                    : 'none',
                 }}
               >
-                Other
-              </h3>
-              <span
-                className="font-medium"
-                style={{
-                  color: 'var(--color-text-tertiary)',
-                  fontSize: '12px',
-                }}
-              >
-                {sectionGroups.uncategorized.length}
-              </span>
-            </div>
-          )}
-          <div className="space-y-3.5">
-            {sectionGroups.uncategorized.map((dish) => (
-              <TopDishCard
-                key={dish.dish_id}
-                dish={dish}
-                rank={null}
-                onVote={onVote}
-                onLoginRequired={onLoginRequired}
-                isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
-                onToggleFavorite={handleToggleSave}
-                friendVotes={friendsVotesByDish[dish.dish_id]}
-              />
-            ))}
-          </div>
+                {/* Row: Name + Price */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <span
+                      className="font-semibold block"
+                      style={{
+                        color: 'var(--color-text-primary)',
+                        fontSize: '13px',
+                        letterSpacing: '-0.01em',
+                        lineHeight: '1.3',
+                      }}
+                    >
+                      {dish.dish_name}
+                    </span>
+                  </div>
+
+                  {/* Dotted leader + price */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0 pt-0.5">
+                    <div
+                      className="w-8"
+                      style={{
+                        borderBottom: '1px dotted var(--color-divider)',
+                        marginBottom: '3px',
+                      }}
+                    />
+                    {dish.price ? (
+                      <span
+                        className="font-semibold"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          fontSize: '13px',
+                          fontVariantNumeric: 'tabular-nums',
+                        }}
+                      >
+                        ${Number(dish.price).toFixed(0)}
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--color-text-tertiary)', fontSize: '11px' }}>
+                        --
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Rating row */}
+                <div className="flex items-center gap-2 mt-1.5">
+                  {isRanked ? (
+                    <>
+                      <span
+                        className="font-bold"
+                        style={{
+                          color: getRatingColor(displayRating),
+                          fontSize: '13px',
+                        }}
+                      >
+                        {displayRating}
+                      </span>
+                      <span
+                        className="font-medium"
+                        style={{ color: 'var(--color-text-tertiary)', fontSize: '10px' }}
+                      >
+                        {votes} votes
+                      </span>
+                      <span style={{ color: 'var(--color-divider)' }}>|</span>
+                      <span
+                        className="font-semibold"
+                        style={{ color: 'var(--color-success)', fontSize: '10px' }}
+                      >
+                        {Math.round(dish.percent_worth_it)}% reorder
+                      </span>
+                    </>
+                  ) : (
+                    <span
+                      className="font-medium"
+                      style={{ color: 'var(--color-text-tertiary)', fontSize: '11px' }}
+                    >
+                      {votes > 0
+                        ? `${votes} vote${votes === 1 ? '' : 's'} so far`
+                        : 'No votes yet'
+                      }
+                    </span>
+                  )}
+                </div>
+              </button>
+            )
+          })}
         </div>
-      )}
+      </div>
     </div>
   )
 }

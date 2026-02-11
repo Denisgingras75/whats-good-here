@@ -569,13 +569,7 @@ export function Restaurants() {
               dishes={dishes}
               loading={dishesLoading}
               error={dishesError}
-              onVote={handleVote}
-              onLoginRequired={handleLoginRequired}
-              isFavorite={isFavorite}
-              onToggleFavorite={handleToggleFavorite}
-              user={user}
               searchQuery={dishSearchQuery}
-              friendsVotesByDish={friendsVotesByDish}
               menuSectionOrder={selectedRestaurant?.menu_section_order || []}
             />
           )}
