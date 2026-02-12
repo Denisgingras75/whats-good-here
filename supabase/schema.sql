@@ -1362,9 +1362,7 @@ BEGIN
 
   INSERT INTO rate_limits (user_id, action) VALUES (v_user_id, p_action);
 
-  IF random() < 0.01 THEN
-    DELETE FROM rate_limits WHERE created_at < NOW() - INTERVAL '1 hour';
-  END IF;
+  -- Cleanup handled by pg_cron job 'cleanup-old-rate-limits' (hourly)
 
   RETURN jsonb_build_object('allowed', true);
 END;
@@ -1727,6 +1725,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- pg_cron: recalculate value percentiles every 2 hours (enabled in production)
 SELECT cron.schedule('recalculate-value-percentiles', '0 */2 * * *', $$SELECT recalculate_value_percentiles()$$);
+
+-- pg_cron: clean up expired rate limit entries hourly (enabled in production)
+SELECT cron.schedule('cleanup-old-rate-limits', '15 * * * *', $$DELETE FROM rate_limits WHERE created_at < NOW() - INTERVAL '1 hour'$$);
 
 
 -- =============================================

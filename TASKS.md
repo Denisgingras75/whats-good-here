@@ -228,7 +228,7 @@
 
 ---
 
-## T18: Rate limit cleanup is probabilistic — old entries may accumulate
+## ~~T18: Rate limit cleanup is probabilistic — old entries may accumulate~~ DONE
 
 **Why:** `check_and_record_rate_limit` (schema.sql:1461) only cleans up old entries with `random() < 0.01` (1% chance per call). Under low traffic, rate_limits table entries older than 1 hour can accumulate indefinitely. The pg_cron job for value percentiles exists but there's no scheduled cleanup for rate_limits.
 
