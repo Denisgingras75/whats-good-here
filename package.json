@@ -17,6 +17,7 @@
     "@supabase/supabase-js": "^2.89.0",
     "@tanstack/react-query": "^5.90.20",
     "nprogress": "^0.2.0",
+    "openai": "^6.21.0",
     "posthog-js": "^1.324.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

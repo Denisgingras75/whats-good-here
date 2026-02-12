@@ -55,6 +55,11 @@ export const ALL_CATEGORIES = [
   { id: 'asian', label: 'Asian', emoji: '🥢' },
   { id: 'quesadilla', label: 'Quesadilla', emoji: '🫓' },
   { id: 'breakfast sandwich', label: 'Breakfast Sandwich', emoji: '🥯' },
+  { id: 'ribs', label: 'Ribs', emoji: '🍖' },
+  { id: 'sides', label: 'Sides', emoji: '🥦' },
+  { id: 'duck', label: 'Duck', emoji: '🦆' },
+  { id: 'lamb', label: 'Lamb', emoji: '🍖' },
+  { id: 'pork', label: 'Pork', emoji: '🐷' },
 ]
 
 // Fuzzy match a search term to existing categories
@@ -166,6 +171,11 @@ export const CATEGORY_INFO = {
   'entree': { emoji: '🥩', label: 'Entrees' },
   'steak': { emoji: '🥩', label: 'Steak' },
   'dessert': { emoji: '🍰', label: 'Desserts' },
+  'ribs': { emoji: '🍖', label: 'Ribs' },
+  'sides': { emoji: '🥦', label: 'Sides' },
+  'duck': { emoji: '🦆', label: 'Duck' },
+  'lamb': { emoji: '🍖', label: 'Lamb' },
+  'pork': { emoji: '🐷', label: 'Pork' },
 }
 
 // Get category info with fuzzy matching
