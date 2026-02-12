@@ -346,7 +346,7 @@ export const dishesApi = {
   /**
    * Get a single dish by ID with vote stats
    * Uses pre-computed avg_rating and total_votes from dishes table (maintained by trigger).
-   * Only queries votes table for yes_votes count (not yet maintained by trigger — see T14).
+   * Queries votes table for yes_votes count (computed on-the-fly, no column on dishes table).
    * @param {string} dishId - Dish ID
    * @returns {Promise<Object>} Dish object with vote stats
    * @throws {Error} With classified error type
@@ -378,7 +378,6 @@ export const dishesApi = {
 
       // Count yes_votes and check variants in parallel
       // Note: avg_rating and total_votes come from pre-computed dish columns.
-      // yes_votes still needs a count query because the trigger doesn't maintain it (T14).
       const [yesVotesResult, hasVariantsResult] = await Promise.all([
         supabase
           .from('votes')

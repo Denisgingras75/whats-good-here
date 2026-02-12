@@ -242,8 +242,6 @@ Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode.
 - `useDishes` — Location-based ranked dishes via React Query
 - `useDishPhotos` — Photo upload with quality analysis, validation, progress
 - `useDishSearch` — Debounced dish search (2+ chars)
-- `useLeaderboard` — Friends leaderboard with weekly reset countdown
-- `useStreak` — Voting streak tracking
 - `useProfile` — User profile data
 - `useRestaurantManager` — Manager portal data
 - `useSpecials` — Restaurant specials management
@@ -260,11 +258,9 @@ Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode.
 - `check_photo_upload_rate_limit` — Photo upload rate limiting (5/min)
 - `get_taste_compatibility` — Taste match % between two users
 - `get_similar_taste_users` — Users with similar taste you don't follow
-- `get_friends_leaderboard` — Friends ranked by votes
 - `get_user_rating_identity` — Rating style analysis (MAD-based bias)
 - `get_friends_votes_for_dish` / `get_friends_votes_for_restaurant` — Social context
 - `evaluate_user_badges` — Award badges based on stats
-- `get_user_streak_info` — Streak status and stats
 - `get_invite_details` / `accept_restaurant_invite` — Manager invite flow
 
 ### 4.10 File Organization

@@ -91,13 +91,6 @@
   --color-blue-light: #60A5FA;
   --color-purple: #9333EA;
 
-  /* Streak card status backgrounds */
-  --color-streak-at-risk-bg: #FEF3C7;
-  --color-streak-at-risk-border: #F59E0B;
-  --color-streak-active-bg: #FFF7ED;
-  --color-streak-active-bg-end: #FFEDD5;
-  --color-streak-active-border: var(--color-primary);
-
   /* Photo tier badges */
   --color-tier-featured: #F59E0B;
   --color-tier-community: #3B82F6;

@@ -7,7 +7,8 @@ ALTER TABLE dishes ADD COLUMN IF NOT EXISTS value_percentile DECIMAL(5, 2);
 ALTER TABLE dishes ADD COLUMN IF NOT EXISTS category_median_price DECIMAL(6, 2);
 
 -- 2. Create category median prices view
-CREATE OR REPLACE VIEW category_median_prices AS
+CREATE OR REPLACE VIEW category_median_prices
+WITH (security_invoker = true) AS
 SELECT category,
   PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price) AS median_price,
   COUNT(*) AS dish_count

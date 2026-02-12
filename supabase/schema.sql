@@ -50,7 +50,6 @@ CREATE TABLE IF NOT EXISTS dishes (
   cuisine TEXT,
   avg_rating DECIMAL(3, 1),
   total_votes INT DEFAULT 0,
-  yes_votes INT DEFAULT 0,
   consensus_rating NUMERIC(3, 1),
   consensus_ready BOOLEAN DEFAULT FALSE,
   consensus_votes INT DEFAULT 0,
@@ -178,19 +177,7 @@ CREATE TABLE IF NOT EXISTS bias_events (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 1l. user_streaks
-CREATE TABLE IF NOT EXISTS user_streaks (
-  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  current_streak INTEGER NOT NULL DEFAULT 0,
-  longest_streak INTEGER NOT NULL DEFAULT 0,
-  votes_this_week INTEGER NOT NULL DEFAULT 0,
-  week_start DATE NOT NULL DEFAULT (date_trunc('week', now())::date),
-  last_vote_date DATE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- 1m. badges
+-- 1l. badges
 CREATE TABLE IF NOT EXISTS badges (
   key TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -321,11 +308,6 @@ CREATE INDEX IF NOT EXISTS idx_user_rating_stats_bias ON user_rating_stats(ratin
 CREATE INDEX IF NOT EXISTS idx_bias_events_user ON bias_events(user_id);
 CREATE INDEX IF NOT EXISTS idx_bias_events_unseen ON bias_events(user_id, seen) WHERE seen = FALSE;
 
--- user_streaks
-CREATE INDEX IF NOT EXISTS idx_user_streaks_votes_week ON user_streaks(votes_this_week DESC);
-CREATE INDEX IF NOT EXISTS idx_user_streaks_current_streak ON user_streaks(current_streak DESC);
-CREATE INDEX IF NOT EXISTS idx_user_streaks_week_start ON user_streaks(week_start);
-
 -- user_badges
 CREATE INDEX IF NOT EXISTS idx_user_badges_user ON user_badges(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_badges_badge ON user_badges(badge_key);
@@ -367,7 +349,6 @@ ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_rating_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bias_events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_streaks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE specials ENABLE ROW LEVEL SECURITY;
@@ -430,11 +411,6 @@ CREATE POLICY "Public can read stats" ON user_rating_stats FOR SELECT USING (TRU
 -- bias_events: users read + update own
 CREATE POLICY "Users can read own events" ON bias_events FOR SELECT USING ((select auth.uid()) = user_id);
 CREATE POLICY "Users can mark events as seen" ON bias_events FOR UPDATE USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
-
--- user_streaks: public read, users manage own
-CREATE POLICY "user_streaks_select_public" ON user_streaks FOR SELECT USING (true);
-CREATE POLICY "user_streaks_update_own" ON user_streaks FOR UPDATE USING ((select auth.uid()) = user_id);
-CREATE POLICY "user_streaks_insert_own" ON user_streaks FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
 
 -- badges: public read
 CREATE POLICY "Public read badges" ON badges FOR SELECT USING (true);
@@ -1333,84 +1309,7 @@ $$;
 
 
 -- =============================================
--- 9. STREAK & LEADERBOARD FUNCTIONS
--- =============================================
-
--- Get user's streak info
-CREATE OR REPLACE FUNCTION get_user_streak_info(p_user_id UUID)
-RETURNS TABLE (
-  current_streak INTEGER, longest_streak INTEGER, votes_this_week INTEGER,
-  last_vote_date DATE, streak_status TEXT
-)
-LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_today DATE; v_yesterday DATE; v_record RECORD;
-BEGIN
-  v_today := CURRENT_DATE;
-  v_yesterday := v_today - INTERVAL '1 day';
-
-  SELECT us.current_streak, us.longest_streak, us.votes_this_week, us.last_vote_date
-  INTO v_record FROM user_streaks us WHERE us.user_id = p_user_id;
-
-  IF NOT FOUND THEN
-    RETURN QUERY SELECT 0, 0, 0, NULL::DATE, 'none'::TEXT;
-    RETURN;
-  END IF;
-
-  RETURN QUERY SELECT v_record.current_streak, v_record.longest_streak, v_record.votes_this_week,
-    v_record.last_vote_date,
-    CASE
-      WHEN v_record.last_vote_date = v_today THEN 'active'
-      WHEN v_record.last_vote_date = v_yesterday THEN 'at_risk'
-      ELSE 'broken'
-    END AS streak_status;
-END;
-$$;
-
--- Get friends leaderboard (mutual follows)
-CREATE OR REPLACE FUNCTION get_friends_leaderboard(p_user_id UUID, p_limit INTEGER DEFAULT 10)
-RETURNS TABLE (
-  user_id UUID, display_name TEXT, votes_this_week INTEGER,
-  current_streak INTEGER, is_current_user BOOLEAN, rank INTEGER
-)
-LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
-BEGIN
-  RETURN QUERY
-  WITH mutual_friends AS (
-    SELECT f1.followed_id AS friend_id
-    FROM follows f1 INNER JOIN follows f2 ON f1.followed_id = f2.follower_id AND f1.follower_id = f2.followed_id
-    WHERE f1.follower_id = p_user_id
-  ),
-  all_participants AS (
-    SELECT friend_id AS participant_id FROM mutual_friends
-    UNION SELECT p_user_id AS participant_id
-  ),
-  ranked AS (
-    SELECT ap.participant_id, p.display_name,
-      COALESCE(us.votes_this_week, 0) AS votes_this_week,
-      COALESCE(us.current_streak, 0) AS current_streak,
-      ap.participant_id = p_user_id AS is_current_user,
-      ROW_NUMBER() OVER (ORDER BY COALESCE(us.votes_this_week, 0) DESC, COALESCE(us.current_streak, 0) DESC) AS rank
-    FROM all_participants ap
-    LEFT JOIN user_streaks us ON us.user_id = ap.participant_id
-    LEFT JOIN profiles p ON p.id = ap.participant_id
-    WHERE us.week_start = date_trunc('week', CURRENT_DATE)::date OR us.week_start IS NULL OR ap.participant_id = p_user_id
-  )
-  SELECT r.participant_id, COALESCE(r.display_name, 'Anonymous'),
-    r.votes_this_week, r.current_streak, r.is_current_user, r.rank::INTEGER
-  FROM ranked r ORDER BY r.rank LIMIT p_limit;
-END;
-$$;
-
--- Get time until weekly reset (seconds)
-CREATE OR REPLACE FUNCTION get_weekly_reset_countdown()
-RETURNS INTEGER LANGUAGE SQL STABLE SET search_path = public AS $$
-  SELECT EXTRACT(EPOCH FROM (date_trunc('week', CURRENT_DATE + INTERVAL '1 week') - NOW()))::INTEGER;
-$$;
-
-
--- =============================================
--- 10. NOTIFICATION FUNCTIONS
+-- 9. NOTIFICATION FUNCTIONS
 -- =============================================
 
 -- Get unread notification count
@@ -1744,49 +1643,7 @@ DROP TRIGGER IF EXISTS update_dish_rating_on_vote ON votes;
 CREATE TRIGGER update_dish_rating_on_vote
   AFTER INSERT OR UPDATE OR DELETE ON votes FOR EACH ROW EXECUTE FUNCTION update_dish_avg_rating();
 
--- 13f. Update streak on vote
-CREATE OR REPLACE FUNCTION update_user_streak_on_vote()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_today DATE; v_yesterday DATE; v_current_week_start DATE;
-  v_existing RECORD; v_new_streak INTEGER; v_votes_this_week INTEGER;
-BEGIN
-  v_today := CURRENT_DATE;
-  v_yesterday := v_today - INTERVAL '1 day';
-  v_current_week_start := date_trunc('week', v_today)::date;
-
-  SELECT * INTO v_existing FROM user_streaks WHERE user_id = NEW.user_id;
-
-  IF NOT FOUND THEN
-    INSERT INTO user_streaks (user_id, current_streak, longest_streak, votes_this_week, week_start, last_vote_date)
-    VALUES (NEW.user_id, 1, 1, 1, v_current_week_start, v_today);
-    RETURN NEW;
-  END IF;
-
-  IF v_existing.last_vote_date = v_today THEN v_new_streak := v_existing.current_streak;
-  ELSIF v_existing.last_vote_date = v_yesterday THEN v_new_streak := v_existing.current_streak + 1;
-  ELSIF v_existing.last_vote_date IS NULL THEN v_new_streak := 1;
-  ELSE v_new_streak := 1; END IF;
-
-  IF v_existing.week_start = v_current_week_start THEN
-    v_votes_this_week := LEAST(v_existing.votes_this_week + 1, 10);
-  ELSE v_votes_this_week := 1; END IF;
-
-  UPDATE user_streaks SET current_streak = v_new_streak,
-    longest_streak = GREATEST(v_existing.longest_streak, v_new_streak),
-    votes_this_week = v_votes_this_week, week_start = v_current_week_start,
-    last_vote_date = v_today, updated_at = NOW()
-  WHERE user_id = NEW.user_id;
-
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trigger_update_streak_on_vote ON votes;
-CREATE TRIGGER trigger_update_streak_on_vote
-  AFTER INSERT ON votes FOR EACH ROW EXECUTE FUNCTION update_user_streak_on_vote();
-
--- 13g. Compute value_score on dish insert/update
+-- 13f. Compute value_score on dish insert/update
 CREATE OR REPLACE FUNCTION compute_value_score()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -1868,9 +1725,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
--- pg_cron: recalculate value percentiles every 2 hours
--- Run manually in Supabase SQL Editor:
--- SELECT cron.schedule('recalculate-value-percentiles', '0 */2 * * *', $$SELECT recalculate_value_percentiles()$$);
+-- pg_cron: recalculate value percentiles every 2 hours (enabled in production)
+SELECT cron.schedule('recalculate-value-percentiles', '0 */2 * * *', $$SELECT recalculate_value_percentiles()$$);
 
 
 -- =============================================
@@ -1879,9 +1735,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 GRANT EXECUTE ON FUNCTION get_smart_snippet(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_smart_snippet(UUID) TO anon;
-GRANT EXECUTE ON FUNCTION get_user_streak_info TO authenticated;
-GRANT EXECUTE ON FUNCTION get_friends_leaderboard TO authenticated;
-GRANT EXECUTE ON FUNCTION get_weekly_reset_countdown TO authenticated;
 GRANT EXECUTE ON FUNCTION check_and_record_rate_limit TO authenticated;
 GRANT EXECUTE ON FUNCTION check_vote_rate_limit TO authenticated;
 GRANT EXECUTE ON FUNCTION check_photo_upload_rate_limit TO authenticated;

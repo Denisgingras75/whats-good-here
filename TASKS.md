@@ -136,7 +136,7 @@
 
 ---
 
-## T11: `value_score.sql` migration view lacks `SECURITY INVOKER`
+## ~~T11: `value_score.sql` migration view lacks `SECURITY INVOKER`~~ DONE
 
 **Why:** The standalone `value_score.sql` migration creates `category_median_prices` view without `WITH (security_invoker = true)`, but `schema.sql:264` has it. If the migration was run after the schema, it may have overwritten the SECURITY INVOKER setting, meaning the view runs as the creator's permissions instead of the caller's.
 
@@ -176,7 +176,7 @@
 
 ---
 
-## T14: `dishes.yes_votes` column exists but is never populated by triggers
+## ~~T14: `dishes.yes_votes` column exists but is never populated by triggers~~ DONE
 
 **Why:** The `dishes` table has `yes_votes INT DEFAULT 0` (schema.sql:51), but the `update_dish_avg_rating` trigger (schema.sql:1679-1695) only updates `avg_rating` and `total_votes` — it never updates `yes_votes`. The column is always 0 in the database. The RPCs compute yes_votes on-the-fly from the votes table, so the column is effectively dead.
 
