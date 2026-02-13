@@ -77,7 +77,7 @@ export function Top10Compact({
             My Top 10
           </button>
         </div>
-      ) : (
+      ) : !categoryLabel ? (
         <h3
           className="font-bold mb-4"
           style={{
@@ -86,12 +86,9 @@ export function Top10Compact({
             letterSpacing: '-0.01em',
           }}
         >
-          {categoryLabel
-            ? `Top ${categoryLabel} ${town ? `in ${town}` : 'on the Island'}`
-            : `Top 10 ${town ? `in ${town}` : 'on the Island'}`
-          }
+          Top 10 {town ? `in ${town}` : 'on the Island'}
         </h3>
-      )}
+      ) : null}
 
       {/* Dishes list */}
       <div className="space-y-0.5">
