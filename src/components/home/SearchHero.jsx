@@ -1,10 +1,9 @@
 import { DishSearch } from '../DishSearch'
-import { TownPicker } from '../TownPicker'
 
 /**
- * SearchHero - Hero section with value proposition, search, town filter, and category scroll
+ * SearchHero - Hero section with value proposition, search, and category scroll
  */
-export function SearchHero({ town, onTownChange, loading, categoryScroll }) {
+export function SearchHero({ town, loading, categoryScroll }) {
   return (
     <section
       className="pt-8 pb-5"
@@ -33,10 +32,6 @@ export function SearchHero({ town, onTownChange, loading, categoryScroll }) {
 
       <div className="px-4">
         <DishSearch loading={loading} placeholder="What are you craving?" town={town} />
-      </div>
-
-      <div className="mt-4 text-center">
-        <TownPicker town={town} onTownChange={onTownChange} />
       </div>
 
       {categoryScroll && (

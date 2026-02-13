@@ -15,6 +15,8 @@ export function Top10Compact({
   showToggle = false,
   initialCount = 3,
   town,
+  categoryLabel,
+  onSeeAll,
 }) {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('mv')
@@ -32,7 +34,7 @@ export function Top10Compact({
   const hasMore = activeDishes.length > initialCount
   const justExpanded = expanded && !prevExpanded
 
-  if (!dishes?.length) return null
+  if (!dishes?.length && !categoryLabel) return null
 
   return (
     <section>
@@ -41,7 +43,10 @@ export function Top10Compact({
         className="font-bold mb-1"
         style={{ color: 'var(--color-accent-gold)', fontSize: '13px' }}
       >
-        {town ? `The best dishes in ${town} right now` : 'The best dishes on the Vineyard right now'}
+        {categoryLabel
+          ? (town ? `The best ${categoryLabel} in ${town} right now` : `The best ${categoryLabel} on the Vineyard right now`)
+          : (town ? `The best dishes in ${town} right now` : 'The best dishes on the Vineyard right now')
+        }
       </p>
 
       {/* Header */}
@@ -81,7 +86,10 @@ export function Top10Compact({
             letterSpacing: '-0.01em',
           }}
         >
-          Top 10 {town ? `in ${town}` : 'on the Island'}
+          {categoryLabel
+            ? `Top ${categoryLabel} ${town ? `in ${town}` : 'on the Island'}`
+            : `Top 10 ${town ? `in ${town}` : 'on the Island'}`
+          }
         </h3>
       )}
 
@@ -101,15 +109,17 @@ export function Top10Compact({
         ) : (
           <div className="text-center py-6">
             <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-              No dishes found in your categories yet
+              {categoryLabel ? `No ${categoryLabel} ranked yet` : 'No dishes found in your categories yet'}
             </p>
-            <button
-              onClick={() => navigate('/profile')}
-              className="mt-2 text-xs font-medium"
-              style={{ color: 'var(--color-primary)' }}
-            >
-              Edit favorites
-            </button>
+            {!categoryLabel && (
+              <button
+                onClick={() => navigate('/profile')}
+                className="mt-2 text-xs font-medium"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                Edit favorites
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -122,6 +132,20 @@ export function Top10Compact({
           style={{ color: 'var(--color-text-tertiary)' }}
         >
           {expanded ? 'Show less' : `Show all ${activeDishes.length}`}
+        </button>
+      )}
+
+      {/* See all link for category filtering */}
+      {onSeeAll && categoryLabel && (
+        <button
+          onClick={onSeeAll}
+          className="w-full mt-3 pt-3 text-sm font-medium transition-opacity hover:opacity-70"
+          style={{
+            color: 'var(--color-accent-gold)',
+            borderTop: '1px solid var(--color-divider)',
+          }}
+        >
+          See all {categoryLabel} →
         </button>
       )}
     </section>

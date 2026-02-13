@@ -7,6 +7,7 @@ import { useProfile } from '../hooks/useProfile'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { BROWSE_CATEGORIES, getCategoryNeonImage } from '../constants/categories'
 import { SearchHero, Top10Compact } from '../components/home'
+import { TownPicker } from '../components/TownPicker'
 
 export function Home() {
   const navigate = useNavigate()
@@ -15,21 +16,45 @@ export function Home() {
 
   const { location, radius, town, setTown } = useLocationContext()
 
+  // Inline category filtering
+  const [selectedCategory, setSelectedCategory] = useState(null)
+
+  // Reset category when town changes
+  const handleTownChange = (newTown) => {
+    setSelectedCategory(null)
+    setTown(newTown)
+  }
+
   // Fetch dishes with town filter
   const { dishes, loading, error } = useDishes(location, radius, null, null, town)
+
+  const rankSort = (a, b) => {
+    const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+    const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+    if (aRanked && !bRanked) return -1
+    if (!aRanked && bRanked) return 1
+    return (b.avg_rating || 0) - (a.avg_rating || 0)
+  }
 
   // Top 10 dishes on the island (all categories)
   const top10Dishes = useMemo(() => {
     if (!dishes?.length) return []
-
-    return dishes.slice().sort((a, b) => {
-      const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-      const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-      if (aRanked && !bRanked) return -1
-      if (!aRanked && bRanked) return 1
-      return (b.avg_rating || 0) - (a.avg_rating || 0)
-    }).slice(0, 10)
+    return dishes.slice().sort(rankSort).slice(0, 10)
   }, [dishes])
+
+  // Category-filtered dishes
+  const categoryDishes = useMemo(() => {
+    if (!selectedCategory || !dishes?.length) return []
+    return dishes
+      .filter(dish => dish.category?.toLowerCase() === selectedCategory)
+      .slice()
+      .sort(rankSort)
+      .slice(0, 10)
+  }, [dishes, selectedCategory])
+
+  const selectedCategoryLabel = selectedCategory
+    ? BROWSE_CATEGORIES.find(c => c.id === selectedCategory)?.label
+    : null
 
   // Personal Top 10 based on user's preferred categories
   const personalTop10Dishes = useMemo(() => {
@@ -40,18 +65,15 @@ export function Home() {
     return dishes
       .filter(dish => preferredCats.includes(dish.category?.toLowerCase()))
       .slice()
-      .sort((a, b) => {
-        const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-        const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-        if (aRanked && !bRanked) return -1
-        if (!aRanked && bRanked) return 1
-        return (b.avg_rating || 0) - (a.avg_rating || 0)
-      })
+      .sort(rankSort)
       .slice(0, 10)
   }, [dishes, profile?.preferred_categories])
 
   // Whether to show the toggle (user is logged in and has preferences)
-  const showPersonalToggle = user && profile?.preferred_categories?.length > 0
+  const showPersonalToggle = !selectedCategory && user && profile?.preferred_categories?.length > 0
+
+  // Town picker inline expansion state
+  const [townPickerOpen, setTownPickerOpen] = useState(false)
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
@@ -60,25 +82,52 @@ export function Home() {
       {/* Section 1: Hero with search, town filter, categories */}
       <SearchHero
         town={town}
-        onTownChange={setTown}
+        onTownChange={handleTownChange}
         loading={loading}
         categoryScroll={
-          <div
-            className="flex gap-2.5 overflow-x-auto px-4 pb-1"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            {BROWSE_CATEGORIES.map((category) => (
-              <CategoryPill
-                key={category.id}
-                category={category}
-                onClick={() => navigate(`/browse?category=${encodeURIComponent(category.id)}`)}
+          townPickerOpen ? (
+            <div
+              className="flex items-center gap-2.5 overflow-x-auto px-4 pb-1"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              <TownPicker
+                town={town}
+                onTownChange={handleTownChange}
+                isOpen={townPickerOpen}
+                onToggle={setTownPickerOpen}
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5 px-4 pb-1">
+              <TownPicker
+                town={town}
+                onTownChange={handleTownChange}
+                isOpen={townPickerOpen}
+                onToggle={setTownPickerOpen}
+              />
+              <div
+                className="flex items-center gap-2.5 overflow-x-auto"
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                {BROWSE_CATEGORIES.map((category) => (
+                  <CategoryPill
+                    key={category.id}
+                    category={category}
+                    isActive={selectedCategory === category.id}
+                    onClick={() => setSelectedCategory(prev => prev === category.id ? null : category.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )
         }
       />
 
@@ -102,11 +151,13 @@ export function Home() {
         ) : top10Dishes.length > 0 ? (
           <div className="max-w-lg mx-auto">
             <Top10Compact
-              dishes={top10Dishes}
+              dishes={selectedCategory ? categoryDishes : top10Dishes}
               personalDishes={personalTop10Dishes}
               showToggle={showPersonalToggle}
               initialCount={3}
               town={town}
+              categoryLabel={selectedCategoryLabel}
+              onSeeAll={selectedCategory ? () => navigate(`/browse?category=${encodeURIComponent(selectedCategory)}`) : undefined}
             />
           </div>
         ) : (
@@ -117,7 +168,7 @@ export function Home() {
   )
 }
 
-function CategoryPill({ category, onClick }) {
+function CategoryPill({ category, isActive, onClick }) {
   const imageSrc = getCategoryNeonImage(category.id)
   const [loaded, setLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
@@ -127,8 +178,8 @@ function CategoryPill({ category, onClick }) {
       onClick={onClick}
       className="flex-shrink-0 flex items-center gap-2 pl-1.5 pr-3.5 py-1.5 rounded-full text-sm font-medium transition-all active:scale-[0.97]"
       style={{
-        background: 'var(--color-surface-elevated)',
-        color: 'var(--color-text-secondary)',
+        background: isActive ? 'var(--color-primary)' : 'var(--color-surface-elevated)',
+        color: isActive ? 'white' : 'var(--color-text-secondary)',
       }}
     >
       {imageSrc && !imgError ? (
