@@ -44,8 +44,8 @@ export function Top10Compact({
         style={{ color: 'var(--color-accent-gold)', fontSize: '13px' }}
       >
         {categoryLabel
-          ? (town ? `The best ${categoryLabel} in ${town} right now` : `The best ${categoryLabel} on the Vineyard right now`)
-          : (town ? `The best dishes in ${town} right now` : 'The best dishes on the Vineyard right now')
+          ? (town ? `The best ${categoryLabel} in ${town}` : `The best ${categoryLabel} on the Vineyard`)
+          : (town ? `The best dishes in ${town}` : 'The best dishes on the Vineyard')
         }
       </p>
 
