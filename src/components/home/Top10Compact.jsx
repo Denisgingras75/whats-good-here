@@ -159,27 +159,103 @@ export function Top10Compact({
   )
 }
 
-const RANK_STYLE = {
-  1: { color: 'var(--color-medal-gold)', fontSize: '16px', opacity: 1 },
-  2: { color: 'var(--color-medal-silver)', fontSize: '15px', opacity: 0.9 },
-  3: { color: 'var(--color-medal-bronze)', fontSize: '14px', opacity: 0.8 },
+const PODIUM_STYLE = {
+  1: { color: 'var(--color-medal-gold)', rankSize: '32px', nameSize: '20px', ratingSize: '20px' },
+  2: { color: 'var(--color-medal-silver)', rankSize: '28px', nameSize: '18px', ratingSize: '18px' },
+  3: { color: 'var(--color-medal-bronze)', rankSize: '24px', nameSize: '17px', ratingSize: '17px' },
 }
 
-// Compact row for Top 10 list
+// Top 10 row — podium layout for 1-3, compact for 4+
 const Top10Row = memo(function Top10Row({ dish, rank, isNewlyRevealed, revealIndex, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
-  const podium = RANK_STYLE[rank]
+  const podium = PODIUM_STYLE[rank]
 
   const accessibleLabel = isRanked
     ? `Rank ${rank}: ${dish_name} at ${restaurant_name}, rated ${avg_rating} out of 10 with ${total_votes} votes`
     : `Rank ${rank}: ${dish_name} at ${restaurant_name}, ${total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'new dish'}`
 
+  if (podium) {
+    return (
+      <div
+        className={isNewlyRevealed ? 'animate-expand-in' : ''}
+        style={isNewlyRevealed ? { animationDelay: `${(revealIndex || 0) * 50}ms`, opacity: 0, animationFillMode: 'forwards' } : undefined}
+      >
+        <button
+          onClick={onClick}
+          aria-label={accessibleLabel}
+          className="w-full flex items-center gap-4 py-4 px-2 rounded-lg transition-colors text-left hover:bg-[var(--color-surface-elevated)]"
+        >
+          {/* Large rank number */}
+          <span
+            className="font-bold flex-shrink-0"
+            style={{
+              color: podium.color,
+              fontSize: podium.rankSize,
+              lineHeight: 1,
+              minWidth: '32px',
+              textAlign: 'center',
+            }}
+          >
+            {rank}
+          </span>
+
+          {/* Dish info */}
+          <div className="flex-1 min-w-0">
+            <p
+              className="font-bold truncate"
+              style={{
+                color: 'var(--color-text-primary)',
+                fontSize: podium.nameSize,
+                lineHeight: 1.2,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {dish_name}
+            </p>
+            <p
+              className="truncate font-medium"
+              style={{
+                color: 'var(--color-text-tertiary)',
+                fontSize: '11px',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                marginTop: '2px',
+              }}
+            >
+              {restaurant_name}
+            </p>
+          </div>
+
+          {/* Rating */}
+          <div className="flex-shrink-0 text-right">
+            {isRanked ? (
+              <span
+                className="font-bold"
+                style={{
+                  color: getRatingColor(avg_rating),
+                  fontSize: podium.ratingSize,
+                }}
+              >
+                {avg_rating}
+              </span>
+            ) : (
+              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+              </span>
+            )}
+          </div>
+        </button>
+      </div>
+    )
+  }
+
+  // Compact row for ranks 4+
   return (
     <div
       className={isNewlyRevealed ? 'animate-expand-in' : ''}
       style={{
-        opacity: isNewlyRevealed ? 0 : (podium ? podium.opacity : 0.6),
+        opacity: isNewlyRevealed ? 0 : 0.6,
         ...(isNewlyRevealed ? { animationDelay: `${(revealIndex || 0) * 50}ms`, animationFillMode: 'forwards' } : {}),
       }}
     >
@@ -188,26 +264,15 @@ const Top10Row = memo(function Top10Row({ dish, rank, isNewlyRevealed, revealInd
         aria-label={accessibleLabel}
         className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[var(--color-surface-elevated)]"
       >
-        {/* Rank number */}
         <span
-          className="w-6 text-center font-bold flex-shrink-0"
-          style={{
-            color: podium ? podium.color : 'var(--color-text-tertiary)',
-            fontSize: podium ? podium.fontSize : '13px',
-          }}
+          className="w-6 text-center text-sm font-bold flex-shrink-0"
+          style={{ color: 'var(--color-text-tertiary)' }}
         >
           {rank}
         </span>
 
-        {/* Info */}
         <div className="flex-1 min-w-0">
-          <p
-            className="font-medium truncate"
-            style={{
-              color: 'var(--color-text-primary)',
-              fontSize: podium ? podium.fontSize : '14px',
-            }}
-          >
+          <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
             {dish_name}
           </p>
           <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -215,16 +280,9 @@ const Top10Row = memo(function Top10Row({ dish, rank, isNewlyRevealed, revealInd
           </p>
         </div>
 
-        {/* Rating */}
         <div className="flex-shrink-0 text-right">
           {isRanked ? (
-            <span
-              className="font-bold"
-              style={{
-                color: getRatingColor(avg_rating),
-                fontSize: podium ? podium.fontSize : '13px',
-              }}
-            >
+            <span className="text-sm font-bold" style={{ color: getRatingColor(avg_rating) }}>
               {avg_rating}
             </span>
           ) : (
