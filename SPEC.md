@@ -96,7 +96,7 @@ Evidence: `schema.sql:506-1531`
 | Function | Purpose | Returns | Auth |
 |---|---|---|---|
 | `get_ranked_dishes(lat, lng, radius, category?, town?)` | Main browse feed — ranked dishes with distance, variants, value score | TABLE | STABLE |
-| `get_restaurant_dishes(restaurant_id)` | Dishes for one restaurant with variant aggregation | TABLE | — |
+| `get_restaurant_dishes(restaurant_id)` | Dishes for one restaurant with variant aggregation, includes tags[] | TABLE | — |
 | `get_dish_variants(parent_dish_id)` | Variant sizes/options for a parent dish | TABLE | — |
 | `get_smart_snippet(dish_id)` | Best review snippet (9+ rated first) | TABLE | — |
 
@@ -244,7 +244,7 @@ Evidence: `schema.sql:1534-1776`
 - **Top Rated** (default) — dishes ranked by confidence (avg_rating, percent_worth_it, votes). Top 5 shown with expand toggle for the rest.
 - **Menu** — split-pane layout: section navigation on the left (33% width, gold accent on active section), dish list on the right sorted by rating (highest first). Each dish row shows name, dotted leader, price, rating, and reorder %. Tapping a dish navigates to its detail page. Sections ordered by `restaurants.menu_section_order` TEXT[]. Dishes without a `menu_section` appear in an "Other" group.
 
-**Menu section mapping** (populated via `supabase/migrations/populate-menu-sections.sql`):
+**Menu sections** use restaurant-specific names that mirror each restaurant's actual menu layout (e.g., Rockfish uses Starters, Salads, Pizza, Chef's Specials, Burgers & Sandwiches, Tacos). Section names and order are set per-restaurant via `menu_section_order` TEXT[]. Dishes with `tags` array containing `lunch-only` or `dinner-only` display L/D badges in the menu view. Fallback defaults (from `supabase/migrations/populate-menu-sections.sql`) apply when actual menu sections aren't available:
 - Soups & Apps (chowder, soup, apps, wings, tendys, fried chicken)
 - Salads, Sandwiches (burger, lobster roll, taco, quesadilla), Pizza, Sushi
 - Entrees (entree, pasta, seafood, fish, steak, chicken, asian, pokebowl)

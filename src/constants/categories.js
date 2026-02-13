@@ -38,6 +38,8 @@ export const MAIN_CATEGORIES = [
   { id: 'seafood', label: 'Seafood', emoji: '🦐' },
   { id: 'tendys', label: 'Tenders', emoji: '🍗' },
   { id: 'dessert', label: 'Dessert', emoji: '🍰' },
+  { id: 'chicken', label: 'Chicken', emoji: '🐔' },
+  { id: 'pork', label: 'Pork', emoji: '🐷' },
 ]
 
 // All categories in the system (including sub-categories)
@@ -50,7 +52,6 @@ export const ALL_CATEGORIES = [
   { id: 'apps', label: 'Appetizers', emoji: '🍤' },
   { id: 'fried chicken', label: 'Fried Chicken', emoji: '🍗' },
   { id: 'entree', label: 'Entree', emoji: '🍽️' },
-  { id: 'chicken', label: 'Chicken', emoji: '🐔' },
   { id: 'donuts', label: 'Donuts', emoji: '🍩' },
   { id: 'asian', label: 'Asian', emoji: '🥢' },
   { id: 'quesadilla', label: 'Quesadilla', emoji: '🫓' },
@@ -59,7 +60,6 @@ export const ALL_CATEGORIES = [
   { id: 'sides', label: 'Sides', emoji: '🥦' },
   { id: 'duck', label: 'Duck', emoji: '🦆' },
   { id: 'lamb', label: 'Lamb', emoji: '🍖' },
-  { id: 'pork', label: 'Pork', emoji: '🐷' },
   { id: 'clams', label: 'Clams', emoji: '🐚' },
 ]
 

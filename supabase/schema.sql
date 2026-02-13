@@ -638,7 +638,8 @@ RETURNS TABLE (
   variant_count INT,
   best_variant_id UUID,
   best_variant_name TEXT,
-  best_variant_rating DECIMAL
+  best_variant_rating DECIMAL,
+  tags TEXT[]
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -695,7 +696,8 @@ BEGIN
     COALESCE(vs.combined_avg_rating, dvs.direct_avg) AS avg_rating,
     (vs.child_count IS NOT NULL AND vs.child_count > 0) AS has_variants,
     COALESCE(vs.child_count, 0)::INT AS variant_count,
-    bv.best_id AS best_variant_id, bv.best_name AS best_variant_name, bv.best_rating AS best_variant_rating
+    bv.best_id AS best_variant_id, bv.best_name AS best_variant_name, bv.best_rating AS best_variant_rating,
+    d.tags
   FROM dishes d
   INNER JOIN restaurants r ON d.restaurant_id = r.id
   LEFT JOIN variant_stats vs ON vs.parent_dish_id = d.id
@@ -704,7 +706,7 @@ BEGIN
   WHERE d.restaurant_id = p_restaurant_id
     AND r.is_open = true
     AND d.parent_dish_id IS NULL
-  GROUP BY d.id, d.name, r.id, r.name, d.category, d.menu_section, d.price, d.photo_url,
+  GROUP BY d.id, d.name, r.id, r.name, d.category, d.menu_section, d.price, d.photo_url, d.tags,
            vs.total_child_votes, vs.total_child_yes, vs.combined_avg_rating, vs.child_count,
            dvs.direct_votes, dvs.direct_yes, dvs.direct_avg,
            bv.best_id, bv.best_name, bv.best_rating

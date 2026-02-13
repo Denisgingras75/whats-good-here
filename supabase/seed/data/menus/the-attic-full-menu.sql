@@ -1,70 +1,97 @@
--- The Attic - Full Menu
+-- The Attic - Update menu sections to match actual menu
+-- Source: the-attic-menu-2025-fall.pdf
 -- Run this in Supabase SQL Editor
--- NOTE: Sides excluded except fries
+-- UPDATE only - preserves existing dishes and votes
 
--- Delete old The Attic dishes
-DELETE FROM dishes
-WHERE restaurant_id = (SELECT id FROM restaurants WHERE name = 'The Attic');
+DO $$
+DECLARE
+  rid UUID;
+BEGIN
+  SELECT id INTO rid FROM restaurants WHERE name = 'The Attic';
 
--- Insert complete menu (34 items)
-INSERT INTO dishes (restaurant_id, name, category, price) VALUES
--- Apps
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Short Rib Poutine', 'apps', 23.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Crispy Sweet Chili Brussel Sprouts', 'apps', 18.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Fried Cheese Curds', 'apps', 15.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Waterside''s House Potato Chips', 'apps', 14.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Beer Battered Onion Rings', 'apps', 17.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'French Onion Soup', 'apps', 15.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Soup of the Day', 'apps', 15.00),
+  -- Starters
+  UPDATE dishes SET menu_section = 'Starters' WHERE restaurant_id = rid AND name IN (
+    'Short Rib Poutine',
+    'Crispy Sweet Chili Brussel Sprouts',
+    'Tuna Tartar',
+    'Fried Cheese Curds',
+    'Attic Wings',
+    'Waterside''s House Potato Chips',
+    'Beer Battered Onion Rings',
+    'Portuguese Mussels',
+    'House-made Crab Cakes'
+  );
 
--- Wings
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Attic Wings', 'wings', 12.00),
+  -- Salads & Soups
+  UPDATE dishes SET menu_section = 'Salads & Soups' WHERE restaurant_id = rid AND name IN (
+    'Attic Salad',
+    'Butternut Squash & Spinach Salad',
+    'Caesar Salad',
+    'French Onion Soup',
+    'Soup of the Day'
+  );
 
--- Fish
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Tuna Tartar', 'fish', 26.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Portuguese Mussels', 'fish', 25.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'House-made Crab Cakes', 'fish', 22.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Fried Codfish Sandwich', 'fish', 25.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Hoisin Glazed Salmon Rice Bowl', 'fish', 38.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Fish & Chips', 'fish', 30.00),
+  -- Burgers
+  UPDATE dishes SET menu_section = 'Burgers' WHERE restaurant_id = rid AND name IN (
+    'Classic Burger',
+    'Attic Smash Burger',
+    'Veggie Burger',
+    'Turkey Burger',
+    'Mr. Bowen',
+    'Black & Bleu Burger',
+    'Firehouse Burger'
+  );
 
--- Salads
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Attic Salad', 'salad', 22.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Butternut Squash & Spinach Salad', 'salad', 22.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Caesar Salad', 'salad', 20.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Side Salad', 'salad', 12.00),
+  -- Handhelds
+  UPDATE dishes SET menu_section = 'Handhelds' WHERE restaurant_id = rid AND name IN (
+    'Attic Fried Chicken Sandwich',
+    'Pulled Pork Sandwich',
+    'Fried Codfish Sandwich',
+    'American Wagyu Hot Dog',
+    'Lobster Roll'
+  );
 
--- Burgers
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Classic Burger', 'burger', 24.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Attic Smash Burger', 'burger', 24.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Veggie Burger', 'burger', 23.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Turkey Burger', 'burger', 24.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Mr. Bowen', 'burger', 27.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Black & Bleu Burger', 'burger', 27.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Firehouse Burger', 'burger', 27.00),
+  -- Mac & Cheese
+  UPDATE dishes SET menu_section = 'Mac & Cheese' WHERE restaurant_id = rid AND name = 'Classic Mac & Cheese';
 
--- Sandwiches
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Attic Fried Chicken Sandwich', 'sandwich', 24.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Pulled Pork Sandwich', 'sandwich', 25.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'American Wagyu Hot Dog', 'sandwich', 23.00),
+  -- Entrees
+  UPDATE dishes SET menu_section = 'Entrees' WHERE restaurant_id = rid AND name IN (
+    '12 oz Prime N.Y. Strip',
+    'Hoisin Glazed Salmon Rice Bowl',
+    'Herb Roasted 1/2 Chicken',
+    'Fish & Chips',
+    'Harissa Roasted Cauliflower'
+  );
 
--- Lobster Rolls
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Lobster Roll', 'lobster roll', 38.00),
+  -- Sides
+  UPDATE dishes SET menu_section = 'Sides' WHERE restaurant_id = rid AND name IN (
+    'Hand-cut Fries',
+    'Side Salad'
+  );
 
--- Entrees
-((SELECT id FROM restaurants WHERE name = 'The Attic'), '12 oz Prime N.Y. Strip', 'entree', 57.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Herb Roasted 1/2 Chicken', 'entree', 35.00),
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Harissa Roasted Cauliflower', 'entree', 30.00),
+  -- Fix categories
+  UPDATE dishes SET category = 'pork'
+  WHERE restaurant_id = rid AND name = 'Short Rib Poutine';
 
--- Pasta
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Classic Mac & Cheese', 'pasta', 20.00),
+  UPDATE dishes SET category = 'steak'
+  WHERE restaurant_id = rid AND name = '12 oz Prime N.Y. Strip';
 
--- Fries
-((SELECT id FROM restaurants WHERE name = 'The Attic'), 'Hand-cut Fries', 'fries', 10.00);
+  -- Fix price: Salmon bowl is $35 on current menu, was $38
+  UPDATE dishes SET price = 35.00
+  WHERE restaurant_id = rid AND name = 'Hoisin Glazed Salmon Rice Bowl';
 
--- Verify import
-SELECT COUNT(*) as dish_count
+  -- Update menu_section_order
+  UPDATE restaurants
+  SET menu_section_order = ARRAY['Starters', 'Salads & Soups', 'Burgers', 'Handhelds', 'Mac & Cheese', 'Entrees', 'Sides']
+  WHERE id = rid;
+
+END $$;
+
+-- Verify
+SELECT name, menu_section, price, category
 FROM dishes
-WHERE restaurant_id = (SELECT id FROM restaurants WHERE name = 'The Attic');
-
--- Should show 34 dishes
+WHERE restaurant_id = (SELECT id FROM restaurants WHERE name = 'The Attic')
+  AND parent_dish_id IS NULL
+ORDER BY
+  array_position(ARRAY['Starters', 'Salads & Soups', 'Burgers', 'Handhelds', 'Mac & Cheese', 'Entrees', 'Sides'], menu_section),
+  name;

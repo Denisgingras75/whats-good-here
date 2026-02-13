@@ -54,7 +54,7 @@ INSERT INTO dishes (restaurant_id, name, category, menu_section, price) VALUES
 ((SELECT id FROM restaurants WHERE name = 'Coop de Ville'), 'Beyond Burger', 'burger', 'Sandwiches', 16.00),
 ((SELECT id FROM restaurants WHERE name = 'Coop de Ville'), 'Grilled Marinated Chicken Breast', 'sandwich', 'Sandwiches', 15.00),
 ((SELECT id FROM restaurants WHERE name = 'Coop de Ville'), 'Lobster Salad Roll', 'lobster roll', 'Sandwiches', 35.00),
-((SELECT id FROM restaurants WHERE name = 'Coop de Ville'), 'Fried Whole Belly Clam Roll', 'clams', 'Sandwiches', 29.00),
+((SELECT id FROM restaurants WHERE name = 'Coop de Ville'), 'Fried Whole Belly Clam Roll', 'sandwich', 'Sandwiches', 29.00),
 ((SELECT id FROM restaurants WHERE name = 'Coop de Ville'), 'Fried Scallop Roll', 'seafood', 'Sandwiches', 24.00),
 ((SELECT id FROM restaurants WHERE name = 'Coop de Ville'), '1/4 lb. Pearl Beef Dog', 'sandwich', 'Sandwiches', 13.00),
 ((SELECT id FROM restaurants WHERE name = 'Coop de Ville'), 'Grilled Steak Tip Sub', 'sandwich', 'Sandwiches', 19.00),

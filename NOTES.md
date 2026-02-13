@@ -292,6 +292,7 @@ These categories/dishes exist and are searchable but don't have Browse shortcuts
 
 - Apps, Appetizers, Calamari
 - Breakfast Sandwiches
+- Clams (strips, bellies, steamers)
 - Entrees, Main courses
 - Fries, Sides
 - Poke Bowls

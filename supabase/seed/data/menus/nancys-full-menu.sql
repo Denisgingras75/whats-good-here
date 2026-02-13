@@ -40,8 +40,8 @@ INSERT INTO dishes (restaurant_id, name, category, price) VALUES
 ((SELECT id FROM restaurants WHERE name = 'Nancy''s Restaurant'), 'Fish & Chips', 'fish', 29.95),
 ((SELECT id FROM restaurants WHERE name = 'Nancy''s Restaurant'), 'Jumbo Shrimp', 'fish', 30.95),
 ((SELECT id FROM restaurants WHERE name = 'Nancy''s Restaurant'), 'Sea Scallops', 'fish', 31.95),
-((SELECT id FROM restaurants WHERE name = 'Nancy''s Restaurant'), 'Clam Strips', 'fish', 32.95),
-((SELECT id FROM restaurants WHERE name = 'Nancy''s Restaurant'), 'Clam Bellies', 'fish', 44.95),
+((SELECT id FROM restaurants WHERE name = 'Nancy''s Restaurant'), 'Clam Strips', 'clams', 32.95),
+((SELECT id FROM restaurants WHERE name = 'Nancy''s Restaurant'), 'Clam Bellies', 'clams', 44.95),
 ((SELECT id FROM restaurants WHERE name = 'Nancy''s Restaurant'), 'Seafood Plate', 'fish', 48.95),
 
 -- Lobster

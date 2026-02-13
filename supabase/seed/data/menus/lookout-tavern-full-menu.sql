@@ -29,7 +29,7 @@ INSERT INTO dishes (restaurant_id, name, category, price) VALUES
 ((SELECT id FROM restaurants WHERE name = 'Lookout Tavern'), 'Fish Bites', 'apps', 15.95),
 ((SELECT id FROM restaurants WHERE name = 'Lookout Tavern'), 'Sautéed Mussels', 'apps', 20.95),
 ((SELECT id FROM restaurants WHERE name = 'Lookout Tavern'), 'Coconut Curry Mussels', 'apps', 22.95),
-((SELECT id FROM restaurants WHERE name = 'Lookout Tavern'), 'Steamers', 'apps', 24.95),
+((SELECT id FROM restaurants WHERE name = 'Lookout Tavern'), 'Steamers', 'clams', 24.95),
 
 -- Chowder
 ((SELECT id FROM restaurants WHERE name = 'Lookout Tavern'), 'New England Clam Chowder', 'chowder', 12.95),

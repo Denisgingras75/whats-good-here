@@ -279,16 +279,44 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
                 {/* Row: Name + Price */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <span
-                      className="font-semibold block"
-                      style={{
-                        color: 'var(--color-text-primary)',
-                        fontSize: '13px',
-                        letterSpacing: '-0.01em',
-                        lineHeight: '1.3',
-                      }}
-                    >
-                      {dish.dish_name}
+                    <span className="flex items-center gap-1.5">
+                      <span
+                        className="font-semibold"
+                        style={{
+                          color: 'var(--color-text-primary)',
+                          fontSize: '13px',
+                          letterSpacing: '-0.01em',
+                          lineHeight: '1.3',
+                        }}
+                      >
+                        {dish.dish_name}
+                      </span>
+                      {dish.tags?.includes('lunch-only') && (
+                        <span
+                          className="flex-shrink-0 px-1 py-0.5 rounded font-bold"
+                          style={{
+                            fontSize: '9px',
+                            background: 'rgba(217, 167, 101, 0.15)',
+                            color: 'var(--color-accent-gold)',
+                            lineHeight: '1',
+                          }}
+                        >
+                          L
+                        </span>
+                      )}
+                      {dish.tags?.includes('dinner-only') && (
+                        <span
+                          className="flex-shrink-0 px-1 py-0.5 rounded font-bold"
+                          style={{
+                            fontSize: '9px',
+                            background: 'rgba(200, 90, 84, 0.15)',
+                            color: 'var(--color-primary)',
+                            lineHeight: '1',
+                          }}
+                        >
+                          D
+                        </span>
+                      )}
                     </span>
                   </div>
 
