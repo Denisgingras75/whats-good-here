@@ -157,7 +157,7 @@ export const votesApi = {
             photo_url,
             avg_rating,
             total_votes,
-            restaurants (name)
+            restaurants (name, town)
           )
         `)
         .eq('user_id', userId)
@@ -382,7 +382,7 @@ export const votesApi = {
             photo_url,
             category,
             price,
-            restaurants (name)
+            restaurants (name, town)
           )
         `)
         .eq('user_id', userId)
