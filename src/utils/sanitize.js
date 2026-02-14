@@ -17,6 +17,8 @@ export function sanitizeSearchQuery(query, maxLength = 100) {
   return query
     .trim()
     .slice(0, maxLength)
+    // Strip PostgREST filter syntax characters that could break .or()/.ilike() filters
+    .replace(/[.,()*]/g, '')
     // Escape LIKE/ILIKE special characters
     .replace(/\\/g, '\\\\')  // Escape backslashes first
     .replace(/%/g, '\\%')    // Escape percent signs

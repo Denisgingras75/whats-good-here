@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { logger } from '../utils/logger'
+import { createClassifiedError } from '../utils/errorHandler'
 
 export const specialsApi = {
   /**
@@ -23,7 +24,7 @@ export const specialsApi = {
 
     if (error) {
       logger.error('Error fetching specials:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     return data || []
@@ -42,7 +43,7 @@ export const specialsApi = {
 
     if (error) {
       logger.error('Error fetching restaurant specials:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     return data || []
@@ -69,7 +70,7 @@ export const specialsApi = {
 
     if (error) {
       logger.error('Error creating special:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     return data
@@ -88,7 +89,7 @@ export const specialsApi = {
 
     if (error) {
       logger.error('Error updating special:', error)
-      throw error
+      throw createClassifiedError(error)
     }
 
     return data

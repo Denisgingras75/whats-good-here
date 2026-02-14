@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { votesApi } from '../api/votesApi'
 import { logger } from '../utils/logger'
 
@@ -220,147 +221,121 @@ function calculateStats(data) {
     favoriteRestaurant,
     uniqueRestaurants,
     categoryCounts,
-    // These will be filled after community data loads
-    categoryComparison: {},
-    standoutPicks: {},
   }
 }
 
-const COMMUNITY_CACHE_TTL = 30 * 60 * 1000 // 30 minutes
+const DEFAULT_STATS = {
+  totalVotes: 0,
+  worthItCount: 0,
+  avoidCount: 0,
+  avgRating: null,
+  ratingVariance: 0,
+  categoryConcentration: 0,
+  topCategory: null,
+  topCategories: [],
+  ratingStyle: null,
+  favoriteRestaurant: null,
+  uniqueRestaurants: 0,
+  categoryCounts: {},
+  dishesHelpedRank: 0,
+  categoryComparison: {},
+  standoutPicks: {},
+}
+
+const sortByRating = (a, b) => {
+  if (a.rating_10 == null && b.rating_10 == null) return 0
+  if (a.rating_10 == null) return 1
+  if (b.rating_10 == null) return -1
+  return b.rating_10 - a.rating_10
+}
 
 export function useUserVotes(userId) {
-  const [votes, setVotes] = useState([])
-  const [worthItDishes, setWorthItDishes] = useState([])
-  const [avoidDishes, setAvoidDishes] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
-    totalVotes: 0,
-    worthItCount: 0,
-    avoidCount: 0,
-    avgRating: null,
-    ratingVariance: 0,
-    categoryConcentration: 0,
-    topCategory: null,
-    topCategories: [],
-    ratingStyle: null,
-    favoriteRestaurant: null,
-    uniqueRestaurants: 0,
-    categoryCounts: {},
-    dishesHelpedRank: 0,
-    categoryComparison: {},
-    standoutPicks: {},
+  // Primary query: fetch votes + helped count in parallel
+  const {
+    data: primaryData,
+    isLoading: primaryLoading,
+    error: primaryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['userVotes', userId],
+    queryFn: async () => {
+      const [votes, helpedCount] = await Promise.all([
+        votesApi.getDetailedVotesForUser(userId),
+        votesApi.getDishesHelpedRank(userId),
+      ])
+      return { votes, helpedCount }
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 2, // 2 minutes
   })
 
-  const communityCache = useRef({ data: null, timestamp: 0 })
+  if (primaryError) {
+    logger.error('Error fetching user votes:', primaryError)
+  }
 
-  const processVotes = useCallback(async (data, helpedCount = 0) => {
-    setVotes(data)
+  const votes = primaryData?.votes || []
+  const helpedCount = primaryData?.helpedCount || 0
 
-    // Split into worth it and avoid, then sort by rating (highest first)
-    const sortByRating = (a, b) => {
-      if (a.rating_10 == null && b.rating_10 == null) return 0
-      if (a.rating_10 == null) return 1
-      if (b.rating_10 == null) return -1
-      return b.rating_10 - a.rating_10
+  // Derive sorted dish lists from raw votes
+  const worthItDishes = useMemo(
+    () => votes.filter(v => v.would_order_again).map(transformVote).sort(sortByRating),
+    [votes]
+  )
+
+  const avoidDishes = useMemo(
+    () => votes.filter(v => !v.would_order_again).map(transformVote).sort(sortByRating),
+    [votes]
+  )
+
+  // Derive base stats from raw votes
+  const baseStats = useMemo(
+    () => votes.length > 0 ? calculateStats(votes) : null,
+    [votes]
+  )
+
+  // Extract rated dish IDs for community averages query
+  const ratedDishIds = useMemo(
+    () => votes.filter(v => v.rating_10 != null).map(v => v.dishes.id),
+    [votes]
+  )
+
+  // Dependent query: community averages (only runs when we have rated dish IDs)
+  const { data: communityAvgs, error: communityError } = useQuery({
+    queryKey: ['communityAvgs', ratedDishIds],
+    queryFn: () => votesApi.getCommunityAvgsForDishes(ratedDishIds),
+    enabled: ratedDishIds.length > 0,
+    staleTime: 1000 * 60 * 30, // 30 minutes (matches old COMMUNITY_CACHE_TTL)
+  })
+
+  if (communityError) {
+    logger.error('Error fetching community averages:', communityError)
+  }
+
+  // Final stats: merge base stats + community-dependent comparisons
+  const stats = useMemo(() => {
+    if (!baseStats) return DEFAULT_STATS
+
+    const categoryComparison = communityAvgs
+      ? computeCategoryComparison(votes, communityAvgs)
+      : {}
+    const standoutPicks = communityAvgs
+      ? computeStandoutPicks(votes, communityAvgs)
+      : {}
+
+    return {
+      ...baseStats,
+      dishesHelpedRank: helpedCount,
+      categoryComparison,
+      standoutPicks,
     }
-
-    const worthIt = data.filter(v => v.would_order_again).map(transformVote).sort(sortByRating)
-    const avoid = data.filter(v => !v.would_order_again).map(transformVote).sort(sortByRating)
-
-    setWorthItDishes(worthIt)
-    setAvoidDishes(avoid)
-
-    const baseStats = { ...calculateStats(data), dishesHelpedRank: helpedCount }
-    setStats(baseStats)
-
-    // Fetch community averages for rated dishes
-    const ratedDishIds = data
-      .filter(v => v.rating_10 != null)
-      .map(v => v.dishes.id)
-
-    if (ratedDishIds.length === 0) return
-
-    try {
-      const now = Date.now()
-      let communityAvgs = communityCache.current.data
-      if (!communityAvgs || (now - communityCache.current.timestamp) > COMMUNITY_CACHE_TTL) {
-        communityAvgs = await votesApi.getCommunityAvgsForDishes(ratedDishIds)
-        communityCache.current = { data: communityAvgs, timestamp: now }
-      }
-
-      const categoryComparison = computeCategoryComparison(data, communityAvgs)
-      const standoutPicks = computeStandoutPicks(data, communityAvgs)
-
-      setStats(prev => ({ ...prev, categoryComparison, standoutPicks }))
-    } catch (error) {
-      logger.error('Error fetching community averages:', error)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!userId) {
-      setVotes([])
-      setWorthItDishes([])
-      setAvoidDishes([])
-      setStats({
-        totalVotes: 0,
-        worthItCount: 0,
-        avoidCount: 0,
-        avgRating: null,
-        topCategory: null,
-        topCategories: [],
-        ratingStyle: null,
-        favoriteRestaurant: null,
-        uniqueRestaurants: 0,
-        categoryCounts: {},
-        dishesHelpedRank: 0,
-        categoryComparison: {},
-        standoutPicks: {},
-      })
-      setLoading(false)
-      return
-    }
-
-    async function fetchVotes() {
-      setLoading(true)
-      try {
-        const [data, helpedCount] = await Promise.all([
-          votesApi.getDetailedVotesForUser(userId),
-          votesApi.getDishesHelpedRank(userId)
-        ])
-        await processVotes(data, helpedCount)
-      } catch (error) {
-        logger.error('Error fetching votes:', error)
-      }
-      setLoading(false)
-    }
-
-    fetchVotes()
-  }, [userId, processVotes])
-
-  const refetch = useCallback(async () => {
-    if (!userId) return
-    setLoading(true)
-    try {
-      const [data, helpedCount] = await Promise.all([
-        votesApi.getDetailedVotesForUser(userId),
-        votesApi.getDishesHelpedRank(userId)
-      ])
-      // Invalidate community cache on refetch
-      communityCache.current = { data: null, timestamp: 0 }
-      await processVotes(data, helpedCount)
-    } catch (error) {
-      logger.error('Error refetching votes:', error)
-    }
-    setLoading(false)
-  }, [userId, processVotes])
+  }, [baseStats, communityAvgs, votes, helpedCount])
 
   return {
     votes,
     worthItDishes,
     avoidDishes,
     stats,
-    loading,
+    loading: userId ? primaryLoading : false,
     refetch,
   }
 }

@@ -58,11 +58,16 @@
   --color-bg: #0D1B22;                /* Deep charcoal-navy */
   --color-surface: #0F1F2B;           /* Slightly lighter */
   --color-surface-elevated: #162B35;
-  --color-divider: rgba(217, 167, 101, 0.12);  /* Warm gold tint */
+  --color-divider: rgba(200, 90, 84, 0.10);  /* Rust tint dividers */
 
   /* Cards - rich navy-teal, tropical water depth */
   --color-card: #1A3A42;
   --color-card-hover: #243A43;
+
+  /* Medal ranks — top 3 in lists */
+  --color-medal-gold: #D9A765;          /* Same as accent-gold */
+  --color-medal-silver: #A8B5BF;        /* Cool slate silver */
+  --color-medal-bronze: #C4855C;        /* Warm copper-bronze */
 
   /* Feedback states */
   --color-danger: #C85A54;            /* Same as primary */
@@ -70,6 +75,31 @@
 
   /* "Avoid" action */
   --color-muted: #6B7680;
+
+  /* Text on primary-colored backgrounds (buttons, banners) */
+  --color-text-on-primary: #1A1A1A;
+
+  /* Semantic status colors — success/error/warning variants */
+  --color-emerald: #10B981;
+  --color-emerald-light: #22C55E;
+  --color-red: #EF4444;
+  --color-red-light: #F87171;
+  --color-amber: #F59E0B;
+  --color-amber-light: #FBBF24;
+  --color-amber-dark: #92400E;
+  --color-orange: #F97316;
+  --color-lime: #84CC16;
+  --color-yellow: #EAB308;
+  --color-green-deep: #16A34A;
+  --color-green-dark: #059669;
+  --color-blue: #3B82F6;
+  --color-blue-light: #60A5FA;
+  --color-purple: #9333EA;
+
+  /* Photo tier badges */
+  --color-tier-featured: #F59E0B;
+  --color-tier-community: #3B82F6;
+  --color-tier-hidden: #6B7280;
 
   /* Glow effects */
   --glow-primary: 0 0 20px rgba(200, 90, 84, 0.25), 0 0 40px rgba(200, 90, 84, 0.1);
@@ -600,21 +630,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-@keyframes expandIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scaleY(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scaleY(1);
-  }
-}
-
-.animate-expand-in {
-  animation: expandIn 0.3s ease-out forwards;
 }
 
 @keyframes shimmer {
@@ -1219,7 +1234,6 @@
   .animate-slide-up,
   .animate-shimmer,
   .animate-crumb-fall,
-  .animate-expand-in,
   .animate-pulse,
   .animate-spin,
   .animate-bounce,

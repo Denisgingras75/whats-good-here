@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { capture, identify, reset } from '../lib/analytics'
-import { clearPendingVoteStorage, clearCache } from '../lib/storage'
+import { clearPendingVoteStorage, clearCache, removeStorageItem, removeSessionItem, STORAGE_KEYS } from '../lib/storage'
 import { logger } from '../utils/logger'
 
 const AuthContext = createContext(null)
@@ -73,12 +73,8 @@ export function AuthProvider({ children }) {
     clearPendingVoteStorage()
     clearCache()
     // SECURITY: Clear any cached PII (email was previously stored for convenience)
-    try {
-      sessionStorage.removeItem('whats-good-here-email')
-      localStorage.removeItem('whats-good-here-email')
-    } catch {
-      // Storage access may fail in private browsing - ignore
-    }
+    removeSessionItem(STORAGE_KEYS.EMAIL_CACHE)
+    removeStorageItem(STORAGE_KEYS.EMAIL_CACHE)
     await supabase.auth.signOut()
     setUser(null)
   }, [])

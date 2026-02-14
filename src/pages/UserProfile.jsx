@@ -494,10 +494,10 @@ export function UserProfile() {
                   className="text-sm font-bold"
                   style={{
                     color: ratingStyle.level === 'generous' || ratingStyle.level === 'easy'
-                      ? '#10b981'
+                      ? 'var(--color-emerald)'
                       : ratingStyle.level === 'tough'
-                      ? '#ef4444'
-                      : '#f97316',
+                      ? 'var(--color-red)'
+                      : 'var(--color-orange)',
                   }}
                 >
                   {ratingStyle.label}
@@ -520,13 +520,13 @@ export function UserProfile() {
                   color: (() => {
                     const isAbove = ratingStyle?.level === 'generous' || ratingStyle?.level === 'easy'
                     if (isAbove) {
-                      return ratingBias.ratingBias < 1.0 ? '#10b981' : '#22c55e'
+                      return ratingBias.ratingBias < 1.0 ? 'var(--color-emerald)' : 'var(--color-emerald-light)'
                     }
                     const isBelow = ratingStyle?.level === 'tough'
                     if (isBelow) {
-                      return ratingBias.ratingBias < 1.0 ? '#f87171' : '#ef4444'
+                      return ratingBias.ratingBias < 1.0 ? 'var(--color-red-light)' : 'var(--color-red)'
                     }
-                    return '#f97316' // fair judge — orange
+                    return 'var(--color-orange)' // fair judge
                   })(),
                 }}>
                   {ratingBias.biasLabel}
@@ -618,11 +618,11 @@ export function UserProfile() {
                 borderColor: 'rgba(239, 68, 68, 0.2)',
               }}
             >
-              <span className="text-lg flex-shrink-0" style={{ color: '#ef4444' }}>
+              <span className="text-lg flex-shrink-0" style={{ color: 'var(--color-red)' }}>
                 {'\uD83C\uDF36\uFE0F'}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold" style={{ color: '#ef4444' }}>
+                <p className="text-xs font-semibold" style={{ color: 'var(--color-red)' }}>
                   Hottest take
                 </p>
                 <p className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
@@ -655,13 +655,10 @@ export function UserProfile() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all whitespace-nowrap active:scale-[0.97] ${
-                activeTab === tab.id
-                  ? 'text-white'
-                  : 'text-[color:var(--color-text-secondary)]'
-              }`}
+              className="flex-shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all whitespace-nowrap active:scale-[0.97]"
               style={{
                 fontSize: '13px',
+                color: activeTab === tab.id ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
                 ...(activeTab === tab.id
                   ? {
                       background: 'var(--color-primary)',
@@ -673,10 +670,8 @@ export function UserProfile() {
               {tab.icon === 'thumbsUp' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.icon === 'thumbsDown' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : <ReviewsIcon size={40} active={activeTab === tab.id} />}
               <span>{tab.label}</span>
               <span
-                className={`ml-0.5 px-1.5 py-0.5 rounded-full font-semibold ${
-                  activeTab === tab.id ? 'bg-white/20' : 'bg-black/20'
-                }`}
-                style={{ fontSize: '11px' }}
+                className="ml-0.5 px-1.5 py-0.5 rounded-full font-semibold"
+                style={{ background: activeTab === tab.id ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)', fontSize: '11px' }}
               >
                 {tab.count}
               </span>

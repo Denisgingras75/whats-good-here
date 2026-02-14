@@ -66,6 +66,32 @@ describe('sanitizeSearchQuery', () => {
     })
   })
 
+  describe('PostgREST filter injection prevention', () => {
+    it('should strip dots used in PostgREST filter syntax', () => {
+      expect(sanitizeSearchQuery('name.ilike.%')).toBe('nameilike\\%')
+    })
+
+    it('should strip commas used to chain PostgREST filters', () => {
+      expect(sanitizeSearchQuery('pizza,category.eq.burger')).toBe('pizzacategoryeqburger')
+    })
+
+    it('should strip parentheses used in PostgREST grouping', () => {
+      expect(sanitizeSearchQuery('(name.eq.test)')).toBe('nameeqtest')
+    })
+
+    it('should strip asterisks used in PostgREST wildcard', () => {
+      expect(sanitizeSearchQuery('pizza*')).toBe('pizza')
+    })
+
+    it('should handle a full PostgREST injection attempt', () => {
+      // Attempt to inject: name.ilike.%admin%,role.eq.admin
+      const result = sanitizeSearchQuery('name.ilike.%admin%,role.eq.admin')
+      expect(result).toBe('nameilike\\%admin\\%roleeqadmin')
+      expect(result).not.toContain('.')
+      expect(result).not.toContain(',')
+    })
+  })
+
   describe('length limiting', () => {
     it('should truncate to default max length (100)', () => {
       const longString = 'a'.repeat(150)

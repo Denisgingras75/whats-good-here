@@ -11,7 +11,7 @@ export function ValueBadge({ valuePercentile }) {
       style={{
         fontSize: '10px',
         lineHeight: '14px',
-        color: '#059669',
+        color: 'var(--color-green-dark)',
         background: 'rgba(16, 185, 129, 0.15)',
       }}
     >

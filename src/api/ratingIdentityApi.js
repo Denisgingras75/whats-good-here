@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { logger } from '../utils/logger'
+import { createClassifiedError } from '../utils/errorHandler'
 
 /**
  * Rating Identity API - Centralized data fetching for the Rating Identity system
@@ -29,7 +30,7 @@ export const ratingIdentityApi = {
 
       if (error) {
         logger.error('Error fetching rating identity:', error)
-        throw error
+        throw createClassifiedError(error)
       }
 
       // RPC returns an array, get first row

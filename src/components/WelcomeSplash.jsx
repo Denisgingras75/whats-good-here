@@ -53,7 +53,7 @@ export function WelcomeSplash({ onComplete }) {
     <div
       className="fixed inset-0 z-[99999] flex flex-col items-center justify-center cursor-pointer"
       style={{
-        background: '#0D1B22',
+        background: 'var(--color-bg)',
         opacity: isFadingOut ? 0 : isVisible ? 1 : 0,
         transition: isFadingOut ? 'opacity 300ms ease-out' : 'opacity 300ms ease-in',
         pointerEvents: (isFadingOut || !isVisible) ? 'none' : 'auto',

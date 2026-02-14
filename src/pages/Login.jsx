@@ -192,7 +192,7 @@ export function Login() {
                 <div className="flex items-start gap-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                    style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                   >
                     <span className="font-bold">1</span>
                   </div>
@@ -203,7 +203,7 @@ export function Login() {
                 <div className="flex items-start gap-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                    style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                   >
                     <span className="font-bold">2</span>
                   </div>
@@ -239,7 +239,7 @@ export function Login() {
             <button
               onClick={() => navigate('/')}
               className="w-full max-w-sm px-6 py-4 rounded-xl font-bold text-lg active:scale-[0.98] transition-all"
-              style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+              style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
             >
               Get Started
             </button>
@@ -333,7 +333,7 @@ export function Login() {
                 <button
                   onClick={() => setMode('signin')}
                   className="w-full px-6 py-4 rounded-xl font-semibold active:scale-[0.98] transition-all"
-                  style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                 >
                   Sign in with Email
                 </button>
@@ -390,7 +390,7 @@ export function Login() {
                   type="submit"
                   disabled={loading}
                   className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-                  style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                 >
                   {loading ? 'Signing in...' : 'Sign In'}
                 </button>
@@ -450,7 +450,7 @@ export function Login() {
                   type="submit"
                   disabled={loading}
                   className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-                  style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                 >
                   {loading ? 'Sending...' : 'Send Reset Link'}
                 </button>
@@ -541,7 +541,7 @@ export function Login() {
                   type="submit"
                   disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking'}
                   className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-                  style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                 >
                   {loading ? 'Creating account...' : 'Create Account'}
                 </button>

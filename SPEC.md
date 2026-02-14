@@ -8,7 +8,7 @@
 
 **VERIFIED** — `CLAUDE.md`, `src/App.jsx`, live deployment
 
-What's Good Here is a mobile-first food discovery app for Martha's Vineyard. Users vote on dishes with a "Would you order this again?" binary plus a 1–10 rating scale, and the app ranks dishes by crowd-sourced consensus. The core loop is: browse/search dishes → vote → see how your taste compares. A gamification layer (badges, streaks, leaderboards) and social features (follows, taste compatibility) drive retention.
+What's Good Here is a mobile-first food discovery app for Martha's Vineyard. Users vote on dishes with a "Would you order this again?" binary plus a 1–10 rating scale, and the app ranks dishes by crowd-sourced consensus. The core loop is: browse/search dishes → vote → see how your taste compares. A gamification layer (badges) and social features (follows, taste compatibility) drive retention.
 
 Tech: React 19, Vite, Tailwind CSS, React Router v7, Supabase (Postgres + Auth + Storage), deployed on Vercel at `whats-good-here.vercel.app`. Analytics via PostHog + Sentry.
 
@@ -16,14 +16,14 @@ Tech: React 19, Vite, Tailwind CSS, React Router v7, Supabase (Postgres + Auth +
 
 ## Core Data Model
 
-### Tables (18)
+### Tables (17)
 
 Evidence: `supabase/schema.sql:24-259`
 
 | Table | PK | Key Columns | Relationships | Constraints | Status |
 |---|---|---|---|---|---|
-| **restaurants** | `id` UUID | name, address, lat/lng, is_open, cuisine, town | — | — | **VERIFIED** |
-| **dishes** | `id` UUID | name, category, price, avg_rating, total_votes, yes_votes, consensus_*, value_score, parent_dish_id, tags[] | FK → restaurants; self-ref parent_dish_id (variants) | — | **VERIFIED** |
+| **restaurants** | `id` UUID | name, address, lat/lng, is_open, cuisine, town, menu_section_order[] | — | — | **VERIFIED** |
+| **dishes** | `id` UUID | name, category, menu_section, price, avg_rating, total_votes, consensus_*, value_score, parent_dish_id, tags[] | FK → restaurants; self-ref parent_dish_id (variants) | — | **VERIFIED** |
 | **votes** | `id` UUID | dish_id, user_id, would_order_again (bool), rating_10 (decimal), review_text, vote_position, category_snapshot | FK → dishes, auth.users; UNIQUE(dish_id, user_id) | review_text max 200 chars | **VERIFIED** |
 | **profiles** | `id` UUID = auth.users(id) | display_name, has_onboarded, preferred_categories[], follower_count, following_count | PK references auth.users | unique lowercase display_name | **VERIFIED** |
 | **favorites** | `id` UUID | user_id, dish_id | FK → auth.users, dishes; UNIQUE(user_id, dish_id) | — | **VERIFIED** |
@@ -33,13 +33,12 @@ Evidence: `supabase/schema.sql:24-259`
 | **notifications** | `id` UUID | user_id, type, data (JSONB), read (bool) | FK → auth.users | — | **VERIFIED** |
 | **user_rating_stats** | `user_id` UUID | rating_bias (MAD), bias_label, votes_with_consensus, votes_pending, dishes_helped_establish, category_biases (JSONB) | FK → auth.users | — | **VERIFIED** |
 | **bias_events** | `id` UUID | user_id, dish_id, dish_name, user_rating, consensus_rating, deviation, was_early_voter, bias_before/after, seen | FK → auth.users, dishes | — | **VERIFIED** |
-| **user_streaks** | `user_id` UUID | current_streak, longest_streak, votes_this_week, last_vote_date, week_start | FK → auth.users | — | **VERIFIED** |
 | **badges** | `key` TEXT | name, subtitle, description, icon, is_public_eligible, sort_order, rarity, family, category | — | 41 seeded badges | **VERIFIED** |
 | **user_badges** | `id` UUID | user_id, badge_key, unlocked_at, metadata_json | FK → auth.users, badges; UNIQUE(user_id, badge_key) | — | **VERIFIED** |
 | **specials** | `id` UUID | restaurant_id, deal_name, description, price, is_active, expires_at, created_by | FK → restaurants, auth.users | — | **VERIFIED** |
 | **restaurant_managers** | `id` UUID | user_id, restaurant_id, role, invited_at, accepted_at, created_by | FK → auth.users, restaurants; UNIQUE(user_id, restaurant_id) | — | **VERIFIED** |
 | **restaurant_invites** | `id` UUID | token (unique hex), restaurant_id, created_by, expires_at, used_by, used_at | FK → restaurants, auth.users | expires after 7 days | **VERIFIED** |
-| **rate_limits** | `id` UUID | user_id, action, created_at | FK → auth.users | probabilistic cleanup (1%) | **VERIFIED** |
+| **rate_limits** | `id` UUID | user_id, action, created_at | FK → auth.users | pg_cron hourly cleanup | **VERIFIED** |
 
 ### Views (1)
 
@@ -57,7 +56,6 @@ restaurants ──< dishes ──< votes >── auth.users ──< profiles
                   └── self-ref           ├──< notifications
                      (parent_dish_id)    ├──< user_rating_stats
                                          ├──< bias_events
-                                         ├──< user_streaks
                                          ├──< user_badges
                                          └──< restaurant_managers
 ```
@@ -73,15 +71,14 @@ Evidence: `schema.sql:351-461`
 | restaurants | public | admin only | admin only | admin only |
 | dishes | public | admin or manager | admin or manager | admin only |
 | votes | public | own (auth.uid) | own | own |
-| profiles | public if display_name set, else own | own | own (with check) | own (**FLAGGED: should be removed — see TASKS.md**) |
+| profiles | public if display_name set, else own | own | own (with check) | — (removed: prevents orphaning FKs) |
 | favorites | own only | own | — | own |
 | admins | admins only | — | — | — |
 | dish_photos | public | own | own | own |
 | follows | public | own (follower_id) | — | own (follower_id) |
-| notifications | own only | service_role only | own | — |
+| notifications | own only | service_role only | own | own |
 | user_rating_stats | public | — | — | — |
 | bias_events | own | — | own (mark seen) | — |
-| user_streaks | public | own | own | — |
 | badges | public | — | — | — |
 | user_badges | own + public-eligible | own | — | — |
 | specials | active OR admin/manager | admin/manager | admin/manager | admin/manager |
@@ -91,7 +88,7 @@ Evidence: `schema.sql:351-461`
 
 **VERIFIED** — all policies read directly from schema.sql
 
-### RPCs (22 functions)
+### RPCs (29 functions)
 
 Evidence: `schema.sql:506-1531`
 
@@ -99,7 +96,7 @@ Evidence: `schema.sql:506-1531`
 | Function | Purpose | Returns | Auth |
 |---|---|---|---|
 | `get_ranked_dishes(lat, lng, radius, category?, town?)` | Main browse feed — ranked dishes with distance, variants, value score | TABLE | STABLE |
-| `get_restaurant_dishes(restaurant_id)` | Dishes for one restaurant with variant aggregation | TABLE | — |
+| `get_restaurant_dishes(restaurant_id)` | Dishes for one restaurant with variant aggregation, includes tags[] | TABLE | — |
 | `get_dish_variants(parent_dish_id)` | Variant sizes/options for a parent dish | TABLE | — |
 | `get_smart_snippet(dish_id)` | Best review snippet (9+ rated first) | TABLE | — |
 
@@ -130,13 +127,6 @@ Evidence: `schema.sql:506-1531`
 | `get_category_experts(category, limit?)` | Experts for a category (deduped by tier) | TABLE | SECURITY DEFINER |
 | `get_expert_votes_for_restaurant(restaurant_id)` | Expert vote counts per dish at a restaurant | TABLE | STABLE |
 
-**Streaks & Leaderboard:**
-| Function | Purpose | Returns | Auth |
-|---|---|---|---|
-| `get_user_streak_info(user_id)` | Streak status (active/at_risk/broken), stats | TABLE | SECURITY DEFINER |
-| `get_friends_leaderboard(user_id, limit?)` | Mutual friends ranked by weekly votes | TABLE | SECURITY DEFINER |
-| `get_weekly_reset_countdown()` | Seconds until Monday reset | INTEGER | STABLE |
-
 **Rate Limiting:**
 | Function | Purpose | Returns | Auth |
 |---|---|---|---|
@@ -162,7 +152,7 @@ Evidence: `schema.sql:506-1531`
 | `compute_value_score()` | Trigger: calculates value_score on dish insert/update | TRIGGER | — |
 | `recalculate_value_percentiles()` | Batch: refresh all percentiles (pg_cron every 2h) | VOID | SECURITY DEFINER |
 
-### Triggers (7)
+### Triggers (6)
 
 Evidence: `schema.sql:1534-1776`
 
@@ -173,7 +163,6 @@ Evidence: `schema.sql:1534-1776`
 | `vote_insert_trigger` | votes | BEFORE INSERT | Sets vote_position, category_snapshot, increments pending stats |
 | `consensus_check_trigger` | votes | AFTER INSERT | At 5+ votes: calculates consensus, creates bias_events, updates user_rating_stats |
 | `update_dish_rating_on_vote` | votes | AFTER INSERT/UPDATE/DELETE | Syncs avg_rating/total_votes on dishes table |
-| `trigger_update_streak_on_vote` | votes | AFTER INSERT | Maintains streak data in user_streaks |
 | `trigger_compute_value_score` | dishes | BEFORE INSERT/UPDATE OF avg_rating, total_votes, price, category | Calculates value_score from rating and price vs median |
 
 **VERIFIED** — all triggers read directly from schema.sql
@@ -184,9 +173,9 @@ Evidence: `schema.sql:1534-1776`
 
 ### Feature 1: Home / Landing
 
-**User flow:** Open app → see search bar + "Top 10" ranked dishes + category grid
+**User flow:** Open app → see search bar + town filter + category scroll + "Top 10" ranked dishes
 **Screens:** `Home.jsx`
-**Components:** `SearchHero`, `Top10Compact`, `CategoryImageCard`, `WelcomeSplash`
+**Components:** `SearchHero`, `Top10Compact`, `WelcomeSplash`
 **Hooks:** `useDishes`, `useProfile`, `useLocationContext`
 **API calls:** `dishesApi.getRankedDishes()` via `useDishes`
 **Data reads:** `get_ranked_dishes` RPC
@@ -225,7 +214,7 @@ Evidence: `schema.sql:1534-1776`
 **Hooks:** `useVote`
 **API calls:** `votesApi.submitVote()`
 **Data reads:** `check_vote_rate_limit` RPC
-**Data writes:** votes table (upsert). Triggers fire: `on_vote_insert`, `check_consensus_after_vote`, `update_dish_avg_rating`, `update_user_streak_on_vote`
+**Data writes:** votes table (upsert). Triggers fire: `on_vote_insert`, `check_consensus_after_vote`, `update_dish_avg_rating`
 **Auth gate:** Requires login — shows `LoginModal` if not authenticated
 
 **VERIFIED** — `src/components/ReviewFlow.jsx`, `src/hooks/useVote.js`, `src/api/votesApi.js`
@@ -242,21 +231,36 @@ Evidence: `schema.sql:1534-1776`
 
 ### Feature 6: Restaurants
 
-**User flow:** Browse restaurants list → tap restaurant → see its dishes ranked
+**User flow:** Browse restaurants list (Open/Closed tabs) → tap restaurant → see its dishes ranked
 **Screens:** `Restaurants.jsx`
 **Hooks:** `useDishes` (with restaurantId param)
-**API calls:** `dishesApi.getDishesForRestaurant()`, `restaurantsApi.getRestaurants()`
+**API calls:** `dishesApi.getDishesForRestaurant()`, `restaurantsApi.getAll()`
 **Data reads:** `get_restaurant_dishes` RPC, restaurants table
+**Components:** `RestaurantDishes` (top-rated view), `RestaurantMenu` (split-pane menu view), `TopDishCard`
 
-**VERIFIED** — `src/pages/Restaurants.jsx`, `src/api/restaurantsApi.js`
+**Restaurant List:** Open/Closed tab switcher filters restaurants by `is_open`. Closed restaurants display at 0.6 opacity with a "Closed for Season" badge. Address links to Google Maps.
+
+**Views:** Two tab-switched views below the restaurant details card:
+- **Top Rated** (default) — dishes ranked by confidence (avg_rating, percent_worth_it, votes). Top 5 shown with expand toggle for the rest.
+- **Menu** — split-pane layout: section navigation on the left (33% width, gold accent on active section), dish list on the right sorted by rating (highest first). Each dish row shows name, dotted leader, price, rating, and reorder %. Tapping a dish navigates to its detail page. Sections ordered by `restaurants.menu_section_order` TEXT[]. Dishes without a `menu_section` appear in an "Other" group.
+
+**Menu sections** use restaurant-specific names that mirror each restaurant's actual menu layout (e.g., Rockfish uses Starters, Salads, Pizza, Chef's Specials, Burgers & Sandwiches, Tacos). Section names and order are set per-restaurant via `menu_section_order` TEXT[]. Dishes with `tags` array containing `lunch-only` or `dinner-only` display L/D badges in the menu view. Fallback defaults (from `supabase/migrations/populate-menu-sections.sql`) apply when actual menu sections aren't available:
+- Soups & Apps (chowder, soup, apps, wings, tendys, fried chicken)
+- Salads, Sandwiches (burger, lobster roll, taco, quesadilla), Pizza, Sushi
+- Entrees (entree, pasta, seafood, fish, steak, chicken, asian, pokebowl)
+- Sides (fries), Desserts (dessert, donuts), Breakfast (breakfast, breakfast sandwich)
+
+Switching restaurants resets to "Top Rated" tab. Search filters work in both views.
+
+**VERIFIED** — `src/pages/Restaurants.jsx`, `src/api/restaurantsApi.js`, `src/components/restaurants/`
 
 ### Feature 7: User Profile (own)
 
-**User flow:** Tap "You" tab → see stats, vote history, badges, favorites, reviews, streaks
+**User flow:** Tap "You" tab → see stats, vote history, badges, favorites, reviews
 **Screens:** `Profile.jsx` (protected)
-**Hooks:** `useProfile`, `useUserVotes`, `useFavorites`, `useStreak`, `useLeaderboard`
-**API calls:** `profileApi`, `votesApi.getDetailedVotesForUser()`, `ratingIdentityApi`, `leaderboardApi`
-**Data reads:** profiles, votes, user_rating_stats, user_streaks, user_badges, favorites
+**Hooks:** `useProfile`, `useUserVotes`, `useFavorites`
+**API calls:** `profileApi`, `votesApi.getDetailedVotesForUser()`, `ratingIdentityApi`
+**Data reads:** profiles, votes, user_rating_stats, user_badges, favorites
 **Data writes:** profiles (update display_name, preferred_categories)
 **Auth gate:** ProtectedRoute wrapper
 
@@ -273,12 +277,11 @@ Evidence: `schema.sql:1534-1776`
 
 ### Feature 9: Discover (Social)
 
-**User flow:** Tap "Discover" tab → see similar taste users, leaderboard, friends' activity
+**User flow:** Tap "Discover" tab → see similar taste users, friends' activity
 **Screens:** `Discover.jsx`
-**Components:** `SimilarTasteUsers`, `StreakCard`, `FollowListModal`, `UserSearch`
-**Hooks:** `useLeaderboard`, `useStreak`
-**API calls:** `tasteApi.getSimilarTasteUsers()`, `leaderboardApi`, `followsApi`
-**Data reads:** `get_similar_taste_users` RPC, `get_friends_leaderboard` RPC, `get_user_streak_info` RPC
+**Components:** `SimilarTasteUsers`, `FollowListModal`, `UserSearch`
+**API calls:** `tasteApi.getSimilarTasteUsers()`, `followsApi`
+**Data reads:** `get_similar_taste_users` RPC
 
 **VERIFIED** — `src/pages/Discover.jsx`
 
@@ -340,20 +343,11 @@ Evidence: `schema.sql:1534-1776`
 
 **VERIFIED** — `schema.sql:1038-1313`
 
-### Feature 16: Streaks & Leaderboard
-
-**User flow:** Vote daily → streak counter increments → see friends leaderboard ranked by weekly votes
-**Hooks:** `useStreak`, `useLeaderboard`
-**Data reads:** `get_user_streak_info` RPC, `get_friends_leaderboard` RPC, `get_weekly_reset_countdown` RPC
-**Data writes:** `update_user_streak_on_vote` trigger maintains streak data
-
-**VERIFIED** — `schema.sql:1330-1404`, `src/hooks/useStreak.js`, `src/hooks/useLeaderboard.js`
-
-### Feature 17: Value Score
+### Feature 16: Value Score
 
 **User flow:** Dishes with 8+ votes and a price → value_score computed (rating vs price-to-median ratio) → value_percentile assigned per category
 **Trigger:** `compute_value_score` fires on dish insert/update
-**Batch job:** `recalculate_value_percentiles()` intended for pg_cron every 2h
+**Batch job:** `recalculate_value_percentiles()` runs via pg_cron every 2h
 **Displayed in:** Browse feed, dish detail
 
 **VERIFIED** — `schema.sql:1739-1823`, `supabase/migrations/value_score.sql`
@@ -455,19 +449,14 @@ All API files follow:
 
 ## Known Inconsistencies
 
-1. **CLAUDE.md design tokens are stale** — Says `#F47A1F` (orange) / `#E6B84C` (gold), but actual CSS uses `#C85A54` (Deep Rust) / `#D9A765` (Warm Gold).
-   **VERIFIED** — `CLAUDE.md:71` vs `src/index.css:37,45`
+1. ~~**CLAUDE.md design tokens are stale**~~ — **FIXED** (T03). CLAUDE.md now matches `src/index.css`.
 
-2. **`useFavorites` uses raw `useEffect` + state, not React Query** — Violates the stated principle "React Query is the data fetching layer... Never add raw `useEffect` + `fetch` patterns."
-   **VERIFIED** — `src/hooks/useFavorites.js:13-35` vs `CLAUDE.md:67`
+2. ~~**`useFavorites` uses raw `useEffect` + state, not React Query**~~ — **FIXED** (T05). Migrated to `useQuery`/`useMutation`.
 
-3. **`profiles_delete_own` policy exists in schema but should not** — Users should not be able to delete their own profile row.
-   **VERIFIED** — `schema.sql:398`, confirmed by owner
+3. ~~**`profiles_delete_own` policy exists in schema but should not**~~ — **FIXED** (T01). Policy removed from schema.sql, migration created to drop in production.
 
-4. **`LocationContext` uses direct `localStorage` calls** — Should use `src/lib/storage.js` per CLAUDE.md rules.
-   **VERIFIED** — `src/context/LocationContext.jsx:22-32,58-65,79,95-101,115-118` vs `CLAUDE.md:152`
+4. ~~**`LocationContext` uses direct `localStorage` calls**~~ — **FIXED** (T06). Now uses `storage.js` helpers.
 
-5. **Pending vote storage key mismatch** — CLAUDE.md says `wgh_pending_vote` but actual key is `whats_good_here_pending_vote`.
-   **VERIFIED** — `CLAUDE.md:78` vs `src/lib/storage.js:76`
+5. ~~**Pending vote storage key mismatch**~~ — **FIXED** (T04). CLAUDE.md now lists the correct key.
 
-6. **Production RLS may have duplicate policies** — `schema.sql:1927-1964` documents known duplicates. Whether they've been cleaned up is **UNKNOWN**.
+6. ~~**Production RLS may have duplicate policies**~~ — **FIXED** (T02). Migration created to drop 16 duplicate policies. See `supabase/migrations/cleanup_rls_policies.sql`.

@@ -5,9 +5,9 @@ import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useProfile } from '../hooks/useProfile'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
-import { BROWSE_CATEGORIES } from '../constants/categories'
+import { BROWSE_CATEGORIES, getCategoryNeonImage } from '../constants/categories'
 import { SearchHero, Top10Compact } from '../components/home'
-import { CategoryImageCard } from '../components/CategoryImageCard'
+import { TownPicker } from '../components/TownPicker'
 
 export function Home() {
   const navigate = useNavigate()
@@ -16,21 +16,39 @@ export function Home() {
 
   const { location, radius, town, setTown } = useLocationContext()
 
+  // Inline category filtering
+  const [selectedCategory, setSelectedCategory] = useState(null)
+
   // Fetch dishes with town filter
   const { dishes, loading, error } = useDishes(location, radius, null, null, town)
+
+  const rankSort = (a, b) => {
+    const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+    const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+    if (aRanked && !bRanked) return -1
+    if (!aRanked && bRanked) return 1
+    return (b.avg_rating || 0) - (a.avg_rating || 0)
+  }
 
   // Top 10 dishes on the island (all categories)
   const top10Dishes = useMemo(() => {
     if (!dishes?.length) return []
-
-    return dishes.slice().sort((a, b) => {
-      const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-      const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-      if (aRanked && !bRanked) return -1
-      if (!aRanked && bRanked) return 1
-      return (b.avg_rating || 0) - (a.avg_rating || 0)
-    }).slice(0, 10)
+    return dishes.slice().sort(rankSort).slice(0, 10)
   }, [dishes])
+
+  // Category-filtered dishes
+  const categoryDishes = useMemo(() => {
+    if (!selectedCategory || !dishes?.length) return []
+    return dishes
+      .filter(dish => dish.category?.toLowerCase() === selectedCategory)
+      .slice()
+      .sort(rankSort)
+      .slice(0, 10)
+  }, [dishes, selectedCategory])
+
+  const selectedCategoryLabel = selectedCategory
+    ? BROWSE_CATEGORIES.find(c => c.id === selectedCategory)?.label
+    : null
 
   // Personal Top 10 based on user's preferred categories
   const personalTop10Dishes = useMemo(() => {
@@ -41,36 +59,32 @@ export function Home() {
     return dishes
       .filter(dish => preferredCats.includes(dish.category?.toLowerCase()))
       .slice()
-      .sort((a, b) => {
-        const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-        const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-        if (aRanked && !bRanked) return -1
-        if (!aRanked && bRanked) return 1
-        return (b.avg_rating || 0) - (a.avg_rating || 0)
-      })
+      .sort(rankSort)
       .slice(0, 10)
   }, [dishes, profile?.preferred_categories])
 
   // Whether to show the toggle (user is logged in and has preferences)
-  const showPersonalToggle = user && profile?.preferred_categories?.length > 0
-
-  const [categoriesExpanded, setCategoriesExpanded] = useState(false)
-  const visibleCategories = categoriesExpanded
-    ? BROWSE_CATEGORIES
-    : BROWSE_CATEGORIES.slice(0, 6)
+  const showPersonalToggle = !selectedCategory && user && profile?.preferred_categories?.length > 0
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
       <h1 className="sr-only">What's Good Here - Top Ranked Dishes Near You</h1>
 
-      {/* Section 1: Hero with search */}
+      {/* Section 1: Hero with search, town filter, categories */}
       <SearchHero
         town={town}
-        onTownChange={setTown}
         loading={loading}
+        categoryScroll={
+          <CategoryScroll
+            town={town}
+            onTownChange={setTown}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        }
       />
 
-      {/* Section 2: Top 10 Compact */}
+      {/* Section 2: Top 10 */}
       <section className="px-4 py-6">
         {loading ? (
           <Top10Skeleton />
@@ -90,101 +104,127 @@ export function Home() {
         ) : top10Dishes.length > 0 ? (
           <div className="max-w-lg mx-auto">
             <Top10Compact
-              dishes={top10Dishes}
+              key={selectedCategory || 'top10'}
+              dishes={selectedCategory ? categoryDishes : top10Dishes}
               personalDishes={personalTop10Dishes}
               showToggle={showPersonalToggle}
-              initialCount={3}
               town={town}
+              categoryLabel={selectedCategoryLabel}
+              onSeeAll={selectedCategory ? () => navigate(`/browse?category=${encodeURIComponent(selectedCategory)}`) : undefined}
             />
           </div>
         ) : (
           <EmptyState onBrowse={() => navigate('/browse')} />
         )}
       </section>
-
-      {/* Section 3: Category Grid */}
-      <section
-        className="px-4 py-6"
-        style={{
-          background: 'linear-gradient(180deg, #1A3A42 0%, #122830 50%, #0D1B22 100%)',
-        }}
-      >
-        {/* Section header */}
-        <div className="mb-8 text-center">
-          {/* Decorative gold dot */}
-          <div
-            className="w-1 h-1 rounded-full mx-auto mb-3"
-            style={{ background: 'var(--color-accent-gold)' }}
-          />
-          <h2
-            className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-2"
-            style={{ color: 'var(--color-text-tertiary)' }}
-          >
-            The Best By Category
-          </h2>
-          <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.35)' }}>
-            Got another craving? Search it above.
-          </p>
-        </div>
-
-        {/* Category grid - 3 columns on mobile, 4 on desktop */}
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-8 justify-items-center max-w-2xl mx-auto">
-          {visibleCategories.map((category, index) => (
-            <div key={category.id} className="stagger-item" style={{ animationDelay: `${index * 50}ms` }}>
-              <CategoryImageCard
-                category={category}
-                onClick={() => navigate(`/browse?category=${encodeURIComponent(category.id)}`)}
-                size={72}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Expand / collapse toggle */}
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={() => setCategoriesExpanded(!categoriesExpanded)}
-            className="flex items-center gap-1.5 text-xs font-semibold tracking-wide transition-opacity hover:opacity-80"
-            style={{ color: 'var(--color-accent-gold)' }}
-          >
-            {categoriesExpanded ? 'Show fewer' : 'See all categories'}
-            <svg
-              className="w-3.5 h-3.5 transition-transform"
-              style={{ transform: categoriesExpanded ? 'rotate(180deg)' : 'none' }}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
-      </section>
     </div>
+  )
+}
+
+const scrollStyle = {
+  scrollbarWidth: 'none',
+  msOverflowStyle: 'none',
+  WebkitOverflowScrolling: 'touch',
+}
+
+function CategoryScroll({ town, onTownChange, selectedCategory, onCategoryChange }) {
+  const [townPickerOpen, setTownPickerOpen] = useState(false)
+
+  if (townPickerOpen) {
+    return (
+      <div className="flex items-center gap-2.5 overflow-x-auto px-4 pb-1" style={scrollStyle}>
+        <TownPicker
+          town={town}
+          onTownChange={onTownChange}
+          isOpen
+          onToggle={setTownPickerOpen}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2.5 px-4 pb-1">
+      <TownPicker
+        town={town}
+        onTownChange={onTownChange}
+        isOpen={false}
+        onToggle={setTownPickerOpen}
+      />
+      <div className="flex items-center gap-2.5 overflow-x-auto" style={scrollStyle}>
+        {BROWSE_CATEGORIES.map((category) => (
+          <CategoryPill
+            key={category.id}
+            category={category}
+            isActive={selectedCategory === category.id}
+            onClick={() => onCategoryChange(prev => prev === category.id ? null : category.id)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CategoryPill({ category, isActive, onClick }) {
+  const imageSrc = getCategoryNeonImage(category.id)
+  const [loaded, setLoaded] = useState(false)
+  const [imgError, setImgError] = useState(false)
+
+  return (
+    <button
+      onClick={onClick}
+      className="flex-shrink-0 flex items-center gap-2 pl-1.5 pr-3.5 py-1.5 rounded-full text-sm font-medium transition-all active:scale-[0.97]"
+      style={{
+        background: isActive ? 'var(--color-primary)' : 'var(--color-surface-elevated)',
+        color: isActive ? 'white' : 'var(--color-text-secondary)',
+      }}
+    >
+      {imageSrc && !imgError ? (
+        <img
+          src={imageSrc}
+          alt=""
+          className="w-6 h-6 rounded-full object-cover"
+          style={{ opacity: loaded ? 1 : 0 }}
+          onLoad={() => setLoaded(true)}
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs"
+          style={{ background: 'var(--color-surface)' }}
+        >
+          {category.emoji}
+        </span>
+      )}
+      {category.label}
+    </button>
   )
 }
 
 // Skeleton for Top 10 section while loading
 function Top10Skeleton() {
   return (
-    <div
-      className="rounded-2xl p-4 max-w-lg mx-auto animate-pulse"
-      style={{
-        background: 'var(--color-bg)',
-        border: '1px solid var(--color-divider)',
-      }}
-    >
-      <div className="h-6 w-48 rounded mb-4" style={{ background: 'var(--color-surface-elevated)' }} />
-      <div className="space-y-3">
+    <div className="max-w-lg mx-auto animate-pulse">
+      <div className="h-4 w-48 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
+      <div className="h-5 w-36 rounded mb-4" style={{ background: 'var(--color-surface-elevated)' }} />
+      <div className="space-y-1">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full" style={{ background: 'var(--color-surface-elevated)' }} />
+          <div key={i} className="flex items-center gap-3 py-3 px-3 rounded-lg mb-1.5" style={{ background: 'var(--color-surface-elevated)' }}>
+            <div className="w-6 h-6 rounded-full" style={{ background: 'var(--color-surface)' }} />
             <div className="flex-1">
-              <div className="h-4 w-32 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
-              <div className="h-3 w-24 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+              <div className="h-4 w-32 rounded mb-1" style={{ background: 'var(--color-surface)' }} />
+              <div className="h-3 w-24 rounded" style={{ background: 'var(--color-surface)' }} />
             </div>
-            <div className="h-5 w-8 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            <div className="h-5 w-8 rounded" style={{ background: 'var(--color-surface)' }} />
+          </div>
+        ))}
+        {[...Array(7)].map((_, i) => (
+          <div key={i + 3} className="flex items-center gap-3 py-2.5 px-2" style={{ opacity: 0.6 }}>
+            <div className="w-6 h-4 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            <div className="flex-1">
+              <div className="h-3.5 w-28 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
+              <div className="h-3 w-20 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            </div>
+            <div className="h-4 w-7 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
           </div>
         ))}
       </div>

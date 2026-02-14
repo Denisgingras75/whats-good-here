@@ -64,7 +64,7 @@ export function HeroIdentityCard({
                     className="w-full px-3 py-1.5 border rounded-lg text-lg font-bold focus:outline-none pr-8"
                     style={{
                       background: 'var(--color-surface-elevated)',
-                      borderColor: nameStatus === 'taken' ? '#ef4444' : nameStatus === 'available' ? '#10b981' : 'var(--color-divider)',
+                      borderColor: nameStatus === 'taken' ? 'var(--color-red)' : nameStatus === 'available' ? 'var(--color-emerald)' : 'var(--color-divider)',
                       color: 'var(--color-text-primary)'
                     }}
                     autoFocus
@@ -99,10 +99,10 @@ export function HeroIdentityCard({
                 </button>
               </div>
               {nameStatus === 'taken' && (
-                <p className="text-xs" style={{ color: '#ef4444' }}>This username is already taken</p>
+                <p className="text-xs" style={{ color: 'var(--color-red)' }}>This username is already taken</p>
               )}
               {nameStatus === 'available' && (
-                <p className="text-xs" style={{ color: '#10b981' }}>Username available!</p>
+                <p className="text-xs" style={{ color: 'var(--color-emerald)' }}>Username available!</p>
               )}
             </div>
           ) : (

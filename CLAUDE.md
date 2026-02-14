@@ -8,6 +8,9 @@ Mobile-first food discovery app for Martha's Vineyard. Ranks dishes by crowd-sou
 - **Hosting:** Vercel (whats-good-here.vercel.app)
 - **Analytics:** PostHog, Sentry
 
+## Session Startup
+Always read `SPEC.md` and `TASKS.md` before beginning any work.
+
 ## Quick Commands
 ```bash
 npm run dev      # localhost:5173
@@ -137,9 +140,10 @@ src/
 supabase/
 ├── schema.sql     # Single source of truth — complete database schema
 ├── migrations/    # Standalone migration scripts (run manually in SQL Editor)
-├── seed/          # Seed data files (17+ SQL files, run manually)
-├── tests/         # RLS validation tests
-└── _archive/      # Old incremental migrations (historical reference only)
+├── seed/
+│   ├── data/      # Real restaurant/dish seed data + menus/
+│   └── test/      # Test votes, demo data, cleanup scripts
+└── tests/         # RLS validation tests
 ```
 
 ### 4.2 API Layer Pattern
@@ -216,7 +220,7 @@ Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode.
 - **`MIN_VOTES_FOR_RANKING` = 5** — `src/constants/app.js` — dishes below this show as "Early"
 - **`MAX_REVIEW_LENGTH` = 200** — `src/constants/app.js` — enforced client + DB constraint
 - **`MIN_VOTES_FOR_VALUE` = 8** — `src/constants/app.js` — value score eligibility
-- **Category definitions** — `src/constants/categories.js` — `BROWSE_CATEGORIES` (15 shortcuts), `MAIN_CATEGORIES`, `ALL_CATEGORIES`
+- **Category definitions** — `src/constants/categories.js` — `BROWSE_CATEGORIES` (19 shortcuts), `MAIN_CATEGORIES`, `ALL_CATEGORIES`
 - **Categories are shortcuts, NOT containers** — Browse shows 15 curated shortcuts. Search covers all dishes regardless of category.
 
 ### 4.7 localStorage Keys
@@ -238,8 +242,6 @@ Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode.
 - `useDishes` — Location-based ranked dishes via React Query
 - `useDishPhotos` — Photo upload with quality analysis, validation, progress
 - `useDishSearch` — Debounced dish search (2+ chars)
-- `useLeaderboard` — Friends leaderboard with weekly reset countdown
-- `useStreak` — Voting streak tracking
 - `useProfile` — User profile data
 - `useRestaurantManager` — Manager portal data
 - `useSpecials` — Restaurant specials management
@@ -256,11 +258,9 @@ Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode.
 - `check_photo_upload_rate_limit` — Photo upload rate limiting (5/min)
 - `get_taste_compatibility` — Taste match % between two users
 - `get_similar_taste_users` — Users with similar taste you don't follow
-- `get_friends_leaderboard` — Friends ranked by votes
 - `get_user_rating_identity` — Rating style analysis (MAD-based bias)
 - `get_friends_votes_for_dish` / `get_friends_votes_for_restaurant` — Social context
 - `evaluate_user_badges` — Award badges based on stats
-- `get_user_streak_info` — Streak status and stats
 - `get_invite_details` / `accept_restaurant_invite` — Manager invite flow
 
 ### 4.10 File Organization

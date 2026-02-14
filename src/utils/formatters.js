@@ -42,12 +42,12 @@ export function formatRelativeTime(dateString) {
  * @returns {string} Hex color
  */
 export function getCompatColor(pct) {
-  if (pct >= 90) return '#16A34A' // deep green
-  if (pct >= 80) return '#22C55E' // green
-  if (pct >= 70) return '#84CC16' // lime
-  if (pct >= 60) return '#EAB308' // yellow
-  if (pct >= 40) return '#F97316' // orange
-  return '#EF4444' // red
+  if (pct >= 90) return 'var(--color-green-deep)'
+  if (pct >= 80) return 'var(--color-emerald-light)'
+  if (pct >= 70) return 'var(--color-lime)'
+  if (pct >= 60) return 'var(--color-yellow)'
+  if (pct >= 40) return 'var(--color-orange)'
+  return 'var(--color-red)'
 }
 
 /**

@@ -9,8 +9,9 @@ import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useFavorites } from '../hooks/useFavorites'
 import { LoginModal } from '../components/Auth/LoginModal'
-import { RestaurantDishes } from '../components/restaurants'
+import { RestaurantDishes, RestaurantMenu } from '../components/restaurants'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
+import { getRatingColor } from '../utils/ranking'
 
 export function Restaurants() {
   const { user } = useAuth()
@@ -23,6 +24,8 @@ export function Restaurants() {
   const [dishSearchQuery, setDishSearchQuery] = useState('')
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('top')
+  const [restaurantTab, setRestaurantTab] = useState('open')
   const [friendsVotesByDish, setFriendsVotesByDish] = useState({})
 
   const { location, radius } = useLocationContext()
@@ -57,7 +60,10 @@ export function Restaurants() {
     if (restaurantId && restaurants.length > 0 && !selectedRestaurant) {
       const restaurant = restaurants.find(r => r.id === restaurantId)
       if (restaurant) {
-        setSelectedRestaurant(restaurant)
+        // Fetch full data (includes menu_section_order)
+        restaurantsApi.getById(restaurant.id)
+          .then(full => setSelectedRestaurant({ ...restaurant, ...full }))
+          .catch(() => setSelectedRestaurant(restaurant))
       }
     }
   }, [restaurantId, restaurants, selectedRestaurant])
@@ -106,7 +112,7 @@ export function Restaurants() {
     await toggleFavorite(dishId)
   }
 
-  const handleRestaurantSelect = (restaurant) => {
+  const handleRestaurantSelect = async (restaurant) => {
     const stats = restaurantStats[restaurant.id] || {}
     capture('restaurant_viewed', {
       restaurant_id: restaurant.id,
@@ -115,7 +121,15 @@ export function Restaurants() {
       total_dish_votes: stats.totalVotes || 0,
       dish_count: restaurant.dishCount,
     })
-    setSelectedRestaurant(restaurant)
+    // Fetch full restaurant data (includes menu_section_order)
+    try {
+      const full = await restaurantsApi.getById(restaurant.id)
+      setSelectedRestaurant({ ...restaurant, ...full })
+    } catch (err) {
+      logger.error('Error fetching restaurant details:', err)
+      setSelectedRestaurant(restaurant)
+    }
+    setActiveTab('top')
   }
 
   // Compute top dish and total votes per restaurant
@@ -154,15 +168,16 @@ export function Restaurants() {
     return stats
   }, [dishes])
 
-  // Filter restaurants by search and sort alphabetically
+  // Filter restaurants by open/closed tab, search, and sort alphabetically
   const filteredRestaurants = useMemo(() => {
     return restaurants
+      .filter(r => restaurantTab === 'open' ? r.is_open !== false : r.is_open === false)
       .filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
       .sort((a, b) => a.name.localeCompare(b.name))
-  }, [restaurants, searchQuery])
+  }, [restaurants, searchQuery, restaurantTab])
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-surface) 0%, #0D1B22 100%)' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg) 100%)' }}>
       <h1 className="sr-only">Restaurants</h1>
 
       {/* Header */}
@@ -235,7 +250,7 @@ export function Restaurants() {
       {!selectedRestaurant && (
         <div className="p-4 pt-5">
           {/* Section Header */}
-          <div className="mb-5 flex items-center gap-3">
+          <div className="mb-4 flex items-center gap-3">
             <div
               className="w-1 h-6 rounded-full"
               style={{ background: 'linear-gradient(180deg, var(--color-primary) 0%, var(--color-accent-orange) 100%)' }}
@@ -250,6 +265,44 @@ export function Restaurants() {
             >
               Restaurants near you
             </h2>
+          </div>
+
+          {/* Open / Closed Tab Switcher */}
+          <div
+            className="flex rounded-xl p-1 mb-5"
+            style={{
+              background: 'var(--color-surface-elevated)',
+              border: '1px solid var(--color-divider)',
+            }}
+            role="tablist"
+            aria-label="Restaurant status filter"
+          >
+            <button
+              role="tab"
+              aria-selected={restaurantTab === 'open'}
+              onClick={() => setRestaurantTab('open')}
+              className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+              style={{
+                background: restaurantTab === 'open' ? 'var(--color-primary)' : 'transparent',
+                color: restaurantTab === 'open' ? 'white' : 'var(--color-text-secondary)',
+                boxShadow: restaurantTab === 'open' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+              }}
+            >
+              Open
+            </button>
+            <button
+              role="tab"
+              aria-selected={restaurantTab === 'closed'}
+              onClick={() => setRestaurantTab('closed')}
+              className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+              style={{
+                background: restaurantTab === 'closed' ? 'var(--color-primary)' : 'transparent',
+                color: restaurantTab === 'closed' ? 'white' : 'var(--color-text-secondary)',
+                boxShadow: restaurantTab === 'closed' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+              }}
+            >
+              Closed
+            </button>
           </div>
 
           {fetchError ? (
@@ -284,6 +337,7 @@ export function Restaurants() {
                       border: '1px solid rgba(217, 167, 101, 0.1)',
                       borderLeft: '3px solid var(--color-accent-gold)',
                       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(217, 167, 101, 0.04)',
+                      opacity: restaurant.is_open ? 1 : 0.6,
                     }}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -299,12 +353,37 @@ export function Restaurants() {
                         >
                           {restaurant.name}
                         </h3>
-                        <p className="mt-1 font-medium" style={{ color: stats.totalVotes > 0 ? 'var(--color-accent-gold)' : 'var(--color-text-tertiary)', fontSize: '12px' }}>
-                          {stats.totalVotes > 0
-                            ? `${stats.totalVotes} total dish votes`
-                            : 'No votes yet'
-                          }
-                        </p>
+                        {!restaurant.is_open && (
+                          <span
+                            className="inline-block mt-1 px-2 py-0.5 rounded-full font-semibold"
+                            style={{
+                              fontSize: '10px',
+                              background: 'rgba(200, 90, 84, 0.15)',
+                              color: 'var(--color-primary)',
+                              border: '1px solid rgba(200, 90, 84, 0.25)',
+                            }}
+                          >
+                            Closed for Season
+                          </span>
+                        )}
+                        {restaurant.knownFor && (
+                          <p
+                            className="mt-1 font-medium"
+                            style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}
+                          >
+                            Known for{' '}
+                            <span style={{ color: 'var(--color-text-secondary)' }}>
+                              {restaurant.knownFor.name}
+                            </span>
+                            {' · '}
+                            <span
+                              className="font-bold"
+                              style={{ color: getRatingColor(restaurant.knownFor.rating) }}
+                            >
+                              {restaurant.knownFor.rating}
+                            </span>
+                          </p>
+                        )}
                       </div>
 
                       {/* Chevron */}
@@ -325,7 +404,14 @@ export function Restaurants() {
                     border: '1px solid var(--color-divider)',
                   }}
                 >
-                  <p className="font-medium" style={{ fontSize: '14px' }}>No restaurants found</p>
+                  <p className="font-medium" style={{ fontSize: '14px' }}>
+                    {searchQuery
+                      ? 'No restaurants found'
+                      : restaurantTab === 'open'
+                        ? 'No open restaurants found'
+                        : 'No closed restaurants'
+                    }
+                  </p>
                 </div>
               )}
             </div>
@@ -410,41 +496,78 @@ export function Restaurants() {
                 </a>
               )}
 
-              {/* Call Restaurant link */}
-              {selectedRestaurant.address && (
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedRestaurant.name + ' ' + selectedRestaurant.address)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 transition-colors group"
-                  style={{ color: 'var(--color-text-secondary)' }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0 group-hover:opacity-80" style={{ color: 'var(--color-text-tertiary)' }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                  </svg>
-                  <span className="text-sm group-hover:text-[var(--color-primary)]">Call Restaurant</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 flex-shrink-0 group-hover:text-[var(--color-primary)]" style={{ color: 'var(--color-divider)' }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                  </svg>
-                </a>
-              )}
             </div>
 
           </div>
 
-          {/* What Should I Order? - Confidence View */}
-          <RestaurantDishes
-            dishes={dishes}
-            loading={dishesLoading}
-            error={dishesError}
-            onVote={handleVote}
-            onLoginRequired={handleLoginRequired}
-            isFavorite={isFavorite}
-            onToggleFavorite={handleToggleFavorite}
-            user={user}
-            searchQuery={dishSearchQuery}
-            friendsVotesByDish={friendsVotesByDish}
-          />
+          {/* Tab Switcher */}
+          <div className="px-4 pt-4">
+            <div
+              className="flex rounded-xl p-1"
+              style={{
+                background: 'var(--color-surface-elevated)',
+                border: '1px solid var(--color-divider)',
+              }}
+              role="tablist"
+              aria-label="Restaurant view"
+            >
+              <button
+                role="tab"
+                aria-selected={activeTab === 'top'}
+                onClick={() => setActiveTab('top')}
+                className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+                style={{
+                  background: activeTab === 'top' ? 'var(--color-primary)' : 'transparent',
+                  color: activeTab === 'top' ? 'white' : 'var(--color-text-secondary)',
+                  boxShadow: activeTab === 'top' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+                }}
+              >
+                Top Rated
+              </button>
+              <button
+                role="tab"
+                aria-selected={activeTab === 'menu'}
+                onClick={() => setActiveTab('menu')}
+                className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+                style={{
+                  background: activeTab === 'menu' ? 'var(--color-primary)' : 'transparent',
+                  color: activeTab === 'menu' ? 'white' : 'var(--color-text-secondary)',
+                  boxShadow: activeTab === 'menu' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+                }}
+              >
+                Menu
+              </button>
+            </div>
+            {/* Gold divider */}
+            <div
+              className="mt-3 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, var(--color-accent-gold), transparent)' }}
+            />
+          </div>
+
+          {/* Dish Content */}
+          {activeTab === 'top' ? (
+            <RestaurantDishes
+              dishes={dishes}
+              loading={dishesLoading}
+              error={dishesError}
+              onVote={handleVote}
+              onLoginRequired={handleLoginRequired}
+              isFavorite={isFavorite}
+              onToggleFavorite={handleToggleFavorite}
+              user={user}
+              searchQuery={dishSearchQuery}
+              friendsVotesByDish={friendsVotesByDish}
+            />
+          ) : (
+            <RestaurantMenu
+              dishes={dishes}
+              loading={dishesLoading}
+              error={dishesError}
+              searchQuery={dishSearchQuery}
+              menuSectionOrder={selectedRestaurant?.menu_section_order || []}
+            />
+          )}
         </>
       )}
 

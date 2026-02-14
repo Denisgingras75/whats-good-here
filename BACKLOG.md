@@ -173,6 +173,34 @@ Ideas and features for future versions. Not prioritized yet.
 
 ---
 
+## Automated Menu Import Pipeline (Scaling)
+
+**Summary:** Automated system to bulk-import restaurant menus for city expansion (Boston, etc.) without manual entry.
+
+**Why it's needed:** Can't rely on restaurant managers to enter their own menus before launch — need menus already populated to show value when pitching. "Look, your restaurant is already here."
+
+**How it works:**
+1. Given a list of restaurants + addresses in a target city
+2. Script finds their menu online (restaurant website, Toast, Square, DoorDash public pages)
+3. LLM extracts dishes, section headings, prices, and maps to category vocabulary
+4. Menu sections mirror the restaurant's actual menu layout (same approach as MV imports)
+5. Auto-imports to database
+6. QA a sample, then go live
+
+**Technical needs:**
+- Web scraper to find and fetch menu pages (handle PDFs, Toast ordering pages, restaurant websites)
+- LLM extraction step (same logic as the menu-importer skill, just automated)
+- Category mapping from the existing vocabulary table
+- Batch runner to process hundreds of restaurants
+- QA dashboard or spot-check workflow
+
+**Phased approach:**
+- v1: Semi-automated — script finds menu URL, LLM extracts, human spot-checks
+- v2: Fully automated — bulk import with confidence scoring, auto-flag low-confidence extractions for review
+- v3: POS integrations (Toast, Square, Clover APIs) for real-time menu sync
+
+---
+
 ## How to Add Ideas
 
 ```markdown

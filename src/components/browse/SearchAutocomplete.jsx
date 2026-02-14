@@ -41,7 +41,7 @@ export const SearchAutocomplete = forwardRef(function SearchAutocomplete({
             className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{
               background: suggestion.type === 'dish' ? 'var(--color-primary-muted)' : 'rgba(59, 130, 246, 0.15)',
-              color: suggestion.type === 'dish' ? 'var(--color-primary)' : '#60A5FA'
+              color: suggestion.type === 'dish' ? 'var(--color-primary)' : 'var(--color-blue-light)'
             }}
           >
             {suggestion.type === 'dish' ? 'Dish' : 'Spot'}

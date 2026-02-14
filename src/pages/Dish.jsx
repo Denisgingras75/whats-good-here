@@ -591,7 +591,7 @@ export function Dish() {
                                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0"
                                 style={{
                                   background: vote.category_expertise === 'authority' ? 'rgba(147, 51, 234, 0.12)' : 'rgba(59, 130, 246, 0.12)',
-                                  color: vote.category_expertise === 'authority' ? '#9333EA' : '#3B82F6',
+                                  color: vote.category_expertise === 'authority' ? 'var(--color-purple)' : 'var(--color-blue)',
                                 }}
                               >
                                 {expertiseLabel}
@@ -760,13 +760,15 @@ export function Dish() {
       {/* Photo Lightbox */}
       {lightboxPhoto && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0, 0, 0, 0.9)' }}
           onClick={() => setLightboxPhoto(null)}
           role="dialog"
           aria-label="Photo lightbox"
         >
           <button
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl"
+            className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-2xl"
+            style={{ background: 'rgba(255, 255, 255, 0.2)', color: 'var(--color-text-primary)' }}
             onClick={() => setLightboxPhoto(null)}
             aria-label="Close lightbox"
           >

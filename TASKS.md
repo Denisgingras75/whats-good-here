@@ -5,7 +5,7 @@
 
 ---
 
-## T01: Remove `profiles_delete_own` RLS policy from schema.sql
+## ~~T01: Remove `profiles_delete_own` RLS policy from schema.sql~~ DONE
 
 **Why:** Users should not be able to delete their own profile row. Doing so would orphan votes, follows, and other FK-referencing data. Owner confirmed this is wrong.
 
@@ -18,7 +18,7 @@
 
 ---
 
-## T02: Verify production RLS matches schema.sql — clean up duplicate policies
+## ~~T02: Verify production RLS matches schema.sql — clean up duplicate policies~~ DONE
 
 **Why:** `schema.sql:1927-1964` documents known duplicate policies in production (follows, profiles, dishes, specials, storage.objects). If not cleaned up, redundant policies increase evaluation cost on every row access and could create unexpected permission grants.
 
@@ -32,7 +32,7 @@
 
 ---
 
-## T03: Fix stale design tokens in CLAUDE.md
+## ~~T03: Fix stale design tokens in CLAUDE.md~~ DONE
 
 **Why:** CLAUDE.md says primary is `#F47A1F` (orange) and rating is `#E6B84C` (gold), but actual CSS uses `#C85A54` (Deep Rust) and `#D9A765` (Warm Gold). This misleads anyone reading CLAUDE.md.
 
@@ -45,7 +45,7 @@
 
 ---
 
-## T04: Fix pending vote storage key mismatch in CLAUDE.md
+## ~~T04: Fix pending vote storage key mismatch in CLAUDE.md~~ DONE
 
 **Why:** CLAUDE.md says key is `wgh_pending_vote` but actual code uses `whats_good_here_pending_vote`. Anyone reading CLAUDE.md would use the wrong key.
 
@@ -56,7 +56,7 @@
 
 ---
 
-## T05: Migrate `useFavorites` to React Query
+## ~~T05: Migrate `useFavorites` to React Query~~ DONE
 
 **Why:** `useFavorites` uses raw `useEffect` + `useState` for data fetching, violating the stated architecture principle "React Query is the data fetching layer... Never add raw `useEffect` + `fetch` patterns." This means favorites don't benefit from React Query's caching, deduplication, or background refetching.
 
@@ -71,7 +71,7 @@
 
 ---
 
-## T06: Move `LocationContext` to use `storage.js` helpers
+## ~~T06: Move `LocationContext` to use `storage.js` helpers~~ DONE
 
 **Why:** `LocationContext.jsx` calls `localStorage.getItem/setItem` directly in 6+ places, violating the CLAUDE.md rule "Direct localStorage calls (use `src/lib/storage.js`)". This bypasses the in-memory cache and private-browsing safety wrappers in `storage.js`.
 
@@ -84,7 +84,7 @@
 
 ---
 
-## T07: Move `AuthContext` to use `storage.js` helpers for non-Supabase storage
+## ~~T07: Move `AuthContext` to use `storage.js` helpers for non-Supabase storage~~ DONE
 
 **Why:** `AuthContext.jsx:77-81` directly calls `sessionStorage.removeItem` and `localStorage.removeItem` to clear email. Should use storage helpers for consistency and private-browsing safety.
 
@@ -97,7 +97,7 @@
 
 ---
 
-## T08: `dishesApi.search` — audit string interpolation in `.or()` for injection safety
+## ~~T08: `dishesApi.search` — audit string interpolation in `.or()` for injection safety~~ DONE
 
 **Why:** `dishesApi.search` constructs a PostgREST `.or()` filter with string interpolation: `` .or(`name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`) ``. While `sanitizeSearchQuery` is called first, PostgREST filter syntax characters (`.`, `,`, `(`, `)`) in the search term could break the filter or produce unexpected behavior. The `.replace(/[.,()]/g, '')` only strips some characters.
 
@@ -110,7 +110,7 @@
 
 ---
 
-## T09: `dishesApi.getDishById` computes `avg_rating` client-side — use pre-computed column instead
+## ~~T09: `dishesApi.getDishById` computes `avg_rating` client-side — use pre-computed column instead~~ DONE
 
 **Why:** `getDishById` fetches all votes for a dish and computes `avg_rating` in JS, but the `dishes` table already has a pre-computed `avg_rating` column maintained by the `update_dish_avg_rating` trigger. The client-side calculation could disagree with the pre-computed value and wastes bandwidth fetching all vote rows.
 
@@ -123,7 +123,7 @@
 
 ---
 
-## T10: Apply or delete `supabase/fix-profiles-rls.sql`
+## ~~T10: Apply or delete `supabase/fix-profiles-rls.sql`~~ DONE
 
 **Why:** This uncommitted file drops old RLS policies but doesn't create replacements (they already exist in `schema.sql`). It's been sitting as an untracked file. Either apply it in production and delete, or just delete if the old policies were already cleaned up.
 
@@ -136,7 +136,7 @@
 
 ---
 
-## T11: `value_score.sql` migration view lacks `SECURITY INVOKER`
+## ~~T11: `value_score.sql` migration view lacks `SECURITY INVOKER`~~ DONE
 
 **Why:** The standalone `value_score.sql` migration creates `category_median_prices` view without `WITH (security_invoker = true)`, but `schema.sql:264` has it. If the migration was run after the schema, it may have overwritten the SECURITY INVOKER setting, meaning the view runs as the creator's permissions instead of the caller's.
 
@@ -149,7 +149,7 @@
 
 ---
 
-## T12: `ALL_CATEGORIES` has duplicate `seafood` entry
+## ~~T12: `ALL_CATEGORIES` has duplicate `seafood` entry~~ DONE
 
 **Why:** `categories.js` line 47 adds `{ id: 'seafood', label: 'Seafood', emoji: '🦐' }` to `ALL_CATEGORIES`, but `seafood` already exists in `MAIN_CATEGORIES` (line 38) which is spread into `ALL_CATEGORIES`. The duplicate means `getCategoryById('seafood')` may return inconsistent results and `matchCategories` returns duplicate suggestions.
 
@@ -162,7 +162,7 @@
 
 ---
 
-## T13: Consensus trigger doesn't re-score existing voters when new consensus is reached
+## ~~T13: Consensus trigger doesn't re-score existing voters when new consensus is reached~~ DONE
 
 **Why:** `check_consensus_after_vote` (schema.sql:1601-1677) only fires the consensus scoring loop when `consensus_ready` transitions from FALSE to TRUE. Votes cast after consensus is already reached are never scored — they don't get `scored_at` set, don't create `bias_events`, and don't update `user_rating_stats`. This means late voters never see how they compared.
 
@@ -176,7 +176,7 @@
 
 ---
 
-## T14: `dishes.yes_votes` column exists but is never populated by triggers
+## ~~T14: `dishes.yes_votes` column exists but is never populated by triggers~~ DONE
 
 **Why:** The `dishes` table has `yes_votes INT DEFAULT 0` (schema.sql:51), but the `update_dish_avg_rating` trigger (schema.sql:1679-1695) only updates `avg_rating` and `total_votes` — it never updates `yes_votes`. The column is always 0 in the database. The RPCs compute yes_votes on-the-fly from the votes table, so the column is effectively dead.
 
@@ -189,7 +189,7 @@
 
 ---
 
-## T15: No automated CI for `npm run build` or `npm run test`
+## ~~T15: No automated CI for `npm run build` or `npm run test`~~ DONE
 
 **Why:** CLAUDE.md mandates "npm run build must pass" and "npm run test must pass" before calling anything done, but there's no CI config (GitHub Actions, Vercel build checks beyond deploy). Regressions can ship silently.
 
@@ -202,7 +202,7 @@
 
 ---
 
-## T16: `_archive/` directory in `src/` contains stale backup
+## ~~T16: `_archive/` directory in `src/` contains stale backup~~ DONE
 
 **Why:** `src/_archive/BrowseCategoryGrid.jsx.bak` is dead code checked into the repo. Per CLAUDE.md: "Delete unused code immediately — Don't let dead code accumulate."
 
@@ -215,7 +215,7 @@
 
 ---
 
-## T17: `get_ranked_dishes` missing `SECURITY DEFINER` — leaks restaurant/dish data via RLS bypass
+## ~~T17: `get_ranked_dishes` missing `SECURITY DEFINER` — leaks restaurant/dish data via RLS bypass~~ DONE
 
 **Why:** `get_ranked_dishes` is `STABLE` but not `SECURITY DEFINER`. Since restaurants and dishes have public SELECT policies this is fine today, but if SELECT policies were ever tightened (e.g., hiding closed restaurants), the function would respect the caller's RLS and might return inconsistent results depending on auth state. Most other RPCs that need cross-table access use `SECURITY DEFINER`.
 
@@ -228,7 +228,7 @@
 
 ---
 
-## T18: Rate limit cleanup is probabilistic — old entries may accumulate
+## ~~T18: Rate limit cleanup is probabilistic — old entries may accumulate~~ DONE
 
 **Why:** `check_and_record_rate_limit` (schema.sql:1461) only cleans up old entries with `random() < 0.01` (1% chance per call). Under low traffic, rate_limits table entries older than 1 hour can accumulate indefinitely. The pg_cron job for value percentiles exists but there's no scheduled cleanup for rate_limits.
 
@@ -241,7 +241,7 @@
 
 ---
 
-## T19: `compute_value_score` trigger lacks `SECURITY DEFINER`
+## ~~T19: `compute_value_score` trigger lacks `SECURITY DEFINER`~~ DONE
 
 **Why:** Other trigger functions (`on_vote_insert`, `check_consensus_after_vote`, `update_dish_avg_rating`, `update_user_streak_on_vote`) all have `SECURITY DEFINER`. `compute_value_score` (schema.sql:1740) does not, which means it runs with the invoking user's permissions. Since it reads `category_median_prices` view (which has `SECURITY INVOKER`), the chain works today because dishes have public SELECT. But inconsistency with other triggers is a maintenance risk.
 
@@ -253,7 +253,7 @@
 
 ---
 
-## T20: CLAUDE.md project structure section lists `seed.sql` but actual structure is `seed/` directory
+## ~~T20: CLAUDE.md project structure section lists `seed.sql` but actual structure is `seed/` directory~~ DONE
 
 **Why:** CLAUDE.md says `supabase/seed.sql` but actual seed data is in `supabase/seed/` with 17+ files. This misleads developers looking for seed data.
 
@@ -262,3 +262,103 @@
 - Mention that seed files are run manually in SQL Editor
 
 **Files:** `CLAUDE.md:36-37`
+
+---
+
+## ~~T21: Add Open/Closed tabs to Restaurants page~~ DONE
+
+**Why:** People search "what's open on MV" — the restaurant list needs Open/Closed filtering.
+
+**Acceptance criteria:**
+- Open/Closed tab switcher on restaurant list (defaults to Open)
+- Closed restaurants show at 0.6 opacity with "Closed for Season" badge
+- Tab-aware empty states
+- `npm run build` passes
+
+**Files:** `src/pages/Restaurants.jsx`
+
+---
+
+## ~~T22: Populate menu_section data on all dishes~~ DONE
+
+**Why:** Menu tab showed "Menu not set up yet" because dishes lacked `menu_section` data.
+
+**Acceptance criteria:**
+- All dishes have `menu_section` populated based on category mapping
+- Each restaurant has `menu_section_order` array in canonical display order
+- Migration run in Supabase SQL Editor successfully
+- Menu tab shows grouped sections
+
+**Files:** `supabase/migrations/populate-menu-sections.sql`
+
+---
+
+## ~~T23: Redesign Menu tab as split-pane layout~~ DONE
+
+**Why:** Vertical scrolling through all menu sections was too long. Split-pane (section nav left, dishes right) is more intuitive and mirrors real menu navigation.
+
+**Acceptance criteria:**
+- Left panel: section names as nav (33% width), gold accent on active
+- Right panel: dishes sorted by rating, typographic layout with name/price/rating
+- Tapping dish navigates to detail page
+- Search filters work across sections
+- `npm run build` passes
+
+**Files:** `src/components/restaurants/RestaurantMenu.jsx`, `src/components/restaurants/index.js`
+
+---
+
+## T24: Add dessert dishes to restaurants
+
+**Why:** Desserts category exists in the app but no restaurants have dessert dishes seeded yet.
+
+**Acceptance criteria:**
+- Dessert dishes added to relevant restaurants with correct prices
+- `category = 'dessert'`, `menu_section = 'Desserts'`
+- `menu_section_order` updated to include 'Desserts' for each restaurant
+- Template ready at `supabase/seed/menus/add-desserts.sql`
+
+**Status:** Waiting on specific restaurant + dessert list from owner
+
+**Files:** `supabase/seed/menus/add-desserts.sql`
+
+---
+
+## T25: Convert specific restaurants to breakfast menu sections
+
+**Why:** Breakfast places should have their own menu structure (Breakfast Plates, Sandwiches & Burritos, Waffles & Pancakes, Eggs, Pastries) instead of a single "Breakfast" section.
+
+**Acceptance criteria:**
+- Owner specifies which restaurants are breakfast places
+- Breakfast dishes re-tagged with granular `menu_section` values via name-based matching
+- `menu_section_order` updated for those restaurants
+
+**Status:** Waiting on restaurant list from owner
+
+**Files:** `supabase/migrations/populate-menu-sections.sql` (or new migration)
+
+---
+
+## T26: Homepage — trust signal, emotional hook, brand signature
+
+**Why:** After the layout simplification (Feb 13), the homepage is clean and functional but lacks magnetism. Three connected problems remain:
+
+### 1. Trust signal too quiet
+"Ranked by people who know" is a tagline, not proof. There's no specificity — no vote count, no restaurant count, nothing that makes a new user think "this data is real." Trust comes from numbers and social proof, not claims.
+
+### 2. Emotional hook is medium
+The homepage is calm-premium but not magnetic-premium. The headline restates the app name. There's no tension, no FOMO, no "you're about to discover something." Nothing makes you *want* to scroll.
+
+### 3. Brand signature still forming
+If you cover the logo, nothing identifies this as What's Good Here. No visual or verbal moment is uniquely this app. The best brands have a signature — a gesture, a phrase, a pattern that's only theirs. These three are connected: a strong brand signature *is* the trust signal *is* the emotional hook.
+
+**Approach:** Brainstorm before coding. This is a design/copy problem, not a component problem. Explore what the signature moment could be — the one thing that makes someone instantly feel "this is the real list."
+
+**Acceptance criteria:**
+- Homepage makes a first-time visitor feel the rankings are credible (trust)
+- Something on the page creates desire to explore, not just permission to browse (hook)
+- A visual or verbal element is unmistakably "What's Good Here" (signature)
+
+**Status:** Ready for brainstorming session
+
+**Files:** `src/pages/Home.jsx`, `src/components/home/SearchHero.jsx`, `src/components/home/Top10Compact.jsx`

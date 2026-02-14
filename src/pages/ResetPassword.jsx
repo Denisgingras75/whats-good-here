@@ -148,7 +148,7 @@ export function ResetPassword() {
             type="submit"
             disabled={loading}
             className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-            style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
           >
             {loading ? 'Updating...' : 'Update Password'}
           </button>
@@ -158,7 +158,7 @@ export function ResetPassword() {
           <button
             onClick={() => navigate('/login')}
             className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all"
-            style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
           >
             Back to Sign In
           </button>

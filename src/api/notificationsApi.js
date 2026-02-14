@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { createClassifiedError } from '../utils/errorHandler'
 
 /**
  * Notifications API
@@ -25,7 +26,7 @@ export const notificationsApi = {
       .limit(limit)
 
     if (error) {
-      throw error
+      throw createClassifiedError(error)
     }
 
     return data || []
@@ -49,7 +50,7 @@ export const notificationsApi = {
       .eq('read', false)
 
     if (error) {
-      throw error
+      throw createClassifiedError(error)
     }
 
     return count || 0
@@ -73,7 +74,7 @@ export const notificationsApi = {
       .eq('read', false)
 
     if (error) {
-      throw error
+      throw createClassifiedError(error)
     }
   },
 
@@ -94,7 +95,7 @@ export const notificationsApi = {
       .eq('user_id', user.id)
 
     if (error) {
-      throw error
+      throw createClassifiedError(error)
     }
   },
 
@@ -117,7 +118,7 @@ export const notificationsApi = {
       .eq('user_id', user.id)
 
     if (error) {
-      throw error
+      throw createClassifiedError(error)
     }
   },
 }

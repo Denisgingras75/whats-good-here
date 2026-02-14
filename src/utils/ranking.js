@@ -36,9 +36,9 @@ export function formatScore10(score) {
 export function getRatingColor(rating) {
   if (rating === null || rating === undefined) return 'var(--color-text-tertiary)'
   const score = Number(rating)
-  if (score >= 8.0) return '#16a34a' // green-600 - excellent
-  if (score >= 6.0) return '#f59e0b' // amber-500 - good
-  return '#ef4444' // red-500 - meh
+  if (score >= 8.0) return 'var(--color-green-deep)'
+  if (score >= 6.0) return 'var(--color-amber)'
+  return 'var(--color-red)'
 }
 
 /**
@@ -107,29 +107,29 @@ export function getConfidenceIndicator(totalVotes) {
       level: 'none',
       text: 'No votes yet — be the first!',
       icon: null,
-      color: 'gray',
-      className: 'text-neutral-500',
+      color: 'var(--color-text-tertiary)',
+      style: { color: 'var(--color-text-tertiary)' },
     },
     low: {
       level: 'low',
       text: `Not enough votes yet (${totalVotes} ${totalVotes === 1 ? 'vote' : 'votes'})`,
       icon: '📊',
-      color: 'yellow',
-      className: 'text-yellow-600 border-yellow-300 bg-yellow-50',
+      color: 'var(--color-accent-gold)',
+      style: { color: 'var(--color-accent-gold)', borderColor: 'var(--color-accent-gold)', background: 'color-mix(in srgb, var(--color-accent-gold) 10%, var(--color-bg))' },
     },
     medium: {
       level: 'medium',
       text: `${totalVotes} votes`,
       icon: null,
-      color: 'gray',
-      className: 'text-gray-600',
+      color: 'var(--color-text-secondary)',
+      style: { color: 'var(--color-text-secondary)' },
     },
     high: {
       level: 'high',
       text: `${totalVotes} votes`,
       icon: '✓',
-      color: 'green',
-      className: 'text-green-600 border-green-300 bg-green-50',
+      color: 'var(--color-rating)',
+      style: { color: 'var(--color-rating)', borderColor: 'var(--color-rating)', background: 'color-mix(in srgb, var(--color-rating) 10%, var(--color-bg))' },
     },
   }
 

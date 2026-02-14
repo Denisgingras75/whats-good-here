@@ -53,6 +53,18 @@ export function removeStorageItem(key) {
 }
 
 /**
+ * Remove item from sessionStorage
+ * @param {string} key - Storage key
+ */
+export function removeSessionItem(key) {
+  try {
+    sessionStorage.removeItem(key)
+  } catch {
+    // sessionStorage may be unavailable in private browsing
+  }
+}
+
+/**
  * Clear the entire in-memory cache (call on logout to prevent data leaking between users)
  */
 export function clearCache() {
@@ -70,6 +82,11 @@ export function clearCacheKeys(keys) {
 // Storage key constants
 export const STORAGE_KEYS = {
   HAS_SEEN_EAR_TOOLTIP: 'wgh_has_seen_ear_tooltip',
+  SOUND_MUTED: 'soundMuted',
+  RADIUS: 'wgh_radius',
+  TOWN: 'wgh_town',
+  LOCATION_PERMISSION: 'whats-good-here-location-permission',
+  EMAIL_CACHE: 'whats-good-here-email',
 }
 
 // Pending vote storage helpers (survives OAuth redirect)

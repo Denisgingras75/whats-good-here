@@ -394,22 +394,36 @@ export function Browse() {
       {/* Header - only shows when viewing dishes */}
       {showingDishes && (
         <header style={{ background: 'var(--color-bg)' }}>
-          {/* Category indicator when viewing dishes */}
-          {selectedCategory && !debouncedSearchQuery.trim() && (
-            <div className="px-4 py-3 flex items-center gap-3">
-              <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                {CATEGORIES.find(c => c.id === selectedCategory)?.label}
+          <div className="px-4 py-3 flex items-center gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="p-1 -ml-1 rounded-lg transition-opacity hover:opacity-70"
+              aria-label="Back to home"
+            >
+              <svg className="w-5 h-5" style={{ color: 'var(--color-text-secondary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            {selectedCategory && !debouncedSearchQuery.trim() && (
+              <>
+                <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                  {CATEGORIES.find(c => c.id === selectedCategory)?.label}
+                </span>
+                <button
+                  onClick={handleBackToCategories}
+                  className="text-xs font-medium px-2 py-1 rounded-lg transition-colors"
+                  style={{ color: 'var(--color-primary)', background: 'var(--color-primary-muted)' }}
+                >
+                  Clear
+                </button>
+              </>
+            )}
+            {debouncedSearchQuery.trim() && (
+              <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                Results for "{debouncedSearchQuery.trim()}"
               </span>
-              <button
-                onClick={handleBackToCategories}
-                className="text-xs font-medium px-2 py-1 rounded-lg transition-colors"
-                style={{ color: 'var(--color-primary)', background: 'var(--color-primary-muted)' }}
-              >
-                Clear
-              </button>
-            </div>
-          )}
-
+            )}
+          </div>
         </header>
       )}
 
@@ -419,7 +433,7 @@ export function Browse() {
         <div
           className="px-6 pt-5 pb-6 relative"
           style={{
-            background: 'linear-gradient(180deg, #1A3A42 0%, #122830 50%, #0D1B22 100%)',
+            background: 'linear-gradient(180deg, var(--color-card) 0%, var(--color-surface) 50%, var(--color-bg) 100%)',
             minHeight: 'calc(100vh - 80px)',
           }}
         >
@@ -560,7 +574,7 @@ export function Browse() {
                       className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
                       style={{
                         background: suggestion.type === 'dish' ? 'var(--color-primary-muted)' : 'rgba(59, 130, 246, 0.15)',
-                        color: suggestion.type === 'dish' ? 'var(--color-primary)' : '#60A5FA'
+                        color: suggestion.type === 'dish' ? 'var(--color-primary)' : 'var(--color-blue-light)'
                       }}
                     >
                       {suggestion.type === 'dish' ? 'Dish' : 'Spot'}
@@ -626,13 +640,14 @@ export function Browse() {
               </div>
             ) : error ? (
               <div className="py-16 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--color-danger, var(--color-primary)) 15%, var(--color-bg))' }}>
                   <span className="text-2xl">⚠️</span>
                 </div>
-                <p role="alert" className="text-sm text-red-600 mb-4">{error?.message || 'Something went wrong'}</p>
+                <p role="alert" className="text-sm mb-4" style={{ color: 'var(--color-danger, var(--color-primary))' }}>{error?.message || 'Something went wrong'}</p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium"
+                  className="px-4 py-2 rounded-lg text-sm font-medium"
+                  style={{ background: 'var(--color-danger, var(--color-primary))', color: 'var(--color-text-primary)' }}
                 >
                   Retry
                 </button>
@@ -680,7 +695,7 @@ export function Browse() {
                 <button
                   onClick={handleBackToCategories}
                   className="px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
-                  style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                  style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                 >
                   Browse Categories
                 </button>

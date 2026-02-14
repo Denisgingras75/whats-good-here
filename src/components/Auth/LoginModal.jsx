@@ -186,7 +186,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
           </button>
 
           {/* Icon */}
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: hasPendingVote ? (pendingVote.vote ? '#10b981' : '#ef4444') : 'var(--color-primary)' }}>
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: hasPendingVote ? (pendingVote.vote ? 'var(--color-emerald)' : 'var(--color-red)') : 'var(--color-primary)' }}>
             <span className="text-3xl">{hasPendingVote ? (pendingVote.vote ? <ThumbsUpIcon size={40} /> : <ThumbsDownIcon size={40} />) : '🍽️'}</span>
           </div>
 
@@ -254,7 +254,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
               <button
                 onClick={() => setMode('signin')}
                 className="w-full px-6 py-4 rounded-xl font-semibold active:scale-[0.98] transition-all"
-                style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
               >
                 Sign in with Email
               </button>
@@ -313,7 +313,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
                 type="submit"
                 disabled={loading}
                 className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-                style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
@@ -374,7 +374,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
                 type="submit"
                 disabled={loading}
                 className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-                style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
               >
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
@@ -413,7 +413,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
                     className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors pr-10"
                     style={{
                       background: 'var(--color-bg)',
-                      border: `2px solid ${usernameStatus === 'taken' ? '#ef4444' : usernameStatus === 'available' ? '#10b981' : 'var(--color-divider)'}`,
+                      border: `2px solid ${usernameStatus === 'taken' ? 'var(--color-red)' : usernameStatus === 'available' ? 'var(--color-emerald)' : 'var(--color-divider)'}`,
                       color: 'var(--color-text-primary)'
                     }}
                   />
@@ -426,10 +426,10 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
                   )}
                 </div>
                 {usernameStatus === 'taken' && (
-                  <p id="username-status" className="text-xs mt-1" style={{ color: '#ef4444' }} role="alert">This username is taken</p>
+                  <p id="username-status" className="text-xs mt-1" style={{ color: 'var(--color-red)' }} role="alert">This username is taken</p>
                 )}
                 {usernameStatus === 'available' && (
-                  <p id="username-status" className="text-xs mt-1" style={{ color: '#10b981' }}>Username available!</p>
+                  <p id="username-status" className="text-xs mt-1" style={{ color: 'var(--color-emerald)' }}>Username available!</p>
                 )}
               </div>
 
@@ -470,7 +470,7 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
                 type="submit"
                 disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking'}
                 className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-                style={{ background: 'var(--color-primary)', color: '#1A1A1A' }}
+                style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
               >
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>

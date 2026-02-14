@@ -19,6 +19,10 @@ export const BROWSE_CATEGORIES = [
   { id: 'taco', label: 'Tacos', emoji: '🌮' },
   { id: 'tendys', label: 'Tenders', emoji: '🍗' },
   { id: 'dessert', label: 'Desserts', emoji: '🍰' },
+  { id: 'fish', label: 'Fish', emoji: '🐟' },
+  { id: 'clams', label: 'Clams', emoji: '🐚' },
+  { id: 'chicken', label: 'Chicken', emoji: '🐔' },
+  { id: 'pork', label: 'Pork', emoji: '🐷' },
 ]
 
 // Main categories shown in category picker (singular labels)
@@ -38,26 +42,31 @@ export const MAIN_CATEGORIES = [
   { id: 'seafood', label: 'Seafood', emoji: '🦐' },
   { id: 'tendys', label: 'Tenders', emoji: '🍗' },
   { id: 'dessert', label: 'Dessert', emoji: '🍰' },
+  { id: 'fish', label: 'Fish', emoji: '🐟' },
+  { id: 'clams', label: 'Clams', emoji: '🐚' },
+  { id: 'chicken', label: 'Chicken', emoji: '🐔' },
+  { id: 'pork', label: 'Pork', emoji: '🐷' },
 ]
 
 // All categories in the system (including sub-categories)
 // Used for fuzzy matching when user types custom input
 export const ALL_CATEGORIES = [
   ...MAIN_CATEGORIES,
-  { id: 'seafood', label: 'Seafood', emoji: '🦐' },
   { id: 'pokebowl', label: 'Poke Bowl', emoji: '🥗' },
-  { id: 'tendys', label: 'Chicken Tenders', emoji: '🍗' },
   { id: 'soup', label: 'Soup', emoji: '🍜' },
   { id: 'fries', label: 'Fries', emoji: '🍟' },
   { id: 'apps', label: 'Appetizers', emoji: '🍤' },
   { id: 'fried chicken', label: 'Fried Chicken', emoji: '🍗' },
   { id: 'entree', label: 'Entree', emoji: '🍽️' },
-  { id: 'chicken', label: 'Chicken', emoji: '🐔' },
   { id: 'donuts', label: 'Donuts', emoji: '🍩' },
   { id: 'asian', label: 'Asian', emoji: '🥢' },
   { id: 'quesadilla', label: 'Quesadilla', emoji: '🫓' },
   { id: 'breakfast sandwich', label: 'Breakfast Sandwich', emoji: '🥯' },
-  { id: 'dessert', label: 'Dessert', emoji: '🍰' },
+  { id: 'ribs', label: 'Ribs', emoji: '🍖' },
+  { id: 'sides', label: 'Sides', emoji: '🥦' },
+  { id: 'duck', label: 'Duck', emoji: '🦆' },
+  { id: 'lamb', label: 'Lamb', emoji: '🍖' },
+  { id: 'clams', label: 'Clams', emoji: '🐚' },
 ]
 
 // Fuzzy match a search term to existing categories
@@ -169,6 +178,14 @@ export const CATEGORY_INFO = {
   'entree': { emoji: '🥩', label: 'Entrees' },
   'steak': { emoji: '🥩', label: 'Steak' },
   'dessert': { emoji: '🍰', label: 'Desserts' },
+  'ribs': { emoji: '🍖', label: 'Ribs' },
+  'sides': { emoji: '🥦', label: 'Sides' },
+  'duck': { emoji: '🦆', label: 'Duck' },
+  'lamb': { emoji: '🍖', label: 'Lamb' },
+  'pork': { emoji: '🐷', label: 'Pork' },
+  'fish': { emoji: '🐟', label: 'Fish' },
+  'chicken': { emoji: '🐔', label: 'Chicken' },
+  'clams': { emoji: '🐚', label: 'Clams' },
 }
 
 // Get category info with fuzzy matching
