@@ -13,31 +13,21 @@ export function Top10Compact({
   dishes,
   personalDishes,
   showToggle = false,
-  initialCount = 3,
   town,
   categoryLabel,
   onSeeAll,
 }) {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('mv')
-  const [expanded, setExpanded] = useState(false)
-  const [prevExpanded, setPrevExpanded] = useState(false)
 
   const activeDishes = activeTab === 'personal' && showToggle
     ? personalDishes
     : dishes
 
-  const displayedDishes = expanded
-    ? activeDishes
-    : activeDishes.slice(0, initialCount)
-
-  const hasMore = activeDishes.length > initialCount
-  const justExpanded = expanded && !prevExpanded
-
   if (!dishes?.length && !categoryLabel) return null
 
   return (
-    <section>
+    <section className="animate-fadeIn">
       {/* Micro-headline */}
       <p
         className="font-bold mb-1"
@@ -55,7 +45,7 @@ export function Top10Compact({
           <button
             role="tab"
             aria-selected={activeTab === 'mv'}
-            onClick={() => { setActiveTab('mv'); setExpanded(false) }}
+            onClick={() => setActiveTab('mv')}
             className="flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
             style={{
               background: activeTab === 'mv' ? 'var(--color-primary)' : 'var(--color-surface-elevated)',
@@ -67,7 +57,7 @@ export function Top10Compact({
           <button
             role="tab"
             aria-selected={activeTab === 'personal'}
-            onClick={() => { setActiveTab('personal'); setExpanded(false) }}
+            onClick={() => setActiveTab('personal')}
             className="flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
             style={{
               background: activeTab === 'personal' ? 'var(--color-accent-gold)' : 'var(--color-surface-elevated)',
@@ -92,19 +82,17 @@ export function Top10Compact({
 
       {/* Dishes list */}
       <div>
-        {displayedDishes.length > 0 ? (
-          displayedDishes.map((dish, index) => {
+        {activeDishes.length > 0 ? (
+          activeDishes.map((dish, index) => {
             const rank = index + 1
             return (
               <div key={dish.dish_id} style={{ marginBottom: rank <= 3 ? '6px' : '0' }}>
                 <Top10Row
                   dish={dish}
                   rank={rank}
-                  isNewlyRevealed={justExpanded && index >= initialCount}
-                  revealIndex={index - initialCount}
                   onClick={() => navigate(`/dish/${dish.dish_id}`)}
                 />
-                {rank === 3 && displayedDishes.length > 3 && (
+                {rank === 3 && activeDishes.length > 3 && (
                   <div
                     className="mt-3 mb-2 mx-2"
                     style={{ borderBottom: '1px solid var(--color-divider)' }}
@@ -131,17 +119,6 @@ export function Top10Compact({
         )}
       </div>
 
-      {/* Expand/collapse */}
-      {hasMore && displayedDishes.length > 0 && (
-        <button
-          onClick={() => { setPrevExpanded(expanded); setExpanded(!expanded) }}
-          className="w-full mt-3 pt-3 text-sm font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--color-text-tertiary)' }}
-        >
-          {expanded ? 'Show less' : `Show all ${activeDishes.length}`}
-        </button>
-      )}
-
       {/* See all link for category filtering */}
       {onSeeAll && categoryLabel && (
         <button
@@ -166,7 +143,7 @@ const PODIUM_STYLE = {
 }
 
 // Top 10 row — podium layout for 1-3, compact for 4+
-const Top10Row = memo(function Top10Row({ dish, rank, isNewlyRevealed, revealIndex, onClick }) {
+const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
   const podium = PODIUM_STYLE[rank]
@@ -177,117 +154,67 @@ const Top10Row = memo(function Top10Row({ dish, rank, isNewlyRevealed, revealInd
 
   if (podium) {
     return (
-      <div
-        className={isNewlyRevealed ? 'animate-expand-in' : ''}
-        style={isNewlyRevealed ? { animationDelay: `${(revealIndex || 0) * 50}ms`, opacity: 0, animationFillMode: 'forwards' } : undefined}
-      >
-        <button
-          onClick={onClick}
-          aria-label={accessibleLabel}
-          className="w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-colors text-left"
-          style={{
-            background: 'var(--color-surface-elevated)',
-            borderLeft: `2px solid ${podium.glow}`,
-          }}
-        >
-          {/* Large rank number with glow */}
-          <span
-            className="font-bold flex-shrink-0"
-            style={{
-              color: podium.color,
-              fontSize: podium.rankSize,
-              lineHeight: 1,
-              minWidth: '24px',
-              textAlign: 'center',
-              textShadow: `0 0 8px ${podium.glow}30, 0 0 16px ${podium.glow}15`,
-            }}
-          >
-            {rank}
-          </span>
-
-          {/* Dish info */}
-          <div className="flex-1 min-w-0">
-            <p
-              className="font-bold truncate"
-              style={{
-                color: 'var(--color-text-primary)',
-                fontSize: podium.nameSize,
-                lineHeight: 1.2,
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {dish_name}
-            </p>
-            <p
-              className="truncate font-medium"
-              style={{
-                color: 'var(--color-text-tertiary)',
-                fontSize: '11px',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                marginTop: '2px',
-              }}
-            >
-              {restaurant_name}
-            </p>
-          </div>
-
-          {/* Rating */}
-          <div className="flex-shrink-0 text-right">
-            {isRanked ? (
-              <span
-                className="font-bold"
-                style={{
-                  color: getRatingColor(avg_rating),
-                  fontSize: podium.ratingSize,
-                }}
-              >
-                {avg_rating}
-              </span>
-            ) : (
-              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
-              </span>
-            )}
-          </div>
-        </button>
-      </div>
-    )
-  }
-
-  // Compact row for ranks 4+
-  return (
-    <div
-      className={isNewlyRevealed ? 'animate-expand-in' : ''}
-      style={{
-        opacity: isNewlyRevealed ? 0 : 0.6,
-        ...(isNewlyRevealed ? { animationDelay: `${(revealIndex || 0) * 50}ms`, animationFillMode: 'forwards' } : {}),
-      }}
-    >
       <button
         onClick={onClick}
         aria-label={accessibleLabel}
-        className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[var(--color-surface-elevated)]"
+        className="w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-colors text-left"
+        style={{
+          background: 'var(--color-surface-elevated)',
+          borderLeft: `2px solid ${podium.glow}`,
+        }}
       >
+        {/* Large rank number with glow */}
         <span
-          className="w-6 text-center text-sm font-bold flex-shrink-0"
-          style={{ color: 'var(--color-text-tertiary)' }}
+          className="font-bold flex-shrink-0"
+          style={{
+            color: podium.color,
+            fontSize: podium.rankSize,
+            lineHeight: 1,
+            minWidth: '24px',
+            textAlign: 'center',
+            textShadow: `0 0 8px ${podium.glow}30, 0 0 16px ${podium.glow}15`,
+          }}
         >
           {rank}
         </span>
 
+        {/* Dish info */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+          <p
+            className="font-bold truncate"
+            style={{
+              color: 'var(--color-text-primary)',
+              fontSize: podium.nameSize,
+              lineHeight: 1.2,
+              letterSpacing: '-0.01em',
+            }}
+          >
             {dish_name}
           </p>
-          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+          <p
+            className="truncate font-medium"
+            style={{
+              color: 'var(--color-text-tertiary)',
+              fontSize: '11px',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              marginTop: '2px',
+            }}
+          >
             {restaurant_name}
           </p>
         </div>
 
+        {/* Rating */}
         <div className="flex-shrink-0 text-right">
           {isRanked ? (
-            <span className="text-sm font-bold" style={{ color: getRatingColor(avg_rating) }}>
+            <span
+              className="font-bold"
+              style={{
+                color: getRatingColor(avg_rating),
+                fontSize: podium.ratingSize,
+              }}
+            >
               {avg_rating}
             </span>
           ) : (
@@ -297,6 +224,44 @@ const Top10Row = memo(function Top10Row({ dish, rank, isNewlyRevealed, revealInd
           )}
         </div>
       </button>
-    </div>
+    )
+  }
+
+  // Compact row for ranks 4+
+  return (
+    <button
+      onClick={onClick}
+      aria-label={accessibleLabel}
+      className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[var(--color-surface-elevated)]"
+      style={{ opacity: 0.6 }}
+    >
+      <span
+        className="w-6 text-center text-sm font-bold flex-shrink-0"
+        style={{ color: 'var(--color-text-tertiary)' }}
+      >
+        {rank}
+      </span>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+          {dish_name}
+        </p>
+        <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+          {restaurant_name}
+        </p>
+      </div>
+
+      <div className="flex-shrink-0 text-right">
+        {isRanked ? (
+          <span className="text-sm font-bold" style={{ color: getRatingColor(avg_rating) }}>
+            {avg_rating}
+          </span>
+        ) : (
+          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+          </span>
+        )}
+      </div>
+    </button>
   )
 })

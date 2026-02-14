@@ -108,7 +108,6 @@ export function Home() {
               dishes={selectedCategory ? categoryDishes : top10Dishes}
               personalDishes={personalTop10Dishes}
               showToggle={showPersonalToggle}
-              initialCount={10}
               town={town}
               categoryLabel={selectedCategoryLabel}
               onSeeAll={selectedCategory ? () => navigate(`/browse?category=${encodeURIComponent(selectedCategory)}`) : undefined}
@@ -204,17 +203,12 @@ function CategoryPill({ category, isActive, onClick }) {
 // Skeleton for Top 10 section while loading
 function Top10Skeleton() {
   return (
-    <div
-      className="rounded-2xl p-4 max-w-lg mx-auto animate-pulse"
-      style={{
-        background: 'var(--color-bg)',
-        border: '1px solid var(--color-divider)',
-      }}
-    >
-      <div className="h-5 w-48 rounded mb-4" style={{ background: 'var(--color-surface-elevated)' }} />
+    <div className="max-w-lg mx-auto animate-pulse">
+      <div className="h-4 w-48 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
+      <div className="h-5 w-36 rounded mb-4" style={{ background: 'var(--color-surface-elevated)' }} />
       <div className="space-y-1">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-center gap-3 py-3 px-3 rounded-lg" style={{ background: 'var(--color-surface-elevated)' }}>
+          <div key={i} className="flex items-center gap-3 py-3 px-3 rounded-lg mb-1.5" style={{ background: 'var(--color-surface-elevated)' }}>
             <div className="w-6 h-6 rounded-full" style={{ background: 'var(--color-surface)' }} />
             <div className="flex-1">
               <div className="h-4 w-32 rounded mb-1" style={{ background: 'var(--color-surface)' }} />
