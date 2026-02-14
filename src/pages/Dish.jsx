@@ -509,15 +509,16 @@ export function Dish() {
               )}
 
               <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
-                {dish.dish_name}
+                <button
+                  onClick={() => navigate(`/restaurants/${dish.restaurant_id}`)}
+                  className="hover:underline"
+                >
+                  {dish.restaurant_name}
+                </button>
               </h1>
-              <button
-                onClick={() => navigate(`/restaurants/${dish.restaurant_id}`)}
-                className="text-base hover:underline"
-                style={{ color: 'var(--color-text-secondary)' }}
-              >
-                {dish.restaurant_name}
-              </button>
+              <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
+                {dish.dish_name}
+              </p>
               {dish.price && (
                 <span className="ml-2 font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                   · ${Number(dish.price).toFixed(0)}

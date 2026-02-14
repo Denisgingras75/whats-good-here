@@ -115,19 +115,19 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
 
       {/* Card Content */}
       <div className="p-5">
-        {/* Dish Name - Primary Focus (2 lines max) */}
+        {/* Restaurant Name - Primary */}
         <h3
           className="text-xl font-bold leading-snug line-clamp-2"
           style={{ color: 'var(--color-text-primary)' }}
         >
-          {dish_name}
+          {restaurant_name}
         </h3>
 
-        {/* Restaurant & Meta Info */}
+        {/* Dish & Meta Info */}
         <div className="mt-1.5 space-y-0.5">
           <div className="flex items-center gap-2 text-sm">
             <span className="font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-              {restaurant_name}
+              {dish_name}
             </span>
             {price && (
               <>

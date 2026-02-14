@@ -146,18 +146,18 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            {/* Dish name */}
+            {/* Restaurant name */}
             <h3
               className="font-bold text-base line-clamp-2 leading-snug"
               style={{ color: 'var(--color-text-primary)' }}
             >
-              {dish_name}
+              {restaurant_name}
             </h3>
 
-            {/* Restaurant + price */}
+            {/* Dish + price */}
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                {restaurant_name}
+                {dish_name}
               </span>
               {price && (
                 <>
