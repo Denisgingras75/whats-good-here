@@ -6,7 +6,6 @@ import { getCategoryNeonImage } from '../constants/categories'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
 import { logger } from '../utils/logger'
-import { RestaurantAvatar } from './RestaurantAvatar'
 const MIN_SEARCH_LENGTH = 2
 const MAX_DISH_RESULTS = 5
 const MAX_CATEGORY_RESULTS = 2
@@ -312,14 +311,11 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
   )
 }
 
-// Individual dish result row
+// Individual dish result row — matches Top 10 compact style
 function DishResult({ dish, rank, onClick }) {
   const {
     dish_name,
     restaurant_name,
-    restaurant_town,
-    category,
-    photo_url,
     avg_rating,
     total_votes,
   } = dish
@@ -329,70 +325,34 @@ function DishResult({ dish, rank, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
+      className="w-full flex items-center gap-3 py-2.5 px-4 transition-colors text-left"
       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
     >
-      {/* Restaurant avatar with town color */}
-      <RestaurantAvatar name={restaurant_name} town={restaurant_town} size={24} />
-
-      {/* Rank badge */}
-      <div
-        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-        style={{
-          background: rank === 1 ? 'var(--color-primary)' : 'var(--color-surface)',
-          color: rank === 1 ? 'var(--color-text-on-primary)' : 'var(--color-text-tertiary)',
-        }}
+      <span
+        className="w-6 text-center text-sm font-bold flex-shrink-0"
+        style={{ color: 'var(--color-text-tertiary)' }}
       >
         {rank}
-      </div>
+      </span>
 
-      {/* Photo */}
-      {photo_url && (
-        <div
-          className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
-          style={{ background: 'var(--color-surface)' }}
-        >
-          <img
-            src={photo_url}
-            alt={dish_name}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-
-      {/* Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+        <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+          <span style={{ color: 'var(--color-text-secondary)' }}>{restaurant_name}</span>
+          {' · '}
           {dish_name}
-        </h4>
-        <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-          {restaurant_name}
         </p>
       </div>
 
-      {/* Rating */}
       <div className="flex-shrink-0 text-right">
         {isRanked ? (
-          <div className="flex flex-col items-end">
-            <span className="text-sm font-bold leading-tight" style={{ color: getRatingColor(avg_rating) }}>
-              {avg_rating || '—'}
-            </span>
-            <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
-              {total_votes} votes
-            </span>
-          </div>
+          <span className="text-sm font-bold" style={{ color: getRatingColor(avg_rating) }}>
+            {avg_rating || '—'}
+          </span>
         ) : (
-          <div
-            className="text-[10px] font-medium px-2 py-1 rounded-full"
-            style={{
-              background: 'var(--color-surface)',
-              color: 'var(--color-text-tertiary)',
-            }}
-          >
-            {total_votes ? `Early · ${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'Be first to vote'}
-          </div>
+          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+          </span>
         )}
       </div>
     </button>
