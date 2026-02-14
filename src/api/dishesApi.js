@@ -401,4 +401,43 @@ export const dishesApi = {
       throw error.type ? error : createClassifiedError(error)
     }
   },
+
+  /**
+   * Create a new dish (any authenticated user)
+   * @param {Object} params - Dish data
+   * @returns {Promise<Object>} Created dish
+   */
+  async create({ restaurantId, name, category, price }) {
+    try {
+      // Check rate limit first
+      const { data: rateCheck, error: rateError } = await supabase.rpc('check_dish_create_rate_limit')
+      if (rateError) throw createClassifiedError(rateError)
+      if (rateCheck && !rateCheck.allowed) {
+        const err = new Error(rateCheck.message || 'Too many dishes created. Please wait.')
+        err.type = 'RATE_LIMIT'
+        throw err
+      }
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw createClassifiedError(new Error('Not authenticated'))
+
+      const { data, error } = await supabase
+        .from('dishes')
+        .insert({
+          restaurant_id: restaurantId,
+          name,
+          category,
+          price: price || null,
+          created_by: user.id,
+        })
+        .select('id, name, category, price, restaurant_id')
+        .single()
+
+      if (error) throw createClassifiedError(error)
+      return data
+    } catch (error) {
+      logger.error('Error creating dish:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
 }

@@ -32,6 +32,11 @@ CREATE TABLE IF NOT EXISTS restaurants (
   cuisine TEXT,
   town TEXT,
   menu_section_order TEXT[] DEFAULT '{}',
+  created_by UUID REFERENCES auth.users(id),
+  google_place_id TEXT,
+  website_url TEXT,
+  facebook_url TEXT,
+  phone TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -47,6 +52,7 @@ CREATE TABLE IF NOT EXISTS dishes (
   parent_dish_id UUID REFERENCES dishes(id) ON DELETE SET NULL,
   display_order INT DEFAULT 0,
   tags TEXT[] DEFAULT '{}',
+  created_by UUID REFERENCES auth.users(id),
   cuisine TEXT,
   avg_rating DECIMAL(3, 1),
   total_votes INT DEFAULT 0,
@@ -268,6 +274,8 @@ GROUP BY category;
 CREATE INDEX IF NOT EXISTS idx_restaurants_location ON restaurants(lat, lng);
 CREATE INDEX IF NOT EXISTS idx_restaurants_open_lat_lng ON restaurants(is_open, lat, lng) WHERE is_open = true;
 CREATE INDEX IF NOT EXISTS idx_restaurants_cuisine ON restaurants(cuisine);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_restaurants_google_place_id ON restaurants(google_place_id) WHERE google_place_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_restaurants_created_by ON restaurants(created_by);
 
 -- dishes
 CREATE INDEX IF NOT EXISTS idx_dishes_restaurant ON dishes(restaurant_id);
@@ -358,13 +366,13 @@ ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY;
 
 -- restaurants: public read, admin write (+ manager policies below)
 CREATE POLICY "Public read access" ON restaurants FOR SELECT USING (true);
-CREATE POLICY "Admins can insert restaurants" ON restaurants FOR INSERT WITH CHECK (is_admin());
+CREATE POLICY "Authenticated users can insert restaurants" ON restaurants FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Admins can update restaurants" ON restaurants FOR UPDATE USING (is_admin());
 CREATE POLICY "Admins can delete restaurants" ON restaurants FOR DELETE USING (is_admin());
 
 -- dishes: public read, admin + manager write
 CREATE POLICY "Public read access" ON dishes FOR SELECT USING (true);
-CREATE POLICY "Admin or manager insert dishes" ON dishes FOR INSERT WITH CHECK (is_admin() OR is_restaurant_manager(restaurant_id));
+CREATE POLICY "Authenticated users can insert dishes" ON dishes FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Admin or manager update dishes" ON dishes FOR UPDATE USING (is_admin() OR is_restaurant_manager(restaurant_id));
 CREATE POLICY "Admins can delete dishes" ON dishes FOR DELETE USING (is_admin());
 
@@ -1382,6 +1390,76 @@ RETURNS JSONB LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
   SELECT check_and_record_rate_limit('photo_upload', 5, 60);
 $$;
 
+-- Convenience: restaurant creation rate limiting (5 per hour)
+CREATE OR REPLACE FUNCTION check_restaurant_create_rate_limit()
+RETURNS JSONB LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT check_and_record_rate_limit('restaurant_create', 5, 3600);
+$$;
+
+-- Convenience: dish creation rate limiting (20 per hour)
+CREATE OR REPLACE FUNCTION check_dish_create_rate_limit()
+RETURNS JSONB LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT check_and_record_rate_limit('dish_create', 20, 3600);
+$$;
+
+-- Find nearby restaurants (for duplicate detection and "you're here" suggestions)
+CREATE OR REPLACE FUNCTION find_nearby_restaurants(
+  p_name TEXT DEFAULT NULL,
+  p_lat DECIMAL DEFAULT NULL,
+  p_lng DECIMAL DEFAULT NULL,
+  p_radius_meters INT DEFAULT 150
+)
+RETURNS TABLE (
+  id UUID,
+  name TEXT,
+  address TEXT,
+  lat DECIMAL,
+  lng DECIMAL,
+  google_place_id TEXT,
+  distance_meters DECIMAL
+) AS $$
+DECLARE
+  lat_delta DECIMAL := p_radius_meters / 111320.0;
+  lng_delta DECIMAL := p_radius_meters / (111320.0 * COS(RADIANS(COALESCE(p_lat, 0))));
+BEGIN
+  RETURN QUERY
+  SELECT
+    r.id,
+    r.name,
+    r.address,
+    r.lat,
+    r.lng,
+    r.google_place_id,
+    ROUND((
+      6371000 * ACOS(
+        LEAST(1.0, GREATEST(-1.0,
+          COS(RADIANS(p_lat)) * COS(RADIANS(r.lat)) *
+          COS(RADIANS(r.lng) - RADIANS(p_lng)) +
+          SIN(RADIANS(p_lat)) * SIN(RADIANS(r.lat))
+        ))
+      )
+    )::NUMERIC, 1) AS distance_meters
+  FROM restaurants r
+  WHERE
+    (p_lat IS NULL OR (
+      r.lat BETWEEN (p_lat - lat_delta) AND (p_lat + lat_delta)
+      AND r.lng BETWEEN (p_lng - lng_delta) AND (p_lng + lng_delta)
+    ))
+    AND (p_name IS NULL OR r.name ILIKE '%' || p_name || '%')
+  ORDER BY
+    CASE WHEN p_lat IS NOT NULL THEN
+      6371000 * ACOS(
+        LEAST(1.0, GREATEST(-1.0,
+          COS(RADIANS(p_lat)) * COS(RADIANS(r.lat)) *
+          COS(RADIANS(r.lng) - RADIANS(p_lng)) +
+          SIN(RADIANS(p_lat)) * SIN(RADIANS(r.lat))
+        ))
+      )
+    ELSE 0 END ASC
+  LIMIT 20;
+END;
+$$ LANGUAGE plpgsql STABLE SET search_path = public;
+
 
 -- =============================================
 -- 12. RESTAURANT MANAGER FUNCTIONS
@@ -1741,6 +1819,10 @@ GRANT EXECUTE ON FUNCTION get_smart_snippet(UUID) TO anon;
 GRANT EXECUTE ON FUNCTION check_and_record_rate_limit TO authenticated;
 GRANT EXECUTE ON FUNCTION check_vote_rate_limit TO authenticated;
 GRANT EXECUTE ON FUNCTION check_photo_upload_rate_limit TO authenticated;
+GRANT EXECUTE ON FUNCTION check_restaurant_create_rate_limit TO authenticated;
+GRANT EXECUTE ON FUNCTION check_dish_create_rate_limit TO authenticated;
+GRANT EXECUTE ON FUNCTION find_nearby_restaurants TO authenticated;
+GRANT EXECUTE ON FUNCTION find_nearby_restaurants TO anon;
 
 
 -- =============================================

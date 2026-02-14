@@ -7,6 +7,11 @@ import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
 import { logger } from '../utils/logger'
 import { RestaurantAvatar } from './RestaurantAvatar'
+import { useRestaurantSearch } from '../hooks/useRestaurantSearch'
+import { useNearbyRestaurants } from '../hooks/useNearbyRestaurants'
+import { useLocationContext } from '../context/LocationContext'
+import { useAuth } from '../context/AuthContext'
+import { AddRestaurantModal } from './AddRestaurantModal'
 const MIN_SEARCH_LENGTH = 2
 const MAX_DISH_RESULTS = 5
 const MAX_CATEGORY_RESULTS = 2
@@ -32,13 +37,27 @@ const BROWSE_CATEGORIES = [
 
 export function DishSearch({ loading = false, placeholder = "Find What's Good near you", town = null }) {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const { location, permissionState } = useLocationContext()
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [searchResults, setSearchResults] = useState([])
   const [searching, setSearching] = useState(false)
+  const [addRestaurantOpen, setAddRestaurantOpen] = useState(false)
   const inputRef = useRef(null)
   const dropdownRef = useRef(null)
   const mountedRef = useRef(true)
+
+  // Restaurant search (local + Google Places)
+  const hasLocation = permissionState === 'granted'
+  const { localResults: restaurantResults, externalResults: placesResults, loading: restaurantSearchLoading } = useRestaurantSearch(
+    query, location?.lat, location?.lng, isFocused
+  )
+
+  // Nearby restaurants (shown on focus before typing)
+  const { nearby: nearbyRestaurants } = useNearbyRestaurants(
+    location?.lat, location?.lng, 150, hasLocation
+  )
 
   // Track mounted state for async operations
   useEffect(() => {
@@ -109,11 +128,14 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
   const results = {
     dishes: searchResults,
     categories: matchingCategories,
+    restaurants: restaurantResults,
+    places: placesResults,
   }
 
-  const hasResults = results.dishes.length > 0 || results.categories.length > 0
-  const showDropdown = isFocused && query.length >= MIN_SEARCH_LENGTH
-  const isLoading = loading || searching
+  const hasResults = results.dishes.length > 0 || results.categories.length > 0 || results.restaurants.length > 0 || results.places.length > 0
+  const showNearby = isFocused && query.length < MIN_SEARCH_LENGTH && nearbyRestaurants.length > 0
+  const showDropdown = isFocused && (query.length >= MIN_SEARCH_LENGTH || showNearby)
+  const isLoading = loading || searching || restaurantSearchLoading
 
   // Handle dish selection
   const handleDishSelect = (dish) => {
@@ -160,6 +182,36 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
       setIsFocused(false)
       navigate(`/browse?q=${encodeURIComponent(query.trim())}`)
     }
+  }
+
+  // Handle restaurant selection (navigate to restaurant page)
+  const handleRestaurantSelect = (restaurant) => {
+    capture('search_performed', {
+      query: query,
+      result_type: 'restaurant',
+      selected_restaurant_id: restaurant.id,
+      selected_restaurant_name: restaurant.name,
+    })
+    setQuery('')
+    setIsFocused(false)
+    navigate(`/restaurants/${restaurant.id}`)
+  }
+
+  // Handle nearby restaurant selection
+  const handleNearbySelect = (restaurant) => {
+    capture('nearby_restaurant_suggested', {
+      restaurant_id: restaurant.id,
+      distance_meters: restaurant.distance_meters,
+    })
+    setQuery('')
+    setIsFocused(false)
+    navigate(`/restaurants/${restaurant.id}`)
+  }
+
+  // Handle "Add a restaurant" button
+  const handleAddRestaurant = () => {
+    setIsFocused(false)
+    setAddRestaurantOpen(true)
   }
 
   return (
@@ -244,70 +296,200 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
             boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
           }}
         >
-          {isLoading ? (
-            <div className="px-4 py-6 text-center">
-              <div className="animate-spin w-5 h-5 border-2 rounded-full mx-auto" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }} />
-              <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
-                Searching...
-              </p>
-            </div>
-          ) : !hasResults ? (
-            <div className="px-4 py-6 text-center">
-              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                No dishes found for "{query}"
-              </p>
-              <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                Try a different search term
-              </p>
-            </div>
-          ) : (
+          {/* Nearby restaurants (shown on focus before typing) */}
+          {showNearby && query.length < MIN_SEARCH_LENGTH && (
             <div className="max-h-80 overflow-y-auto">
-              {/* Dish Results */}
-              {results.dishes.length > 0 && (
-                <div>
-                  <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {town ? `Best in ${town}` : 'Best Matches'}
-                    </span>
+              <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
+                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Nearby
+                </span>
+              </div>
+              {nearbyRestaurants.slice(0, 3).map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => handleNearbySelect(r)}
+                  className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--color-surface-elevated)' }}>
+                    <svg className="w-4 h-4" style={{ color: 'var(--color-accent-gold)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                    </svg>
                   </div>
-                  {results.dishes.map((dish, index) => (
-                    <DishResult
-                      key={dish.dish_id}
-                      dish={dish}
-                      rank={index + 1}
-                      onClick={() => handleDishSelect(dish)}
-                    />
-                  ))}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{r.name}</p>
+                    <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {Math.round(r.distance_meters)}m away
+                    </p>
+                  </div>
+                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Search results mode */}
+          {query.length >= MIN_SEARCH_LENGTH && (
+            <>
+              {isLoading ? (
+                <div className="px-4 py-6 text-center">
+                  <div className="animate-spin w-5 h-5 border-2 rounded-full mx-auto" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }} />
+                  <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                    Searching...
+                  </p>
+                </div>
+              ) : !hasResults ? (
+                <div className="px-4 py-6 text-center">
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    No results found for "{query}"
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                    Try a different search term
+                  </p>
+                </div>
+              ) : (
+                <div className="max-h-80 overflow-y-auto">
+                  {/* Dish Results */}
+                  {results.dishes.length > 0 && (
+                    <div>
+                      <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                          {town ? `Best in ${town}` : 'Best Matches'}
+                        </span>
+                      </div>
+                      {results.dishes.map((dish, index) => (
+                        <DishResult
+                          key={dish.dish_id}
+                          dish={dish}
+                          rank={index + 1}
+                          onClick={() => handleDishSelect(dish)}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Restaurant Results (local DB) */}
+                  {results.restaurants.length > 0 && (
+                    <div>
+                      <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                          Restaurants
+                        </span>
+                      </div>
+                      {results.restaurants.map((r) => (
+                        <button
+                          key={r.id}
+                          onClick={() => handleRestaurantSelect(r)}
+                          className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <RestaurantAvatar name={r.name} size={24} />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{r.name}</p>
+                            <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{r.address}</p>
+                          </div>
+                          <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Google Places Results */}
+                  {results.places.length > 0 && (
+                    <div>
+                      <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                          Add from Google
+                        </span>
+                      </div>
+                      {results.places.slice(0, 3).map((p) => (
+                        <button
+                          key={p.placeId}
+                          onClick={() => {
+                            setIsFocused(false)
+                            setAddRestaurantOpen(true)
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(217, 167, 101, 0.15)', color: 'var(--color-accent-gold)' }}>
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{p.name}</p>
+                            <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{p.address}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Category Results */}
+                  {results.categories.length > 0 && (
+                    <div>
+                      <div
+                        className="px-4 py-2 border-b"
+                        style={{
+                          borderColor: 'var(--color-divider)',
+                          background: results.dishes.length > 0 ? 'var(--color-surface)' : 'transparent',
+                        }}
+                      >
+                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                          Categories
+                        </span>
+                      </div>
+                      {results.categories.map((category) => (
+                        <CategoryResult
+                          key={category.id}
+                          category={category}
+                          onClick={() => handleCategorySelect(category)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Category Results */}
-              {results.categories.length > 0 && (
-                <div>
-                  <div
-                    className="px-4 py-2 border-b"
-                    style={{
-                      borderColor: 'var(--color-divider)',
-                      background: results.dishes.length > 0 ? 'var(--color-surface)' : 'transparent',
-                    }}
-                  >
-                    <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-                      Categories
-                    </span>
+              {/* "Add a restaurant" CTA - always shown when query has 2+ chars */}
+              {user && (
+                <button
+                  onClick={handleAddRestaurant}
+                  className="w-full flex items-center gap-3 px-4 py-3 border-t transition-colors text-left"
+                  style={{ borderColor: 'var(--color-divider)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(217, 167, 101, 0.08)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--color-accent-gold)', color: 'white' }}>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
                   </div>
-                  {results.categories.map((category) => (
-                    <CategoryResult
-                      key={category.id}
-                      category={category}
-                      onClick={() => handleCategorySelect(category)}
-                    />
-                  ))}
-                </div>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--color-accent-gold)' }}>
+                    Don't see it? Add a restaurant
+                  </span>
+                </button>
               )}
-            </div>
+            </>
           )}
         </div>
       )}
+
+      {/* Add Restaurant Modal */}
+      <AddRestaurantModal
+        isOpen={addRestaurantOpen}
+        onClose={() => setAddRestaurantOpen(false)}
+        initialQuery={query}
+      />
     </div>
   )
 }

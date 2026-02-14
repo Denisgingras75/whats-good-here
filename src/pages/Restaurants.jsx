@@ -9,6 +9,7 @@ import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useFavorites } from '../hooks/useFavorites'
 import { LoginModal } from '../components/Auth/LoginModal'
+import { AddDishModal } from '../components/AddDishModal'
 import { RestaurantDishes, RestaurantMenu } from '../components/restaurants'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
@@ -27,6 +28,7 @@ export function Restaurants() {
   const [activeTab, setActiveTab] = useState('top')
   const [restaurantTab, setRestaurantTab] = useState('open')
   const [friendsVotesByDish, setFriendsVotesByDish] = useState({})
+  const [addDishModalOpen, setAddDishModalOpen] = useState(false)
 
   const { location, radius } = useLocationContext()
   const { dishes, loading: dishesLoading, error: dishesError, refetch } = useDishes(
@@ -496,6 +498,23 @@ export function Restaurants() {
                 </a>
               )}
 
+              {/* Add a dish button (visible to logged-in users) */}
+              {user && (
+                <button
+                  onClick={() => setAddDishModalOpen(true)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all active:scale-[0.98]"
+                  style={{
+                    background: 'rgba(217, 167, 101, 0.1)',
+                    color: 'var(--color-accent-gold)',
+                    border: '1px solid rgba(217, 167, 101, 0.2)',
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add a dish
+                </button>
+              )}
             </div>
 
           </div>
@@ -575,6 +594,16 @@ export function Restaurants() {
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
       />
+
+      {selectedRestaurant && (
+        <AddDishModal
+          isOpen={addDishModalOpen}
+          onClose={() => setAddDishModalOpen(false)}
+          restaurantId={selectedRestaurant.id}
+          restaurantName={selectedRestaurant.name}
+          onDishCreated={() => refetch()}
+        />
+      )}
     </div>
   )
 }

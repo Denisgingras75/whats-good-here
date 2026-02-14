@@ -133,6 +133,98 @@ export const restaurantsApi = {
     }
   },
 
+  /**
+   * Create a new restaurant (any authenticated user)
+   * @param {Object} params - Restaurant data
+   * @returns {Promise<Object>} Created restaurant
+   */
+  async create({ name, address, lat, lng, town, cuisine, googlePlaceId, websiteUrl, facebookUrl, phone }) {
+    try {
+      // Check rate limit first
+      const { data: rateCheck, error: rateError } = await supabase.rpc('check_restaurant_create_rate_limit')
+      if (rateError) throw createClassifiedError(rateError)
+      if (rateCheck && !rateCheck.allowed) {
+        const err = new Error(rateCheck.message || 'Too many restaurants created. Please wait.')
+        err.type = 'RATE_LIMIT'
+        throw err
+      }
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw createClassifiedError(new Error('Not authenticated'))
+
+      const { data, error } = await supabase
+        .from('restaurants')
+        .insert({
+          name,
+          address,
+          lat,
+          lng,
+          town: town || null,
+          cuisine: cuisine || null,
+          google_place_id: googlePlaceId || null,
+          website_url: websiteUrl || null,
+          facebook_url: facebookUrl || null,
+          phone: phone || null,
+          created_by: user.id,
+          is_open: true,
+        })
+        .select('id, name, address, lat, lng, town, google_place_id')
+        .single()
+
+      if (error) throw createClassifiedError(error)
+      return data
+    } catch (error) {
+      logger.error('Error creating restaurant:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
+
+  /**
+   * Search nearby restaurants via RPC
+   * @param {number} lat - Latitude
+   * @param {number} lng - Longitude
+   * @param {number} radiusMeters - Search radius in meters
+   * @returns {Promise<Array>} Nearby restaurants with distance
+   */
+  async searchNearby(lat, lng, radiusMeters = 150) {
+    try {
+      const { data, error } = await supabase.rpc('find_nearby_restaurants', {
+        p_lat: lat,
+        p_lng: lng,
+        p_radius_meters: radiusMeters,
+      })
+
+      if (error) throw createClassifiedError(error)
+      return data || []
+    } catch (error) {
+      logger.error('Error searching nearby restaurants:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
+
+  /**
+   * Find restaurant by Google Place ID (for duplicate detection)
+   * @param {string} googlePlaceId - Google Place ID
+   * @returns {Promise<Object|null>} Restaurant or null
+   */
+  async findByGooglePlaceId(googlePlaceId) {
+    if (!googlePlaceId) return null
+
+    try {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('id, name, address')
+        .eq('google_place_id', googlePlaceId)
+        .maybeSingle()
+
+      if (error) throw createClassifiedError(error)
+      return data
+    } catch (error) {
+      logger.error('Error finding restaurant by place ID:', error)
+      return null
+    }
+  },
+
   async getById(restaurantId) {
     try {
       const { data, error } = await supabase
