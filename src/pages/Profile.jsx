@@ -14,6 +14,7 @@ import { useFavorites } from '../hooks/useFavorites'
 import { useUnratedDishes } from '../hooks/useUnratedDishes'
 import { useRestaurantManager } from '../hooks/useRestaurantManager'
 import { isSoundMuted, toggleSoundMute } from '../lib/sounds'
+import { useTheme } from '../context/ThemeContext'
 import { DishModal } from '../components/DishModal'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { UserSearch } from '../components/UserSearch'
@@ -51,6 +52,7 @@ export function Profile() {
   const { user, loading, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('worth-it')
   const [soundMuted, setSoundMuted] = useState(isSoundMuted())
+  const { theme, toggleTheme } = useTheme()
   const [authLoading, setAuthLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState(null)
@@ -664,6 +666,20 @@ export function Profile() {
                 <span className="font-medium text-[color:var(--color-text-primary)]">Bite Sounds</span>
                 <div className="w-12 h-7 rounded-full transition-colors" style={{ background: soundMuted ? 'var(--color-surface-elevated)' : 'var(--color-primary)' }}>
                   <div className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform mt-1 ${soundMuted ? 'ml-1' : 'ml-6'}`} />
+                </div>
+              </button>
+
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t"
+                style={{ borderColor: 'var(--color-divider)' }}
+              >
+                <span className="font-medium text-[color:var(--color-text-primary)]">
+                  {theme === 'dark' ? 'Ocean Dark Mode' : 'Light Mode'}
+                </span>
+                <div className="w-12 h-7 rounded-full transition-colors" style={{ background: theme === 'light' ? 'var(--color-primary)' : 'var(--color-surface-elevated)' }}>
+                  <div className={`w-5 h-5 rounded-full shadow-sm transform transition-transform mt-1 ${theme === 'light' ? 'ml-6' : 'ml-1'}`} style={{ background: '#FFFFFF' }} />
                 </div>
               </button>
 

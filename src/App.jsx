@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AuthProvider } from './context/AuthContext'
 import { LocationProvider } from './context/LocationContext'
+import { ThemeProvider } from './context/ThemeContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Layout } from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -108,6 +109,7 @@ function App() {
           },
         }}
       />
+      <ThemeProvider>
       <AuthProvider>
       <LocationProvider>
         <BrowserRouter>
@@ -136,6 +138,7 @@ function App() {
         </BrowserRouter>
       </LocationProvider>
       </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   )
 }

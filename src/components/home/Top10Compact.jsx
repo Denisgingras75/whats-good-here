@@ -49,7 +49,7 @@ export function Top10Compact({
             className="flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
             style={{
               background: activeTab === 'mv' ? 'var(--color-primary)' : 'var(--color-surface-elevated)',
-              color: activeTab === 'mv' ? 'var(--color-text-on-primary)' : 'var(--color-text-secondary)',
+              color: activeTab === 'mv' ? '#FFFFFF' : 'var(--color-text-secondary)',
             }}
           >
             {town || 'MV'} Top 10
@@ -61,7 +61,7 @@ export function Top10Compact({
             className="flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
             style={{
               background: activeTab === 'personal' ? 'var(--color-accent-gold)' : 'var(--color-surface-elevated)',
-              color: activeTab === 'personal' ? 'var(--color-text-on-primary)' : 'var(--color-text-secondary)',
+              color: activeTab === 'personal' ? '#FFFFFF' : 'var(--color-text-secondary)',
             }}
           >
             My Top 10
@@ -159,7 +159,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
         aria-label={accessibleLabel}
         className="w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-colors text-left"
         style={{
-          background: rank === 1 ? 'rgba(232, 102, 60, 0.06)' : 'var(--color-surface-elevated)',
+          background: 'var(--color-surface-elevated)',
           borderLeft: `2px solid ${podium.glow}`,
         }}
       >
