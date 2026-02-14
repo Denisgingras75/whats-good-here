@@ -8,13 +8,16 @@ import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { BROWSE_CATEGORIES, getCategoryNeonImage } from '../constants/categories'
 import { SearchHero, Top10Compact } from '../components/home'
 import { TownPicker } from '../components/TownPicker'
+import { RadiusSheet } from '../components/LocationPicker'
+import { LocationBanner } from '../components/LocationBanner'
 
 export function Home() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { profile } = useProfile(user?.id)
 
-  const { location, radius, town, setTown } = useLocationContext()
+  const { location, radius, setRadius, town, setTown, permissionState, requestLocation } = useLocationContext()
+  const [showRadiusSheet, setShowRadiusSheet] = useState(false)
 
   // Inline category filtering
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -84,6 +87,38 @@ export function Home() {
         }
       />
 
+      {/* Location banner + radius chip */}
+      <div className="px-4 pt-3">
+        <LocationBanner
+          permissionState={permissionState}
+          requestLocation={requestLocation}
+        />
+        <div className="flex items-center justify-end">
+          <button
+            onClick={() => setShowRadiusSheet(true)}
+            aria-label={`Search radius: ${radius} miles. Tap to change`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
+            style={{
+              background: 'var(--color-surface-elevated)',
+              borderColor: 'var(--color-divider)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            <span>{radius} mi</span>
+            <svg
+              aria-hidden="true"
+              className="w-3 h-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       {/* Section 2: Top 10 */}
       <section className="px-4 py-6">
         {loading ? (
@@ -117,6 +152,13 @@ export function Home() {
           <EmptyState onBrowse={() => navigate('/browse')} />
         )}
       </section>
+
+      <RadiusSheet
+        isOpen={showRadiusSheet}
+        onClose={() => setShowRadiusSheet(false)}
+        radius={radius}
+        onRadiusChange={setRadius}
+      />
     </div>
   )
 }

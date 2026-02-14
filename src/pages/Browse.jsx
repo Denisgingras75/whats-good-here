@@ -20,6 +20,8 @@ import { DishCardSkeleton } from '../components/Skeleton'
 import { ImpactFeedback, getImpactMessage } from '../components/ImpactFeedback'
 import { SortDropdown, CategoryGrid } from '../components/browse'
 import { CategoryImageCard } from '../components/CategoryImageCard'
+import { RadiusSheet } from '../components/LocationPicker'
+import { LocationBanner } from '../components/LocationBanner'
 
 // Use centralized browse categories
 const CATEGORIES = BROWSE_CATEGORIES
@@ -63,7 +65,8 @@ export function Browse() {
   const [dishSuggestions, setDishSuggestions] = useState([])
   const [restaurantSuggestions, setRestaurantSuggestions] = useState([])
 
-  const { location, radius, town } = useLocationContext()
+  const { location, radius, setRadius, town, permissionState, requestLocation } = useLocationContext()
+  const [showRadiusSheet, setShowRadiusSheet] = useState(false)
   const { stats: userStats } = useUserVotes(user?.id)
 
   // Search results from API using React Query hook
@@ -608,18 +611,48 @@ export function Browse() {
                 </p>
               </div>
 
-              {/* Sort dropdown */}
-              <SortDropdown
-                sortBy={sortBy}
-                onSortChange={handleSortChange}
-                isOpen={sortDropdownOpen}
-                onToggle={setSortDropdownOpen}
-              />
+              <div className="flex items-center gap-2">
+                {/* Radius chip */}
+                <button
+                  onClick={() => setShowRadiusSheet(true)}
+                  aria-label={`Search radius: ${radius} miles. Tap to change`}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all"
+                  style={{
+                    background: 'var(--color-surface-elevated)',
+                    borderColor: 'var(--color-divider)',
+                    color: 'var(--color-text-secondary)',
+                  }}
+                >
+                  <span>{radius} mi</span>
+                  <svg
+                    aria-hidden="true"
+                    className="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    style={{ color: 'var(--color-text-tertiary)' }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Sort dropdown */}
+                <SortDropdown
+                  sortBy={sortBy}
+                  onSortChange={handleSortChange}
+                  isOpen={sortDropdownOpen}
+                  onToggle={setSortDropdownOpen}
+                />
+              </div>
             </div>
           </div>
 
           {/* Dish Grid */}
           <div className="px-4 py-4">
+            <LocationBanner
+              permissionState={permissionState}
+              requestLocation={requestLocation}
+            />
             {(loading || searchLoading) ? (
               <div className="space-y-2">
                 {[...Array(5)].map((_, i) => (
@@ -751,6 +784,13 @@ export function Browse() {
           </div>
         </>
       )}
+
+      <RadiusSheet
+        isOpen={showRadiusSheet}
+        onClose={() => setShowRadiusSheet(false)}
+        radius={radius}
+        onRadiusChange={setRadius}
+      />
 
       <LoginModal
         isOpen={loginModalOpen}

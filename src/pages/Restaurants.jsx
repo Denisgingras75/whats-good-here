@@ -13,6 +13,9 @@ import { LoginModal } from '../components/Auth/LoginModal'
 import { AddDishModal } from '../components/AddDishModal'
 import { RestaurantDishes, RestaurantMenu } from '../components/restaurants'
 import { RadiusSheet } from '../components/LocationPicker'
+import { LocationBanner } from '../components/LocationBanner'
+import { AddRestaurantModal } from '../components/AddRestaurantModal'
+import { useNearbyPlaces } from '../hooks/useNearbyPlaces'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
 
@@ -29,6 +32,8 @@ export function Restaurants() {
   const [friendsVotesByDish, setFriendsVotesByDish] = useState({})
   const [addDishModalOpen, setAddDishModalOpen] = useState(false)
   const [showRadiusSheet, setShowRadiusSheet] = useState(false)
+  const [addRestaurantModalOpen, setAddRestaurantModalOpen] = useState(false)
+  const [addRestaurantInitialQuery, setAddRestaurantInitialQuery] = useState('')
 
   const { location, radius, setRadius, permissionState, requestLocation } = useLocationContext()
 
@@ -44,6 +49,21 @@ export function Restaurants() {
     selectedRestaurant?.id
   )
   const { isFavorite, toggleFavorite } = useFavorites(user?.id)
+
+  // Google Place IDs already in DB (to filter out from discovery)
+  const existingPlaceIds = useMemo(() =>
+    restaurants.filter(r => r.google_place_id).map(r => r.google_place_id),
+    [restaurants]
+  )
+
+  // Discover nearby restaurants from Google Places (only for authenticated users at radius >= 10mi)
+  const { places: nearbyPlaces, loading: nearbyLoading } = useNearbyPlaces({
+    lat: location?.lat,
+    lng: location?.lng,
+    radius,
+    isAuthenticated: !!user,
+    existingPlaceIds,
+  })
 
   // Auto-select restaurant from URL param
   useEffect(() => {
@@ -284,34 +304,11 @@ export function Restaurants() {
           </div>
 
           {/* Location permission banner */}
-          {permissionState === 'prompt' && (
-            <div
-              className="mb-4 p-4 rounded-xl flex items-center justify-between gap-3"
-              style={{
-                background: 'rgba(217, 167, 101, 0.08)',
-                border: '1px solid rgba(217, 167, 101, 0.2)',
-              }}
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                  Enable location to see restaurants near you
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                  We'll sort by distance and show how far each one is
-                </p>
-              </div>
-              <button
-                onClick={requestLocation}
-                className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95"
-                style={{
-                  background: 'var(--color-accent-gold)',
-                  color: 'var(--color-bg)',
-                }}
-              >
-                Enable
-              </button>
-            </div>
-          )}
+          <LocationBanner
+            permissionState={permissionState}
+            requestLocation={requestLocation}
+            message="Enable location to see restaurants near you"
+          />
 
           {/* Open / Closed Tab Switcher */}
           <div
@@ -496,6 +493,82 @@ export function Restaurants() {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Discover More Restaurants — Google Places suggestions (auth only, radius >= 10mi) */}
+          {user && radius >= 10 && nearbyPlaces.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-1 h-6 rounded-full"
+                  style={{ background: 'linear-gradient(180deg, var(--color-accent-gold) 0%, var(--color-accent-orange) 100%)' }}
+                />
+                <h2
+                  className="font-bold"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: '16px',
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  Discover more restaurants
+                </h2>
+              </div>
+              <p className="text-xs mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
+                Found on Google Maps — not yet on WGH
+              </p>
+              <div className="space-y-2">
+                {nearbyPlaces.map((place) => (
+                  <div
+                    key={place.placeId}
+                    className="rounded-xl p-4 flex items-center justify-between gap-3"
+                    style={{
+                      background: 'var(--color-card)',
+                      border: '1px solid var(--color-divider)',
+                    }}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="font-semibold truncate"
+                        style={{ color: 'var(--color-text-primary)', fontSize: '14px' }}
+                      >
+                        {place.name}
+                      </p>
+                      {place.address && (
+                        <p
+                          className="text-xs truncate mt-0.5"
+                          style={{ color: 'var(--color-text-tertiary)' }}
+                        >
+                          {place.address}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setAddRestaurantInitialQuery(place.name)
+                        setAddRestaurantModalOpen(true)
+                      }}
+                      className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95"
+                      style={{
+                        background: 'rgba(217, 167, 101, 0.12)',
+                        color: 'var(--color-accent-gold)',
+                        border: '1px solid rgba(217, 167, 101, 0.2)',
+                      }}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add to WGH
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {user && radius >= 10 && nearbyLoading && (
+            <div className="mt-8 flex justify-center py-4">
+              <div className="animate-spin w-5 h-5 border-2 rounded-full" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-accent-gold)' }} />
             </div>
           )}
         </div>
@@ -691,6 +764,12 @@ export function Restaurants() {
           onDishCreated={() => refetch()}
         />
       )}
+
+      <AddRestaurantModal
+        isOpen={addRestaurantModalOpen}
+        onClose={() => setAddRestaurantModalOpen(false)}
+        initialQuery={addRestaurantInitialQuery}
+      />
     </div>
   )
 }
