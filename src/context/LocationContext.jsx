@@ -4,10 +4,10 @@ import { capture } from '../lib/analytics'
 import { logger } from '../utils/logger'
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../lib/storage'
 
-// Default location: Montreal, QC (temp test to verify deployment)
+// Default location: Martha's Vineyard center (between Vineyard Haven, Oak Bluffs, Edgartown)
 const DEFAULT_LOCATION = {
-  lat: 45.50,
-  lng: -73.57,
+  lat: 41.43,
+  lng: -70.56,
 }
 
 const LocationContext = createContext(null)
