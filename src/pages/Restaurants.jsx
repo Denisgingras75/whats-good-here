@@ -8,9 +8,11 @@ import { followsApi } from '../api/followsApi'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useFavorites } from '../hooks/useFavorites'
+import { useRestaurants } from '../hooks/useRestaurants'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { AddDishModal } from '../components/AddDishModal'
 import { RestaurantDishes, RestaurantMenu } from '../components/restaurants'
+import { RadiusSheet } from '../components/LocationPicker'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
 
@@ -18,9 +20,6 @@ export function Restaurants() {
   const { user } = useAuth()
   const { restaurantId } = useParams()
   const navigate = useNavigate()
-  const [restaurants, setRestaurants] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [fetchError, setFetchError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [dishSearchQuery, setDishSearchQuery] = useState('')
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
@@ -29,8 +28,15 @@ export function Restaurants() {
   const [restaurantTab, setRestaurantTab] = useState('open')
   const [friendsVotesByDish, setFriendsVotesByDish] = useState({})
   const [addDishModalOpen, setAddDishModalOpen] = useState(false)
+  const [showRadiusSheet, setShowRadiusSheet] = useState(false)
 
-  const { location, radius } = useLocationContext()
+  const { location, radius, setRadius, permissionState, requestLocation } = useLocationContext()
+
+  // Use distance-filtered restaurants when location is available
+  const { restaurants, loading, error: fetchError, isDistanceFiltered } = useRestaurants(
+    location, radius, permissionState
+  )
+
   const { dishes, loading: dishesLoading, error: dishesError, refetch } = useDishes(
     location,
     radius,
@@ -39,30 +45,11 @@ export function Restaurants() {
   )
   const { isFavorite, toggleFavorite } = useFavorites(user?.id)
 
-  // Fetch restaurants with dish counts and details
-  useEffect(() => {
-    async function fetchRestaurants() {
-      setLoading(true)
-      setFetchError(null)
-      try {
-        const data = await restaurantsApi.getAll()
-        setRestaurants(data)
-      } catch (error) {
-        logger.error('Error fetching restaurants:', error)
-        setFetchError('Unable to load restaurants. Please try again.')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchRestaurants()
-  }, [])
-
   // Auto-select restaurant from URL param
   useEffect(() => {
     if (restaurantId && restaurants.length > 0 && !selectedRestaurant) {
       const restaurant = restaurants.find(r => r.id === restaurantId)
       if (restaurant) {
-        // Fetch full data (includes menu_section_order)
         restaurantsApi.getById(restaurant.id)
           .then(full => setSelectedRestaurant({ ...restaurant, ...full }))
           .catch(() => setSelectedRestaurant(restaurant))
@@ -80,7 +67,6 @@ export function Restaurants() {
     async function fetchFriendsVotes() {
       try {
         const votes = await followsApi.getFriendsVotesForRestaurant(selectedRestaurant.id)
-        // Group votes by dish_id
         const byDish = {}
         votes.forEach(vote => {
           if (!byDish[vote.dish_id]) {
@@ -121,9 +107,8 @@ export function Restaurants() {
       restaurant_name: restaurant.name,
       restaurant_address: restaurant.address,
       total_dish_votes: stats.totalVotes || 0,
-      dish_count: restaurant.dishCount,
+      dish_count: restaurant.dishCount || restaurant.dish_count || 0,
     })
-    // Fetch full restaurant data (includes menu_section_order)
     try {
       const full = await restaurantsApi.getById(restaurant.id)
       setSelectedRestaurant({ ...restaurant, ...full })
@@ -146,14 +131,13 @@ export function Restaurants() {
       if (!stats[rid]) {
         stats[rid] = {
           totalVotes: 0,
-          topRankedDish: null, // Highest rated with 5+ votes
-          topVotedDish: null,  // Most votes (fallback)
+          topRankedDish: null,
+          topVotedDish: null,
         }
       }
 
       stats[rid].totalVotes += (dish.total_votes || 0)
 
-      // Track highest rated dish (with 5+ votes)
       const isRanked = (dish.total_votes || 0) >= MIN_VOTES_FOR_RANKING
       if (isRanked) {
         if (!stats[rid].topRankedDish || (dish.avg_rating || 0) > (stats[rid].topRankedDish.avg_rating || 0)) {
@@ -161,7 +145,6 @@ export function Restaurants() {
         }
       }
 
-      // Track most voted dish (fallback)
       if (!stats[rid].topVotedDish || (dish.total_votes || 0) > (stats[rid].topVotedDish.total_votes || 0)) {
         stats[rid].topVotedDish = dish
       }
@@ -170,13 +153,19 @@ export function Restaurants() {
     return stats
   }, [dishes])
 
-  // Filter restaurants by open/closed tab, search, and sort alphabetically
+  // Filter restaurants by open/closed tab and search
+  // Distance-filtered results are already sorted by distance from the RPC
   const filteredRestaurants = useMemo(() => {
-    return restaurants
+    const filtered = restaurants
       .filter(r => restaurantTab === 'open' ? r.is_open !== false : r.is_open === false)
       .filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  }, [restaurants, searchQuery, restaurantTab])
+
+    // Only sort alphabetically if not distance-filtered (fallback mode)
+    if (!isDistanceFiltered) {
+      return filtered.slice().sort((a, b) => a.name.localeCompare(b.name))
+    }
+    return filtered
+  }, [restaurants, searchQuery, restaurantTab, isDistanceFiltered])
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg) 100%)' }}>
@@ -200,7 +189,7 @@ export function Restaurants() {
             background: 'linear-gradient(90deg, transparent, var(--color-divider), transparent)',
           }}
         />
-        {/* Search bar - context-aware */}
+        {/* Search bar */}
         <div className="relative">
           <svg
             aria-hidden="true"
@@ -232,7 +221,6 @@ export function Restaurants() {
               '--tw-ring-color': 'var(--color-primary)',
             }}
           />
-          {/* Clear button when searching dishes */}
           {selectedRestaurant && dishSearchQuery && (
             <button
               onClick={() => setDishSearchQuery('')}
@@ -251,23 +239,79 @@ export function Restaurants() {
       {/* Restaurant List */}
       {!selectedRestaurant && (
         <div className="p-4 pt-5">
-          {/* Section Header */}
-          <div className="mb-4 flex items-center gap-3">
-            <div
-              className="w-1 h-6 rounded-full"
-              style={{ background: 'linear-gradient(180deg, var(--color-primary) 0%, var(--color-accent-orange) 100%)' }}
-            />
-            <h2
-              className="font-bold"
+          {/* Section Header with Radius Chip */}
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-1 h-6 rounded-full"
+                style={{ background: 'linear-gradient(180deg, var(--color-primary) 0%, var(--color-accent-orange) 100%)' }}
+              />
+              <h2
+                className="font-bold"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: '18px',
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                {isDistanceFiltered ? `Restaurants within ${radius} mi` : 'Restaurants near you'}
+              </h2>
+            </div>
+
+            {/* Radius chip */}
+            <button
+              onClick={() => setShowRadiusSheet(true)}
+              aria-label={`Search radius: ${radius} miles. Tap to change`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
               style={{
-                color: 'var(--color-text-primary)',
-                fontSize: '18px',
-                letterSpacing: '-0.01em',
+                background: 'var(--color-surface-elevated)',
+                borderColor: 'var(--color-divider)',
+                color: 'var(--color-text-secondary)',
               }}
             >
-              Restaurants near you
-            </h2>
+              <span>{radius} mi</span>
+              <svg
+                aria-hidden="true"
+                className="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                style={{ color: 'var(--color-text-tertiary)' }}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
           </div>
+
+          {/* Location permission banner */}
+          {permissionState === 'prompt' && (
+            <div
+              className="mb-4 p-4 rounded-xl flex items-center justify-between gap-3"
+              style={{
+                background: 'rgba(217, 167, 101, 0.08)',
+                border: '1px solid rgba(217, 167, 101, 0.2)',
+              }}
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                  Enable location to see restaurants near you
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                  We'll sort by distance and show how far each one is
+                </p>
+              </div>
+              <button
+                onClick={requestLocation}
+                className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95"
+                style={{
+                  background: 'var(--color-accent-gold)',
+                  color: 'var(--color-bg)',
+                }}
+              >
+                Enable
+              </button>
+            </div>
+          )}
 
           {/* Open / Closed Tab Switcher */}
           <div
@@ -309,7 +353,7 @@ export function Restaurants() {
 
           {fetchError ? (
             <div className="text-center py-12">
-              <p role="alert" className="text-sm mb-4" style={{ color: 'var(--color-danger)' }}>{fetchError}</p>
+              <p role="alert" className="text-sm mb-4" style={{ color: 'var(--color-danger)' }}>{fetchError.message}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-4 py-2 text-sm font-medium rounded-lg"
@@ -328,6 +372,8 @@ export function Restaurants() {
             <div className="space-y-3">
               {filteredRestaurants.map((restaurant) => {
                 const stats = restaurantStats[restaurant.id] || {}
+                const dishCount = restaurant.dish_count ?? restaurant.dishCount ?? 0
+                const distanceMiles = restaurant.distance_miles
 
                 return (
                   <button
@@ -345,16 +391,32 @@ export function Restaurants() {
                     <div className="flex items-center justify-between gap-3">
                       {/* Restaurant info */}
                       <div className="min-w-0 flex-1">
-                        <h3
-                          className="font-bold"
-                          style={{
-                            color: 'var(--color-text-primary)',
-                            fontSize: '15px',
-                            letterSpacing: '-0.01em',
-                          }}
-                        >
-                          {restaurant.name}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3
+                            className="font-bold truncate"
+                            style={{
+                              color: 'var(--color-text-primary)',
+                              fontSize: '15px',
+                              letterSpacing: '-0.01em',
+                            }}
+                          >
+                            {restaurant.name}
+                          </h3>
+                          {/* Distance badge */}
+                          {distanceMiles != null && (
+                            <span
+                              className="flex-shrink-0 px-2 py-0.5 rounded-full font-semibold"
+                              style={{
+                                fontSize: '10px',
+                                background: 'rgba(107, 179, 132, 0.12)',
+                                color: 'var(--color-rating)',
+                                border: '1px solid rgba(107, 179, 132, 0.2)',
+                              }}
+                            >
+                              {distanceMiles} mi
+                            </span>
+                          )}
+                        </div>
                         {!restaurant.is_open && (
                           <span
                             className="inline-block mt-1 px-2 py-0.5 rounded-full font-semibold"
@@ -368,9 +430,22 @@ export function Restaurants() {
                             Closed for Season
                           </span>
                         )}
+                        {/* Cuisine + dish count */}
+                        <p
+                          className="mt-1 font-medium"
+                          style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}
+                        >
+                          {restaurant.cuisine && (
+                            <span style={{ color: 'var(--color-text-secondary)' }}>
+                              {restaurant.cuisine}
+                              {' · '}
+                            </span>
+                          )}
+                          {dishCount} {dishCount === 1 ? 'dish' : 'dishes'}
+                        </p>
                         {restaurant.knownFor && (
                           <p
-                            className="mt-1 font-medium"
+                            className="mt-0.5 font-medium"
                             style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}
                           >
                             Known for{' '}
@@ -414,6 +489,11 @@ export function Restaurants() {
                         : 'No closed restaurants'
                     }
                   </p>
+                  {isDistanceFiltered && !searchQuery && (
+                    <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                      Try increasing your search radius
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -438,7 +518,6 @@ export function Restaurants() {
                 onClick={() => {
                   setSelectedRestaurant(null)
                   setDishSearchQuery('')
-                  // Clear URL param if present
                   if (restaurantId) {
                     navigate('/restaurants', { replace: true })
                   }
@@ -462,7 +541,10 @@ export function Restaurants() {
                   {selectedRestaurant.name}
                 </h2>
                 <p className="font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
-                  {selectedRestaurant.dishCount} dishes
+                  {selectedRestaurant.dish_count ?? selectedRestaurant.dishCount ?? 0} dishes
+                  {selectedRestaurant.distance_miles != null && (
+                    <span> · {selectedRestaurant.distance_miles} mi away</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -478,7 +560,6 @@ export function Restaurants() {
               }}
             />
             <div className="space-y-3">
-              {/* Address with Maps link */}
               {selectedRestaurant.address && (
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedRestaurant.address)}`}
@@ -498,7 +579,6 @@ export function Restaurants() {
                 </a>
               )}
 
-              {/* Add a dish button (visible to logged-in users) */}
               {user && (
                 <button
                   onClick={() => setAddDishModalOpen(true)}
@@ -557,7 +637,6 @@ export function Restaurants() {
                 Menu
               </button>
             </div>
-            {/* Gold divider */}
             <div
               className="mt-3 h-px"
               style={{ background: 'linear-gradient(90deg, transparent, var(--color-accent-gold), transparent)' }}
@@ -589,6 +668,14 @@ export function Restaurants() {
           )}
         </>
       )}
+
+      {/* Radius Sheet */}
+      <RadiusSheet
+        isOpen={showRadiusSheet}
+        onClose={() => setShowRadiusSheet(false)}
+        radius={radius}
+        onRadiusChange={setRadius}
+      />
 
       <LoginModal
         isOpen={loginModalOpen}

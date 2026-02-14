@@ -38,7 +38,7 @@ const BROWSE_CATEGORIES = [
 export function DishSearch({ loading = false, placeholder = "Find What's Good near you", town = null }) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { location, permissionState } = useLocationContext()
+  const { location, radius, permissionState } = useLocationContext()
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [searchResults, setSearchResults] = useState([])
@@ -51,7 +51,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
   // Restaurant search (local + Google Places)
   const hasLocation = permissionState === 'granted'
   const { localResults: restaurantResults, externalResults: placesResults, loading: restaurantSearchLoading } = useRestaurantSearch(
-    query, location?.lat, location?.lng, isFocused
+    query, location?.lat, location?.lng, isFocused, radius
   )
 
   // Nearby restaurants (shown on focus before typing)

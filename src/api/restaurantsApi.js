@@ -225,6 +225,29 @@ export const restaurantsApi = {
     }
   },
 
+  /**
+   * Get restaurants within a radius, sorted by distance
+   * @param {number} lat - User latitude
+   * @param {number} lng - User longitude
+   * @param {number} radiusMiles - Search radius in miles
+   * @returns {Promise<Array>} Restaurants with distance_miles and dish_count
+   */
+  async getByDistance(lat, lng, radiusMiles = 5) {
+    try {
+      const { data, error } = await supabase.rpc('get_restaurants_within_radius', {
+        p_lat: lat,
+        p_lng: lng,
+        p_radius_miles: radiusMiles,
+      })
+
+      if (error) throw createClassifiedError(error)
+      return data || []
+    } catch (error) {
+      logger.error('Error fetching restaurants by distance:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
+
   async getById(restaurantId) {
     try {
       const { data, error } = await supabase

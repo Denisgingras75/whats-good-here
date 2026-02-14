@@ -11,9 +11,10 @@ import { logger } from '../utils/logger'
  * @param {number|null} lat - User latitude
  * @param {number|null} lng - User longitude
  * @param {boolean} enabled - Whether to search (default true)
+ * @param {number} radiusMiles - Radius in miles for biasing Google Places results
  * @returns {{ localResults: Array, externalResults: Array, loading: boolean }}
  */
-export function useRestaurantSearch(query, lat, lng, enabled = true) {
+export function useRestaurantSearch(query, lat, lng, enabled = true, radiusMiles = null) {
   const [localResults, setLocalResults] = useState([])
   const [externalResults, setExternalResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -42,7 +43,7 @@ export function useRestaurantSearch(query, lat, lng, enabled = true) {
             logger.error('Local restaurant search error:', err)
             return []
           }),
-          placesApi.autocomplete(trimmed, lat, lng, 50000).catch((err) => {
+          placesApi.autocomplete(trimmed, lat, lng, radiusMiles ? radiusMiles * 1609 : 50000).catch((err) => {
             logger.error('Places autocomplete error:', err)
             return []
           }),
@@ -77,7 +78,7 @@ export function useRestaurantSearch(query, lat, lng, enabled = true) {
     // Debounce
     const timer = setTimeout(fetchResults, 250)
     return () => clearTimeout(timer)
-  }, [query, lat, lng, enabled])
+  }, [query, lat, lng, enabled, radiusMiles])
 
   return { localResults, externalResults, loading }
 }
