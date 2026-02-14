@@ -90,10 +90,10 @@ export function VotedDishCard({
         <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
           <div>
             <h3 className="font-semibold text-[color:var(--color-text-primary)] truncate">
-              {dishName}
+              {restaurantName}
             </h3>
             <p className="text-sm text-[color:var(--color-text-secondary)] truncate">
-              {restaurantName}
+              {dishName}
             </p>
           </div>
 

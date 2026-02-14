@@ -46,10 +46,10 @@ export function ReviewCard({ review, onClick }) {
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h3 className={`font-semibold text-[color:var(--color-text-primary)] truncate ${onClick ? 'text-sm' : 'text-sm'}`}>
-                {dishName}
+                {restaurantName}
               </h3>
               <p className="text-xs text-[color:var(--color-text-secondary)] truncate">
-                {restaurantName}
+                {dishName}
               </p>
             </div>
             {review.rating_10 && (

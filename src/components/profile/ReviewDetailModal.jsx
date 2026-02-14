@@ -87,10 +87,10 @@ export function ReviewDetailModal({ review, reviewerName, onClose }) {
         <div className="p-4 flex-1 overflow-y-auto">
           {/* Dish info */}
           <h2 id="review-modal-title" className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {dish.name}
+            {dish.restaurants?.name}
           </h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-            {dish.restaurants?.name}
+            {dish.name}
           </p>
 
           {/* Vote indicator */}
