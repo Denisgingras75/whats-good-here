@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { getCategoryImage } from '../constants/categoryImages'
+import { DishPlaceholder } from './DishPlaceholder'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
 import { getResponsiveImageProps } from '../utils/images'
@@ -8,14 +8,14 @@ import { EarIconTooltip } from './EarIconTooltip'
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../lib/storage'
 
 export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
-  const [imageLoaded, setImageLoaded] = useState(false)
   if (!dish) return null
+  const [imageLoaded, setImageLoaded] = useState(!dish?.photo_url)
 
   const {
     dish_id,
     dish_name,
     restaurant_name,
-    category,
+    restaurant_town,
     photo_url,
     price,
     avg_rating,
@@ -45,8 +45,7 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
     setStorageItem(STORAGE_KEYS.HAS_SEEN_EAR_TOOLTIP, '1')
   }
 
-  const imgSrc = photo_url || getCategoryImage(category)
-  const imageProps = getResponsiveImageProps(imgSrc, [300, 400, 600]) || { src: '' }
+  const imageProps = photo_url ? (getResponsiveImageProps(photo_url, [300, 400, 600]) || { src: '' }) : null
   const isRanked = total_votes >= MIN_VOTES_FOR_RANKING
 
   // For parent dishes with variants, show best variant's rating instead of aggregate
@@ -75,24 +74,20 @@ export function BrowseCard({ dish, onClick, isFavorite, onToggleFavorite }) {
     >
       {/* Image with rating badge */}
       <div className="relative aspect-[16/10] overflow-hidden image-placeholder">
-        <img
-          {...imageProps}
-          alt={dish_name}
-          loading="lazy"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
-          className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onError={(e) => {
-            // Fall back to category image if photo_url fails to load
-            const fallback = getCategoryImage(category)
-            if (e.target.src !== fallback) {
-              e.target.src = fallback
-            }
-            setImageLoaded(true)
-          }}
-        />
+        {imageProps ? (
+          <img
+            {...imageProps}
+            alt={dish_name}
+            loading="lazy"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
+            className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+          />
+        ) : (
+          <DishPlaceholder restaurantName={restaurant_name} restaurantTown={restaurant_town} showCTA />
+        )}
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />

@@ -1,20 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { VariantPicker, VariantBadge } from '../VariantPicker'
-import { getCategoryImage } from '../../constants/categoryImages'
+import { RestaurantAvatar } from '../RestaurantAvatar'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
 import { getRatingColor } from '../../utils/ranking'
 import { HearingIcon } from '../HearingIcon'
 
 // Compact dish card for restaurant view - shows order again % prominently
 // Now supports variants with expandable list
-export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, onToggleFavorite, friendVotes }) {
+export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, onToggleFavorite, friendVotes, restaurantName, restaurantTown }) {
   const navigate = useNavigate()
   const [showVariants, setShowVariants] = useState(false)
   const {
     dish_id,
     dish_name,
-    category,
     photo_url,
     price,
     total_votes,
@@ -26,7 +25,6 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
     best_variant_rating,
   } = dish
 
-  const imgSrc = photo_url || getCategoryImage(category)
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
   const votes = total_votes || 0
 
@@ -96,15 +94,19 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
 
         {/* Photo */}
         <div
-          className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0"
+          className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0"
           style={{ background: 'var(--color-surface)', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.2)' }}
         >
-          <img
-            src={imgSrc}
-            alt={dish_name}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
+          {photo_url ? (
+            <img
+              src={photo_url}
+              alt={dish_name}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <RestaurantAvatar name={restaurantName} town={restaurantTown} fill />
+          )}
         </div>
 
         {/* Dish Info */}

@@ -5,9 +5,7 @@ import { logger } from '../utils/logger'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { adminApi } from '../api/adminApi'
 import { restaurantManagerApi } from '../api/restaurantManagerApi'
-import { CATEGORY_IMAGES } from '../constants/categoryImages'
-
-const CATEGORIES = Object.keys(CATEGORY_IMAGES)
+import { ALL_CATEGORIES } from '../constants/categories'
 
 export function Admin() {
   const navigate = useNavigate()
@@ -421,9 +419,9 @@ export function Admin() {
               required
             >
               <option value="">Select a category...</option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+              {ALL_CATEGORIES.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label}
                 </option>
               ))}
             </select>

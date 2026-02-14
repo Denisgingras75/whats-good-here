@@ -16,7 +16,7 @@ import { PhotoUploadButton } from '../components/PhotoUploadButton'
 import { PhotoUploadConfirmation } from '../components/PhotoUploadConfirmation'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { VariantSelector } from '../components/VariantPicker'
-import { getCategoryImage } from '../constants/categoryImages'
+import { DishPlaceholder } from '../components/DishPlaceholder'
 import { CATEGORY_INFO } from '../constants/categories'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor, formatScore10 } from '../utils/ranking'
@@ -36,6 +36,7 @@ function transformDish(data) {
     dish_name: data.name,
     restaurant_id: data.restaurant_id,
     restaurant_name: data.restaurants?.name || 'Unknown',
+    restaurant_town: data.restaurants?.town,
     restaurant_address: data.restaurants?.address,
     category: data.category,
     price: data.price,
@@ -338,8 +339,8 @@ export function Dish() {
   const displayPhotos = showAllPhotos ? allPhotos : communityPhotos.slice(0, 4)
   const hasMorePhotos = allPhotos.length > 4 && !showAllPhotos
 
-  // Hero image
-  const heroImage = featuredPhoto?.photo_url || dish?.photo_url || getCategoryImage(dish?.category)
+  // Hero image — only use real photos, fall back to RestaurantAvatar placeholder
+  const heroImage = featuredPhoto?.photo_url || dish?.photo_url
 
   if (loading) {
     return (
@@ -453,19 +454,16 @@ export function Dish() {
         <>
           {/* Hero Image */}
           <div className="relative aspect-[4/3] overflow-hidden">
-            <img
-              src={heroImage}
-              alt={dish.dish_name}
-              loading="lazy"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fall back to category image if photo_url fails to load
-                const fallback = getCategoryImage(dish?.category)
-                if (e.target.src !== fallback) {
-                  e.target.src = fallback
-                }
-              }}
-            />
+            {heroImage ? (
+              <img
+                src={heroImage}
+                alt={dish.dish_name}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <DishPlaceholder restaurantName={dish.restaurant_name} restaurantTown={dish.restaurant_town} showCTA />
+            )}
 
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />

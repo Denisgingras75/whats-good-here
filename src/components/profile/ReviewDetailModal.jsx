@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { getCategoryImage } from '../../constants/categoryImages'
+import { DishPlaceholder } from '../DishPlaceholder'
 import { getRatingColor } from '../../utils/ranking'
 import { ThumbsUpIcon } from '../ThumbsUpIcon'
 import { ThumbsDownIcon } from '../ThumbsDownIcon'
@@ -21,7 +21,7 @@ export function ReviewDetailModal({ review, reviewerName, onClose }) {
 
   if (!dish) return null
 
-  const imgSrc = dish.photo_url || getCategoryImage(dish.category)
+  const imgSrc = dish.photo_url
 
   // Format date
   const formattedDate = review.review_created_at
@@ -53,8 +53,12 @@ export function ReviewDetailModal({ review, reviewerName, onClose }) {
       >
         {/* Header with dish image */}
         <div className="relative">
-          <div className="aspect-[16/9] w-full overflow-hidden" style={{ background: 'var(--color-surface)' }}>
-            <img src={imgSrc} alt={dish.name} loading="lazy" className="w-full h-full object-cover" />
+          <div className="relative aspect-[16/9] w-full overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+            {imgSrc ? (
+              <img src={imgSrc} alt={dish.name} loading="lazy" className="w-full h-full object-cover" />
+            ) : (
+              <DishPlaceholder restaurantName={dish.restaurants?.name} restaurantTown={dish.restaurants?.town} showCTA />
+            )}
           </div>
 
           {/* Close button */}

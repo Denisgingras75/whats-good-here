@@ -65,22 +65,25 @@ export const RestaurantAvatar = memo(function RestaurantAvatar({
   name,
   town,
   size = 48,
+  fill = false,
   className = ''
 }) {
   const initials = getInitials(name)
   const townStyle = getTownStyle(town)
 
-  const fontSize = size < 40 ? size * 0.4 : size * 0.35
+  const fontSize = fill ? undefined : (size < 40 ? size * 0.4 : size * 0.35)
 
   return (
     <div
-      className={`rounded-lg flex items-center justify-center flex-shrink-0 ${className}`}
+      className={`${fill ? '' : 'rounded-lg'} flex items-center justify-center flex-shrink-0 ${className}`}
       style={{
-        width: size,
-        height: size,
+        ...(fill
+          ? { position: 'absolute', inset: 0, width: '100%', height: '100%' }
+          : { width: size, height: size }
+        ),
         background: townStyle.bg,
         color: townStyle.text,
-        fontSize: `${fontSize}px`,
+        fontSize: fill ? 'clamp(24px, 8vw, 64px)' : `${fontSize}px`,
         fontWeight: 700,
         letterSpacing: '-0.02em',
         // Add subtle text shadow for gradient backgrounds to ensure readability

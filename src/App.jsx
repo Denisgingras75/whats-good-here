@@ -9,7 +9,6 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { WelcomeModal } from './components/Auth/WelcomeModal'
 import { RouteProgress } from './components/RouteProgress'
 import { preloadSounds } from './lib/sounds'
-import { preloadCategoryImages } from './constants/categories'
 
 // Helper to handle chunk load failures after new deploys
 // If a lazy-loaded chunk fails to load (e.g., after deploy), reload the page once
@@ -89,10 +88,9 @@ const PageLoader = () => (
 )
 
 function App() {
-  // Preload sounds and category images on app start
+  // Preload sounds on app start
   useEffect(() => {
     preloadSounds()
-    preloadCategoryImages()
   }, [])
 
   return (

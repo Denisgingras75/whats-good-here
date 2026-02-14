@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { capture } from '../lib/analytics'
 import { dishesApi } from '../api/dishesApi'
-import { getCategoryImage } from '../constants/categoryImages'
+import { getCategoryNeonImage } from '../constants/categories'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
 import { logger } from '../utils/logger'
@@ -324,7 +324,6 @@ function DishResult({ dish, rank, onClick }) {
     total_votes,
   } = dish
 
-  const imgSrc = photo_url || getCategoryImage(category)
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
 
   return (
@@ -349,17 +348,19 @@ function DishResult({ dish, rank, onClick }) {
       </div>
 
       {/* Photo */}
-      <div
-        className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
-        style={{ background: 'var(--color-surface)' }}
-      >
-        <img
-          src={imgSrc}
-          alt={dish_name}
-          loading="lazy"
-          className="w-full h-full object-cover"
-        />
-      </div>
+      {photo_url && (
+        <div
+          className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
+          style={{ background: 'var(--color-surface)' }}
+        >
+          <img
+            src={photo_url}
+            alt={dish_name}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
 
       {/* Info */}
       <div className="flex-1 min-w-0">
@@ -407,17 +408,21 @@ function CategoryResult({ category, onClick }) {
       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
     >
-      {/* Category image */}
+      {/* Category icon */}
       <div
-        className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
+        className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
         style={{ background: 'var(--color-surface)' }}
       >
-        <img
-          src={getCategoryImage(category.id)}
-          alt={category.label}
-          loading="lazy"
-          className="w-full h-full object-cover"
-        />
+        {getCategoryNeonImage(category.id) ? (
+          <img
+            src={getCategoryNeonImage(category.id)}
+            alt={category.label}
+            loading="lazy"
+            className="w-8 h-8 object-contain"
+          />
+        ) : (
+          <span className="text-lg">{category.label.charAt(0)}</span>
+        )}
       </div>
 
       {/* Info */}

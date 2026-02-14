@@ -558,6 +558,8 @@ export function Restaurants() {
               user={user}
               searchQuery={dishSearchQuery}
               friendsVotesByDish={friendsVotesByDish}
+              restaurantName={selectedRestaurant?.name}
+              restaurantTown={selectedRestaurant?.town}
             />
           ) : (
             <RestaurantMenu

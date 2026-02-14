@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { getCategoryImage } from '../../constants/categoryImages'
+import { RestaurantAvatar } from '../RestaurantAvatar'
 import { getRatingColor } from '../../utils/ranking'
 
 /**
@@ -12,9 +12,9 @@ import { getRatingColor } from '../../utils/ranking'
  */
 export function ReviewCard({ review, onClick }) {
   const dish = review.dishes
-  const imageUrl = dish?.photo_url || getCategoryImage(dish?.category)
   const dishName = dish?.name
   const restaurantName = dish?.restaurants?.name
+  const restaurantTown = dish?.restaurants?.town
 
   // Format date
   const formattedDate = review.review_created_at
@@ -26,15 +26,19 @@ export function ReviewCard({ review, onClick }) {
       <div className="flex">
         {/* Image */}
         <div
-          className={`${onClick ? 'w-14 h-14 rounded-lg m-3' : 'w-20 h-20'} flex-shrink-0 overflow-hidden`}
+          className={`relative ${onClick ? 'w-14 h-14 rounded-lg m-3' : 'w-20 h-20'} flex-shrink-0 overflow-hidden`}
           style={{ background: 'var(--color-surface-elevated)' }}
         >
-          <img
-            src={imageUrl}
-            alt={dishName}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
+          {dish?.photo_url ? (
+            <img
+              src={dish.photo_url}
+              alt={dishName}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <RestaurantAvatar name={restaurantName} town={restaurantTown} fill />
+          )}
         </div>
 
         {/* Info */}

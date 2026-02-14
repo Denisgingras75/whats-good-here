@@ -1,4 +1,4 @@
-import { getCategoryImage } from '../../constants/categoryImages'
+import { RestaurantAvatar } from '../RestaurantAvatar'
 import { CameraIcon } from '../CameraIcon'
 
 /**
@@ -11,7 +11,7 @@ import { CameraIcon } from '../CameraIcon'
  * - onDelete: Callback to delete the photo
  */
 export function UnratedDishCard({ dish, onClick, onDelete }) {
-  const imageUrl = dish.user_photo_url || dish.photo_url || getCategoryImage(dish.category)
+  const imageUrl = dish.user_photo_url || dish.photo_url
 
   // Format time since photo was taken
   const timeSince = dish.photo_created_at
@@ -34,12 +34,16 @@ export function UnratedDishCard({ dish, onClick, onDelete }) {
         className="w-24 h-24 flex-shrink-0 relative"
         style={{ background: 'var(--color-surface-elevated)' }}
       >
-        <img
-          src={imageUrl}
-          alt={dish.dish_name}
-          loading="lazy"
-          className="w-full h-full object-cover"
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={dish.dish_name}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <RestaurantAvatar name={dish.restaurant_name} town={dish.restaurant_town} fill />
+        )}
         {dish.user_photo_url && (
           <div className="absolute bottom-1 left-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
             <CameraIcon size={14} />

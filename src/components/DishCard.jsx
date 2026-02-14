@@ -1,7 +1,7 @@
 import { memo, useState, useEffect, useRef } from 'react'
 import { ReviewFlow } from './ReviewFlow'
 import { getWorthItBadge, formatScore10, calculateWorthItScore10, getRatingColor } from '../utils/ranking'
-import { getCategoryImage } from '../constants/categoryImages'
+import { DishPlaceholder } from './DishPlaceholder'
 import { ThumbsUpIcon } from './ThumbsUpIcon'
 import { HearingIcon } from './HearingIcon'
 import { getResponsiveImageProps } from '../utils/images'
@@ -14,6 +14,7 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
     dish_name,
     restaurant_id,
     restaurant_name,
+    restaurant_town,
     category,
     price,
     photo_url,
@@ -46,23 +47,24 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
     setStorageItem(STORAGE_KEYS.HAS_SEEN_EAR_TOOLTIP, '1')
   }
 
-  // Use photo_url if dish has one, otherwise use category-based image
-  const imageUrl = photo_url || getCategoryImage(category)
-
-  // Get responsive image props (srcSet for Unsplash, regular src for others)
-  const imageProps = getResponsiveImageProps(imageUrl, [400, 600, 800])
+  // Get responsive image props only if we have a real photo
+  const imageProps = photo_url ? getResponsiveImageProps(photo_url, [400, 600, 800]) : null
 
   return (
     <article className="card-elevated overflow-hidden mb-6 stagger-item dish-card-virtualized">
       {/* Dish Photo - Hero Element */}
-      <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden group">
-        <img
-          {...imageProps}
-          alt={dish_name}
-          className="w-full h-full object-cover image-zoom"
-          loading="lazy"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-        />
+      <div className="relative w-full aspect-[4/3] overflow-hidden group">
+        {imageProps ? (
+          <img
+            {...imageProps}
+            alt={dish_name}
+            className="w-full h-full object-cover image-zoom"
+            loading="lazy"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+          />
+        ) : (
+          <DishPlaceholder restaurantName={restaurant_name} restaurantTown={restaurant_town} showCTA />
+        )}
 
         {/* Subtle gradient for badge contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />

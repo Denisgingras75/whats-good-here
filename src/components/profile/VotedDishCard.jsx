@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { getCategoryImage } from '../../constants/categoryImages'
+import { RestaurantAvatar } from '../RestaurantAvatar'
 import { getRatingColor } from '../../utils/ranking'
 import { ThumbsUpIcon } from '../ThumbsUpIcon'
 import { ThumbsDownIcon } from '../ThumbsDownIcon'
@@ -32,9 +32,9 @@ export function VotedDishCard({
   const navigate = useNavigate()
 
   // Handle different data shapes between the two use cases
-  const imageUrl = dish.photo_url || getCategoryImage(dish.category)
   const dishName = dish.dish_name || dish.name
   const restaurantName = dish.restaurant_name || dish.restaurants?.name
+  const restaurantTown = dish.restaurant_town || dish.restaurants?.town
   const dishId = dish.dish_id || dish.id
 
   // For own-profile: compare user rating to community
@@ -71,15 +71,19 @@ export function VotedDishCard({
       <div className="flex">
         {/* Image */}
         <div
-          className="w-24 h-24 rounded-l-xl flex-shrink-0 overflow-hidden"
+          className="relative w-24 h-24 rounded-l-xl flex-shrink-0 overflow-hidden"
           style={{ background: 'var(--color-surface-elevated)' }}
         >
-          <img
-            src={imageUrl}
-            alt={dishName}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
+          {dish.photo_url ? (
+            <img
+              src={dish.photo_url}
+              alt={dishName}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <RestaurantAvatar name={restaurantName} town={restaurantTown} fill />
+          )}
         </div>
 
         {/* Info */}
