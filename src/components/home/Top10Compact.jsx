@@ -4,10 +4,10 @@ import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
 import { getRatingColor } from '../../utils/ranking'
 
 /**
- * Top10Compact - Collapsible top 10 list for the homepage
+ * Top10Compact - Ranked dish list for the homepage
  *
- * Shows top 3 by default, expands to show all 10.
  * Supports MV vs Personal toggle for logged-in users with preferences.
+ * Accepts categoryLabel for inline category filtering.
  */
 export function Top10Compact({
   dishes,

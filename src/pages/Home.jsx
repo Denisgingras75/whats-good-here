@@ -19,10 +19,6 @@ export function Home() {
   // Inline category filtering
   const [selectedCategory, setSelectedCategory] = useState(null)
 
-  const handleTownChange = (newTown) => {
-    setTown(newTown)
-  }
-
   // Fetch dishes with town filter
   const { dishes, loading, error } = useDishes(location, radius, null, null, town)
 
@@ -81,7 +77,7 @@ export function Home() {
         categoryScroll={
           <CategoryScroll
             town={town}
-            onTownChange={handleTownChange}
+            onTownChange={setTown}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
           />
@@ -215,16 +211,26 @@ function Top10Skeleton() {
         border: '1px solid var(--color-divider)',
       }}
     >
-      <div className="h-6 w-48 rounded mb-4" style={{ background: 'var(--color-surface-elevated)' }} />
-      <div className="space-y-3">
+      <div className="h-5 w-48 rounded mb-4" style={{ background: 'var(--color-surface-elevated)' }} />
+      <div className="space-y-1">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full" style={{ background: 'var(--color-surface-elevated)' }} />
+          <div key={i} className="flex items-center gap-3 py-3 px-3 rounded-lg" style={{ background: 'var(--color-surface-elevated)' }}>
+            <div className="w-6 h-6 rounded-full" style={{ background: 'var(--color-surface)' }} />
             <div className="flex-1">
-              <div className="h-4 w-32 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
-              <div className="h-3 w-24 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+              <div className="h-4 w-32 rounded mb-1" style={{ background: 'var(--color-surface)' }} />
+              <div className="h-3 w-24 rounded" style={{ background: 'var(--color-surface)' }} />
             </div>
-            <div className="h-5 w-8 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            <div className="h-5 w-8 rounded" style={{ background: 'var(--color-surface)' }} />
+          </div>
+        ))}
+        {[...Array(7)].map((_, i) => (
+          <div key={i + 3} className="flex items-center gap-3 py-2.5 px-2" style={{ opacity: 0.6 }}>
+            <div className="w-6 h-4 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            <div className="flex-1">
+              <div className="h-3.5 w-28 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
+              <div className="h-3 w-20 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            </div>
+            <div className="h-4 w-7 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
           </div>
         ))}
       </div>
