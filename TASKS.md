@@ -324,18 +324,9 @@
 
 ---
 
-## T25: Convert specific restaurants to breakfast menu sections
+## ~~T25: Convert specific restaurants to breakfast menu sections~~ REMOVED
 
-**Why:** Breakfast places should have their own menu structure (Breakfast Plates, Sandwiches & Burritos, Waffles & Pancakes, Eggs, Pastries) instead of a single "Breakfast" section.
-
-**Acceptance criteria:**
-- Owner specifies which restaurants are breakfast places
-- Breakfast dishes re-tagged with granular `menu_section` values via name-based matching
-- `menu_section_order` updated for those restaurants
-
-**Status:** Waiting on restaurant list from owner
-
-**Files:** `supabase/migrations/populate-menu-sections.sql` (or new migration)
+**Reason:** No longer needed — menus are being manually curated to match each restaurant's actual menu.
 
 ---
 
