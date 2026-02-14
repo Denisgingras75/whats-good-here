@@ -70,19 +70,27 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy })
         size={48}
       />
 
-      {/* Dish Info */}
+      {/* Restaurant + Dish Info */}
       <div className="flex-1 min-w-0 text-left">
-        <div className="flex items-center gap-1.5">
-          <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+        <h3 className="font-bold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+          {restaurant_name}
+        </h3>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <p
+            className="truncate font-medium"
+            style={{
+              color: 'var(--color-text-secondary)',
+              fontSize: '11px',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}
+          >
             {dish_name}
-          </h3>
+            {sortBy === 'best_value' && price != null && ` · $${Number(price).toFixed(0)}`}
+            {distance_miles && ` · ${Number(distance_miles).toFixed(1)} mi`}
+          </p>
           <ValueBadge valuePercentile={value_percentile} />
         </div>
-        <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-          {restaurant_name}
-          {sortBy === 'best_value' && price != null && ` · $${Number(price).toFixed(0)}`}
-          {distance_miles && ` · ${Number(distance_miles).toFixed(1)} mi`}
-        </p>
       </div>
 
       {/* Rating */}
