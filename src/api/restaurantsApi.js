@@ -23,6 +23,7 @@ export const restaurantsApi = {
           lat,
           lng,
           is_open,
+          google_place_id,
           dishes (id, name, avg_rating, total_votes)
         `)
         .order('name')

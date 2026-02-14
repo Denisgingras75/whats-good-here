@@ -87,40 +87,14 @@ export function Home() {
         }
       />
 
-      {/* Location banner + radius chip */}
-      <div className="px-4 pt-3">
+      {/* Section 2: Top 10 */}
+      <section className="px-4 py-6">
+        {/* Location banner */}
         <LocationBanner
           permissionState={permissionState}
           requestLocation={requestLocation}
         />
-        <div className="flex items-center justify-end">
-          <button
-            onClick={() => setShowRadiusSheet(true)}
-            aria-label={`Search radius: ${radius} miles. Tap to change`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-            style={{
-              background: 'var(--color-surface-elevated)',
-              borderColor: 'var(--color-divider)',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
-            <span>{radius} mi</span>
-            <svg
-              aria-hidden="true"
-              className="w-3 h-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              style={{ color: 'var(--color-text-tertiary)' }}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
-      </div>
 
-      {/* Section 2: Top 10 */}
-      <section className="px-4 py-6">
         {loading ? (
           <Top10Skeleton />
         ) : error ? (
@@ -138,6 +112,48 @@ export function Home() {
           </div>
         ) : top10Dishes.length > 0 ? (
           <div className="max-w-lg mx-auto">
+            {/* Radius badge — contextual with the Top 10 list */}
+            <div className="flex items-center justify-between mb-2">
+              <span
+                className="text-xs font-medium"
+                style={{ color: 'var(--color-text-tertiary)' }}
+              >
+                within {radius} mi
+              </span>
+              <button
+                onClick={() => setShowRadiusSheet(true)}
+                aria-label={`Search radius: ${radius} miles. Tap to change`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active:scale-[0.97]"
+                style={{
+                  background: 'var(--color-surface-elevated)',
+                  borderColor: 'var(--color-divider)',
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                <svg
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  style={{ color: 'var(--color-text-tertiary)' }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                </svg>
+                <span>{radius} mi</span>
+                <svg
+                  aria-hidden="true"
+                  className="w-3 h-3"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  style={{ color: 'var(--color-text-tertiary)' }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
             <Top10Compact
               key={selectedCategory || 'top10'}
               dishes={selectedCategory ? categoryDishes : top10Dishes}

@@ -566,6 +566,14 @@ export function Restaurants() {
               </div>
             </div>
           )}
+          {user && radius >= 10 && !nearbyLoading && nearbyPlaces.length === 0 && (
+            <p
+              className="mt-6 text-center text-xs py-3"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
+              No additional restaurants found nearby from Google
+            </p>
+          )}
           {user && radius >= 10 && nearbyLoading && (
             <div className="mt-8 flex justify-center py-4">
               <div className="animate-spin w-5 h-5 border-2 rounded-full" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-accent-gold)' }} />

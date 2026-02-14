@@ -27,6 +27,7 @@ export function useNearbyPlaces({ lat, lng, radius, isAuthenticated, existingPla
     },
     enabled,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: false, // Google Places API is rate-limited — retries make it worse
   })
 
   // Filter out places already in the DB
@@ -40,6 +41,6 @@ export function useNearbyPlaces({ lat, lng, radius, isAuthenticated, existingPla
   return {
     places,
     loading: isLoading && enabled,
-    error,
+    error: error ? { message: 'Could not load nearby restaurant suggestions' } : null,
   }
 }
