@@ -11,7 +11,7 @@ const PODIUM_STYLE = {
 }
 
 // Compact dish row for browse/homepage rankings — matches Top10 style
-export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy }) {
+export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, isLast }) {
   const navigate = useNavigate()
   const {
     dish_id,
@@ -116,26 +116,48 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy })
     )
   }
 
-  // Compact row for ranks 4+
+  // Respected finalists for ranks 4+
   return (
     <button
       onClick={handleClick}
       aria-label={accessibleLabel}
-      className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[var(--color-surface-elevated)]"
-      style={{ opacity: 0.6 }}
+      className="w-full flex items-center gap-3 py-3.5 px-3 transition-colors text-left active:scale-[0.99]"
+      style={{
+        background: 'var(--color-surface)',
+        borderBottom: isLast ? 'none' : '1px solid var(--color-divider)',
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-surface)'}
     >
       <span
-        className="w-6 text-center text-sm font-bold flex-shrink-0"
-        style={{ color: 'var(--color-text-tertiary)' }}
+        className="font-bold flex-shrink-0"
+        style={{
+          color: 'var(--color-text-secondary)',
+          fontSize: '15px',
+          minWidth: '24px',
+          textAlign: 'center',
+        }}
       >
         {rank}
       </span>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-            <span style={{ color: 'var(--color-text-secondary)' }}>{restaurant_name}</span>
-            {' · '}
+        <p
+          className="font-semibold text-sm truncate"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          {restaurant_name}
+        </p>
+        <div className="flex items-center gap-1.5" style={{ marginTop: '1px' }}>
+          <p
+            className="truncate font-medium"
+            style={{
+              color: 'var(--color-text-tertiary)',
+              fontSize: '11px',
+              letterSpacing: '0.03em',
+              textTransform: 'uppercase',
+            }}
+          >
             {dish_name}
             {sortBy === 'best_value' && price != null && ` · $${Number(price).toFixed(0)}`}
             {distance_miles && ` · ${Number(distance_miles).toFixed(1)} mi`}
@@ -155,6 +177,18 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy })
           </span>
         )}
       </div>
+
+      {/* Chevron — tappable affordance */}
+      <svg
+        className="w-4 h-4 flex-shrink-0"
+        style={{ color: 'var(--color-text-tertiary)' }}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
     </button>
   )
 })

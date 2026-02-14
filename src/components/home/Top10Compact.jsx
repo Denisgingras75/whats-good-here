@@ -83,24 +83,35 @@ export function Top10Compact({
       {/* Dishes list */}
       <div>
         {activeDishes.length > 0 ? (
-          activeDishes.map((dish, index) => {
-            const rank = index + 1
-            return (
-              <div key={dish.dish_id} style={{ marginBottom: rank <= 3 ? '6px' : '0' }}>
+          <>
+            {/* Podium rows 1-3 */}
+            {activeDishes.slice(0, 3).map((dish, index) => (
+              <div key={dish.dish_id} style={{ marginBottom: '6px' }}>
                 <Top10Row
                   dish={dish}
-                  rank={rank}
+                  rank={index + 1}
                   onClick={() => navigate(`/dish/${dish.dish_id}`)}
                 />
-                {rank === 3 && activeDishes.length > 3 && (
-                  <div
-                    className="mt-3 mb-2 mx-2"
-                    style={{ borderBottom: '1px solid var(--color-divider)' }}
-                  />
-                )}
               </div>
-            )
-          })
+            ))}
+
+            {/* Finalists 4+ — grouped Apple-style list */}
+            {activeDishes.length > 3 && (
+              <div
+                className="mt-3 rounded-xl overflow-hidden"
+              >
+                {activeDishes.slice(3).map((dish, index) => (
+                  <Top10Row
+                    key={dish.dish_id}
+                    dish={dish}
+                    rank={index + 4}
+                    onClick={() => navigate(`/dish/${dish.dish_id}`)}
+                    isLast={index === activeDishes.length - 4}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-6">
             <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -143,7 +154,7 @@ const PODIUM_STYLE = {
 }
 
 // Top 10 row — podium layout for 1-3, compact for 4+
-const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
+const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
   const { dish_name, restaurant_name, avg_rating, total_votes } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
   const podium = PODIUM_STYLE[rank]
@@ -227,25 +238,48 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
     )
   }
 
-  // Compact row for ranks 4+
+  // Respected finalists for ranks 4+
   return (
     <button
       onClick={onClick}
       aria-label={accessibleLabel}
-      className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[var(--color-surface-elevated)]"
-      style={{ opacity: 0.6 }}
+      className="w-full flex items-center gap-3 py-3.5 px-3 transition-colors text-left active:scale-[0.99]"
+      style={{
+        background: 'var(--color-surface)',
+        borderBottom: isLast ? 'none' : '1px solid var(--color-divider)',
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-surface)'}
     >
       <span
-        className="w-6 text-center text-sm font-bold flex-shrink-0"
-        style={{ color: 'var(--color-text-tertiary)' }}
+        className="font-bold flex-shrink-0"
+        style={{
+          color: 'var(--color-text-secondary)',
+          fontSize: '15px',
+          minWidth: '24px',
+          textAlign: 'center',
+        }}
       >
         {rank}
       </span>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-          <span style={{ color: 'var(--color-text-secondary)' }}>{restaurant_name}</span>
-          {' · '}
+        <p
+          className="font-semibold text-sm truncate"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          {restaurant_name}
+        </p>
+        <p
+          className="truncate font-medium"
+          style={{
+            color: 'var(--color-text-tertiary)',
+            fontSize: '11px',
+            letterSpacing: '0.03em',
+            textTransform: 'uppercase',
+            marginTop: '1px',
+          }}
+        >
           {dish_name}
         </p>
       </div>
@@ -261,6 +295,18 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
           </span>
         )}
       </div>
+
+      {/* Chevron — tappable affordance */}
+      <svg
+        className="w-4 h-4 flex-shrink-0"
+        style={{ color: 'var(--color-text-tertiary)' }}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
     </button>
   )
 })

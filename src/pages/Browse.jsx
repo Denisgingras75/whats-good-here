@@ -703,24 +703,33 @@ export function Browse() {
             ) : (
               /* Ranked List View — matches Top 10 style */
               <div>
-                {filteredDishes.slice(0, 10).map((dish, index) => {
-                  const rank = index + 1
-                  return (
-                    <div key={dish.dish_id} style={{ marginBottom: rank <= 3 ? '6px' : '0' }}>
+                {/* Podium rows 1-3 */}
+                {filteredDishes.slice(0, 3).map((dish, index) => (
+                  <div key={dish.dish_id} style={{ marginBottom: '6px' }}>
+                    <RankedDishRow
+                      dish={dish}
+                      rank={index + 1}
+                      sortBy={sortBy}
+                    />
+                  </div>
+                ))}
+
+                {/* Finalists 4-10 — grouped Apple-style list */}
+                {filteredDishes.length > 3 && (
+                  <div
+                    className="mt-3 rounded-xl overflow-hidden"
+                  >
+                    {filteredDishes.slice(3, 10).map((dish, index) => (
                       <RankedDishRow
+                        key={dish.dish_id}
                         dish={dish}
-                        rank={rank}
+                        rank={index + 4}
                         sortBy={sortBy}
+                        isLast={index === Math.min(filteredDishes.length - 4, 6)}
                       />
-                      {rank === 3 && filteredDishes.length > 3 && (
-                        <div
-                          className="mt-3 mb-2 mx-2"
-                          style={{ borderBottom: '1px solid var(--color-divider)' }}
-                        />
-                      )}
-                    </div>
-                  )
-                })}
+                    ))}
+                  </div>
+                )}
 
                 {/* Show more if there are more than 10 */}
                 {filteredDishes.length > 10 && (
@@ -735,13 +744,16 @@ export function Browse() {
                     >
                       Show {filteredDishes.length - 10} more dishes
                     </summary>
-                    <div className="mt-3">
+                    <div
+                      className="mt-3 rounded-xl overflow-hidden"
+                    >
                       {filteredDishes.slice(10).map((dish, index) => (
                         <RankedDishRow
                           key={dish.dish_id}
                           dish={dish}
                           rank={index + 11}
                           sortBy={sortBy}
+                          isLast={index === filteredDishes.length - 11}
                         />
                       ))}
                     </div>
