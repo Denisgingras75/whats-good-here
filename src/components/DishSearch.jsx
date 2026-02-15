@@ -345,11 +345,17 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
               ) : !hasResults ? (
                 <div className="px-4 py-6 text-center">
                   <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    No results found for "{query}"
+                    No results for "{query}"
                   </p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                    Try a different search term
-                  </p>
+                  {user ? (
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                      Try a different spelling, or add it below
+                    </p>
+                  ) : (
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                      Log in to add new restaurants from Google
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="max-h-80 overflow-y-auto">
@@ -406,13 +412,14 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                     <div>
                       <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
                         <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-                          Add from Google
+                          Not on WGH yet
                         </span>
                       </div>
-                      {results.places.slice(0, 3).map((p) => (
+                      {results.places.slice(0, 5).map((p) => (
                         <button
                           key={p.placeId}
                           onClick={() => {
+                            setQuery(p.name)
                             setIsFocused(false)
                             setAddRestaurantOpen(true)
                           }}
@@ -420,7 +427,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                           onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
                           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                         >
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(217, 167, 101, 0.15)', color: 'var(--color-accent-gold)' }}>
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(107, 179, 132, 0.15)', color: 'var(--color-rating)' }}>
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
@@ -429,6 +436,9 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                             <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{p.name}</p>
                             <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{p.address}</p>
                           </div>
+                          <span className="flex-shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(107, 179, 132, 0.12)', color: 'var(--color-rating)' }}>
+                            + Add
+                          </span>
                         </button>
                       ))}
                     </div>
