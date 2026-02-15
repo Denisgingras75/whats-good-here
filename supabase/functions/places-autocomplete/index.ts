@@ -38,10 +38,10 @@ serve(async (req) => {
       })
     }
 
-    // Rate limit: 5 requests/min via existing infrastructure
+    // Rate limit: 20 requests/min (debounced search fires often)
     const { data: rateCheck } = await supabase.rpc('check_and_record_rate_limit', {
       p_action: 'places_autocomplete',
-      p_max_attempts: 5,
+      p_max_attempts: 20,
       p_window_seconds: 60,
     })
     if (rateCheck && !rateCheck.allowed) {
@@ -68,10 +68,11 @@ serve(async (req) => {
     }
 
     if (lat && lng) {
-      body.locationBias = {
+      // Use locationRestriction to ONLY return results within the radius
+      body.locationRestriction = {
         circle: {
           center: { latitude: lat, longitude: lng },
-          radius: radius || 50000, // 50km default
+          radius: Math.min(radius || 50000, 50000), // Cap at 50km
         },
       }
     }
