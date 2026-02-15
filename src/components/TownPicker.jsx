@@ -63,8 +63,8 @@ export function TownPicker({ town, onTownChange, isOpen, onToggle }) {
       <div
         className="rounded-full relative overflow-hidden"
         style={{
-          width: '52px',
-          height: '52px',
+          width: '56px',
+          height: '56px',
           background: 'var(--color-surface-elevated)',
         }}
       >
