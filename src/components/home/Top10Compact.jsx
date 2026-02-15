@@ -144,7 +144,7 @@ const PODIUM_STYLE = {
 
 // Top 10 row — podium layout for 1-3, compact for 4+
 const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
-  const { dish_name, restaurant_name, avg_rating, total_votes } = dish
+  const { dish_name, restaurant_name, avg_rating, total_votes, distance_miles } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
   const podium = PODIUM_STYLE[rank]
 
@@ -201,7 +201,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
               marginTop: '2px',
             }}
           >
-            {restaurant_name}
+            {restaurant_name}{distance_miles != null && ` · ${Number(distance_miles).toFixed(1)} mi`}
           </p>
         </div>
 
@@ -247,7 +247,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
           {dish_name}
         </p>
         <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
-          {restaurant_name}
+          {restaurant_name}{distance_miles != null && ` · ${Number(distance_miles).toFixed(1)} mi`}
         </p>
       </div>
 

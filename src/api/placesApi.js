@@ -55,6 +55,7 @@ export const placesApi = {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return []
 
+      // Try nearby search first
       const response = await supabase.functions.invoke('places-nearby-search', {
         body: { lat, lng, radiusMeters },
       })
@@ -63,11 +64,41 @@ export const placesApi = {
         throw createClassifiedError(response.error)
       }
 
-      return response.data?.places || []
+      const places = response.data?.places || []
+      if (places.length > 0) return places
+
+      // Fallback: nearby search returned empty, try autocomplete instead
+      logger.warn('places-nearby-search returned no results, falling back to autocomplete')
+      return await this._discoverViaAutocomplete(lat, lng, radiusMeters)
     } catch (error) {
-      logger.error('Places discover nearby error:', error)
-      return []
+      logger.warn('places-nearby-search failed, falling back to autocomplete:', error)
+      try {
+        return await this._discoverViaAutocomplete(lat, lng, radiusMeters)
+      } catch (fallbackError) {
+        logger.error('Places discover fallback also failed:', fallbackError)
+        return []
+      }
     }
+  },
+
+  /**
+   * Internal fallback: discover restaurants via autocomplete endpoint
+   */
+  async _discoverViaAutocomplete(lat, lng, radiusMeters) {
+    const response = await supabase.functions.invoke('places-autocomplete', {
+      body: { input: 'restaurants', lat, lng, radius: radiusMeters },
+    })
+
+    if (response.error) {
+      throw createClassifiedError(response.error)
+    }
+
+    const predictions = response.data?.predictions || []
+    return predictions.map(p => ({
+      placeId: p.placeId,
+      name: p.name,
+      address: p.address,
+    }))
   },
 
   async getDetails(placeId) {
