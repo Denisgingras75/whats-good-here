@@ -11,6 +11,10 @@ import { useFavorites } from '../hooks/useFavorites'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { AddDishModal } from '../components/AddDishModal'
 import { RestaurantDishes, RestaurantMenu } from '../components/restaurants'
+import { useRestaurantSpecials } from '../hooks/useSpecials'
+import { useRestaurantEvents } from '../hooks/useEvents'
+import { SpecialCard } from '../components/SpecialCard'
+import { EventCard } from '../components/EventCard'
 
 export function RestaurantDetail() {
   const { restaurantId } = useParams()
@@ -66,6 +70,10 @@ export function RestaurantDetail() {
   )
 
   const { isFavorite, toggleFavorite } = useFavorites(user?.id)
+
+  // Fetch specials and events for this restaurant
+  const { specials } = useRestaurantSpecials(restaurantId)
+  const { events } = useRestaurantEvents(restaurantId)
 
   // Fetch friend votes
   useEffect(() => {
@@ -229,6 +237,52 @@ export function RestaurantDetail() {
             </a>
           )}
 
+          {/* Contact info row */}
+          {(restaurant.phone || restaurant.website_url || restaurant.facebook_url) && (
+            <div className="flex items-center gap-3 flex-wrap">
+              {restaurant.phone && (
+                <a
+                  href={`tel:${restaurant.phone}`}
+                  className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--color-accent-gold)' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                  </svg>
+                  {restaurant.phone}
+                </a>
+              )}
+              {restaurant.website_url && (
+                <a
+                  href={restaurant.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--color-accent-gold)' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+                  </svg>
+                  Website
+                </a>
+              )}
+              {restaurant.facebook_url && (
+                <a
+                  href={restaurant.facebook_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--color-accent-gold)' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+                  </svg>
+                  Facebook
+                </a>
+              )}
+            </div>
+          )}
+
           {user && (
             <button
               onClick={() => setAddDishModalOpen(true)}
@@ -314,6 +368,38 @@ export function RestaurantDetail() {
           searchQuery={dishSearchQuery}
           menuSectionOrder={restaurant?.menu_section_order || []}
         />
+      )}
+
+      {/* Happening Here - Specials & Events */}
+      {(specials.length > 0 || events.length > 0) && (
+        <div className="px-4 py-4">
+          <div
+            className="mb-3 h-px"
+            style={{ background: 'linear-gradient(90deg, transparent, var(--color-divider), transparent)' }}
+          />
+          <h3
+            className="text-sm font-semibold mb-3 uppercase tracking-wider"
+            style={{ color: 'var(--color-text-tertiary)' }}
+          >
+            Happening Here
+          </h3>
+          <div className="space-y-3">
+            {specials.map((special) => (
+              <SpecialCard
+                key={`special-${special.id}`}
+                special={{ ...special, restaurants: restaurant }}
+                promoted={special.is_promoted}
+              />
+            ))}
+            {events.map((event) => (
+              <EventCard
+                key={`event-${event.id}`}
+                event={{ ...event, restaurants: restaurant }}
+                promoted={event.is_promoted}
+              />
+            ))}
+          </div>
+        </div>
       )}
 
       <LoginModal

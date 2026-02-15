@@ -24,6 +24,7 @@ import { formatRelativeTime } from '../utils/formatters'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 import { HearingIcon } from '../components/HearingIcon'
+import { ValueBadge } from '../components/browse/ValueBadge'
 import { EarIconTooltip } from '../components/EarIconTooltip'
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../lib/storage'
 
@@ -48,6 +49,7 @@ function transformDish(data) {
     avg_rating: data.avg_rating,
     parent_dish_id: data.parent_dish_id,
     has_variants: data.has_variants,
+    value_percentile: data.value_percentile,
   }
 }
 
@@ -510,9 +512,12 @@ export function Dish() {
                 </button>
               )}
 
-              <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
-                {dish.dish_name}
-              </h1>
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                  {dish.dish_name}
+                </h1>
+                <ValueBadge valuePercentile={dish.value_percentile} />
+              </div>
               <button
                 onClick={() => navigate(`/restaurants/${dish.restaurant_id}`)}
                 className="text-base hover:underline"

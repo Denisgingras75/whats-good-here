@@ -387,3 +387,43 @@ If you cover the logo, nothing identifies this as What's Good Here. No visual or
 - `src/pages/Discover.jsx`, `src/pages/ManageRestaurant.jsx`
 - `src/api/restaurantManagerApi.js`, `src/api/index.js`
 - `supabase/functions/restaurant-scraper/index.ts`, `supabase/functions/scraper-dispatcher/index.ts`
+
+---
+
+## ~~T28: Sprint 1 — Surface the Value (make existing data visible)~~ DONE
+
+**Why:** Value score is computed in the DB but never rendered. Browse only sorts by "Top Rated." Specials/events don't appear on restaurant pages. Restaurant contact info (phone, website, Facebook) is stored but hidden. This sprint makes what's already built actually visible.
+
+**What was built:**
+
+**1a. Value score badge on Dish detail page**
+- `ValueBadge` component (already on RankedDishRow) now also renders on Dish.jsx detail page
+- `value_percentile` added to `transformDish()` in Dish.jsx
+- Badge appears next to dish name when value_percentile >= 90 (VALUE_BADGE_THRESHOLD)
+
+**1b. Sort options in Browse**
+- SortDropdown expanded from 1 option to 4: Top Rated, Best Value, Most Voted, Closest
+- Client-side sorting in Browse.jsx filteredDishes useMemo:
+  - Best Value: sorts by value_percentile DESC, then avg_rating
+  - Most Voted: sorts by total_votes DESC
+  - Closest: sorts by distance_miles ASC, then avg_rating
+- RankedDishRow shows price when sorting by best_value or closest, always shows distance
+
+**1c. Specials + events on RestaurantDetail page**
+- "Happening Here" section below dish tabs on restaurant detail page
+- Uses `useRestaurantSpecials` and `useRestaurantEvents` hooks (already existed)
+- Reuses `SpecialCard` and `EventCard` components (already existed)
+- Only renders when there are active specials or upcoming events
+
+**1d. Restaurant contact info on detail page**
+- Phone (tap-to-call), Website (external link), Facebook (external link)
+- Renders below address, above "Add a dish" button
+- Data already in restaurants table (website_url, facebook_url, phone columns)
+- `restaurantsApi.getById()` already selects `*`
+
+**Files:**
+- `src/components/browse/SortDropdown.jsx` (added 3 sort options)
+- `src/pages/Browse.jsx` (added sorting logic for best_value, most_voted, closest)
+- `src/components/home/RankedDishRow.jsx` (show price/distance for more sort modes)
+- `src/pages/Dish.jsx` (added ValueBadge import, value_percentile to transform, badge in header)
+- `src/pages/RestaurantDetail.jsx` (added specials/events hooks, "Happening Here" section, contact info row)

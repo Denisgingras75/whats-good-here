@@ -80,8 +80,8 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy })
         </div>
         <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
           {restaurant_name}
-          {sortBy === 'best_value' && price != null && ` · $${Number(price).toFixed(0)}`}
-          {distance_miles && ` · ${Number(distance_miles).toFixed(1)} mi`}
+          {price != null && (sortBy === 'best_value' || sortBy === 'closest') && ` · $${Number(price).toFixed(0)}`}
+          {distance_miles != null && ` · ${Number(distance_miles).toFixed(1)} mi`}
         </p>
       </div>
 

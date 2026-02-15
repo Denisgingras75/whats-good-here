@@ -188,11 +188,13 @@ Evidence: `schema.sql:1534-1776`
 
 **User flow:** Tap category → see ranked dishes filtered by category → search, sort, vote
 **Screens:** `Browse.jsx`
-**Components:** `RankedDishRow`, `SortDropdown`, `CategoryGrid`, `DishCardSkeleton`, `LoginModal`, `ImpactFeedback`
+**Components:** `RankedDishRow`, `SortDropdown`, `CategoryGrid`, `ValueBadge`, `DishCardSkeleton`, `LoginModal`, `ImpactFeedback`
 **Hooks:** `useDishes`, `useUserVotes`, `useDishSearch`, `useFavorites`
 **API calls:** `dishesApi.getRankedDishes()`, `dishesApi.search()`, `votesApi.submitVote()`
 **Data reads:** `get_ranked_dishes` RPC, dishes table (search)
 **Data writes:** votes table (upsert), `check_vote_rate_limit` RPC
+
+**Sort options:** SortDropdown offers 4 client-side sorts: Top Rated (default, ranked dishes first then by avg_rating), Best Value (by value_percentile DESC), Most Voted (by total_votes DESC), Closest (by distance_miles ASC). RankedDishRow shows price when sorting by best_value or closest, and always shows distance when available. ValueBadge renders "Great Value" tag on dishes with value_percentile >= 90.
 
 **VERIFIED** — `src/pages/Browse.jsx`, `src/components/browse/`
 
@@ -200,11 +202,13 @@ Evidence: `schema.sql:1534-1776`
 
 **User flow:** Tap dish → see full details, reviews, photos, friends' votes, variant picker
 **Screens:** `Dish.jsx`
-**Components:** `DishModal`, `ReviewFlow`, `VariantPicker`, `PhotoUploadButton`, `PhotoUploadConfirmation`
+**Components:** `DishModal`, `ReviewFlow`, `VariantPicker`, `PhotoUploadButton`, `PhotoUploadConfirmation`, `ValueBadge`
 **Hooks:** `useDish`, `useDishPhotos`, `useVote`, `useFavorites`
 **API calls:** `dishesApi.getDishById()`, `votesApi.getReviewsForDish()`, `votesApi.getSmartSnippetForDish()`
 **Data reads:** dishes table, votes table, `get_dish_variants` RPC, `get_smart_snippet` RPC
 **Data writes:** votes (upsert), dish_photos (insert)
+
+**Value badge:** Dishes with `value_percentile >= 90` show a "Great Value" badge next to the dish name. The `value_percentile` field is passed through `transformDish()` from `getDishById()`.
 
 **VERIFIED** — `src/pages/Dish.jsx`
 
@@ -241,9 +245,13 @@ Evidence: `schema.sql:1534-1776`
 
 **Restaurant List:** Open/Closed tab switcher filters restaurants by `is_open`. Closed restaurants display at 0.6 opacity with a "Closed for Season" badge. Address links to Google Maps.
 
+**Restaurant info:** Below the address, a contact row displays phone (tap-to-call), website (external link), and Facebook (external link) when available. Data sourced from `restaurants.phone`, `restaurants.website_url`, `restaurants.facebook_url`.
+
 **Views:** Two tab-switched views below the restaurant details card:
 - **Top Rated** (default) — dishes ranked by confidence (avg_rating, percent_worth_it, votes). Top 5 shown with expand toggle for the rest.
 - **Menu** — split-pane layout: section navigation on the left (33% width, gold accent on active section), dish list on the right sorted by rating (highest first). Each dish row shows name, dotted leader, price, rating, and reorder %. Tapping a dish navigates to its detail page. Sections ordered by `restaurants.menu_section_order` TEXT[]. Dishes without a `menu_section` appear in an "Other" group.
+
+**Happening Here:** Below the dish tabs, a "Happening Here" section shows active specials and upcoming events for this restaurant. Uses `useRestaurantSpecials(restaurantId)` and `useRestaurantEvents(restaurantId)` hooks. Renders existing `SpecialCard` and `EventCard` components. Only visible when there are active specials or upcoming events.
 
 **Menu sections** use restaurant-specific names that mirror each restaurant's actual menu layout (e.g., Rockfish uses Starters, Salads, Pizza, Chef's Specials, Burgers & Sandwiches, Tacos). Section names and order are set per-restaurant via `menu_section_order` TEXT[]. Dishes with `tags` array containing `lunch-only` or `dinner-only` display L/D badges in the menu view. Fallback defaults (from `supabase/migrations/populate-menu-sections.sql`) apply when actual menu sections aren't available:
 - Soups & Apps (chowder, soup, apps, wings, tendys, fried chicken)

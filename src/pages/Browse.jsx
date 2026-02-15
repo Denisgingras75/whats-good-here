@@ -271,6 +271,32 @@ export function Browse() {
 
     // Then sort based on selected option
     switch (sortBy) {
+      case 'best_value':
+        result = result.slice().sort((a, b) => {
+          const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+          const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+          if (aRanked && !bRanked) return -1
+          if (!aRanked && bRanked) return 1
+          // Higher value_percentile first, then by rating as tiebreaker
+          const aVal = a.value_percentile != null ? Number(a.value_percentile) : -1
+          const bVal = b.value_percentile != null ? Number(b.value_percentile) : -1
+          if (bVal !== aVal) return bVal - aVal
+          return (b.avg_rating || 0) - (a.avg_rating || 0)
+        })
+        break
+      case 'most_voted':
+        result = result.slice().sort((a, b) => {
+          return (b.total_votes || 0) - (a.total_votes || 0)
+        })
+        break
+      case 'closest':
+        result = result.slice().sort((a, b) => {
+          const aDist = a.distance_miles != null ? Number(a.distance_miles) : 9999
+          const bDist = b.distance_miles != null ? Number(b.distance_miles) : 9999
+          if (aDist !== bDist) return aDist - bDist
+          return (b.avg_rating || 0) - (a.avg_rating || 0)
+        })
+        break
       case 'top_rated':
       default:
         // Sort by avg_rating (1-10 scale) for Discovery view
