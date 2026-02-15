@@ -74,7 +74,7 @@ export function WelcomeSplash({ onComplete }) {
         <h1
           style={{
             fontFamily: "'Pacifico', cursive",
-            fontSize: '42px',
+            fontSize: '48px',
             color: 'var(--color-primary)',
             lineHeight: 1.2,
             letterSpacing: '-0.01em',
