@@ -17,7 +17,7 @@ export function SearchHero({ town, loading, categoryScroll }) {
             color: 'var(--color-primary)',
             fontSize: '28px',
             letterSpacing: '-0.02em',
-            marginBottom: '10px',
+            marginBottom: '16px',
             lineHeight: 1.2,
           }}
         >
