@@ -12,7 +12,7 @@ import { CameraIcon } from '../components/CameraIcon'
 export function Login() {
   const navigate = useNavigate()
   const location = useLocation()
-  useAuth() // Hook must be called for context to work
+  const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,6 +21,17 @@ export function Login() {
   const [showLogin, setShowLogin] = useState(false) // Controls welcome vs login view
   const [mode, setMode] = useState('options') // 'options' | 'signin' | 'signup' | 'forgot'
   const [usernameStatus, setUsernameStatus] = useState(null) // null | 'checking' | 'available' | 'taken'
+
+  // Redirect authenticated users to home (or where they came from)
+  useEffect(() => {
+    if (user) {
+      const fromLocation = location.state?.from
+      const from = fromLocation
+        ? fromLocation.pathname + (fromLocation.search || '') + (fromLocation.hash || '')
+        : '/'
+      navigate(from, { replace: true })
+    }
+  }, [user, navigate, location.state])
 
   // Reset form when switching modes
   useEffect(() => {
