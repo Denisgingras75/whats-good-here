@@ -217,13 +217,14 @@ export function Restaurants() {
               }>
                 <RestaurantMap
                   restaurants={filteredRestaurants}
-                  nearbyPlaces={nearbyPlaces}
                   userLocation={location}
                   onSelectRestaurant={handleRestaurantSelect}
                   onAddPlace={(placeName) => {
                     setAddRestaurantInitialQuery(placeName)
                     setAddRestaurantModalOpen(true)
                   }}
+                  isAuthenticated={!!user}
+                  existingPlaceIds={existingPlaceIds}
                 />
               </Suspense>
             </ErrorBoundary>
