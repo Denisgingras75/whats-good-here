@@ -23,14 +23,14 @@ export function SearchHero({ town, loading, categoryScroll }) {
         {/* Decorative wave underline */}
         <svg
           className="mx-auto mb-1"
-          width="120"
+          width="150"
           height="8"
-          viewBox="0 0 120 8"
+          viewBox="0 0 150 8"
           fill="none"
           style={{ opacity: 0.26 }}
         >
           <path
-            d="M0 4 C10 1, 20 7, 30 4 S50 1, 60 4 S80 7, 90 4 S110 1, 120 4"
+            d="M0 4 C12 1, 25 7, 37 4 S62 1, 75 4 S100 7, 112 4 S137 1, 150 4"
             stroke="var(--color-primary)"
             strokeWidth="1.5"
             strokeLinecap="round"
