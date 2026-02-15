@@ -111,20 +111,22 @@ export function WelcomeModal() {
         />
 
         <div className="relative z-10 text-center px-8">
-          {/* Logo */}
-          <div className="flex justify-center mb-5">
-            <WghLogo size={48} />
+          {/* Logo — matches splash page layout */}
+          <div className="flex justify-center" style={{ marginBottom: '-18px', position: 'relative', zIndex: 2 }}>
+            <WghLogo size={72} />
           </div>
 
           {/* Brand name */}
           <h1
             style={{
               fontFamily: "'Sora', sans-serif",
-              fontSize: '28px',
+              fontSize: '42px',
               fontWeight: 700,
               color: 'var(--color-primary)',
-              lineHeight: 1.2,
+              lineHeight: 1.15,
               letterSpacing: '-0.02em',
+              position: 'relative',
+              zIndex: 1,
             }}
           >
             What's Good Here
@@ -132,30 +134,30 @@ export function WelcomeModal() {
 
           {/* Welcome line */}
           <p
-            className="mt-3"
             style={{
               color: 'var(--color-text-primary)',
-              fontSize: '17px',
+              fontSize: '18px',
               fontWeight: 500,
               lineHeight: 1.4,
+              marginTop: '16px',
             }}
           >
             Welcome{displayName ? `, ${displayName}` : ''}.
           </p>
 
-          {/* Tagline */}
+          {/* Tagline — matches splash page */}
           <p
-            className="mt-6"
             style={{
               color: 'var(--color-text-secondary)',
               opacity: 0.7,
-              fontSize: '12.5px',
+              fontSize: '13px',
               fontWeight: 500,
-              letterSpacing: '0.08em',
+              letterSpacing: '0.14em',
               textTransform: 'uppercase',
+              marginTop: '14px',
             }}
           >
-            the #1 bite near you
+            Martha's Vineyard
           </p>
         </div>
       </div>
