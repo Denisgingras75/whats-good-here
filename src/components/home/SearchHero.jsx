@@ -13,11 +13,11 @@ export function SearchHero({ town, loading, categoryScroll }) {
         <h1
           style={{
             fontFamily: "'Sora', sans-serif",
-            fontWeight: 800,
+            fontWeight: 700,
             color: 'var(--color-primary)',
             fontSize: '28px',
-            letterSpacing: '-0.03em',
-            marginBottom: '6px',
+            letterSpacing: '-0.02em',
+            marginBottom: '10px',
             lineHeight: 1.2,
           }}
         >

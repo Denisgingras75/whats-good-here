@@ -75,10 +75,10 @@ export function WelcomeSplash({ onComplete }) {
           style={{
             fontFamily: "'Sora', sans-serif",
             fontSize: '42px',
-            fontWeight: 800,
+            fontWeight: 700,
             color: 'var(--color-primary)',
             lineHeight: 1.15,
-            letterSpacing: '-0.03em',
+            letterSpacing: '-0.02em',
           }}
         >
           What's Good Here
@@ -91,7 +91,7 @@ export function WelcomeSplash({ onComplete }) {
             fontWeight: 500,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            marginTop: '10px',
+            marginTop: '14px',
           }}
         >
           Martha's Vineyard
