@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { WghLogo } from './WghLogo'
 
 // Module-level flag - persists across re-renders, resets on app reload
 let hasShownThisSession = false
@@ -63,7 +64,7 @@ export function WelcomeSplash({ onComplete }) {
       tabIndex={0}
       aria-label="Welcome splash screen. Press Enter or tap to skip."
     >
-      {/* Brand logotype */}
+      {/* Brand mark + logotype */}
       <div
         className="transition-all duration-300 ease-out text-center px-8"
         style={{
@@ -71,6 +72,9 @@ export function WelcomeSplash({ onComplete }) {
           transform: isVisible ? 'scale(1)' : 'scale(0.95)',
         }}
       >
+        <div className="flex justify-center mb-5">
+          <WghLogo size={56} />
+        </div>
         <h1
           style={{
             fontFamily: "'Sora', sans-serif",
