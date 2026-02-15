@@ -148,6 +148,14 @@ Why each item belongs in its week. Reference for next project.
 ### Recent Work (update this as you go)
 | Date | What Changed | Category |
 |------|--------------|----------|
+| Feb 14 | Restaurant-first hierarchy: restaurant name leads everywhere (cards, search, browse, profile, dish detail) | Design |
+| Feb 14 | Category pills redesigned: vertical chips (icon top, label below), no boxes/borders, 56px circles | UX |
+| Feb 14 | Town picker: ocean waves + filled gold pin, matches category pill style and size | UX |
+| Feb 14 | Category scroll alignment: left-aligned under search box, tightened icon spacing to 4px | Polish |
+| Feb 14 | Browse results match Top 10 style: podium 1-3, Apple grouped list 4-10, no emojis | Design |
+| Feb 14 | Search dropdown matches Top 10 compact row style: rank + restaurant · dish + rating | Design |
+| Feb 14 | Ranks 4-10: Apple-style grouped list (surface bg, inset dividers, chevrons, two-line layout) | Design |
+| Feb 14 | Fixed light-mode bleed on restaurant menu nav dark theme | Bugfix |
 | Jan 17 | Category architecture: shortcuts not containers | Architecture |
 | Feb 13 | Homepage simplification: removed emoji medals, card wrapper, gradients, uppercase labels | Design |
 | Feb 13 | Categories moved to horizontal scroll under town picker | UX |

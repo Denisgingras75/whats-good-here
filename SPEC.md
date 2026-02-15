@@ -175,11 +175,15 @@ Evidence: `schema.sql:1534-1776`
 
 **User flow:** Open app → see search bar + town filter + category scroll + "Top 10" ranked dishes
 **Screens:** `Home.jsx`
-**Components:** `SearchHero`, `Top10Compact`, `WelcomeSplash`
+**Components:** `SearchHero`, `Top10Compact`, `TownPicker`, `WelcomeSplash`
 **Hooks:** `useDishes`, `useProfile`, `useLocationContext`
 **API calls:** `dishesApi.getRankedDishes()` via `useDishes`
 **Data reads:** `get_ranked_dishes` RPC
 **Data writes:** none
+
+**Category scroll:** Horizontal strip below search hero. Each category is a vertical chip (56px circle with neon icon above 11px label). Town picker is first in strip: 56px circle with ocean wave SVGs and a filled gold location pin, matching category pill style. Scroll container left-aligned under search box edge (`pl-2 pr-4`), 4px gaps between icons. Tapping town picker expands inline town options; tapping a category filters the Top 10 below.
+
+**Top 10 display:** Restaurant-first hierarchy — restaurant name bold primary, dish name small uppercase secondary. Ranks 1-3 get podium treatment (medal colors with glow, sized rank numbers, colored restaurant name). Ranks 4-10 use Apple-style grouped list (rounded container, surface background, inset dividers, chevron arrows, two-line layout, ultra-soft hover `rgba(255,255,255,0.03)`). Logged-in users with preferred categories see MV/Personal toggle tabs.
 
 **VERIFIED** — `src/pages/Home.jsx`, `src/components/home/`
 
@@ -192,6 +196,8 @@ Evidence: `schema.sql:1534-1776`
 **API calls:** `dishesApi.getRankedDishes()`, `dishesApi.search()`, `votesApi.submitVote()`
 **Data reads:** `get_ranked_dishes` RPC, dishes table (search)
 **Data writes:** votes table (upsert), `check_vote_rate_limit` RPC
+
+**Ranking display:** Matches homepage Top 10 style. Restaurant-first hierarchy (restaurant name bold, dish name small uppercase). Ranks 1-3 get podium treatment with medal colors. Ranks 4-10 in Apple-style grouped list (rounded container, surface bg, inset dividers, chevrons). "Show more" section uses same grouped container.
 
 **VERIFIED** — `src/pages/Browse.jsx`, `src/components/browse/`
 
@@ -226,6 +232,8 @@ Evidence: `schema.sql:1534-1776`
 **Hooks:** `useDishSearch`
 **API calls:** `dishesApi.search()` — runs 3 parallel queries (name, cuisine, tags), dedupes, sorts by rating
 **Data reads:** dishes table via PostgREST (not RPC)
+
+**Dropdown display:** Search results match Top 10 compact row style — rank number, restaurant name bold, dish name secondary, rating. Restaurant-first hierarchy consistent with home and browse.
 
 **VERIFIED** — `src/api/dishesApi.js:81-225`, `src/hooks/useDishSearch.js`
 
