@@ -404,7 +404,7 @@ If you cover the logo, nothing identifies this as What's Good Here. No visual or
 
 ---
 
-## T30: Fix BrowseCard hooks-after-early-return (crash risk)
+## ~~T30: Fix BrowseCard hooks-after-early-return (crash risk)~~ DONE
 
 **Why:** `BrowseCard.jsx` has `if (!dish) return null` on line 11, before `useState`/`useRef`/`useEffect` calls on lines 12+. Violates React Rules of Hooks. Will crash the component tree if a dish transitions from truthy to falsy between renders.
 

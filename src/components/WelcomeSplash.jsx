@@ -72,8 +72,8 @@ export function WelcomeSplash({ onComplete }) {
           transform: isVisible ? 'scale(1)' : 'scale(0.95)',
         }}
       >
-        <div className="flex justify-center mb-5">
-          <WghLogo size={56} />
+        <div className="flex justify-center" style={{ marginBottom: '-18px', position: 'relative', zIndex: 2 }}>
+          <WghLogo size={72} />
         </div>
         <h1
           style={{
@@ -83,6 +83,8 @@ export function WelcomeSplash({ onComplete }) {
             color: 'var(--color-primary)',
             lineHeight: 1.15,
             letterSpacing: '-0.02em',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           What's Good Here
