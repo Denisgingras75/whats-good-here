@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { capture } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
@@ -11,7 +11,11 @@ import { useFavorites } from '../hooks/useFavorites'
 import { useRestaurants } from '../hooks/useRestaurants'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { AddDishModal } from '../components/AddDishModal'
-import { RestaurantDishes, RestaurantMenu, RestaurantMap } from '../components/restaurants'
+import { RestaurantDishes, RestaurantMenu } from '../components/restaurants'
+
+const RestaurantMap = lazy(() =>
+  import('../components/restaurants/RestaurantMap').then(m => ({ default: m.RestaurantMap }))
+)
 import { RadiusSheet } from '../components/LocationPicker'
 import { LocationBanner } from '../components/LocationBanner'
 import { AddRestaurantModal } from '../components/AddRestaurantModal'
@@ -378,11 +382,17 @@ export function Restaurants() {
           {/* Map View */}
           {viewMode === 'map' && !fetchError && !loading && (
             <div className="mt-4">
-              <RestaurantMap
-                restaurants={filteredRestaurants}
-                userLocation={location}
-                onSelectRestaurant={handleRestaurantSelect}
-              />
+              <Suspense fallback={
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin w-6 h-6 border-2 rounded-full" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-accent-gold)' }} />
+                </div>
+              }>
+                <RestaurantMap
+                  restaurants={filteredRestaurants}
+                  userLocation={location}
+                  onSelectRestaurant={handleRestaurantSelect}
+                />
+              </Suspense>
             </div>
           )}
 

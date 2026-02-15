@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
+import L from 'leaflet'
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
 
 // Auto-fit bounds when restaurants or location change
 function FitBounds({ restaurants, userLocation }) {
   const map = useMap()
-  const hasInitialized = useRef(false)
+  const prevCountRef = useRef(0)
 
   useEffect(() => {
     const points = restaurants
@@ -17,14 +19,11 @@ function FitBounds({ restaurants, userLocation }) {
 
     if (points.length === 0) return
 
-    // Only auto-fit on first load or when restaurants change significantly
-    if (!hasInitialized.current || points.length > 0) {
-      const L = map.options.L || window.L
-      if (L) {
-        const bounds = L.latLngBounds(points)
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
-      }
-      hasInitialized.current = true
+    // Fit bounds when restaurant count changes or on first render
+    if (points.length !== prevCountRef.current) {
+      const bounds = L.latLngBounds(points)
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
+      prevCountRef.current = points.length
     }
   }, [restaurants, userLocation, map])
 
@@ -113,9 +112,6 @@ export function RestaurantMap({ restaurants, userLocation, onSelectRestaurant })
                   fillOpacity: isOpen ? 0.9 : 0.5,
                   weight: 2,
                   opacity: 1,
-                }}
-                eventHandlers={{
-                  click: () => {}, // popup opens automatically
                 }}
               >
                 <Popup>
