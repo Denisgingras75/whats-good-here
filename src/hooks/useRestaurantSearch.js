@@ -35,6 +35,11 @@ export function useRestaurantSearch(query, lat, lng, enabled = true, radiusMiles
     const trimmed = query.trim()
     setLoading(true)
 
+    // Default to Martha's Vineyard center if no location
+    const searchLat = lat || 41.43
+    const searchLng = lng || -70.56
+    const searchRadiusMeters = radiusMiles ? radiusMiles * 1609 : 50000
+
     const fetchResults = async () => {
       try {
         // Run local + Google Places searches in parallel
@@ -43,7 +48,7 @@ export function useRestaurantSearch(query, lat, lng, enabled = true, radiusMiles
             logger.error('Local restaurant search error:', err)
             return []
           }),
-          placesApi.autocomplete(trimmed, lat, lng, radiusMiles ? radiusMiles * 1609 : 50000).catch((err) => {
+          placesApi.autocomplete(trimmed, searchLat, searchLng, searchRadiusMeters).catch((err) => {
             logger.error('Places autocomplete error:', err)
             return []
           }),

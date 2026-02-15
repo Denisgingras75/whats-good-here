@@ -68,8 +68,9 @@ serve(async (req) => {
     }
 
     if (lat && lng) {
-      // Use locationRestriction to ONLY return results within the radius
-      body.locationRestriction = {
+      // Use locationBias to prefer results near the user's location
+      // locationRestriction is too strict for autocomplete — can return 0 results
+      body.locationBias = {
         circle: {
           center: { latitude: lat, longitude: lng },
           radius: Math.min(radius || 50000, 50000), // Cap at 50km
