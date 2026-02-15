@@ -188,7 +188,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           {rank}
         </span>
 
-        {/* Restaurant + dish info */}
+        {/* Dish + restaurant info */}
         <div className="flex-1 min-w-0">
           <p
             className="font-bold truncate"
@@ -199,7 +199,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
               letterSpacing: '-0.01em',
             }}
           >
-            {restaurant_name}
+            {dish_name}
           </p>
           <p
             className="truncate font-medium"
@@ -211,7 +211,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
               marginTop: '2px',
             }}
           >
-            {dish_name}
+            {restaurant_name}
           </p>
         </div>
 
@@ -267,7 +267,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           className="font-semibold text-sm truncate"
           style={{ color: 'var(--color-text-primary)' }}
         >
-          {restaurant_name}
+          {dish_name}
         </p>
         <p
           className="truncate font-medium"
@@ -279,7 +279,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
             marginTop: '1px',
           }}
         >
-          {dish_name}
+          {restaurant_name}
         </p>
       </div>
 
