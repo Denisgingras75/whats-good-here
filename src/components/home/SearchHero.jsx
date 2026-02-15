@@ -20,13 +20,29 @@ export function SearchHero({ town, loading, categoryScroll }) {
         >
           What's Good Here
         </h1>
+        {/* Decorative wave underline */}
+        <svg
+          className="mx-auto mb-1"
+          width="120"
+          height="8"
+          viewBox="0 0 120 8"
+          fill="none"
+          style={{ opacity: 0.26 }}
+        >
+          <path
+            d="M0 4 C10 1, 20 7, 30 4 S50 1, 60 4 S80 7, 90 4 S110 1, 120 4"
+            stroke="var(--color-primary)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
         <p
           style={{
-            color: 'var(--color-text-tertiary)',
+            color: '#F07A52',
             fontSize: '13px',
           }}
         >
-          Ranked by people who know
+          the #1 bite near you
         </p>
       </div>
 
