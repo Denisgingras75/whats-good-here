@@ -6,6 +6,7 @@ import { logger } from '../utils/logger'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 import { CameraIcon } from '../components/CameraIcon'
+import { WghLogo } from '../components/WghLogo'
 
 // SECURITY: Email is NOT persisted to storage to prevent XSS exposure of PII
 
@@ -124,7 +125,7 @@ export function Login() {
       if (result.success) {
         setMessage({
           type: 'success',
-          text: 'Account created! Check your email to verify, then sign in.'
+          text: "Welcome to What's Good Here! Check your email for a verification link, then sign in to start discovering."
         })
         setMode('signin')
         setPassword('')
@@ -191,12 +192,39 @@ export function Login() {
         {!showLogin ? (
           /* ========== WELCOME / SPLASH PAGE ========== */
           <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
-            {/* Logo */}
-            <img
-              src="/logo.png"
-              alt="What's Good Here"
-              className="w-64 md:w-72 h-auto mb-8"
-            />
+            {/* Logo + Brand */}
+            <div className="flex flex-col items-center mb-8">
+              <div style={{ marginBottom: '-14px', position: 'relative', zIndex: 2 }}>
+                <WghLogo size={56} />
+              </div>
+              <h1
+                style={{
+                  fontFamily: "'Sora', sans-serif",
+                  fontSize: '32px',
+                  fontWeight: 700,
+                  color: 'var(--color-primary)',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.02em',
+                  position: 'relative',
+                  zIndex: 1,
+                }}
+              >
+                What's Good Here
+              </h1>
+              <p
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  opacity: 0.7,
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  marginTop: '10px',
+                }}
+              >
+                Martha's Vineyard
+              </p>
+            </div>
 
             {/* Goals Section */}
             <div className="w-full max-w-sm mb-8">
@@ -284,11 +312,9 @@ export function Login() {
           /* ========== LOGIN PAGE ========== */
           <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
             {/* Logo */}
-            <img
-              src="/logo.png"
-              alt="What's Good Here"
-              className="w-48 h-auto mb-6"
-            />
+            <div className="flex justify-center mb-6">
+              <WghLogo size={48} />
+            </div>
 
             {/* Heading */}
             <h1 className="text-2xl font-bold text-center mb-2" style={{ color: 'var(--color-text-primary)' }}>

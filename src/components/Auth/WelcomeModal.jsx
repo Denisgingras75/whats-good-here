@@ -39,6 +39,10 @@ export function WelcomeModal() {
   const [isOpen, setIsOpen] = useState(false)
 
   // Show modal when user is logged in but hasn't completed onboarding
+  // Build steps dynamically — skip name if user already set one during signup
+  const hasName = profile?.display_name && profile.display_name.trim().length > 0
+  const activeSteps = hasName ? STEPS.filter(s => s.id !== 'name') : STEPS
+
   useEffect(() => {
     if (user && !loading && profile) {
       // Show only if user hasn't completed onboarding
@@ -49,9 +53,16 @@ export function WelcomeModal() {
     }
   }, [user, profile, loading])
 
-  const handleNext = () => {
-    if (step < STEPS.length - 1) {
+  const handleNext = async () => {
+    if (step < activeSteps.length - 1) {
       setStep(step + 1)
+    } else {
+      // Last step for users who already have a name — complete onboarding
+      setSaving(true)
+      await updateProfile({ has_onboarded: true })
+      capture('onboarding_completed', { name_set: hasName })
+      setSaving(false)
+      setIsOpen(false)
     }
   }
 
@@ -82,7 +93,7 @@ export function WelcomeModal() {
 
   if (!isOpen) return null
 
-  const currentStep = STEPS[step]
+  const currentStep = activeSteps[step]
   const isNameStep = currentStep.id === 'name'
 
   return (
@@ -101,7 +112,7 @@ export function WelcomeModal() {
         <div className="p-8">
           {/* Progress dots */}
           <div className="flex justify-center gap-2 mb-6">
-            {STEPS.map((_, i) => (
+            {activeSteps.map((_, i) => (
               <button
                 key={i}
                 onClick={() => i < step && setStep(i)}
@@ -210,10 +221,11 @@ export function WelcomeModal() {
             <div className="space-y-3">
               <button
                 onClick={handleNext}
-                className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all"
+                disabled={saving}
+                className="w-full px-6 py-4 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
                 style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
               >
-                Next
+                {saving ? 'Saving...' : step === activeSteps.length - 1 ? "Let's go!" : 'Next'}
               </button>
               {step > 0 && (
                 <button
