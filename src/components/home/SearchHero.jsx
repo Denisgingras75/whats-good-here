@@ -24,7 +24,7 @@ export function SearchHero({ town, loading, categoryScroll }) {
         <p
           className="font-medium"
           style={{
-            color: '#C08B7A',
+            color: 'var(--color-text-tagline)',
             opacity: 0.94,
             fontSize: '13px',
             letterSpacing: '0.06em',

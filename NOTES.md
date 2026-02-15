@@ -148,6 +148,11 @@ Why each item belongs in its week. Reference for next project.
 ### Recent Work (update this as you go)
 | Date | What Changed | Category |
 |------|--------------|----------|
+| Feb 14 | Hero tagline "the #1 bite near you": muted coral uppercase whisper below title | Design |
+| Feb 14 | Headlines elevated: "MV Top 10 Right Now" at 19px bold rust, category headlines match | Design |
+| Feb 14 | Disabled personal Top 10 toggle + favorite categories in Profile (code preserved for later) | Feature |
+| Feb 14 | Icon row elevated: muted food photos (brightness/saturation filters), toned-down town picker | Design |
+| Feb 14 | Hero typography hierarchy: title→tagline tight (one idea), tagline→search tighter (next action) | Polish |
 | Feb 14 | Restaurant-first hierarchy: restaurant name leads everywhere (cards, search, browse, profile, dish detail) | Design |
 | Feb 14 | Category pills redesigned: vertical chips (icon top, label below), no boxes/borders, 56px circles | UX |
 | Feb 14 | Town picker: ocean waves + filled gold pin, matches category pill style and size | UX |

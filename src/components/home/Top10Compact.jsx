@@ -21,8 +21,8 @@ export function Top10Compact({
   const [activeTab, setActiveTab] = useState('mv')
 
   const activeDishes = activeTab === 'personal' && showToggle
-    ? personalDishes
-    : dishes
+    ? (personalDishes || [])
+    : (dishes || [])
 
   if (!dishes?.length && !categoryLabel) return null
 

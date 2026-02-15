@@ -31,7 +31,6 @@ import {
   EmptyState,
   UnratedDishCard,
   HeroIdentityCard,
-  EditFavoritesSection,
   PhotosInfoSection,
   MissionSection,
 } from '../components/profile'
@@ -72,8 +71,6 @@ export function Profile() {
   const [expandedTabs, setExpandedTabs] = useState({}) // Track which tabs show all dishes
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 })
   const [followListModal, setFollowListModal] = useState(null) // 'followers' | 'following' | null
-  const [editingFavorites, setEditingFavorites] = useState(false)
-  const [editedCategories, setEditedCategories] = useState([])
   const [userReviews, setUserReviews] = useState([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
   const [ratingBias, setRatingBias] = useState(null)

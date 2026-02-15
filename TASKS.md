@@ -401,3 +401,47 @@ If you cover the logo, nothing identifies this as What's Good Here. No visual or
 **Status:** Ready
 
 **Files:** `index.html`, potentially `public/apple-touch-icon.png`
+
+---
+
+## T30: Fix BrowseCard hooks-after-early-return (crash risk)
+
+**Why:** `BrowseCard.jsx` has `if (!dish) return null` on line 11, before `useState`/`useRef`/`useEffect` calls on lines 12+. Violates React Rules of Hooks. Will crash the component tree if a dish transitions from truthy to falsy between renders.
+
+**Acceptance criteria:**
+- All hooks called before any early return
+- `if (!dish) return null` guard moved below all hook calls
+- No "Rendered fewer hooks than expected" error when dishes update
+
+**Status:** Ready — CRITICAL
+
+**Files:** `src/components/BrowseCard.jsx:11-41`
+
+---
+
+## T31: Add error handling to Profile page async operations
+
+**Why:** `handleSaveName`, `handleVote`, and `adminApi.isAdmin()` call in Profile.jsx have no try-catch. Failed saves leave the UI in a broken state with no feedback. `handleToggleFavorite` in Browse.jsx also unhandled.
+
+**Acceptance criteria:**
+- `handleSaveName` wrapped in try-catch, shows error message on failure
+- `handleVote` refetch wrapped in try-catch, logs on failure
+- `adminApi.isAdmin()` has `.catch()` handler
+- `handleToggleFavorite` in Browse.jsx wrapped in try-catch
+
+**Status:** Ready
+
+**Files:** `src/pages/Profile.jsx:87,204-215,248-251`, `src/pages/Browse.jsx:237-243`
+
+---
+
+## T32: Fix DishSearch inputRef null check
+
+**Why:** `inputRef.current.contains(e.target)` in the click-outside handler lacks optional chaining. Race condition during unmount can crash. Browse.jsx already does this correctly with `?.`.
+
+**Acceptance criteria:**
+- `!inputRef.current?.contains(e.target)` with optional chaining
+
+**Status:** Ready
+
+**Files:** `src/components/DishSearch.jsx:56`

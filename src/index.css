@@ -79,6 +79,9 @@
   /* "Avoid" action */
   --color-muted: #6B7680;
 
+  /* Tagline — muted coral whisper under headings */
+  --color-text-tagline: #C08B7A;
+
   /* Text on primary-colored backgrounds (buttons, banners) */
   --color-text-on-primary: #1A1A1A;
 

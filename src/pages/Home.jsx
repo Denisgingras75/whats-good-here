@@ -158,7 +158,7 @@ function CategoryScroll({ town, onTownChange, selectedCategory, onCategoryChange
             key={category.id}
             category={category}
             isActive={selectedCategory === category.id}
-            onClick={() => onCategoryChange(prev => prev === category.id ? null : category.id)}
+            onClick={() => onCategoryChange(selectedCategory === category.id ? null : category.id)}
           />
         ))}
       </div>
