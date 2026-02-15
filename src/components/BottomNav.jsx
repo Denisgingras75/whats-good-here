@@ -64,7 +64,7 @@ export function BottomNav() {
             onMouseEnter={() => tab.prefetch?.()}
             onFocus={() => tab.prefetch?.()}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center flex-1 h-full transition-all duration-150 active:scale-95 active:opacity-80 ${
+              `relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-150 active:scale-95 active:opacity-80 ${
                 isActive
                   ? ''
                   : 'hover:opacity-80'
@@ -74,8 +74,23 @@ export function BottomNav() {
               color: isActive ? 'var(--color-primary)' : 'var(--color-text-tertiary)'
             })}
           >
-            {tab.icon}
-            <span className="text-xs font-medium mt-1">{tab.label}</span>
+            {({ isActive }) => (
+              <>
+                <span style={{ transform: isActive ? 'scale(1.08)' : 'scale(1)', transition: 'transform 150ms ease' }}>
+                  {tab.icon}
+                </span>
+                <span className="text-xs font-medium mt-1">{tab.label}</span>
+                {isActive && (
+                  <span
+                    className="absolute w-1 h-1 rounded-full"
+                    style={{
+                      background: 'var(--color-primary)',
+                      bottom: '4px',
+                    }}
+                  />
+                )}
+              </>
+            )}
           </NavLink>
         ))}
       </div>

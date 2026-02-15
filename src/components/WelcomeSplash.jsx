@@ -64,12 +64,12 @@ export function WelcomeSplash({ onComplete }) {
       tabIndex={0}
       aria-label="Welcome splash screen. Press Enter or tap to skip."
     >
-      {/* Main WGH Image */}
+      {/* Main WGH Image — fade in + scale */}
       <div
-        className="transition-all duration-300 ease-out"
         style={{
           opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'scale(1)' : 'scale(0.95)',
+          transform: isVisible ? 'scale(1)' : 'scale(0.92)',
+          transition: 'opacity 400ms ease-out, transform 400ms ease-out',
         }}
       >
         <img
@@ -80,6 +80,19 @@ export function WelcomeSplash({ onComplete }) {
           onError={(e) => logger.error('Splash image failed to load:', e)}
         />
       </div>
+
+      {/* Tagline — slides up after logo */}
+      <p
+        className="mt-4 text-sm font-medium"
+        style={{
+          color: 'var(--color-text-tertiary)',
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(8px)',
+          transition: 'opacity 400ms ease-out 200ms, transform 400ms ease-out 200ms',
+        }}
+      >
+        The best dishes, ranked by locals
+      </p>
 
       {/* Tap to skip hint */}
       <p

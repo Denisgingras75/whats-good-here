@@ -11,10 +11,10 @@ export function SearchHero({ town, loading, categoryScroll }) {
     >
       <div className="mb-5 text-center px-4">
         <h1
-          className="font-bold mb-1"
+          className="font-bold mb-1 text-shadow-warm"
           style={{
             color: 'var(--color-text-primary)',
-            fontSize: '22px',
+            fontSize: '26px',
             letterSpacing: '-0.02em',
           }}
         >
@@ -26,7 +26,7 @@ export function SearchHero({ town, loading, categoryScroll }) {
             fontSize: '13px',
           }}
         >
-          Ranked by people who know
+          The best dishes, ranked by locals
         </p>
       </div>
 

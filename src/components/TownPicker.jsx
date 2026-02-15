@@ -1,10 +1,11 @@
-import { MV_TOWNS } from '../constants/towns'
+import { ALL_TOWNS, MV_TOWNS, NANTUCKET_TOWNS } from '../constants/towns'
 
 /**
  * TownPicker - Inline pill that expands town options into the scroll strip
+ * Shows both MV and Nantucket towns with grouping headers
  */
 export function TownPicker({ town, onTownChange, isOpen, onToggle }) {
-  const currentLabel = MV_TOWNS.find(t => t.value === town)?.label || 'All Island'
+  const currentLabel = ALL_TOWNS.find(t => t.value === town)?.label || 'All Islands'
 
   const handleSelect = (value) => {
     onTownChange(value)
@@ -12,6 +13,10 @@ export function TownPicker({ town, onTownChange, isOpen, onToggle }) {
   }
 
   if (isOpen) {
+    // Build grouped town list: "All Islands" first, then MV towns, then Nantucket towns
+    const mvTowns = MV_TOWNS.slice(1) // skip "All Island"
+    const nackTowns = NANTUCKET_TOWNS.slice(1) // skip "All Nantucket"
+
     return (
       <>
         <button
@@ -27,7 +32,58 @@ export function TownPicker({ town, onTownChange, isOpen, onToggle }) {
           </svg>
           <span>Close</span>
         </button>
-        {MV_TOWNS.map((option) => (
+
+        {/* All Islands */}
+        <button
+          onClick={() => handleSelect(null)}
+          className="flex-shrink-0 pl-3 pr-3 py-1.5 rounded-full text-sm font-medium transition-all active:scale-[0.97]"
+          style={{
+            background: town === null
+              ? 'var(--color-primary)'
+              : 'var(--color-surface-elevated)',
+            color: town === null
+              ? 'white'
+              : 'var(--color-text-secondary)',
+          }}
+        >
+          All Islands
+        </button>
+
+        {/* MV group label */}
+        <span
+          className="flex-shrink-0 pl-2 pr-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider self-center"
+          style={{ color: 'var(--color-text-tertiary)' }}
+        >
+          MV
+        </span>
+
+        {mvTowns.map((option) => (
+          <button
+            key={option.label}
+            onClick={() => handleSelect(option.value)}
+            className="flex-shrink-0 pl-3 pr-3 py-1.5 rounded-full text-sm font-medium transition-all active:scale-[0.97]"
+            style={{
+              background: option.value === town
+                ? 'var(--color-primary)'
+                : 'var(--color-surface-elevated)',
+              color: option.value === town
+                ? 'white'
+                : 'var(--color-text-secondary)',
+            }}
+          >
+            {option.label}
+          </button>
+        ))}
+
+        {/* Nantucket group label */}
+        <span
+          className="flex-shrink-0 pl-2 pr-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider self-center"
+          style={{ color: 'var(--color-text-tertiary)' }}
+        >
+          ACK
+        </span>
+
+        {nackTowns.map((option) => (
           <button
             key={option.label}
             onClick={() => handleSelect(option.value)}

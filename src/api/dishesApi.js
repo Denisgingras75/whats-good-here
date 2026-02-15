@@ -248,6 +248,139 @@ export const dishesApi = {
   },
 
   /**
+   * Get trending dishes (most votes in last 7 days)
+   * @param {number} limit - Max results (default 10)
+   * @param {string|null} town - Optional town filter
+   * @returns {Promise<Array>} Trending dishes with vote counts
+   */
+  async getTrending(limit = 10, town = null) {
+    try {
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      const since = sevenDaysAgo.toISOString()
+
+      // Get votes from last 7 days grouped by dish
+      const { data: recentVotes, error: votesError } = await supabase
+        .from('votes')
+        .select('dish_id')
+        .gte('created_at', since)
+
+      if (votesError) {
+        throw createClassifiedError(votesError)
+      }
+
+      if (!recentVotes?.length) return []
+
+      // Count votes per dish
+      const voteCounts = {}
+      for (const v of recentVotes) {
+        voteCounts[v.dish_id] = (voteCounts[v.dish_id] || 0) + 1
+      }
+
+      // Filter dishes with at least 2 recent votes
+      const trendingIds = Object.entries(voteCounts)
+        .filter(([, count]) => count >= 2)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit * 2) // fetch extra for town filtering
+        .map(([id]) => id)
+
+      if (!trendingIds.length) return []
+
+      // Fetch dish details
+      const { data: dishes, error: dishError } = await supabase
+        .from('dishes')
+        .select(`
+          id, name, category, photo_url, avg_rating, total_votes,
+          restaurants!inner ( id, name, town, is_open )
+        `)
+        .in('id', trendingIds)
+        .eq('restaurants.is_open', true)
+
+      if (dishError) {
+        throw createClassifiedError(dishError)
+      }
+
+      let results = (dishes || [])
+        .filter(d => d.restaurants)
+        .map(d => ({
+          dish_id: d.id,
+          dish_name: d.name,
+          category: d.category,
+          photo_url: d.photo_url,
+          avg_rating: d.avg_rating,
+          total_votes: d.total_votes,
+          recent_votes: voteCounts[d.id] || 0,
+          restaurant_id: d.restaurants.id,
+          restaurant_name: d.restaurants.name,
+          restaurant_town: d.restaurants.town,
+        }))
+
+      // Town filter
+      if (town) {
+        results = results.filter(d => d.restaurant_town === town)
+      }
+
+      // Sort by recent votes descending
+      results.sort((a, b) => b.recent_votes - a.recent_votes)
+
+      return results.slice(0, limit)
+    } catch (error) {
+      logger.error('Error fetching trending dishes:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
+
+  /**
+   * Get recently added dishes
+   * @param {number} limit - Max results (default 10)
+   * @param {string|null} town - Optional town filter
+   * @returns {Promise<Array>} Recently added dishes
+   */
+  async getRecent(limit = 10, town = null) {
+    try {
+      let query = supabase
+        .from('dishes')
+        .select(`
+          id, name, category, photo_url, avg_rating, total_votes, created_at,
+          restaurants!inner ( id, name, town, is_open )
+        `)
+        .eq('restaurants.is_open', true)
+        .order('created_at', { ascending: false })
+        .limit(town ? limit * 3 : limit)
+
+      const { data, error } = await query
+
+      if (error) {
+        throw createClassifiedError(error)
+      }
+
+      let results = (data || [])
+        .filter(d => d.restaurants)
+        .map(d => ({
+          dish_id: d.id,
+          dish_name: d.name,
+          category: d.category,
+          photo_url: d.photo_url,
+          avg_rating: d.avg_rating,
+          total_votes: d.total_votes,
+          created_at: d.created_at,
+          restaurant_id: d.restaurants.id,
+          restaurant_name: d.restaurants.name,
+          restaurant_town: d.restaurants.town,
+        }))
+
+      if (town) {
+        results = results.filter(d => d.restaurant_town === town)
+      }
+
+      return results.slice(0, limit)
+    } catch (error) {
+      logger.error('Error fetching recent dishes:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
+
+  /**
    * Check if a dish has variants
    * @param {string} dishId - Dish ID to check
    * @returns {Promise<boolean>} True if dish has variants

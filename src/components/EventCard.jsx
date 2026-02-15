@@ -114,7 +114,7 @@ export const EventCard = memo(function EventCard({ event, promoted }) {
             </p>
           )}
 
-          {/* Date & Time */}
+          {/* Date & Time with urgency badge */}
           <div className="flex items-center gap-2 mt-2">
             <span
               className="text-xs font-semibold"
@@ -127,6 +127,28 @@ export const EventCard = memo(function EventCard({ event, promoted }) {
                 {timeDisplay}
               </span>
             )}
+            {(() => {
+              const d = new Date(event_date + 'T00:00:00')
+              const today = new Date()
+              today.setHours(0, 0, 0, 0)
+              const diffDays = Math.round((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+              if (diffDays === 0) return (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'var(--color-primary-muted)', color: 'var(--color-primary)' }}>
+                  Today
+                </span>
+              )
+              if (diffDays === 1) return (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'var(--color-accent-gold-muted)', color: 'var(--color-accent-gold)' }}>
+                  Tomorrow
+                </span>
+              )
+              if (diffDays > 0 && diffDays <= 3) return (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-secondary)' }}>
+                  This week
+                </span>
+              )
+              return null
+            })()}
           </div>
         </div>
 

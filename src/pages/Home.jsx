@@ -87,6 +87,12 @@ export function Home() {
         }
       />
 
+      {/* Section divider */}
+      <div
+        className="mx-4"
+        style={{ borderTop: '1px solid var(--color-divider)' }}
+      />
+
       {/* Section 2: Top 10 */}
       <section className="px-4 py-6">
         {/* Location banner */}
@@ -173,11 +179,12 @@ export function Home() {
           <div className="max-w-lg mx-auto mt-4 text-center">
             <button
               onClick={() => navigate('/restaurants')}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-[0.97]"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.97]"
               style={{
                 color: 'var(--color-accent-gold)',
-                background: 'rgba(217, 167, 101, 0.08)',
-                border: '1px solid rgba(217, 167, 101, 0.15)',
+                background: 'rgba(217, 167, 101, 0.1)',
+                border: '1px solid rgba(217, 167, 101, 0.2)',
+                boxShadow: '0 0 20px rgba(217, 167, 101, 0.08)',
               }}
             >
               Browse all restaurants
