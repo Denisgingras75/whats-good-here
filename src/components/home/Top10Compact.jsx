@@ -147,9 +147,9 @@ export function Top10Compact({
 }
 
 const PODIUM_STYLE = {
-  1: { color: 'var(--color-medal-gold)', glow: '#E9A115', rankSize: '25px', nameSize: '16px', ratingSize: '16px' },
-  2: { color: 'var(--color-medal-silver)', glow: '#A8B5BF', rankSize: '22px', nameSize: '15px', ratingSize: '15px' },
-  3: { color: 'var(--color-medal-bronze)', glow: '#C4855C', rankSize: '20px', nameSize: '14px', ratingSize: '14px' },
+  1: { color: 'var(--color-medal-gold)', glow: '#E9A115', rankSize: '25px', nameSize: '16px', ratingSize: '16px', fill: 100 },
+  2: { color: 'var(--color-medal-silver)', glow: '#A8B5BF', rankSize: '22px', nameSize: '15px', ratingSize: '15px', fill: 80 },
+  3: { color: 'var(--color-medal-bronze)', glow: '#C4855C', rankSize: '20px', nameSize: '14px', ratingSize: '14px', fill: 60 },
 }
 
 // Top 10 row — podium layout for 1-3, compact for 4+
@@ -169,7 +169,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
         aria-label={accessibleLabel}
         className="w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-colors text-left"
         style={{
-          background: 'var(--color-surface-elevated)',
+          background: `linear-gradient(to right, var(--color-surface-elevated) ${podium.fill}%, var(--color-surface) ${podium.fill}%)`,
           borderLeft: `2px solid ${podium.glow}`,
         }}
       >
