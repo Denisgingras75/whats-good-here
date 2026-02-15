@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { logger } from '../utils/logger'
 
 // Module-level flag - persists across re-renders, resets on app reload
 let hasShownThisSession = false
@@ -64,21 +63,37 @@ export function WelcomeSplash({ onComplete }) {
       tabIndex={0}
       aria-label="Welcome splash screen. Press Enter or tap to skip."
     >
-      {/* Main WGH Image */}
+      {/* Brand logotype */}
       <div
-        className="transition-all duration-300 ease-out"
+        className="transition-all duration-300 ease-out text-center px-8"
         style={{
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? 'scale(1)' : 'scale(0.95)',
         }}
       >
-        <img
-          src="/logo.png"
-          alt="What's Good Here"
-          className="w-[336px] md:w-[432px] lg:w-[504px] h-auto"
-          draggable={false}
-          onError={(e) => logger.error('Splash image failed to load:', e)}
-        />
+        <h1
+          style={{
+            fontFamily: "'Pacifico', cursive",
+            fontSize: '42px',
+            color: 'var(--color-primary)',
+            lineHeight: 1.2,
+            letterSpacing: '-0.01em',
+          }}
+        >
+          What's Good Here
+        </h1>
+        <p
+          className="font-medium"
+          style={{
+            color: 'var(--color-accent-gold)',
+            fontSize: '13px',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            marginTop: '8px',
+          }}
+        >
+          Martha's Vineyard
+        </p>
       </div>
 
       {/* Tap to skip hint */}
