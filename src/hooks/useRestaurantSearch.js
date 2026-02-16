@@ -35,10 +35,12 @@ export function useRestaurantSearch(query, lat, lng, enabled = true, radiusMiles
     const trimmed = query.trim()
     setLoading(true)
 
-    // Default to Martha's Vineyard center if no location
-    const searchLat = lat || 41.43
-    const searchLng = lng || -70.56
-    const searchRadiusMeters = radiusMiles ? radiusMiles * 1609 : 50000
+    // Only bias toward user location if we actually have one
+    // Passing null lets Google return global results based on query alone
+    const hasLocation = lat != null && lng != null
+    const searchLat = hasLocation ? lat : null
+    const searchLng = hasLocation ? lng : null
+    const searchRadiusMeters = hasLocation ? (radiusMiles ? radiusMiles * 1609 : 50000) : null
 
     const fetchResults = async () => {
       try {
