@@ -173,17 +173,23 @@ Evidence: `schema.sql:1534-1776`
 
 ### Feature 1: Home / Landing
 
-**User flow:** Open app → see search bar + town filter + category scroll + "Top 10" ranked dishes
+**User flow:** Open app → see brand header + search bar + town filter + category scroll → #1 hero dish → "The Contenders" ranked list (2-10). Search inline: type 2+ chars → list morphs to search results without page navigation.
 **Screens:** `Home.jsx`
-**Components:** `SearchHero`, `Top10Compact`, `TownPicker`, `WelcomeSplash`
-**Hooks:** `useDishes`, `useProfile`, `useLocationContext`
-**API calls:** `dishesApi.getRankedDishes()` via `useDishes`
-**Data reads:** `get_ranked_dishes` RPC
+**Components:** `SearchHero`, `Top10Compact`, `TownPicker`, `WelcomeSplash`, `NumberOneHero` (inline in Home.jsx), `CategoryNav` (inline in Home.jsx)
+**Hooks:** `useDishes`, `useDishSearch`, `useProfile`, `useLocationContext`
+**API calls:** `dishesApi.getRankedDishes()` via `useDishes`, `dishesApi.search()` via `useDishSearch`
+**Data reads:** `get_ranked_dishes` RPC, dishes table (search)
 **Data writes:** none
 
-**Category scroll:** Horizontal strip below search hero. Each category is a vertical chip (56px circle with neon icon above 11px label). Town picker is first in strip: 56px circle with ocean wave SVGs and a filled gold location pin, matching category pill style. Scroll container left-aligned under search box edge (`pl-2 pr-4`), 4px gaps between icons. Tapping town picker expands inline town options; tapping a category filters the Top 10 below.
+**Brand header:** "What's Good Here" in Aglet Sans Bold (700) at 30px via Adobe Fonts (Typekit). Tagline "the #1 bite near you" in uppercase below.
 
-**Top 10 display:** Restaurant-first hierarchy — restaurant name bold primary, dish name small uppercase secondary. Ranks 1-3 get podium treatment (medal colors with glow, sized rank numbers, colored restaurant name). Ranks 4-10 use Apple-style grouped list (rounded container, surface background, inset dividers, chevron arrows, two-line layout, ultra-soft hover `rgba(255,255,255,0.03)`). Logged-in users with preferred categories see MV/Personal toggle tabs.
+**#1 Hero Card:** `NumberOneHero` component — typographic hero announcement for the top-ranked dish. Gold left border, uppercase "#1 in {town} right now" label, Aglet Sans dish name at 24px, uppercase restaurant name, large rating number. Only shown for the main Top 10 (not category-filtered views).
+
+**Inline search:** `DishSearch` accepts `onSearchChange` prop. When provided, debounced query (150ms) is passed to parent instead of showing dropdown. Home.jsx uses `useDishSearch` hook and renders results in `Top10Compact` format. "Show more" button paginates in batches of 10.
+
+**Category scroll:** Horizontal strip below search. Each category is a 44px circle with neon food photo + 10.5px label. Town picker is first in strip, expands inline for town selection. Tapping a category filters the ranked list; tapping again deselects. Categories use `BROWSE_CATEGORIES` from `src/constants/categories.js`.
+
+**Top 10 display:** #1 dish shown as hero card above. Ranks 2-3 get podium treatment (medal colors with glow, gradient fill, sized rank numbers). Ranks 4-10 use Apple-style grouped list (surface background, inset dividers, chevron arrows). Section header: "The Contenders". `startRank` prop offsets numbering when #1 is the hero. Personal toggle (MV vs My Top 10) currently disabled.
 
 **VERIFIED** — `src/pages/Home.jsx`, `src/components/home/`
 

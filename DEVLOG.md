@@ -5,6 +5,31 @@ A shared log of what each contributor worked on. Add your entries at the top.
 
 ---
 
+## 2026-02-15 - Daniel + Claude (Session 2)
+
+### T26: Homepage Brand Signature
+- **Brand font:** Aglet Sans Bold (700) at 30px for all "What's Good Here" headings (SearchHero, WelcomeSplash, WelcomeModal, Login)
+- **Adobe Fonts (Typekit):** Added `use.typekit.net/yxz4cgv.css` for Aglet Sans; fixed CSP in `vercel.json` to allow typekit domains on deployed versions
+- **Two-font system:** Aglet Sans Bold (brand header only) + DM Sans (everything else). Tried Bryant Condensed, Clone Rounded, Informa Pro, Fira Sans — stripped back to avoid font sprawl
+- **#1 Hero Card:** New `NumberOneHero` component — typographic hero announcement for the top-ranked dish. Gold accent border, Aglet Sans dish name, uppercase restaurant, large rating number. Top10Compact now starts at rank #2
+- **"The Contenders"** section header replaces "Top 10 Right Now" for ranks #2-10
+- **Inline search:** Search results now render directly on the homepage (no page navigation). DishSearch accepts `onSearchChange` prop for inline mode. "Show more" button paginates results in batches of 10
+- **Category nav redesign:** Multiple iterations (circles → pills → text labels → back to smaller 44px circles with food photos). Final: compact photo circles + text labels in horizontal scroll with town picker
+- **Trust signal exploration:** Tried live stats (votes, restaurants, dishes) under header — numbers too small to be credible yet. Reverted to "the #1 bite near you" tagline
+
+### Files changed
+- `index.html` — Typekit CSS import
+- `vercel.json` — CSP for typekit domains (style-src, font-src)
+- `src/components/home/SearchHero.jsx` — Aglet Sans, onSearchChange prop
+- `src/components/home/Top10Compact.jsx` — startRank prop, "The Contenders" header
+- `src/components/DishSearch.jsx` — onSearchChange inline mode
+- `src/pages/Home.jsx` — NumberOneHero, CategoryNav, inline search, category filtering
+- `src/components/WelcomeSplash.jsx` — Aglet Sans font
+- `src/components/Auth/WelcomeModal.jsx` — Aglet Sans font
+- `src/pages/Login.jsx` — Aglet Sans font
+
+---
+
 ## 2026-02-15 - Daniel + Claude
 
 ### Bug Fixes

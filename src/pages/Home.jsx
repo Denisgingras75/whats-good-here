@@ -186,7 +186,7 @@ function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange })
   const [townPickerOpen, setTownPickerOpen] = useState(false)
 
   return (
-    <div className="flex items-center gap-1 pl-2 pr-4 pb-1">
+    <div className="flex items-center gap-1 pl-2 pr-4 pb-1 overflow-x-auto" style={scrollStyle}>
       <TownPicker
         town={town}
         onTownChange={onTownChange}
@@ -194,7 +194,7 @@ function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange })
         onToggle={setTownPickerOpen}
       />
       {!townPickerOpen && (
-        <div className="flex items-center gap-2 overflow-x-auto" style={scrollStyle}>
+        <div className="flex items-center gap-2">
           {BROWSE_CATEGORIES.map((cat) => {
             const isActive = selectedCategory === cat.id
             const imageSrc = getCategoryNeonImage(cat.id)

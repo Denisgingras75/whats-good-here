@@ -330,27 +330,23 @@
 
 ---
 
-## T26: Homepage — trust signal, emotional hook, brand signature
+## T26: Homepage — trust signal, emotional hook, brand signature — IN PROGRESS
 
-**Why:** After the layout simplification (Feb 13), the homepage is clean and functional but lacks magnetism. Three connected problems remain:
+**Why:** After the layout simplification (Feb 13), the homepage is clean and functional but lacks magnetism.
 
-### 1. Trust signal too quiet
-"Ranked by people who know" is a tagline, not proof. There's no specificity — no vote count, no restaurant count, nothing that makes a new user think "this data is real." Trust comes from numbers and social proof, not claims.
+**What's done (Feb 15):**
+- Brand font established: Aglet Sans Bold (700) via Adobe Fonts (Typekit) for all "What's Good Here" headings
+- Two-font system: Aglet Sans (brand header) + DM Sans (everything else)
+- #1 Hero Card: `NumberOneHero` component — typographic hero announcement for top-ranked dish with gold accent
+- "The Contenders" section header for ranks #2-10 (replaces generic "Top 10")
+- Inline search: results render directly on homepage without page navigation
+- Category nav: compact 44px photo circles with labels in horizontal scroll
+- CSP fix for Adobe Fonts on deployed versions
 
-### 2. Emotional hook is medium
-The homepage is calm-premium but not magnetic-premium. The headline restates the app name. There's no tension, no FOMO, no "you're about to discover something." Nothing makes you *want* to scroll.
-
-### 3. Brand signature still forming
-If you cover the logo, nothing identifies this as What's Good Here. No visual or verbal moment is uniquely this app. The best brands have a signature — a gesture, a phrase, a pattern that's only theirs. These three are connected: a strong brand signature *is* the trust signal *is* the emotional hook.
-
-**Approach:** Brainstorm before coding. This is a design/copy problem, not a component problem. Explore what the signature moment could be — the one thing that makes someone instantly feel "this is the real list."
-
-**Acceptance criteria:**
-- Homepage makes a first-time visitor feel the rankings are credible (trust)
-- Something on the page creates desire to explore, not just permission to browse (hook)
-- A visual or verbal element is unmistakably "What's Good Here" (signature)
-
-**Status:** Ready for brainstorming session
+**What's remaining:**
+- Trust signal: deferred until vote counts are more impressive (live stats looked empty)
+- Logo animation: creative brief written (`docs/plans/2026-02-15-logo-creative-brief.md`), needs external designer
+- Further brand signature refinement as the visual identity matures
 
 **Files:** `src/pages/Home.jsx`, `src/components/home/SearchHero.jsx`, `src/components/home/Top10Compact.jsx`
 
