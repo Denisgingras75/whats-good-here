@@ -180,6 +180,8 @@ const scrollStyle = {
   scrollbarWidth: 'none',
   msOverflowStyle: 'none',
   WebkitOverflowScrolling: 'touch',
+  overscrollBehaviorX: 'contain',
+  touchAction: 'pan-x',
 }
 
 function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange }) {
