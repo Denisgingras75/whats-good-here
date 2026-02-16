@@ -17,13 +17,21 @@ A shared log of what each contributor worked on. Add your entries at the top.
 - **Category nav redesign:** Multiple iterations (circles → pills → text labels → back to smaller 44px circles with food photos). Final: compact photo circles + text labels in horizontal scroll with town picker
 - **Trust signal exploration:** Tried live stats (votes, restaurants, dishes) under header — numbers too small to be credible yet. Reverted to "the #1 bite near you" tagline
 
+### UX Fixes (Feb 16)
+- **Town picker scroll:** Fixed horizontal swipe scrolling the whole page — moved `overflow-x-auto` to outer container, added `touch-action: pan-x` and `overscroll-behavior-x: contain`
+- **Town picker flash:** Removed `transition-all` from TownPicker buttons to prevent red background flash when closing
+- **Town picker scroll reset:** Scroll position resets to beginning when town picker closes so categories start from the left
+- **Town picker icon:** Red location pin over ocean waves (replaced generic gold pin)
+- **Category circles:** Restored to 56px (were shrunk to 44px, looked unintentional on mobile)
+
 ### Files changed
 - `index.html` — Typekit CSS import
 - `vercel.json` — CSP for typekit domains (style-src, font-src)
 - `src/components/home/SearchHero.jsx` — Aglet Sans, onSearchChange prop
 - `src/components/home/Top10Compact.jsx` — startRank prop, "The Contenders" header
 - `src/components/DishSearch.jsx` — onSearchChange inline mode
-- `src/pages/Home.jsx` — NumberOneHero, CategoryNav, inline search, category filtering
+- `src/pages/Home.jsx` — NumberOneHero, CategoryNav, inline search, scroll fixes
+- `src/components/TownPicker.jsx` — Red pin, removed transition flash, scroll behavior
 - `src/components/WelcomeSplash.jsx` — Aglet Sans font
 - `src/components/Auth/WelcomeModal.jsx` — Aglet Sans font
 - `src/pages/Login.jsx` — Aglet Sans font
