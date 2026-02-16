@@ -15,15 +15,19 @@ export function Top10Compact({
   showToggle = false,
   town,
   categoryLabel,
-  onSeeAll,
   startRank = 1,
 }) {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('mv')
+  const [expanded, setExpanded] = useState(false)
 
-  const activeDishes = activeTab === 'personal' && showToggle
+  const allDishes = activeTab === 'personal' && showToggle
     ? (personalDishes || [])
     : (dishes || [])
+
+  const INITIAL_COUNT = 10
+  const hasMore = categoryLabel && allDishes.length > INITIAL_COUNT
+  const activeDishes = expanded ? allDishes : allDishes.slice(0, INITIAL_COUNT)
 
   if (!dishes?.length && !categoryLabel) return null
 
@@ -130,17 +134,17 @@ export function Top10Compact({
         )}
       </div>
 
-      {/* See all link for category filtering */}
-      {onSeeAll && categoryLabel && (
+      {/* Show more / Show less for category lists */}
+      {hasMore && (
         <button
-          onClick={onSeeAll}
+          onClick={() => setExpanded(prev => !prev)}
           className="w-full mt-3 pt-3 text-sm font-medium transition-opacity hover:opacity-70"
           style={{
             color: 'var(--color-accent-gold)',
             borderTop: '1px solid var(--color-divider)',
           }}
         >
-          See all {categoryLabel} →
+          {expanded ? 'Show less' : `Show all ${allDishes.length} ${categoryLabel}`}
         </button>
       )}
     </section>

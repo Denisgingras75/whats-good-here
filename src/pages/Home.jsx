@@ -56,7 +56,6 @@ export function Home() {
       .filter(dish => dish.category?.toLowerCase() === selectedCategory)
       .slice()
       .sort(rankSort)
-      .slice(0, 10)
   }, [dishes, selectedCategory])
 
   const selectedCategoryLabel = selectedCategory
