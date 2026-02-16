@@ -15,7 +15,7 @@ export function SearchHero({ town, loading, categoryScroll }) {
             fontFamily: "'bryant-web-condensed', sans-serif",
             fontWeight: 700,
             color: 'var(--color-primary)',
-            fontSize: '28px',
+            fontSize: '34px',
             letterSpacing: '-0.02em',
             marginBottom: '16px',
             lineHeight: 1.2,
