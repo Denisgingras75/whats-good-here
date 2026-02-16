@@ -275,4 +275,34 @@ export const restaurantsApi = {
       throw error.type ? error : createClassifiedError(error)
     }
   },
+
+  /**
+   * Get recently added restaurants (last N days)
+   * @param {number} limit - Max results
+   * @param {number} days - How many days back to look
+   * @returns {Promise<Array>} Array of recently added restaurants
+   */
+  async getRecentlyAdded(limit = 10, days = 14) {
+    try {
+      const since = new Date()
+      since.setDate(since.getDate() - days)
+
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('id, name, town, cuisine, created_at')
+        .eq('is_open', true)
+        .gte('created_at', since.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        throw createClassifiedError(error)
+      }
+
+      return data || []
+    } catch (error) {
+      logger.error('Error fetching recently added restaurants:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
 }

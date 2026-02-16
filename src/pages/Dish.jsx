@@ -512,10 +512,26 @@ export function Dish() {
                 </button>
               )}
 
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
                   {dish.dish_name}
                 </h1>
+                {isRanked && dish.percent_worth_it >= 90 && (
+                  <span
+                    className="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide"
+                    style={{ background: 'var(--color-accent-gold-muted)', color: 'var(--color-accent-gold)' }}
+                  >
+                    GREAT
+                  </span>
+                )}
+                {isRanked && dish.percent_worth_it >= 80 && dish.percent_worth_it < 90 && (
+                  <span
+                    className="px-2 py-0.5 rounded text-xs font-bold tracking-wide"
+                    style={{ background: 'rgba(107, 179, 132, 0.15)', color: 'var(--color-rating)' }}
+                  >
+                    Good Here
+                  </span>
+                )}
                 <ValueBadge valuePercentile={dish.value_percentile} />
               </div>
               <button

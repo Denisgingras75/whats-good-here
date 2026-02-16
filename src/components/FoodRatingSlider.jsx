@@ -133,7 +133,7 @@ export function FoodRatingSlider({ value, onChange, min = 0, max = 10, step = 0.
       {/* Label based on rating */}
       <div className="text-center">
         <span className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-          {getRatingLabel(value, category)}
+          {getRatingLabel(value)}
         </span>
       </div>
 
@@ -148,11 +148,11 @@ export function FoodRatingSlider({ value, onChange, min = 0, max = 10, step = 0.
           step={step}
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value))}
-          aria-label={`Rating: ${value.toFixed(1)} out of 10. ${getRatingLabel(value, category)}`}
+          aria-label={`Rating: ${value.toFixed(1)} out of 10. ${getRatingLabel(value)}`}
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={value}
-          aria-valuetext={`${value.toFixed(1)} out of 10: ${getRatingLabel(value, category)}`}
+          aria-valuetext={`${value.toFixed(1)} out of 10: ${getRatingLabel(value)}`}
           className="rating-slider w-full h-3 bg-gradient-to-r from-red-300 via-yellow-300 to-emerald-400 rounded-full appearance-none cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-9 [&::-webkit-slider-thumb]:h-9
             [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-xl
@@ -163,10 +163,20 @@ export function FoodRatingSlider({ value, onChange, min = 0, max = 10, step = 0.
             [&::-moz-range-thumb]:shadow-xl [&::-moz-range-thumb]:border-4
             [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer"
         />
-        <div className="flex justify-between text-xs mt-2 px-1" style={{ color: 'var(--color-text-tertiary)' }}>
-          <span>0</span>
-          <span>5</span>
-          <span>10</span>
+        {/* Anchor tick marks */}
+        <div className="relative h-6 mt-1">
+          <div className="absolute flex flex-col items-center" style={{ left: '20%', transform: 'translateX(-50%)' }}>
+            <div className="w-px h-2" style={{ background: 'var(--color-text-tertiary)' }} />
+            <span className="text-[10px] font-medium mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>One bite</span>
+          </div>
+          <div className="absolute flex flex-col items-center" style={{ left: '65%', transform: 'translateX(-50%)' }}>
+            <div className="w-px h-2" style={{ background: 'var(--color-text-tertiary)' }} />
+            <span className="text-[10px] font-medium mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Ate half</span>
+          </div>
+          <div className="absolute flex flex-col items-center" style={{ left: '95%', transform: 'translateX(-50%)' }}>
+            <div className="w-px h-2" style={{ background: 'var(--color-text-tertiary)' }} />
+            <span className="text-[10px] font-medium mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Clean plate</span>
+          </div>
         </div>
       </div>
     </div>
@@ -197,6 +207,10 @@ function getFoodComponent(category) {
     'fried chicken': FriedChickenSVG,
     'entree': EntreeSVG,
     'dessert': DessertSVG,
+    'oysters': SeafoodSVG,
+    'coffee': ChowderSVG,
+    'cocktails': ChowderSVG,
+    'ice cream': DessertSVG,
   }
 
   return foodMap[category] || PizzaSVG // Default to pizza for now
@@ -204,7 +218,7 @@ function getFoodComponent(category) {
 
 // Check if food is served on a plate (doesn't shrink, plate stays)
 function hasPlate(category) {
-  const platedFoods = ['pasta', 'salad', 'breakfast', 'entree', 'apps', 'seafood', 'fried chicken', 'sushi', 'pokebowl', 'wings', 'tendys', 'fries', 'chowder', 'soup', 'dessert']
+  const platedFoods = ['pasta', 'salad', 'breakfast', 'entree', 'apps', 'seafood', 'fried chicken', 'sushi', 'pokebowl', 'wings', 'tendys', 'fries', 'chowder', 'soup', 'dessert', 'oysters', 'coffee', 'cocktails', 'ice cream']
   return platedFoods.includes(category)
 }
 
@@ -230,44 +244,23 @@ function getCrumbColor(category) {
     'dessert': '#F4A0A0', // Pink cake crumbs
     'lobster roll': '#FFA07A', // Lobster meat color
     'taco': '#E8C060', // Tortilla color
+    'oysters': '#C8D8D0', // Shell gray-green
+    'coffee': '#6F4E37', // Coffee brown
+    'cocktails': '#E8A060', // Amber
+    'ice cream': '#F5E6D3', // Vanilla cream
   }
 
   return colorMap[category] || '#D97706'
 }
 
-function getRatingLabel(value, category) {
-  if (value >= 9.5) return "EXCELLENT Here"
-  if (value >= 8.5) return "GREAT Here"
-  if (value >= 7.5) return "GOOD Here"
-  if (value >= 7) return "Pretty Good Here"
-  if (value >= 6) return "Not Bad Here"
-  if (value >= 0.1) return "Bad Here"
-
-  // Category-specific "slide to rate" messages
-  const categoryEmojis = {
-    'burger': '🍔',
-    'pizza': '🍕',
-    'sandwich': '🥪',
-    'breakfast sandwich': '🥪',
-    'pasta': '🍝',
-    'sushi': '🍣',
-    'pokebowl': '🥗',
-    'taco': '🌮',
-    'wings': '🍗',
-    'tendys': '🍗',
-    'lobster roll': '🦞',
-    'seafood': '🦐',
-    'chowder': '🍲',
-    'soup': '🍜',
-    'breakfast': '🍳',
-    'salad': '🥗',
-    'fries': '🍟',
-    'apps': '🍽️',
-    'fried chicken': '🍗',
-    'entree': '🍽️',
-    'dessert': '🍰',
-  }
-
-  const emoji = categoryEmojis[category] || '🍽️'
-  return `${emoji} Slide to rate!`
+function getRatingLabel(value) {
+  if (value >= 10) return "Clean plate!"
+  if (value >= 9.0) return "Licked the plate"
+  if (value >= 8.0) return "Almost finished"
+  if (value >= 6.5) return "More than half"
+  if (value >= 5.0) return "Ate half"
+  if (value >= 3.0) return "A few bites"
+  if (value >= 1.0) return "One bite"
+  if (value >= 0.1) return "One bite"
+  return "Slide to take a bite!"
 }

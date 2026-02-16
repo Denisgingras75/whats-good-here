@@ -500,10 +500,14 @@ export const dishesApi = {
           )
         `)
         .eq('id', dishId)
-        .single()
+        .maybeSingle()
 
       if (dishError) {
         throw createClassifiedError(dishError)
+      }
+
+      if (!dish) {
+        throw createClassifiedError({ code: 'PGRST116', message: 'Dish not found', details: `No dish with id ${dishId}` })
       }
 
       // Count total_votes, yes_votes and check variants in parallel

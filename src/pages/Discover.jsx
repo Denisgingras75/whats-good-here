@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSpecials } from '../hooks/useSpecials'
 import { useEvents } from '../hooks/useEvents'
@@ -6,6 +6,8 @@ import { useTrendingDishes, useRecentDishes } from '../hooks/useTrendingDishes'
 import { SpecialCard } from '../components/SpecialCard'
 import { EventCard } from '../components/EventCard'
 import { getCategoryEmoji } from '../constants/categories'
+import { restaurantsApi } from '../api/restaurantsApi'
+import { logger } from '../utils/logger'
 
 const FILTER_CHIPS = [
   { value: 'all', label: 'All' },
@@ -23,6 +25,13 @@ export function Discover() {
   const { events, loading: eventsLoading, error: eventsError } = useEvents()
   const { trending, loading: trendingLoading } = useTrendingDishes(10)
   const { recent, loading: recentLoading } = useRecentDishes(8)
+  const [newRestaurants, setNewRestaurants] = useState([])
+
+  useEffect(() => {
+    restaurantsApi.getRecentlyAdded(8, 14)
+      .then(setNewRestaurants)
+      .catch((err) => logger.error('Failed to fetch new restaurants:', err))
+  }, [])
 
   const loading = specialsLoading || eventsLoading
   const error = specialsError || eventsError
@@ -256,8 +265,53 @@ export function Discover() {
         </div>
       )}
 
+      {/* New on the Island — recently discovered restaurants */}
+      {newRestaurants.length > 0 && (
+        <div className="px-4 pt-5">
+          <h3 className="text-base font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+            New on the Island
+          </h3>
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{
+              background: 'var(--color-card)',
+              border: '1px solid var(--color-divider)',
+            }}
+          >
+            {newRestaurants.map((r, i) => (
+              <button
+                key={r.id}
+                onClick={() => navigate(`/restaurants/${r.id}`)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors active:scale-[0.99]"
+                style={{
+                  borderBottom: i < newRestaurants.length - 1 ? '1px solid var(--color-divider)' : 'none',
+                }}
+              >
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold"
+                  style={{ background: 'var(--color-accent-gold-muted)', color: 'var(--color-accent-gold)' }}
+                >
+                  NEW
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+                    {r.name}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                    {r.cuisine ? `${r.cuisine} · ` : ''}{r.town}
+                  </p>
+                </div>
+                <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
+                  {timeAgo(r.created_at)}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Section Divider */}
-      {(trending.length > 0 || recent.length > 0) && (feed.length > 0 || !loading) && (
+      {(trending.length > 0 || recent.length > 0 || newRestaurants.length > 0) && (feed.length > 0 || !loading) && (
         <div className="px-4 pt-6 pb-1">
           <div style={{ borderTop: '1px solid var(--color-divider)' }} />
         </div>
