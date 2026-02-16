@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useLocationContext } from '../context/LocationContext'
 import { useNearbyRestaurant } from '../hooks/useNearbyRestaurant'
 import { AddDishModal } from './AddDishModal'
 import { AddRestaurantModal } from './AddRestaurantModal'
@@ -8,13 +9,15 @@ import { LoginModal } from './Auth/LoginModal'
 const DISMISS_KEY = 'wgh_nearby_nudge_dismissed'
 
 /**
- * Non-intrusive banner that detects GPS proximity to restaurants.
- * - Near a known restaurant: "At [Name]? Rate a dish!" + "Not here?" fallback
- * - Has location but no match: "Know this spot? Add it to WGH"
- * - No location permission: renders nothing
+ * Smart location nudge — always visible, adapts to state:
+ * 1. No GPS permission → "Enable GPS to find what's near you"
+ * 2. GPS granted, near a known restaurant → "At [Name]? Rate a dish!"
+ * 3. GPS granted, no match nearby → "Know this spot? Add it to WGH"
+ * 4. GPS denied/unsupported → returns null (nothing we can do)
  */
 export function NearbyNudge() {
   const { user } = useAuth()
+  const { permissionState, promptForLocation } = useLocationContext()
   const { nearbyRestaurant, isLoading, hasRealLocation } = useNearbyRestaurant()
 
   const [dismissed, setDismissed] = useState(() => {
@@ -29,8 +32,9 @@ export function NearbyNudge() {
   const [addRestaurantOpen, setAddRestaurantOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
 
-  // Don't render if: no GPS, dismissed, or still loading
-  if (!hasRealLocation || dismissed || isLoading) return null
+  // Only hide if dismissed or truly can't use location
+  if (dismissed) return null
+  if (permissionState === 'denied' || permissionState === 'unsupported') return null
 
   const handleDismiss = () => {
     setDismissed(true)
@@ -42,20 +46,17 @@ export function NearbyNudge() {
   }
 
   const handleRateDish = () => {
-    if (!user) {
-      setLoginOpen(true)
-      return
-    }
+    if (!user) { setLoginOpen(true); return }
     setAddDishOpen(true)
   }
 
   const handleAddRestaurant = () => {
-    if (!user) {
-      setLoginOpen(true)
-      return
-    }
+    if (!user) { setLoginOpen(true); return }
     setAddRestaurantOpen(true)
   }
+
+  // State 1: GPS not yet granted — be the location prompt
+  const needsPermission = permissionState === 'prompt' || (!hasRealLocation && !isLoading)
 
   return (
     <>
@@ -68,7 +69,25 @@ export function NearbyNudge() {
       >
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
-            {nearbyRestaurant ? (
+            {needsPermission ? (
+              <>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  What&apos;s near you?
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Enable GPS to discover restaurants and rate dishes nearby
+                </p>
+              </>
+            ) : isLoading ? (
+              <>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  Looking around...
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Checking for restaurants nearby
+                </p>
+              </>
+            ) : nearbyRestaurant ? (
               <>
                 <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
                   At {nearbyRestaurant.name}?
@@ -80,16 +99,35 @@ export function NearbyNudge() {
             ) : (
               <>
                 <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                  Know this spot?
+                  Know a good spot nearby?
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                  Add it to WGH so others can find it
+                  Be the first to add it — anywhere in the world
                 </p>
               </>
             )}
           </div>
 
-          {nearbyRestaurant ? (
+          {needsPermission ? (
+            <button
+              onClick={promptForLocation}
+              className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-[0.97]"
+              style={{
+                background: 'var(--color-accent-gold)',
+                color: 'var(--color-bg)',
+              }}
+            >
+              Enable GPS
+            </button>
+          ) : isLoading ? (
+            <div
+              className="flex-shrink-0 w-5 h-5 rounded-full border-2 animate-spin"
+              style={{
+                borderColor: 'var(--color-divider)',
+                borderTopColor: 'var(--color-accent-gold)',
+              }}
+            />
+          ) : nearbyRestaurant ? (
             <button
               onClick={handleRateDish}
               className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-[0.97]"
@@ -105,12 +143,11 @@ export function NearbyNudge() {
               onClick={handleAddRestaurant}
               className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-[0.97]"
               style={{
-                background: 'rgba(217, 167, 101, 0.15)',
-                color: 'var(--color-accent-gold)',
-                border: '1px solid rgba(217, 167, 101, 0.3)',
+                background: 'var(--color-accent-gold)',
+                color: 'var(--color-bg)',
               }}
             >
-              Add it
+              Add a spot
             </button>
           )}
 
@@ -126,8 +163,8 @@ export function NearbyNudge() {
           </button>
         </div>
 
-        {/* "Not here?" fallback — always gives a path to add a new restaurant */}
-        {nearbyRestaurant && (
+        {/* "Not here?" fallback when we matched the wrong restaurant */}
+        {!needsPermission && !isLoading && nearbyRestaurant && (
           <button
             onClick={handleAddRestaurant}
             className="mt-2 text-xs transition-opacity hover:opacity-80"
