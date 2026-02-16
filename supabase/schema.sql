@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS restaurants (
   phone TEXT,
   menu_url TEXT,
   menu_last_checked TIMESTAMPTZ,
+  menu_content_hash TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

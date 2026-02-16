@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { capture } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
+import { shareOrCopy } from '../utils/share'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { followsApi } from '../api/followsApi'
 import { useLocationContext } from '../context/LocationContext'
@@ -195,7 +196,7 @@ export function RestaurantDetail() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
             </svg>
           </button>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2
               className="font-bold truncate"
               style={{
@@ -213,6 +214,23 @@ export function RestaurantDetail() {
               )}
             </p>
           </div>
+          <button
+            onClick={async () => {
+              const result = await shareOrCopy({
+                url: `${window.location.origin}/restaurant/${restaurantId}`,
+                title: restaurant.name,
+                text: `Check out ${restaurant.name} on What's Good Here!`,
+              })
+              capture('restaurant_shared', { restaurant_id: restaurantId, method: result.method })
+            }}
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
+            style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-secondary)' }}
+            aria-label="Share restaurant"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+            </svg>
+          </button>
         </div>
       </div>
 

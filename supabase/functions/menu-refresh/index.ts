@@ -113,8 +113,43 @@ interface MenuExtractionResult {
 const MAX_RESTAURANTS_PER_RUN = 10
 const STALE_DAYS = 14
 
+// Signals that a restaurant is closed (check before wasting Claude API call)
+const CLOSED_SIGNALS = [
+  /closed\s+(for\s+the\s+)?season/i,
+  /closed\s+for\s+winter/i,
+  /temporarily\s+closed/i,
+  /permanently\s+closed/i,
+  /opening\s+(in\s+)?(spring|summer|may|june|april|march)/i,
+  /we\s+are\s+closed/i,
+  /see\s+you\s+(in\s+)?(spring|summer|next\s+season)/i,
+  /reopening\s+(in\s+)?\w+\s+\d{4}/i,
+  /seasonal\s+closure/i,
+]
+
+function detectClosed(text: string): string | null {
+  const snippet = text.slice(0, 3000).toLowerCase()
+  for (const signal of CLOSED_SIGNALS) {
+    const match = snippet.match(signal)
+    if (match) return match[0]
+  }
+  return null
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
+ * Simple content hash — if the page hasn't changed, skip the Claude call
+ */
+async function hashContent(text: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(text)
+  const hash = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+    .slice(0, 16) // 16 hex chars = 64 bits, plenty for change detection
 }
 
 /**
@@ -342,13 +377,13 @@ serve(async (req) => {
       // Empty body = batch mode
     }
 
-    let restaurants: Array<{ id: string; name: string; menu_url: string }>
+    let restaurants: Array<{ id: string; name: string; menu_url: string; menu_content_hash: string | null }>
 
     if (body.restaurant_id) {
       // Single restaurant mode
       const { data, error } = await supabase
         .from('restaurants')
-        .select('id, name, menu_url')
+        .select('id, name, menu_url, menu_content_hash')
         .eq('id', body.restaurant_id)
         .not('menu_url', 'is', null)
         .single()
@@ -367,7 +402,7 @@ serve(async (req) => {
 
       const { data, error } = await supabase
         .from('restaurants')
-        .select('id, name, menu_url')
+        .select('id, name, menu_url, menu_content_hash')
         .not('menu_url', 'is', null)
         .eq('is_open', true)
         .or(`menu_last_checked.is.null,menu_last_checked.lt.${staleDate.toISOString()}`)
@@ -409,6 +444,34 @@ serve(async (req) => {
           continue
         }
 
+        // Content hash — skip Claude if page hasn't changed
+        const contentHash = await hashContent(content)
+        if (restaurant.menu_content_hash && restaurant.menu_content_hash === contentHash) {
+          console.log(`${restaurant.name}: content unchanged, skipping`)
+          await supabase
+            .from('restaurants')
+            .update({ menu_last_checked: new Date().toISOString() })
+            .eq('id', restaurant.id)
+          results.push({ restaurant_id: restaurant.id, name: restaurant.name, status: 'unchanged (hash match)' })
+          continue
+        }
+
+        // Check for closure signals BEFORE calling Claude (saves API cost)
+        const closedSignal = detectClosed(content)
+        if (closedSignal) {
+          console.log(`${restaurant.name}: detected closed signal "${closedSignal}"`)
+          await supabase
+            .from('restaurants')
+            .update({ is_open: false, menu_last_checked: new Date().toISOString() })
+            .eq('id', restaurant.id)
+          results.push({
+            restaurant_id: restaurant.id,
+            name: restaurant.name,
+            status: `closed: ${closedSignal}`,
+          })
+          continue
+        }
+
         // Extract dishes with Claude
         const extracted = await extractMenuWithClaude(content, restaurant.name)
         if (extracted.dishes.length === 0) {
@@ -419,10 +482,13 @@ serve(async (req) => {
         // Upsert dishes
         const stats = await upsertDishes(supabase, restaurant.id, extracted)
 
-        // Mark menu as checked
+        // Mark menu as checked + save content hash
         await supabase
           .from('restaurants')
-          .update({ menu_last_checked: new Date().toISOString() })
+          .update({
+            menu_last_checked: new Date().toISOString(),
+            menu_content_hash: contentHash,
+          })
           .eq('id', restaurant.id)
 
         results.push({
