@@ -121,29 +121,29 @@
    =========================== */
 [data-theme="light"] {
   --color-primary: #E8663C;
-  --color-primary-muted: rgba(232, 102, 60, 0.10);
+  --color-primary-muted: rgba(232, 102, 60, 0.14);
   --color-primary-glow: rgba(232, 102, 60, 0.20);
   --color-rating: #16A34A;
   --color-accent-gold: #E9A115;
-  --color-accent-gold-muted: rgba(233, 161, 21, 0.12);
+  --color-accent-gold-muted: rgba(233, 161, 21, 0.15);
   --color-link-secondary: #E9A115;
   --color-accent-orange: #E07856;
   --color-accent-yellow: #D4960A;
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
+  --color-text-primary: #2A2218;
+  --color-text-secondary: #7A6E62;
+  --color-text-tertiary: #A89888;
   --color-bg: #F0ECE8;
-  --color-surface: #F7F4F1;
-  --color-surface-elevated: #FFFFFF;
-  --color-divider: rgba(0, 0, 0, 0.08);
-  --color-card: #FFFFFF;
-  --color-card-hover: #FFF8F4;
+  --color-surface: #F2EDE6;
+  --color-surface-elevated: #FAF3EC;
+  --color-divider: rgba(200, 100, 60, 0.12);
+  --color-card: #FDF6F0;
+  --color-card-hover: #F9EDE3;
   --color-medal-gold: #B8860B;
-  --color-medal-silver: #6B7280;
+  --color-medal-silver: #8A8278;
   --color-medal-bronze: #A0522D;
   --color-danger: #DC2626;
   --color-success: #16A34A;
-  --color-muted: #9CA3AF;
+  --color-muted: #A09488;
   --color-text-on-primary: #FFFFFF;
   --glow-primary: 0 0 20px rgba(232, 102, 60, 0.15), 0 0 40px rgba(232, 102, 60, 0.05);
   --glow-gold: 0 0 15px rgba(233, 161, 21, 0.15);
@@ -204,7 +204,7 @@
   }
 
   [data-theme="light"] .glass-header {
-    background: rgba(247, 244, 241, 0.95);
+    background: rgba(242, 237, 230, 0.95);
   }
 
   .card-elevated {
