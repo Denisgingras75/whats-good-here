@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
 import { authApi } from '../api/authApi'
-import { adminApi } from '../api/adminApi'
 import { profileApi } from '../api/profileApi'
 import { followsApi } from '../api/followsApi'
 import { votesApi } from '../api/votesApi'
@@ -12,8 +10,6 @@ import { useProfile } from '../hooks/useProfile'
 import { useUserVotes } from '../hooks/useUserVotes'
 import { useFavorites } from '../hooks/useFavorites'
 import { useUnratedDishes } from '../hooks/useUnratedDishes'
-import { useRestaurantManager } from '../hooks/useRestaurantManager'
-import { isSoundMuted, toggleSoundMute } from '../lib/sounds'
 import { useTheme } from '../context/ThemeContext'
 import { DishModal } from '../components/DishModal'
 import { LoginModal } from '../components/Auth/LoginModal'
@@ -47,10 +43,8 @@ const TABS = [
 // SECURITY: Email is NOT persisted to storage to prevent XSS exposure of PII
 
 export function Profile() {
-  const navigate = useNavigate()
-  const { user, loading, signOut } = useAuth()
+  const { user, loading } = useAuth()
   const [activeTab, setActiveTab] = useState('worth-it')
-  const [soundMuted, setSoundMuted] = useState(isSoundMuted())
   const { theme, toggleTheme } = useTheme()
   const [authLoading, setAuthLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -66,25 +60,12 @@ export function Profile() {
 
   const [selectedDish, setSelectedDish] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const { isManager: isRestaurantManager } = useRestaurantManager()
   const [expandedTabs, setExpandedTabs] = useState({}) // Track which tabs show all dishes
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 })
   const [followListModal, setFollowListModal] = useState(null) // 'followers' | 'following' | null
   const [userReviews, setUserReviews] = useState([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
   const [ratingBias, setRatingBias] = useState(null)
-
-  // Check admin status from database (matches RLS policies)
-  useEffect(() => {
-    if (!user) {
-      setIsAdmin(false)
-      return
-    }
-    adminApi.isAdmin().then(setIsAdmin).catch((error) => {
-      logger.error('Failed to check admin status:', error)
-    })
-  }, [user])
 
   // Fetch follow counts
   useEffect(() => {
@@ -162,18 +143,6 @@ export function Profile() {
     }
     fetchReviews()
   }, [user])
-
-  const handleToggleSound = () => {
-    const newMutedState = toggleSoundMute()
-    setSoundMuted(newMutedState)
-  }
-
-  const handleSignOut = async () => {
-    const confirmed = window.confirm('Are you sure you want to sign out?')
-    if (!confirmed) return
-    await signOut()
-    navigate('/login')
-  }
 
   const handleGoogleSignIn = async () => {
     setAuthLoading(true)
@@ -621,7 +590,7 @@ export function Profile() {
             />
           )}
 
-          {/* Settings */}
+          {/* Theme Toggle + Info Sections */}
           <div className="p-4 pt-2">
             {/* Section divider dot */}
             <div className="flex justify-center mb-5">
@@ -635,54 +604,10 @@ export function Profile() {
                 boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
               }}
             >
-              <div className="px-4 py-3.5 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-                <h2
-                  className="font-bold"
-                  style={{
-                    color: 'var(--color-text-primary)',
-                    fontSize: '15px',
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  Settings
-                </h2>
-              </div>
-
-              {/* Edit Favorites — disabled while personal Top 10 is off
-              <EditFavoritesSection
-                currentCategories={profile?.preferred_categories || []}
-                editing={editingFavorites}
-                editedCategories={editedCategories}
-                onStartEdit={() => {
-                  setEditedCategories(profile?.preferred_categories || [])
-                  setEditingFavorites(true)
-                }}
-                onCancelEdit={() => setEditingFavorites(false)}
-                onSave={async () => {
-                  await updateProfile({ preferred_categories: editedCategories })
-                  setEditingFavorites(false)
-                }}
-                onCategoriesChange={setEditedCategories}
-              />
-              */}
-
-              {/* Sound Toggle */}
-              <button
-                onClick={handleToggleSound}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t"
-                style={{ borderColor: 'var(--color-divider)' }}
-              >
-                <span className="font-medium text-[color:var(--color-text-primary)]">Bite Sounds</span>
-                <div className="w-12 h-7 rounded-full transition-colors" style={{ background: soundMuted ? 'var(--color-surface-elevated)' : 'var(--color-primary)' }}>
-                  <div className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform mt-1 ${soundMuted ? 'ml-1' : 'ml-6'}`} />
-                </div>
-              </button>
-
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t"
-                style={{ borderColor: 'var(--color-divider)' }}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors"
               >
                 <span className="font-medium text-[color:var(--color-text-primary)]">
                   {theme === 'dark' ? 'Ocean Dark Mode' : 'Light Mode'}
@@ -692,68 +617,11 @@ export function Profile() {
                 </div>
               </button>
 
-              {/* Admin Panel Link - only visible to admins */}
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
-                >
-                  <span className="font-medium text-[color:var(--color-text-primary)]">Admin Panel</span>
-                  <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              )}
-
-              {/* Manage Restaurant Link - only visible to restaurant managers */}
-              {isRestaurantManager && (
-                <Link
-                  to="/manage"
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
-                >
-                  <span className="font-medium text-[color:var(--color-text-primary)]">Manage Restaurant</span>
-                  <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              )}
-
               {/* How Photos Work */}
               <PhotosInfoSection />
 
               {/* Our Mission */}
               <MissionSection />
-
-              {/* Privacy Policy */}
-              <a
-                href="/privacy"
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
-              >
-                <span className="font-medium text-[color:var(--color-text-primary)]">Privacy Policy</span>
-                <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-
-              {/* Terms of Service */}
-              <a
-                href="/terms"
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t" style={{ borderColor: 'var(--color-divider)' }}
-              >
-                <span className="font-medium text-[color:var(--color-text-primary)]">Terms of Service</span>
-                <svg className="w-5 h-5 text-[color:var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-
-              {/* Sign Out */}
-              <button
-                onClick={handleSignOut}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[color:var(--color-surface-elevated)] transition-colors border-t"
-                style={{ borderColor: 'var(--color-divider)' }}
-              >
-                <span className="font-medium" style={{ color: 'var(--color-danger)' }}>Sign Out</span>
-              </button>
             </div>
           </div>
         </>

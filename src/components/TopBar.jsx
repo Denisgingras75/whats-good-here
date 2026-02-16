@@ -1,7 +1,8 @@
 import { NotificationBell } from './NotificationBell'
+import { SettingsDropdown } from './SettingsDropdown'
 
 /**
- * TopBar - Brand anchor with MV island silhouette and notification bell
+ * TopBar - Brand anchor with MV island silhouette, settings gear, and notification bell
  */
 export function TopBar() {
   return (
@@ -18,8 +19,11 @@ export function TopBar() {
           style={{ height: '28px', width: 'auto', opacity: 0.9 }}
         />
 
-        {/* Notification Bell */}
-        <NotificationBell />
+        {/* Settings + Notifications grouped right */}
+        <div className="flex items-center">
+          <SettingsDropdown />
+          <NotificationBell />
+        </div>
       </div>
     </div>
   )
