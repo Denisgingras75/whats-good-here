@@ -53,7 +53,7 @@ export function WelcomeSplash({ onComplete }) {
     <div
       className="fixed inset-0 z-[99999] flex flex-col items-center justify-center cursor-pointer"
       style={{
-        background: 'var(--color-bg)',
+        background: 'radial-gradient(ellipse at 50% 40%, rgba(200, 90, 84, 0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(217, 167, 101, 0.06) 0%, transparent 50%), var(--color-bg)',
         opacity: isFadingOut ? 0 : isVisible ? 1 : 0,
         transition: isFadingOut ? 'opacity 300ms ease-out' : 'opacity 300ms ease-in',
         pointerEvents: (isFadingOut || !isVisible) ? 'none' : 'auto',

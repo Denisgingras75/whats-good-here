@@ -113,13 +113,13 @@ export function getPendingVoteFromStorage() {
 }
 
 /**
- * Save pending vote to storage
+ * Save pending vote to storage (slider value for OAuth redirect survival)
  */
-export function setPendingVoteToStorage(dishId, vote) {
+export function setPendingVoteToStorage(dishId, sliderValue) {
   try {
     localStorage.setItem(PENDING_VOTE_KEY, JSON.stringify({
       dishId,
-      vote,
+      sliderValue,
       timestamp: Date.now()
     }))
   } catch (error) {

@@ -222,7 +222,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
         style={{
           background: 'var(--color-bg)',
           border: `1.5px solid ${isFocused ? 'var(--color-accent-gold)' : 'var(--color-divider)'}`,
-          boxShadow: isFocused ? '0 0 0 3px rgba(217, 167, 101, 0.15), 0 0 20px rgba(217, 167, 101, 0.1)' : 'none',
+          boxShadow: isFocused ? '0 0 0 3px rgba(217, 167, 101, 0.25), 0 0 24px rgba(217, 167, 101, 0.15)' : 'none',
           minHeight: '48px',
         }}
       >

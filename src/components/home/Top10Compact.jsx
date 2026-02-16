@@ -137,9 +137,9 @@ export function Top10Compact({
 }
 
 const PODIUM_STYLE = {
-  1: { color: 'var(--color-medal-gold)', glow: '#D9A765', rankSize: '25px', nameSize: '16px', ratingSize: '16px' },
-  2: { color: 'var(--color-medal-silver)', glow: '#A8B5BF', rankSize: '22px', nameSize: '15px', ratingSize: '15px' },
-  3: { color: 'var(--color-medal-bronze)', glow: '#C4855C', rankSize: '20px', nameSize: '14px', ratingSize: '14px' },
+  1: { color: 'var(--color-medal-gold)', glow: '#D9A765', rankSize: '25px', nameSize: '16px', ratingSize: '16px', bgTint: 'rgba(217, 167, 101, 0.06)' },
+  2: { color: 'var(--color-medal-silver)', glow: '#A8B5BF', rankSize: '22px', nameSize: '15px', ratingSize: '15px', bgTint: 'rgba(168, 181, 191, 0.05)' },
+  3: { color: 'var(--color-medal-bronze)', glow: '#C4855C', rankSize: '20px', nameSize: '14px', ratingSize: '14px', bgTint: 'rgba(196, 133, 92, 0.05)' },
 }
 
 // Top 10 row — podium layout for 1-3, compact for 4+
@@ -157,10 +157,11 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
       <button
         onClick={onClick}
         aria-label={accessibleLabel}
-        className="w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-colors text-left"
+        className="w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-all text-left hover:brightness-110"
         style={{
-          background: 'var(--color-surface-elevated)',
+          background: podium.bgTint,
           borderLeft: `2px solid ${podium.glow}`,
+          boxShadow: `inset 0 0 20px ${podium.glow}08`,
         }}
       >
         {/* Large rank number with glow */}
@@ -232,8 +233,8 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
     <button
       onClick={onClick}
       aria-label={accessibleLabel}
-      className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-colors text-left hover:bg-[var(--color-surface-elevated)]"
-      style={{ opacity: 0.6 }}
+      className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-all text-left hover:bg-[var(--color-surface-elevated)]"
+      style={{ opacity: 0.8 }}
     >
       <span
         className="w-6 text-center text-sm font-bold flex-shrink-0"

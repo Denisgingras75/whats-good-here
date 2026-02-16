@@ -475,7 +475,7 @@ export function Dish() {
             {/* Rating badge */}
             {isRanked && (
               <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm">
-                <span className="text-lg font-bold" style={{ color: dish.avg_rating ? getRatingColor(dish.avg_rating) : 'white' }}>
+                <span className={`text-lg font-bold${dish.avg_rating >= 8.0 ? ' glow-rating-high' : ''}`} style={{ color: dish.avg_rating ? getRatingColor(dish.avg_rating) : 'white' }}>
                   {dish.avg_rating || `${dish.percent_worth_it}%`}
                 </span>
                 <span className="text-xs text-white/80 ml-1">

@@ -58,7 +58,7 @@
   --color-bg: #0D1B22;                /* Deep charcoal-navy */
   --color-surface: #0F1F2B;           /* Slightly lighter */
   --color-surface-elevated: #162B35;
-  --color-divider: rgba(200, 90, 84, 0.10);  /* Rust tint dividers */
+  --color-divider: rgba(200, 90, 84, 0.18);  /* Rust tint dividers */
 
   /* Cards - rich navy-teal, tropical water depth */
   --color-card: #1A3A42;
@@ -102,8 +102,8 @@
   --color-tier-hidden: #6B7280;
 
   /* Glow effects */
-  --glow-primary: 0 0 20px rgba(200, 90, 84, 0.25), 0 0 40px rgba(200, 90, 84, 0.1);
-  --glow-gold: 0 0 15px rgba(217, 167, 101, 0.2);
+  --glow-primary: 0 0 20px rgba(200, 90, 84, 0.35), 0 0 40px rgba(200, 90, 84, 0.15);
+  --glow-gold: 0 0 15px rgba(217, 167, 101, 0.3), 0 0 30px rgba(217, 167, 101, 0.1);
 
   /* Focus ring */
   --focus-ring: 0 0 0 3px rgba(200, 90, 84, 0.25);
@@ -495,6 +495,29 @@
   /* Warm text shadow for hero headlines */
   .text-shadow-warm {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Gradient hero background */
+  .gradient-hero {
+    background: radial-gradient(ellipse at 50% 0%, rgba(200, 90, 84, 0.08) 0%, transparent 70%),
+                radial-gradient(ellipse at 80% 50%, rgba(217, 167, 101, 0.06) 0%, transparent 50%),
+                var(--color-bg);
+  }
+
+  /* Search input gold glow on focus */
+  .glow-search:focus-within {
+    box-shadow: 0 0 0 2px rgba(217, 167, 101, 0.3), 0 0 20px rgba(217, 167, 101, 0.15);
+    border-color: var(--color-accent-gold) !important;
+  }
+
+  /* Rating glow for high scores */
+  .glow-rating-high {
+    text-shadow: 0 0 12px rgba(107, 179, 132, 0.5);
+  }
+
+  /* Gold text glow */
+  .glow-gold-text {
+    text-shadow: 0 0 16px rgba(217, 167, 101, 0.4), 0 0 32px rgba(217, 167, 101, 0.15);
   }
 
   .focus-ring {

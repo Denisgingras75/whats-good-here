@@ -76,16 +76,19 @@ export function BottomNav() {
           >
             {({ isActive }) => (
               <>
-                <span style={{ transform: isActive ? 'scale(1.08)' : 'scale(1)', transition: 'transform 150ms ease' }}>
+                <span style={{ transform: isActive ? 'scale(1.12)' : 'scale(1)', transition: 'transform 150ms ease' }}>
                   {tab.icon}
                 </span>
                 <span className="text-xs font-medium mt-1">{tab.label}</span>
                 {isActive && (
                   <span
-                    className="absolute w-1 h-1 rounded-full"
+                    className="absolute rounded-full"
                     style={{
-                      background: 'var(--color-primary)',
+                      background: 'var(--color-accent-gold)',
                       bottom: '4px',
+                      width: '16px',
+                      height: '3px',
+                      boxShadow: '0 0 6px rgba(217, 167, 101, 0.4)',
                     }}
                   />
                 )}

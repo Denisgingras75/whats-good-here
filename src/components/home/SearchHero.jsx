@@ -6,8 +6,7 @@ import { DishSearch } from '../DishSearch'
 export function SearchHero({ town, loading, categoryScroll }) {
   return (
     <section
-      className="pt-8 pb-5"
-      style={{ background: 'var(--color-bg)' }}
+      className="pt-8 pb-5 gradient-hero"
     >
       <div className="mb-5 text-center px-4">
         <h1
@@ -18,7 +17,7 @@ export function SearchHero({ town, loading, categoryScroll }) {
             letterSpacing: '-0.02em',
           }}
         >
-          What's <span style={{ color: 'var(--color-accent-gold)' }}>Good</span> Here
+          What's <span className="glow-gold-text" style={{ color: 'var(--color-accent-gold)' }}>Good</span> Here
         </h1>
         <p
           style={{
