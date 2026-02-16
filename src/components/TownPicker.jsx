@@ -16,7 +16,7 @@ export function TownPicker({ town, onTownChange, isOpen, onToggle }) {
       <>
         <button
           onClick={() => onToggle(false)}
-          className="flex-shrink-0 flex items-center gap-1.5 pl-3 pr-3 py-1.5 rounded-full text-sm font-medium transition-all active:scale-[0.97]"
+          className="flex-shrink-0 flex items-center gap-1.5 pl-3 pr-3 py-1.5 rounded-full text-sm font-medium active:scale-[0.97]"
           style={{
             background: 'var(--color-primary)',
             color: 'var(--color-text-on-primary)',
@@ -31,7 +31,7 @@ export function TownPicker({ town, onTownChange, isOpen, onToggle }) {
           <button
             key={option.label}
             onClick={() => handleSelect(option.value)}
-            className="flex-shrink-0 pl-3 pr-3 py-1.5 rounded-full text-sm font-medium transition-all active:scale-[0.97]"
+            className="flex-shrink-0 pl-3 pr-3 py-1.5 rounded-full text-sm font-medium active:scale-[0.97]"
             style={{
               background: option.value === town
                 ? 'var(--color-primary)'
@@ -53,7 +53,7 @@ export function TownPicker({ town, onTownChange, isOpen, onToggle }) {
   return (
     <button
       onClick={() => onToggle(true)}
-      className="flex-shrink-0 flex flex-col items-center gap-1.5 px-2 py-1 transition-all active:scale-[0.97]"
+      className="flex-shrink-0 flex flex-col items-center gap-1.5 px-2 py-1 active:scale-[0.97]"
       style={{
         minWidth: '56px',
         fontSize: '11px',
