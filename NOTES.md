@@ -199,16 +199,22 @@ Defined in `src/index.css`. Dark "Island Depths" is the default; light "Appetite
 | `--color-surface` | `#0F1F2B` | Slightly lighter surface |
 | `--color-card` | `#1A3A42` (Navy-Teal) | Card backgrounds |
 
-### Toggle — Appetite (Light)
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--color-primary` | `#E8663C` (Orange-Red) | CTAs, primary actions |
-| `--color-accent-gold` | `#E9A115` (Warm Yellow) | Links, secondary accents |
-| `--color-rating` | `#16A34A` (Bright Green) | Rating displays |
-| `--color-text-primary` | `#1A1A1A` (Near-Black) | Main text |
-| `--color-text-on-primary` | `#FFFFFF` (White) | Text on primary-colored backgrounds |
-| `--color-bg` | `#F0ECE8` (Warm Stone) | Page background |
-| `--color-card` | `#FFFFFF` (White) | Card backgrounds |
+### Toggle — Appetite (Light) — 60/30/10 Food Psychology Ratio
+| Token | Value | Usage | Layer |
+|-------|-------|-------|-------|
+| `--color-primary` | `#9E2B1E` (Deep Warm Crimson) | CTAs, primary actions, danger | 10% accent |
+| `--color-accent-gold` | `#E9A115` (Warm Yellow) | Links, secondary accents | 10% accent |
+| `--color-accent-orange` | `#E07856` (Warm Orange) | Hover states | 10% accent |
+| `--color-rating` | `#16A34A` (Bright Green) | Rating displays | Functional |
+| `--color-text-primary` | `#3A2818` (Warm Dark Brown) | Main text | Text |
+| `--color-text-secondary` | `#7A6E62` (Warm Taupe) | Secondary text | Text |
+| `--color-text-tertiary` | `#A89888` (Warm Sand) | Tertiary text | Text |
+| `--color-text-on-primary` | `#FFFFFF` (White) | Text on primary-colored backgrounds | Text |
+| `--color-bg` | `#F0ECE8` (Warm Stone) | Page background | 60% backdrop |
+| `--color-surface` | `#E8D4C8` (Warm Peach Stone) | Surface areas | 60% backdrop |
+| `--color-card` | `#F2CDBC` (Copper Peach) | Card backgrounds | 30% atmosphere |
+| `--color-card-hover` | `#EBC2AE` (Deeper Copper) | Card hover states | 30% atmosphere |
+| `--color-surface-elevated` | `#EFCFBE` (Warm Elevated) | Modals, panels | 30% atmosphere |
 
 ---
 
