@@ -137,6 +137,10 @@ const CATEGORY_IMAGES_DARK = {
   salad: '/categories/salads.png',
   tendys: '/categories/tendys.png',
   dessert: '/categories/desserts.png',
+  fish: '/categories/fish.png',
+  clams: '/categories/clams.png',
+  chicken: '/categories/chicken.png',
+  pork: '/categories/pork.png',
 }
 
 // Category image mappings — light mode (Appetite)
