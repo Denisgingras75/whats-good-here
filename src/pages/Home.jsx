@@ -5,7 +5,7 @@ import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useProfile } from '../hooks/useProfile'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
-import { BROWSE_CATEGORIES, getCategoryNeonImage } from '../constants/categories'
+import { BROWSE_CATEGORIES } from '../constants/categories'
 import { SearchHero, Top10Compact } from '../components/home'
 import { TownPicker } from '../components/TownPicker'
 
@@ -167,47 +167,17 @@ function CategoryScroll({ town, onTownChange, selectedCategory, onCategoryChange
 }
 
 function CategoryPill({ category, isActive, onClick }) {
-  const imageSrc = getCategoryNeonImage(category.id)
-  const [loaded, setLoaded] = useState(false)
-  const [imgError, setImgError] = useState(false)
-
   return (
     <button
       onClick={onClick}
-      className="flex-shrink-0 flex flex-col items-center gap-1.5 px-2 py-1 transition-all active:scale-[0.97]"
+      className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-[0.97]"
       style={{
-        minWidth: '56px',
-        fontSize: '11.5px',
-        color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
+        background: isActive ? 'var(--color-primary)' : 'var(--color-surface-elevated)',
+        color: isActive ? '#FFFFFF' : 'var(--color-text-secondary)',
+        letterSpacing: '0.02em',
       }}
     >
-      <div
-        className="rounded-full flex items-center justify-center overflow-hidden"
-        style={{
-          width: '56px',
-          height: '56px',
-          background: 'var(--color-surface-elevated)',
-          boxShadow: isActive ? '0 0 0 2px rgba(200, 90, 84, 0.5)' : 'none',
-        }}
-      >
-        {imageSrc && !imgError ? (
-          <img
-            src={imageSrc}
-            alt=""
-            className="w-full h-full object-cover"
-            style={{
-              opacity: loaded ? 1 : 0,
-              filter: isActive ? 'brightness(1.2) saturate(0.8)' : 'brightness(1.0) saturate(0.7)',
-              transition: 'filter 0.2s ease',
-            }}
-            onLoad={() => setLoaded(true)}
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <span className="text-lg">{category.emoji}</span>
-        )}
-      </div>
-      <span className="font-medium" style={{ letterSpacing: '0.01em' }}>{category.label}</span>
+      {category.label}
     </button>
   )
 }
