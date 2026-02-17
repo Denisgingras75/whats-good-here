@@ -65,7 +65,8 @@ export function TownPicker({ town, onTownChange, isOpen, onToggle }) {
         style={{
           width: '56px',
           height: '56px',
-          background: 'var(--color-surface-elevated)',
+          background: 'var(--color-category-strip)',
+          border: '1.5px solid var(--color-divider)',
         }}
       >
         {/* Ocean waves */}

@@ -43,7 +43,10 @@ export function SearchHero({ town, loading, categoryScroll, onSearchChange }) {
       </div>
 
       {categoryScroll && (
-        <div className="mt-4">
+        <div
+          className="mt-4 -mx-0 py-3"
+          style={{ background: 'var(--color-category-strip)' }}
+        >
           {categoryScroll}
         </div>
       )}
