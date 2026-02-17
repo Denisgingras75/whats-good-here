@@ -6,9 +6,10 @@ import { useDishes } from '../hooks/useDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { useProfile } from '../hooks/useProfile'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
-import { BROWSE_CATEGORIES, getCategoryNeonImage } from '../constants/categories'
+import { BROWSE_CATEGORIES } from '../constants/categories'
 import { useTheme } from '../context/ThemeContext'
 import { SearchHero, Top10Compact } from '../components/home'
+import { CategoryIcon } from '../components/home/CategoryIcons'
 import { TownPicker } from '../components/TownPicker'
 
 export function Home() {
@@ -198,7 +199,7 @@ function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange })
   }, [])
 
   return (
-    <div ref={scrollRef} className="flex items-center gap-1 pl-2 pr-4 pb-1 overflow-x-auto" style={scrollStyle}>
+    <div ref={scrollRef} className="flex items-center gap-2 pl-3 pr-4 pb-2 overflow-x-auto" style={scrollStyle}>
       <TownPicker
         town={town}
         onTownChange={onTownChange}
@@ -209,44 +210,35 @@ function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange })
         <div className="flex items-center gap-2">
           {BROWSE_CATEGORIES.map((cat) => {
             const isActive = selectedCategory === cat.id
-            const imageSrc = getCategoryNeonImage(cat.id)
             return (
               <button
                 key={cat.id}
                 onClick={() => onCategoryChange(isActive ? null : cat.id)}
-                className="flex-shrink-0 flex flex-col items-center gap-1.5 py-1 transition-all active:scale-[0.97]"
+                className="flex-shrink-0 flex flex-col items-center justify-center transition-all active:scale-[0.96]"
                 style={{
-                  minWidth: '56px',
-                  color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
+                  width: '64px',
+                  height: '84px',
+                  background: isActive ? '#E4440A' : '#FFFFFF',
+                  border: '3px solid #1A1A1A',
+                  borderRadius: '12px',
                 }}
               >
-                <div
-                  className="rounded-full overflow-hidden flex items-center justify-center transition-transform"
+                <CategoryIcon
+                  categoryId={cat.id}
+                  size={34}
+                  color={isActive ? '#FFFFFF' : '#E4440A'}
+                />
+                <span
                   style={{
-                    width: '56px',
-                    height: '56px',
-                    background: isDark ? 'var(--color-surface-elevated)' : '#FFFFFF',
-                    border: isActive ? '2px solid #E4440A' : '2px solid #1A1A1A',
-                    transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.02em',
+                    color: isActive ? '#FFFFFF' : '#1A1A1A',
+                    marginTop: '4px',
+                    lineHeight: 1.1,
+                    textAlign: 'center',
                   }}
                 >
-                  {imageSrc ? (
-                    <img
-                      src={imageSrc}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      style={{
-                        filter: isDark
-                          ? (isActive ? 'brightness(1.2) saturate(0.9)' : 'brightness(1.0) saturate(0.8)')
-                          : (isActive ? 'brightness(1.2) saturate(0.8)' : 'brightness(1.0) saturate(0.7)'),
-                      }}
-                    />
-                  ) : (
-                    <span className="text-base">{cat.emoji}</span>
-                  )}
-                </div>
-                <span style={{ fontSize: '11px', fontWeight: isActive ? 600 : 500, letterSpacing: '0.01em' }}>
                   {cat.label}
                 </span>
               </button>
@@ -258,9 +250,9 @@ function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange })
   )
 }
 
-// #1 Dish — hero card with optional photo
+// #1 Dish — hero card with category icon
 function NumberOneHero({ dish, town, onClick }) {
-  const { dish_name, restaurant_name, avg_rating, total_votes, photo_url } = dish
+  const { dish_name, restaurant_name, avg_rating, total_votes, category } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
 
   return (
@@ -269,7 +261,7 @@ function NumberOneHero({ dish, town, onClick }) {
       className="w-full text-left mb-6 rounded-2xl overflow-hidden transition-all active:scale-[0.98]"
       style={{
         background: '#FFFFFF',
-        border: '2px solid #1A1A1A',
+        border: '3px solid #1A1A1A',
       }}
     >
       <div className="flex">
@@ -337,20 +329,13 @@ function NumberOneHero({ dish, town, onClick }) {
           </div>
         </div>
 
-        {/* Photo — right side, only when available */}
-        {photo_url && (
-          <div
-            className="flex-shrink-0"
-            style={{ width: '140px', minHeight: '100%' }}
-          >
-            <img
-              src={photo_url}
-              alt={dish_name}
-              loading="lazy"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
+        {/* Category icon — right side */}
+        <div
+          className="flex-shrink-0 flex items-center justify-center"
+          style={{ width: '120px' }}
+        >
+          <CategoryIcon categoryId={category} size={72} color="#E4440A" />
+        </div>
       </div>
     </button>
   )

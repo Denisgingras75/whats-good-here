@@ -181,7 +181,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
         className="relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
         style={{
           background: '#FFFFFF',
-          border: `2px solid ${isFocused ? '#E4440A' : '#1A1A1A'}`,
+          border: `3px solid ${isFocused ? '#E4440A' : '#1A1A1A'}`,
           boxShadow: 'none',
           minHeight: '48px',
         }}

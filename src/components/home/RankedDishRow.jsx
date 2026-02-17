@@ -39,87 +39,7 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
   const rankColor = podium?.color || 'var(--color-text-secondary)'
   const nameSize = podium?.nameSize || '14px'
 
-  // Photo-left card layout
-  if (photo_url) {
-    return (
-      <button
-        onClick={handleClick}
-        aria-label={accessibleLabel}
-        className="w-full flex items-stretch rounded-xl overflow-hidden transition-all text-left active:scale-[0.98]"
-        style={{
-          background: '#FFFFFF',
-          border: '2px solid #1A1A1A',
-          marginBottom: '8px',
-        }}
-      >
-        <div className="flex-shrink-0" style={{ width: '110px' }}>
-          <img
-            src={photo_url}
-            alt={dish_name}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="flex-1 min-w-0 py-3 px-3 flex flex-col justify-center">
-          <div className="flex items-center gap-2">
-            <span
-              className="font-bold flex-shrink-0"
-              style={{
-                color: rankColor,
-                fontSize: podium?.rankSize || '16px',
-                lineHeight: 1,
-              }}
-            >
-              {rank}
-            </span>
-            <p
-              className="font-bold truncate"
-              style={{
-                color: rankColor,
-                fontSize: nameSize,
-                lineHeight: 1.2,
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {dish_name}
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5" style={{ marginTop: '4px' }}>
-            <p
-              className="truncate font-medium"
-              style={{
-                color: 'var(--color-text-secondary)',
-                fontSize: '11px',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-              }}
-            >
-              {restaurant_name}
-              {sortBy === 'best_value' && price != null && ` · $${Number(price).toFixed(0)}`}
-              {distance_miles && ` · ${Number(distance_miles).toFixed(1)} mi`}
-            </p>
-            <ValueBadge valuePercentile={value_percentile} />
-          </div>
-          <p style={{ marginTop: '6px', fontSize: '13px' }}>
-            {isRanked ? (
-              <>
-                <span className="font-bold" style={{ color: getRatingColor(avg_rating) }}>
-                  {avg_rating}
-                </span>
-                <span style={{ color: 'var(--color-text-tertiary)' }}> · {total_votes} votes</span>
-              </>
-            ) : (
-              <span style={{ color: 'var(--color-text-tertiary)' }}>
-                {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
-              </span>
-            )}
-          </p>
-        </div>
-      </button>
-    )
-  }
-
-  // Podium rows without photo
+  // Podium rows
   if (podium) {
     return (
       <button
@@ -128,7 +48,7 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
         className="w-full flex items-center gap-3 py-3 px-3 rounded-xl transition-colors text-left"
         style={{
           background: '#FFFFFF',
-          border: '2px solid #1A1A1A',
+          border: '3px solid #1A1A1A',
         }}
       >
         <span

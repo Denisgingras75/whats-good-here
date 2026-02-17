@@ -209,7 +209,7 @@
   }
 
   [data-theme="light"] .card-elevated {
-    border: 2px solid #1A1A1A;
+    border: 3px solid #1A1A1A;
     box-shadow: none;
   }
 
@@ -238,7 +238,7 @@
 
   [data-theme="light"] .top-bar {
     background: #FFFFFF;
-    border-bottom: 2px solid #1A1A1A;
+    border-bottom: 3px solid #1A1A1A;
   }
 
   .top-bar-content {

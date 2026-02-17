@@ -2,6 +2,7 @@ import { useState, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
 import { getRatingColor } from '../../utils/ranking'
+import { CategoryIcon } from './CategoryIcons'
 
 /**
  * Top10Compact - Ranked dish list for the homepage
@@ -103,7 +104,7 @@ export function Top10Compact({
             {activeDishes.length > Math.max(0, 4 - startRank) && (
               <div
                 className="mt-3 rounded-xl overflow-hidden"
-                style={{ border: '2px solid #1A1A1A' }}
+                style={{ border: '3px solid #1A1A1A' }}
               >
                 {activeDishes.slice(Math.max(0, 4 - startRank)).map((dish, index) => (
                   <Top10Row
@@ -160,7 +161,7 @@ const PODIUM_STYLE = {
 
 // Top 10 row — photo-left card when photo exists, compact text row when not
 const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
-  const { dish_name, restaurant_name, avg_rating, total_votes, photo_url } = dish
+  const { dish_name, restaurant_name, avg_rating, total_votes, photo_url, category } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
   const podium = PODIUM_STYLE[rank]
 
@@ -172,86 +173,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
   const nameColor = podium?.color || 'var(--color-text-primary)'
   const nameSize = podium?.nameSize || '14px'
 
-  // Photo-left card layout — when dish has a photo
-  if (photo_url) {
-    return (
-      <button
-        onClick={onClick}
-        aria-label={accessibleLabel}
-        className="w-full flex items-stretch rounded-xl overflow-hidden transition-all text-left active:scale-[0.98]"
-        style={{
-          background: '#FFFFFF',
-          border: '2px solid #1A1A1A',
-          marginBottom: '8px',
-        }}
-      >
-        {/* Photo — left side, square */}
-        <div className="flex-shrink-0" style={{ width: '110px' }}>
-          <img
-            src={photo_url}
-            alt={dish_name}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Text content — right side */}
-        <div className="flex-1 min-w-0 py-3 px-3 flex flex-col justify-center">
-          <div className="flex items-center gap-2">
-            <span
-              className="font-bold flex-shrink-0"
-              style={{
-                color: rankColor,
-                fontSize: podium?.rankSize || '16px',
-                lineHeight: 1,
-              }}
-            >
-              {rank}
-            </span>
-            <p
-              className="font-bold truncate"
-              style={{
-                color: nameColor,
-                fontSize: nameSize,
-                lineHeight: 1.2,
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {dish_name}
-            </p>
-          </div>
-          <p
-            className="truncate font-medium"
-            style={{
-              color: '#555555',
-              fontSize: '11px',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-              marginTop: '4px',
-            }}
-          >
-            {restaurant_name}
-          </p>
-          <p style={{ marginTop: '6px', fontSize: '13px' }}>
-            {isRanked ? (
-              <>
-                <span className="font-bold" style={{ color: '#E4440A' }}>
-                  {avg_rating}
-                </span>
-                <span style={{ color: '#999999' }}> · {total_votes} votes</span>
-              </>
-            ) : (
-              <span style={{ color: '#999999' }}>
-                {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
-              </span>
-            )}
-          </p>
-        </div>
-      </button>
-    )
-  }
-
-  // No-photo layout — compact text row (podium or finalist)
+  // Podium rows (1-3) — bordered card with icon
   if (podium) {
     return (
       <button
@@ -260,7 +182,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
         className="w-full flex items-center gap-3 py-3.5 px-3 rounded-xl transition-colors text-left"
         style={{
           background: '#FFFFFF',
-          border: '2px solid #1A1A1A',
+          border: '3px solid #1A1A1A',
         }}
       >
         <span
@@ -314,6 +236,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
             )}
           </p>
         </div>
+        <CategoryIcon categoryId={category} size={28} color="#E4440A" />
       </button>
     )
   }
@@ -374,6 +297,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           )}
         </p>
       </div>
+      <CategoryIcon categoryId={category} size={24} color="#E4440A" />
     </button>
   )
 })
