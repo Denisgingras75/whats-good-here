@@ -10,7 +10,7 @@ const PODIUM_STYLE = {
   3: { color: 'var(--color-medal-bronze)', glow: '#C4855C', rankSize: '20px', nameSize: '14px', ratingSize: '14px' },
 }
 
-// Compact dish row for browse/homepage rankings — matches Top10 style
+// Compact dish row for browse/homepage rankings — photo-left card when photo exists
 export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, isLast }) {
   const navigate = useNavigate()
   const {
@@ -32,12 +32,93 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
     navigate(`/dish/${dish_id}`)
   }
 
-  // Build accessible label for screen readers
   const accessibleLabel = isRanked
     ? `Rank ${rank}: ${dish_name} at ${restaurant_name}, rated ${avg_rating} out of 10 with ${total_votes} votes${distance_miles ? `, ${Number(distance_miles).toFixed(1)} miles away` : ''}`
     : `Rank ${rank}: ${dish_name} at ${restaurant_name}, ${total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'no votes yet'}${distance_miles ? `, ${Number(distance_miles).toFixed(1)} miles away` : ''}`
 
-  // Podium layout for ranks 1-3
+  const rankColor = podium?.color || 'var(--color-text-secondary)'
+  const nameSize = podium?.nameSize || '14px'
+
+  // Photo-left card layout
+  if (photo_url) {
+    return (
+      <button
+        onClick={handleClick}
+        aria-label={accessibleLabel}
+        className="w-full flex items-stretch rounded-xl overflow-hidden transition-all text-left active:scale-[0.98]"
+        style={{
+          background: 'var(--color-surface-elevated)',
+          marginBottom: '8px',
+        }}
+      >
+        <div className="flex-shrink-0" style={{ width: '110px' }}>
+          <img
+            src={photo_url}
+            alt={dish_name}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex-1 min-w-0 py-3 px-3 flex flex-col justify-center">
+          <div className="flex items-center gap-2">
+            <span
+              className="font-bold flex-shrink-0"
+              style={{
+                color: rankColor,
+                fontSize: podium?.rankSize || '16px',
+                lineHeight: 1,
+              }}
+            >
+              {rank}
+            </span>
+            <p
+              className="font-bold truncate"
+              style={{
+                color: rankColor,
+                fontSize: nameSize,
+                lineHeight: 1.2,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {dish_name}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5" style={{ marginTop: '4px' }}>
+            <p
+              className="truncate font-medium"
+              style={{
+                color: 'var(--color-text-secondary)',
+                fontSize: '11px',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+              }}
+            >
+              {restaurant_name}
+              {sortBy === 'best_value' && price != null && ` · $${Number(price).toFixed(0)}`}
+              {distance_miles && ` · ${Number(distance_miles).toFixed(1)} mi`}
+            </p>
+            <ValueBadge valuePercentile={value_percentile} />
+          </div>
+          <p style={{ marginTop: '6px', fontSize: '13px' }}>
+            {isRanked ? (
+              <>
+                <span className="font-bold" style={{ color: getRatingColor(avg_rating) }}>
+                  {avg_rating}
+                </span>
+                <span style={{ color: 'var(--color-text-tertiary)' }}> · {total_votes} votes</span>
+              </>
+            ) : (
+              <span style={{ color: 'var(--color-text-tertiary)' }}>
+                {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+              </span>
+            )}
+          </p>
+        </div>
+      </button>
+    )
+  }
+
+  // Podium rows without photo
   if (podium) {
     return (
       <button
@@ -49,7 +130,6 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
           borderLeft: `2px solid ${podium.glow}`,
         }}
       >
-        {/* Large rank number with glow */}
         <span
           className="font-bold flex-shrink-0"
           style={{
@@ -63,8 +143,6 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
         >
           {rank}
         </span>
-
-        {/* Restaurant + dish info */}
         <div className="flex-1 min-w-0">
           <p
             className="font-bold truncate"
@@ -94,8 +172,6 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
             <ValueBadge valuePercentile={value_percentile} />
           </div>
         </div>
-
-        {/* Rating */}
         <div className="flex-shrink-0 text-right">
           {isRanked ? (
             <span
@@ -113,22 +189,11 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
             </span>
           )}
         </div>
-
-        {/* Photo thumbnail */}
-        {photo_url && (
-          <img
-            src={photo_url}
-            alt=""
-            loading="lazy"
-            className="flex-shrink-0 rounded-full object-cover"
-            style={{ width: '72px', height: '72px' }}
-          />
-        )}
       </button>
     )
   }
 
-  // Respected finalists for ranks 4+
+  // Finalist rows without photo
   return (
     <button
       onClick={handleClick}
@@ -138,8 +203,6 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
         background: 'var(--color-surface)',
         borderBottom: isLast ? 'none' : '1px solid var(--color-divider)',
       }}
-      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-      onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-surface)'}
     >
       <span
         className="font-bold flex-shrink-0"
@@ -152,7 +215,6 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
       >
         {rank}
       </span>
-
       <div className="flex-1 min-w-0">
         <p
           className="font-semibold text-sm truncate"
@@ -177,7 +239,6 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
           <ValueBadge valuePercentile={value_percentile} />
         </div>
       </div>
-
       <div className="flex-shrink-0 text-right">
         {isRanked ? (
           <span className="text-sm font-bold" style={{ color: getRatingColor(avg_rating) }}>
@@ -189,19 +250,6 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
           </span>
         )}
       </div>
-
-      {/* Photo thumbnail */}
-      {photo_url && (
-        <img
-          src={photo_url}
-          alt=""
-          loading="lazy"
-          className="flex-shrink-0 rounded-full object-cover"
-          style={{ width: '64px', height: '64px' }}
-        />
-      )}
-
-      {/* Chevron — tappable affordance */}
       <svg
         className="w-4 h-4 flex-shrink-0"
         style={{ color: 'var(--color-text-tertiary)' }}

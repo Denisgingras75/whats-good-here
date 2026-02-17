@@ -157,7 +157,7 @@ const PODIUM_STYLE = {
   3: { color: 'var(--color-medal-bronze)', glow: '#C4855C', rankSize: '22px', nameSize: '16px', ratingSize: '15px' },
 }
 
-// Top 10 row — podium layout for 1-3, compact for 4+
+// Top 10 row — photo-left card when photo exists, compact text row when not
 const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
   const { dish_name, restaurant_name, avg_rating, total_votes, photo_url } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
@@ -167,6 +167,89 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
     ? `Rank ${rank}: ${dish_name} at ${restaurant_name}, rated ${avg_rating} out of 10 with ${total_votes} votes`
     : `Rank ${rank}: ${dish_name} at ${restaurant_name}, ${total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'new dish'}`
 
+  const rankColor = podium?.color || 'var(--color-text-secondary)'
+  const nameColor = podium?.color || 'var(--color-text-primary)'
+  const nameSize = podium?.nameSize || '14px'
+
+  // Photo-left card layout — when dish has a photo
+  if (photo_url) {
+    return (
+      <button
+        onClick={onClick}
+        aria-label={accessibleLabel}
+        className="w-full flex items-stretch rounded-xl overflow-hidden transition-all text-left active:scale-[0.98]"
+        style={{
+          background: 'var(--color-surface-elevated)',
+          marginBottom: '8px',
+        }}
+      >
+        {/* Photo — left side, square */}
+        <div className="flex-shrink-0" style={{ width: '110px' }}>
+          <img
+            src={photo_url}
+            alt={dish_name}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Text content — right side */}
+        <div className="flex-1 min-w-0 py-3 px-3 flex flex-col justify-center">
+          <div className="flex items-center gap-2">
+            <span
+              className="font-bold flex-shrink-0"
+              style={{
+                color: rankColor,
+                fontSize: podium?.rankSize || '16px',
+                lineHeight: 1,
+              }}
+            >
+              {rank}
+            </span>
+            <p
+              className="font-bold truncate"
+              style={{
+                color: nameColor,
+                fontSize: nameSize,
+                lineHeight: 1.2,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {dish_name}
+            </p>
+          </div>
+          <p
+            className="truncate font-medium"
+            style={{
+              color: 'var(--color-text-secondary)',
+              fontSize: '11px',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              marginTop: '4px',
+            }}
+          >
+            {restaurant_name}
+          </p>
+          <p style={{ marginTop: '6px', fontSize: '13px' }}>
+            {isRanked ? (
+              <>
+                <span className="font-bold" style={{ color: getRatingColor(avg_rating) }}>
+                  {avg_rating}
+                </span>
+                <span style={{ color: 'var(--color-text-tertiary)' }}> · {total_votes} votes</span>
+              </>
+            ) : (
+              <span style={{ color: 'var(--color-text-tertiary)' }}>
+                {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+              </span>
+            )}
+          </p>
+        </div>
+      </button>
+    )
+  }
+
+  // No-photo layout — compact text row (podium or finalist)
   if (podium) {
     return (
       <button
@@ -178,7 +261,6 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           borderLeft: `2px solid ${podium.glow}`,
         }}
       >
-        {/* Large rank number with glow */}
         <span
           className="font-bold flex-shrink-0"
           style={{
@@ -192,8 +274,6 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
         >
           {rank}
         </span>
-
-        {/* Dish + restaurant + rating info */}
         <div className="flex-1 min-w-0">
           <p
             className="font-bold truncate"
@@ -233,22 +313,11 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
             )}
           </p>
         </div>
-
-        {/* Photo thumbnail */}
-        {photo_url && (
-          <img
-            src={photo_url}
-            alt=""
-            loading="lazy"
-            className="flex-shrink-0 rounded-full object-cover"
-            style={{ width: '72px', height: '72px' }}
-          />
-        )}
       </button>
     )
   }
 
-  // Respected finalists for ranks 4+
+  // Finalist row (4+), no photo
   return (
     <button
       onClick={onClick}
@@ -270,7 +339,6 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
       >
         {rank}
       </span>
-
       <div className="flex-1 min-w-0">
         <p
           className="font-semibold text-sm truncate"
@@ -305,17 +373,6 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           )}
         </p>
       </div>
-
-      {/* Photo thumbnail */}
-      {photo_url && (
-        <img
-          src={photo_url}
-          alt=""
-          loading="lazy"
-          className="flex-shrink-0 rounded-full object-cover"
-          style={{ width: '64px', height: '64px' }}
-        />
-      )}
     </button>
   )
 })
