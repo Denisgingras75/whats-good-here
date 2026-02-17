@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { capture } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
 import { useVote } from '../hooks/useVote'
+import { usePurityTracker } from '../hooks/usePurityTracker'
 import { authApi } from '../api/authApi'
 import { FoodRatingSlider } from './FoodRatingSlider'
 import { ThumbsUpIcon } from './ThumbsUpIcon'
@@ -21,6 +22,7 @@ import { setBackButtonInterceptor, clearBackButtonInterceptor } from '../utils/b
 export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, category, price, totalVotes = 0, yesVotes = 0, onVote, onLoginRequired }) {
   const { user } = useAuth()
   const { submitVote, submitting } = useVote()
+  const { getPurity, attachToTextarea, reset: resetPurity } = usePurityTracker()
   const [userVote, setUserVote] = useState(null)
   const [userRating, setUserRating] = useState(null)
   const [userReviewText, setUserReviewText] = useState(null)
@@ -187,11 +189,15 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
 
     setLastSubmission({ wouldOrderAgain, rating: sliderValue })
 
+    // Capture purity before clearing state
+    const purityData = reviewTextToSubmit ? getPurity() : null
+
     clearPendingVoteStorage()
     setStep(1)
     setSliderValue(5.0)
     setReviewText('')
     setReviewError(null)
+    resetPurity()
 
     hapticSuccess()
 
@@ -200,7 +206,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     setAnnouncement('Vote submitted successfully')
     setTimeout(() => setAnnouncement(''), 1000)
 
-    submitVote(dishId, wouldOrderAgain, sliderValue, reviewTextToSubmit)
+    submitVote(dishId, wouldOrderAgain, sliderValue, reviewTextToSubmit, purityData)
       .then((result) => {
         if (!result.success) {
           logger.error('Vote submission failed:', result.error)
@@ -466,6 +472,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
       <div className="relative">
         <label htmlFor="review-text" className="sr-only">Your review</label>
         <textarea
+          ref={attachToTextarea}
           id="review-text"
           value={reviewText}
           onChange={(e) => {

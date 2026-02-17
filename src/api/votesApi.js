@@ -20,7 +20,7 @@ export const votesApi = {
    * @param {string} params.reviewText - Optional review text (max 200 chars)
    * @returns {Promise<Object>} Success status
    */
-  async submitVote({ dishId, wouldOrderAgain, rating10 = null, reviewText = null }) {
+  async submitVote({ dishId, wouldOrderAgain, rating10 = null, reviewText = null, purityData = null }) {
     // Quick client-side check first (better UX)
       const clientRateLimit = checkVoteRateLimit()
       if (!clientRateLimit.allowed) {
@@ -73,6 +73,11 @@ export const votesApi = {
       if (cleanReviewText) {
         voteData.review_text = cleanReviewText
         voteData.review_created_at = new Date().toISOString()
+      }
+
+      // Attach purity score if available (silent anti-spam metric)
+      if (purityData && purityData.purity != null) {
+        voteData.purity_score = purityData.purity
       }
 
       const { error } = await supabase

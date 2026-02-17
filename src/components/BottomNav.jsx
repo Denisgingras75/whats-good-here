@@ -1,7 +1,11 @@
+import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { prefetchRoutes } from '../App'
+import { AddDishFlow } from './AddDishFlow'
 
 export function BottomNav() {
+  const [addDishOpen, setAddDishOpen] = useState(false)
+
   const tabs = [
     {
       to: '/',
@@ -56,47 +60,74 @@ export function BottomNav() {
       }}
     >
       <div className="flex justify-around items-center h-16 pb-safe">
-        {tabs.map((tab) => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            end={tab.to === '/'}
-            onMouseEnter={() => tab.prefetch?.()}
-            onFocus={() => tab.prefetch?.()}
-            className={({ isActive }) =>
-              `relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-150 active:scale-95 active:opacity-80 ${
-                isActive
-                  ? ''
-                  : 'hover:opacity-80'
-              }`
-            }
-            style={({ isActive }) => ({
-              color: isActive ? 'var(--color-primary)' : 'var(--color-text-tertiary)'
-            })}
-          >
-            {({ isActive }) => (
-              <>
-                <span style={{ transform: isActive ? 'scale(1.12)' : 'scale(1)', transition: 'transform 150ms ease' }}>
-                  {tab.icon}
-                </span>
-                <span className="text-xs font-medium mt-1">{tab.label}</span>
-                {isActive && (
-                  <span
-                    className="absolute rounded-full"
-                    style={{
-                      background: 'var(--color-accent-gold)',
-                      bottom: '4px',
-                      width: '16px',
-                      height: '3px',
-                      boxShadow: '0 0 6px rgba(217, 167, 101, 0.4)',
-                    }}
-                  />
-                )}
-              </>
+        {tabs.map((tab, i) => (
+          <React.Fragment key={tab.to}>
+            <NavLink
+              to={tab.to}
+              end={tab.to === '/'}
+              onMouseEnter={() => tab.prefetch?.()}
+              onFocus={() => tab.prefetch?.()}
+              className={({ isActive }) =>
+                `relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-150 active:scale-95 active:opacity-80 ${
+                  isActive
+                    ? ''
+                    : 'hover:opacity-80'
+                }`
+              }
+              style={({ isActive }) => ({
+                color: isActive ? 'var(--color-primary)' : 'var(--color-text-tertiary)'
+              })}
+            >
+              {({ isActive }) => (
+                <>
+                  <span style={{ transform: isActive ? 'scale(1.12)' : 'scale(1)', transition: 'transform 150ms ease' }}>
+                    {tab.icon}
+                  </span>
+                  <span className="text-xs font-medium mt-1">{tab.label}</span>
+                  {isActive && (
+                    <span
+                      className="absolute rounded-full"
+                      style={{
+                        background: 'var(--color-accent-gold)',
+                        bottom: '4px',
+                        width: '16px',
+                        height: '3px',
+                        boxShadow: '0 0 6px rgba(217, 167, 101, 0.4)',
+                      }}
+                    />
+                  )}
+                </>
+              )}
+            </NavLink>
+            {/* Add button after Restaurants (index 1) */}
+            {i === 1 && (
+              <button
+                onClick={() => setAddDishOpen(true)}
+                aria-label="Add a dish"
+                className="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-150 active:scale-90"
+              >
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center -mt-1"
+                  style={{
+                    background: 'var(--color-primary)',
+                    boxShadow: '0 2px 8px rgba(200, 90, 84, 0.4)',
+                  }}
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                </div>
+                <span className="text-xs font-medium mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Add</span>
+              </button>
             )}
-          </NavLink>
+          </React.Fragment>
         ))}
       </div>
+
+      <AddDishFlow
+        isOpen={addDishOpen}
+        onClose={() => setAddDishOpen(false)}
+      />
     </nav>
   )
 }

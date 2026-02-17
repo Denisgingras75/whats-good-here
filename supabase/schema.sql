@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS votes (
   vote_position INT,
   scored_at TIMESTAMPTZ,
   category_snapshot TEXT,
+  purity_score DECIMAL(5, 2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(dish_id, user_id),
   CONSTRAINT review_text_max_length CHECK (review_text IS NULL OR length(review_text) <= 200)
