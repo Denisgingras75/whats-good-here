@@ -223,7 +223,7 @@ export function Restaurants() {
             onChange={(e) => selectedRestaurant ? setDishSearchQuery(e.target.value) : setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 rounded-xl border focus:ring-2 transition-all"
             style={{
-              background: 'var(--color-surface-elevated)',
+              background: 'var(--color-bg)',
               borderColor: 'var(--color-divider)',
               color: 'var(--color-text-primary)',
               fontSize: '14px',
@@ -272,7 +272,6 @@ export function Restaurants() {
             className="flex rounded-xl p-1 mb-5"
             style={{
               background: 'var(--color-surface-elevated)',
-              border: '1px solid var(--color-divider)',
             }}
             role="tablist"
             aria-label="Restaurant status filter"

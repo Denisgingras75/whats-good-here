@@ -7,7 +7,7 @@ export function SearchHero({ town, loading, categoryScroll, onSearchChange }) {
   return (
     <section
       className="pt-8 pb-5"
-      style={{ background: 'var(--color-bg)' }}
+      style={{ background: 'var(--color-surface)' }}
     >
       <div className="mb-3 text-center px-4">
         <h1
