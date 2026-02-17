@@ -35,3 +35,4 @@ presentation-style-3-friendly.html
 .netlify
 stats.html
 .env
+.env.dev

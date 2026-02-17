@@ -344,17 +344,24 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                 </div>
               ) : !hasResults ? (
                 <div className="px-4 py-6 text-center">
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
                     No results for "{query}"
                   </p>
-                  {user ? (
-                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                      Try a different spelling, or add it below
-                    </p>
-                  ) : (
-                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                      Try a different spelling or browse restaurants instead
-                    </p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                    Try a different spelling
+                  </p>
+                  {user && (
+                    <button
+                      onClick={handleAddRestaurant}
+                      className="mt-3 px-4 py-2 rounded-full font-semibold text-xs transition-all active:scale-[0.97]"
+                      style={{
+                        background: 'rgba(217, 167, 101, 0.12)',
+                        color: 'var(--color-accent-gold)',
+                        border: '1px solid rgba(217, 167, 101, 0.25)',
+                      }}
+                    >
+                      Can't find it? Add a restaurant
+                    </button>
                   )}
                 </div>
               ) : (

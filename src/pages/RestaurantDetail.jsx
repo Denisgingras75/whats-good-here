@@ -424,6 +424,7 @@ export function RestaurantDetail() {
           user={user}
           searchQuery={dishSearchQuery}
           friendsVotesByDish={friendsVotesByDish}
+          onAddDish={() => setAddDishModalOpen(true)}
         />
       ) : (
         <RestaurantMenu
