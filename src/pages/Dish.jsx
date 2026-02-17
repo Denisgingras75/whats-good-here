@@ -10,6 +10,7 @@ import { dishesApi } from '../api/dishesApi'
 import { followsApi } from '../api/followsApi'
 import { dishPhotosApi } from '../api/dishPhotosApi'
 import { votesApi } from '../api/votesApi'
+import { authApi } from '../api/authApi'
 import { useFavorites } from '../hooks/useFavorites'
 import { ReviewFlow } from '../components/ReviewFlow'
 import { PhotoUploadButton } from '../components/PhotoUploadButton'
@@ -66,6 +67,7 @@ export function Dish() {
   const [parentDish, setParentDish] = useState(null)
   const [isVariant, setIsVariant] = useState(false)
 
+  const [hasVoted, setHasVoted] = useState(false)
   const [photoUploaded, setPhotoUploaded] = useState(null)
   const [featuredPhoto, setFeaturedPhoto] = useState(null)
   const [communityPhotos, setCommunityPhotos] = useState([])
@@ -190,7 +192,7 @@ export function Dish() {
       setReviewsLoading(true)
 
       // Run all independent fetches in parallel
-      const [photosResult, reviewsResult, friendsResult] = await Promise.allSettled([
+      const [photosResult, reviewsResult, friendsResult, userVoteResult] = await Promise.allSettled([
         // Photos (3 calls, already parallelized internally)
         Promise.all([
           dishPhotosApi.getFeaturedPhoto(dishId),
@@ -201,6 +203,8 @@ export function Dish() {
         votesApi.getReviewsForDish(dishId, { limit: 20 }),
         // Friends' votes (only if user is logged in)
         user ? followsApi.getFriendsVotesForDish(dishId) : Promise.resolve([]),
+        // Check if user has voted (for showing photo upload)
+        user ? authApi.getUserVoteForDish(dishId, user.id) : Promise.resolve(null),
       ])
 
       // Handle photos result
@@ -228,6 +232,11 @@ export function Dish() {
       } else {
         logger.error('Failed to fetch friends votes:', friendsResult.reason)
         setFriendsVotes([])
+      }
+
+      // Handle user vote check
+      if (userVoteResult.status === 'fulfilled' && userVoteResult.value) {
+        setHasVoted(true)
       }
     }
 
@@ -280,6 +289,7 @@ export function Dish() {
   }
 
   const handleVote = async () => {
+    setHasVoted(true)
     // Refetch dish data and reviews after voting
     try {
       const [data, reviewsData] = await Promise.all([
@@ -347,10 +357,12 @@ export function Dish() {
       <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
         <div className="animate-pulse">
           <div className="aspect-[4/3] w-full" style={{ background: 'var(--color-divider)' }} />
-          <div className="mx-4 -mt-5 rounded-xl p-5" style={{ background: 'var(--color-surface-elevated)' }}>
-            <div className="flex items-start justify-between">
-              <div className="h-12 w-16 rounded" style={{ background: 'var(--color-divider)' }} />
-              <div className="h-4 w-40 rounded" style={{ background: 'var(--color-divider)' }} />
+          <div className="mx-4 -mt-5 rounded-xl p-5 space-y-3" style={{ background: 'var(--color-surface-elevated)' }}>
+            <div className="h-6 w-48 rounded" style={{ background: 'var(--color-divider)' }} />
+            <div className="h-4 w-32 rounded" style={{ background: 'var(--color-divider)' }} />
+            <div className="flex items-end justify-between pt-2">
+              <div className="h-10 w-14 rounded" style={{ background: 'var(--color-divider)' }} />
+              <div className="h-4 w-24 rounded" style={{ background: 'var(--color-divider)' }} />
             </div>
           </div>
           <div className="p-4 mt-4 space-y-3">
@@ -459,7 +471,7 @@ export function Dish() {
         </div>
       ) : (
         <>
-          {/* Hero Image — Editorial overlay */}
+          {/* Hero Image — pure photo, no overlays */}
           <div className="relative aspect-[4/3] overflow-hidden">
             {heroImage ? (
               <img
@@ -469,50 +481,8 @@ export function Dish() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <DishPlaceholder restaurantName={dish.restaurant_name} restaurantTown={dish.restaurant_town} category={dish.category} showCTA />
+              <DishPlaceholder restaurantName={dish.restaurant_name} restaurantTown={dish.restaurant_town} category={dish.category} />
             )}
-
-            {/* Gradient overlay — stronger for text readability */}
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 40%, transparent 70%)' }}
-            />
-
-            {/* Editorial text overlay */}
-            <div className="absolute bottom-0 left-0 right-0 px-5 pb-5">
-              <h1
-                style={{
-                  fontFamily: "'aglet-sans', sans-serif",
-                  fontWeight: 800,
-                  fontSize: '24px',
-                  letterSpacing: '-0.02em',
-                  color: '#FFFFFF',
-                  lineHeight: 1.1,
-                  margin: 0,
-                  textShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                }}
-              >
-                {dish.dish_name}
-              </h1>
-              <button
-                onClick={() => navigate(`/restaurants/${dish.restaurant_id}`)}
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.7)',
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  marginTop: '4px',
-                  cursor: 'pointer',
-                  display: 'block',
-                }}
-              >
-                {dish.restaurant_name}
-              </button>
-            </div>
 
             {/* Official badge if featured from restaurant */}
             {featuredPhoto?.source_type === 'restaurant' && (
@@ -549,7 +519,53 @@ export function Dish() {
               </button>
             )}
 
-            <div className="flex items-start justify-between">
+            {/* Dish name + price */}
+            <div className="flex items-start justify-between gap-3">
+              <h1
+                style={{
+                  fontFamily: "'aglet-sans', sans-serif",
+                  fontWeight: 800,
+                  fontSize: '22px',
+                  letterSpacing: '-0.02em',
+                  color: 'var(--color-text-primary)',
+                  lineHeight: 1.15,
+                  margin: 0,
+                }}
+              >
+                {dish.dish_name}
+              </h1>
+              {dish.price ? (
+                <span
+                  className="flex-shrink-0 text-base font-bold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  ${Number(dish.price).toFixed(0)}
+                </span>
+              ) : null}
+            </div>
+
+            {/* Restaurant link */}
+            <button
+              onClick={() => navigate(`/restaurants/${dish.restaurant_id}`)}
+              className="flex items-center gap-1 mt-1"
+              style={{
+                fontSize: '14px',
+                fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+              }}
+            >
+              {dish.restaurant_name}
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Rating + votes row */}
+            <div className="flex items-end justify-between mt-4">
               {/* Rating — left side */}
               {isRanked && dish.avg_rating ? (
                 <div className="flex-shrink-0">
@@ -567,13 +583,9 @@ export function Dish() {
                 </div>
               ) : null}
 
-              {/* Stats — right side */}
+              {/* Votes — right side */}
               <div className={`text-right ${isRanked && dish.avg_rating ? '' : 'w-full'}`}>
                 <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                  {dish.price ? (
-                    <span className="font-bold">${Number(dish.price).toFixed(0)}</span>
-                  ) : null}
-                  {dish.price && dish.total_votes > 0 ? ' · ' : ''}
                   {dish.total_votes > 0 ? `${dish.total_votes} vote${dish.total_votes === 1 ? '' : 's'}` : ''}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
@@ -799,12 +811,14 @@ export function Dish() {
               </div>
             )}
 
-            {/* Photo Upload */}
-            <PhotoUploadButton
-              dishId={dish.dish_id}
-              onPhotoUploaded={handlePhotoUploaded}
-              onLoginRequired={handleLoginRequired}
-            />
+            {/* Photo Upload — only after voting */}
+            {hasVoted && (
+              <PhotoUploadButton
+                dishId={dish.dish_id}
+                onPhotoUploaded={handlePhotoUploaded}
+                onLoginRequired={handleLoginRequired}
+              />
+            )}
           </div>
         </>
       )}
