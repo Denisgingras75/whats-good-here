@@ -34,7 +34,7 @@ export function Home() {
     return (b.avg_rating || 0) - (a.avg_rating || 0)
   }
 
-  // Top 10 dishes on the island (all categories)
+  // Top 10 dishes (all categories)
   const top10Dishes = useMemo(() => {
     if (!dishes?.length) return []
     return dishes.slice().sort(rankSort).slice(0, 10)
@@ -326,18 +326,20 @@ function EmptyState({ onBrowse }) {
         className="w-16 h-16 mx-auto mb-4 rounded-full object-cover"
       />
       <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
-        No dishes found
+        No dishes rated here yet
       </p>
       <p className="text-sm mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-        Try selecting a different town or expanding your radius
+        Be the first to rate a dish, or try expanding your radius
       </p>
-      <button
-        onClick={() => onBrowse('/restaurants')}
-        className="mt-4 px-6 py-2 rounded-full text-sm font-medium transition-opacity hover:opacity-90"
-        style={{ background: 'var(--color-primary)', color: 'white' }}
-      >
-        Browse Restaurants
-      </button>
+      <div className="flex flex-col items-center gap-2 mt-4">
+        <button
+          onClick={() => onBrowse('/restaurants')}
+          className="px-6 py-2 rounded-full text-sm font-medium transition-opacity hover:opacity-90"
+          style={{ background: 'var(--color-primary)', color: 'white' }}
+        >
+          Browse Restaurants
+        </button>
+      </div>
     </div>
   )
 }

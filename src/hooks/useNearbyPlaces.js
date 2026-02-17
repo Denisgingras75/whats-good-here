@@ -8,7 +8,7 @@ const MAX_DISCOVERY_RADIUS_MI = 25
 /**
  * Discover nearby restaurants via Google Places that aren't already in the DB.
  * Only runs when: user is authenticated and location is available.
- * Search radius is capped at 25 miles (MV + Cape Cod coverage).
+ * Search radius is capped at 25 miles.
  *
  * @param {Object} params
  * @param {number} params.lat - User latitude
