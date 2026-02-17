@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { toast } from 'sonner'
 import { capture } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
 import { useVote } from '../hooks/useVote'
@@ -15,7 +14,6 @@ import {
 } from '../lib/storage'
 import { logger } from '../utils/logger'
 import { hapticLight, hapticSuccess } from '../utils/haptics'
-import { shareOrCopy, buildPostVoteShareData } from '../utils/share'
 import { PhotoUploadButton } from './PhotoUploadButton'
 import { setBackButtonInterceptor, clearBackButtonInterceptor } from '../utils/backButtonInterceptor'
 
@@ -29,7 +27,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
   const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes)
   const [localYesVotes, setLocalYesVotes] = useState(yesVotes)
 
-  // Flow: 1 = yes/no, 2 = rating, 3 = extras (review + photo)
+  // Flow: 1 = yes/no, 2 = rate + extras (review + photo)
   // Initialize from localStorage if there's a pending vote for this dish (survives page reload after magic link)
   const [step, setStep] = useState(() => {
     const stored = getPendingVoteFromStorage()
@@ -48,8 +46,6 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
   const [awaitingLogin, setAwaitingLogin] = useState(false)
   const [announcement, setAnnouncement] = useState('') // For screen reader announcements
   const [photoAdded, setPhotoAdded] = useState(false)
-  const [showSharePrompt, setShowSharePrompt] = useState(false)
-  const [lastSubmission, setLastSubmission] = useState(null)
   const confirmationTimerRef = useRef(null)
 
   const noVotes = localTotalVotes - localYesVotes
@@ -108,9 +104,9 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     }
   }, [user, dishId, step, pendingVote])
 
-  // Auth guard: if on step 2+ without auth, kick back to step 1
+  // Auth guard: if on step 2 without auth, kick back to step 1
   useEffect(() => {
-    if ((step === 2 || step === 3) && !user) {
+    if (step === 2 && !user) {
       setStep(1)
       setAwaitingLogin(true)
       onLoginRequired?.()
@@ -150,11 +146,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     }, 350)
   }
 
-  const handleRatingNext = () => {
-    setStep(3) // Go to extras (review + photo)
-  }
-
-  const handleExtrasSubmit = async () => {
+  const handleSubmit = async () => {
     // Validate review length if they wrote something
     if (reviewText.length > MAX_REVIEW_LENGTH) {
       setReviewError(`${reviewText.length - MAX_REVIEW_LENGTH} characters over limit`)
@@ -181,8 +173,6 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     }
 
     const previousVote = userVote
-    const previousRating = userRating
-    const previousReview = userReviewText
 
     if (previousVote === null) {
       setLocalTotalVotes(prev => prev + 1)
@@ -210,11 +200,9 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
       would_order_again: pendingVote,
       rating: sliderValue,
       has_review: !!reviewTextToSubmit,
+      has_photo: photoAdded,
       is_update: previousVote !== null,
     })
-
-    // Save submission data for share prompt before clearing state
-    setLastSubmission({ wouldOrderAgain: pendingVote, rating: sliderValue })
 
     // Clear UI state immediately - instant feedback
     clearPendingVoteStorage()
@@ -227,12 +215,12 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     // Haptic success feedback
     hapticSuccess()
 
-    // Show share prompt
-    setShowSharePrompt(true)
-
     // Announce for screen readers
     setAnnouncement('Vote submitted successfully')
     setTimeout(() => setAnnouncement(''), 1000)
+
+    // Notify parent to refresh data
+    onVote?.()
 
     // Submit to server in background (non-blocking)
     submitVote(dishId, pendingVote, sliderValue, reviewTextToSubmit)
@@ -251,7 +239,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
   // fires first (AT_TARGET phase = registration order). It calls stopImmediatePropagation to
   // prevent React Router from processing the navigation, then pushes the dish URL back.
   useEffect(() => {
-    if (step <= 1 && !showSharePrompt) {
+    if (step <= 1) {
       clearBackButtonInterceptor()
       return
     }
@@ -264,90 +252,11 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     setBackButtonInterceptor(() => {
       // Restore the dish page in the history stack
       window.history.pushState(currentState, '', currentUrl)
-
-      if (showSharePrompt) {
-        setShowSharePrompt(false)
-        setLastSubmission(null)
-        onVote?.()
-      } else if (step > 1) {
-        setStep(step - 1)
-      }
+      setStep(1)
     })
 
     return () => clearBackButtonInterceptor()
-  }, [step, showSharePrompt, onVote])
-
-  const handleShareDish = async () => {
-    if (!lastSubmission) return
-    const shareData = buildPostVoteShareData(
-      { dish_id: dishId, dish_name: dishName, restaurant_name: restaurantName },
-      lastSubmission.wouldOrderAgain,
-      lastSubmission.rating
-    )
-    const result = await shareOrCopy(shareData)
-
-    capture('dish_shared', {
-      dish_id: dishId,
-      dish_name: dishName,
-      restaurant_name: restaurantName,
-      context: 'post_vote',
-      method: result.method,
-      success: result.success,
-    })
-
-    if (result.success && result.method !== 'native') {
-      toast.success('Link copied!', { duration: 2000 })
-    }
-
-    setShowSharePrompt(false)
-    setLastSubmission(null)
-    onVote?.()
-  }
-
-  const handleShareDismiss = () => {
-    capture('share_dismissed', { context: 'post_vote', dish_id: dishId })
-    setShowSharePrompt(false)
-    setLastSubmission(null)
-    onVote?.()
-  }
-
-  // Share prompt after voting
-  if (showSharePrompt && lastSubmission) {
-    return (
-      <div className="space-y-3 text-center animate-fadeIn">
-        {/* Screen reader announcement region */}
-        <div aria-live="polite" aria-atomic="true" className="sr-only">
-          {announcement}
-        </div>
-        <div>{lastSubmission.wouldOrderAgain ? <ThumbsUpIcon size={40} /> : <ThumbsDownIcon size={40} />}</div>
-        <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-          Vote saved!
-        </p>
-        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-          Let friends know what's good here
-        </p>
-        <button
-          onClick={handleShareDish}
-          className="w-full py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-98"
-          style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-            <polyline points="16 6 12 2 8 6" />
-            <line x1="12" y1="2" x2="12" y2="15" />
-          </svg>
-          Share this dish
-        </button>
-        <button
-          onClick={handleShareDismiss}
-          className="w-full py-2 text-sm transition-colors"
-          style={{ color: 'var(--color-text-tertiary)' }}
-        >
-          Not now
-        </button>
-      </div>
-    )
-  }
+  }, [step])
 
   // Already voted - show summary
   if (userVote !== null && userRating !== null && step === 1) {
@@ -464,55 +373,26 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     )
   }
 
-  // Step 2: Rating with Pizza Animation
-  if (step === 2) {
-    return (
-      <div className="space-y-4 animate-fadeIn">
-        <div className="flex items-center justify-between">
-          <button onClick={() => setStep(1)} className="text-sm transition-colors flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
-            <span>←</span> Back
-          </button>
-          <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>How good was it?</p>
-          <div className="w-12" />
-        </div>
-
-        {/* Food Rating Slider */}
-        <FoodRatingSlider
-          value={sliderValue}
-          onChange={setSliderValue}
-          min={0}
-          max={10}
-          step={0.1}
-          category={category}
-        />
-
-        <button
-          onClick={handleRatingNext}
-          className="w-full py-4 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 ease-out focus-ring active:scale-98 hover:shadow-xl hover:opacity-90"
-          style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
-        >
-          Next
-        </button>
-      </div>
-    )
-  }
-
-  // Step 3: Extras — review + photo on one screen
+  // Step 2: Rate + extras (review + photo) — all on one screen
   return (
     <div className="space-y-4 animate-fadeIn">
       <div className="flex items-center justify-between">
-        <button onClick={() => setStep(2)} className="text-sm transition-colors flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
+        <button onClick={() => setStep(1)} className="text-sm transition-colors flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
           <span>←</span> Back
         </button>
-        <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Anything to add?</p>
+        <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>How good was it?</p>
         <div className="w-12" />
       </div>
 
-      {/* Summary of vote */}
-      <div className="p-3 rounded-xl flex items-center justify-center gap-4" style={{ background: 'var(--color-surface-elevated)', border: '1px solid var(--color-divider)' }}>
-        {pendingVote ? <ThumbsUpIcon size={28} /> : <ThumbsDownIcon size={28} />}
-        <span className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{sliderValue.toFixed(1)}</span>
-      </div>
+      {/* Food Rating Slider */}
+      <FoodRatingSlider
+        value={sliderValue}
+        onChange={setSliderValue}
+        min={0}
+        max={10}
+        step={0.1}
+        category={category}
+      />
 
       {/* Review text input */}
       <div className="relative">
@@ -524,12 +404,12 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             setReviewText(e.target.value)
             if (reviewError) setReviewError(null)
           }}
-          placeholder="What made this dish great (or not)?"
+          placeholder="Quick review (optional)"
           aria-label="Write your review"
           aria-describedby={reviewError ? 'review-error' : 'review-char-count'}
           aria-invalid={!!reviewError}
           maxLength={MAX_REVIEW_LENGTH + 50}
-          rows={3}
+          rows={2}
           className="w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           style={{
             background: 'var(--color-surface-elevated)',
@@ -537,9 +417,11 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             color: 'var(--color-text-primary)',
           }}
         />
-        <div id="review-char-count" className="absolute bottom-2 right-3 text-xs" style={{ color: reviewText.length > MAX_REVIEW_LENGTH ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}>
-          {reviewText.length}/{MAX_REVIEW_LENGTH}
-        </div>
+        {reviewText.length > 0 && (
+          <div id="review-char-count" className="absolute bottom-2 right-3 text-xs" style={{ color: reviewText.length > MAX_REVIEW_LENGTH ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}>
+            {reviewText.length}/{MAX_REVIEW_LENGTH}
+          </div>
+        )}
       </div>
 
       {/* Error message */}
@@ -570,7 +452,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
 
       {/* Submit button */}
       <button
-        onClick={handleExtrasSubmit}
+        onClick={handleSubmit}
         disabled={submitting || reviewText.length > MAX_REVIEW_LENGTH}
         className={`w-full py-4 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 ease-out focus-ring
           ${submitting || reviewText.length > MAX_REVIEW_LENGTH ? 'opacity-50 cursor-not-allowed' : 'active:scale-98 hover:shadow-xl'}`}
