@@ -790,17 +790,6 @@ export function Dish() {
               </div>
             )}
 
-            {/* No reviews message */}
-            {!reviewsLoading && reviews.length === 0 && dish.total_votes > 0 && (
-              <div
-                className="mb-6 p-4 rounded-xl text-center"
-                style={{ background: 'var(--color-surface-elevated)', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
-              >
-                <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                  No written reviews yet — be the first to share your thoughts!
-                </p>
-              </div>
-            )}
 
           </div>
         </>
