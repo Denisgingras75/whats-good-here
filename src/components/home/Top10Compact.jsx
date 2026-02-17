@@ -241,7 +241,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
             alt=""
             loading="lazy"
             className="flex-shrink-0 rounded-full object-cover"
-            style={{ width: '64px', height: '64px' }}
+            style={{ width: '72px', height: '72px' }}
           />
         )}
       </button>
@@ -313,7 +313,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           alt=""
           loading="lazy"
           className="flex-shrink-0 rounded-full object-cover"
-          style={{ width: '56px', height: '56px' }}
+          style={{ width: '64px', height: '64px' }}
         />
       )}
     </button>

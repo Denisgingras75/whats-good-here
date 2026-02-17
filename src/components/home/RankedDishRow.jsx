@@ -121,7 +121,7 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
             alt=""
             loading="lazy"
             className="flex-shrink-0 rounded-full object-cover"
-            style={{ width: '64px', height: '64px' }}
+            style={{ width: '72px', height: '72px' }}
           />
         )}
       </button>
@@ -197,7 +197,7 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
           alt=""
           loading="lazy"
           className="flex-shrink-0 rounded-full object-cover"
-          style={{ width: '56px', height: '56px' }}
+          style={{ width: '64px', height: '64px' }}
         />
       )}
 
