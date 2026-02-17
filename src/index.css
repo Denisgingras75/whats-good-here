@@ -29,66 +29,45 @@
 }
 
 /* ===========================
-   What's Good Here — Island Depths Theme (Default)
-   Dark mode with ocean island vibes
+   What's Good Here — Appetite Theme (Default)
+   White + orange, food psychology colors
    =========================== */
 :root {
-  /* Primary: Deep Rust/Terracotta - appetite trigger, premium feel */
-  --color-primary: #C85A54;
-  --color-primary-muted: rgba(200, 90, 84, 0.15);
-  --color-primary-glow: rgba(200, 90, 84, 0.3);
-
-  /* Rating: Muted natural green - softer, less techy */
-  --color-rating: #6BB384;
-
-  /* Secondary: Warm Gold - links, secondary buttons, accents */
-  --color-accent-gold: #D9A765;
-  --color-accent-gold-muted: rgba(217, 167, 101, 0.15);
-  --color-link-secondary: #D9A765;
-
-  /* Bright yellow for badges, stars, highlights */
-  --color-accent-yellow: #F5B731;
-
-  /* Tertiary: Warm Orange - hover states, accent borders */
+  /* Primary: Orange-Red — appetite trigger, energy, action */
+  --color-primary: #E8663C;
+  --color-primary-muted: rgba(232, 102, 60, 0.10);
+  --color-primary-glow: rgba(232, 102, 60, 0.20);
+  --color-rating: #16A34A;
+  --color-accent-gold: #E9A115;
+  --color-accent-gold-muted: rgba(233, 161, 21, 0.12);
+  --color-link-secondary: #E9A115;
   --color-accent-orange: #E07856;
+  --color-accent-yellow: #F5B731;
+  /* Text — neutral dark on white */
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #6B7280;
+  --color-text-tertiary: #9CA3AF;
+  /* Surfaces — warm stone + white */
+  --color-bg: #F0ECE8;
+  --color-surface: #F7F4F1;
+  --color-surface-elevated: #FFFFFF;
+  --color-divider: rgba(0, 0, 0, 0.08);
+  /* Category strip — warm orange accent band for icon backgrounds */
+  --color-category-strip: #FADCC8;
+  /* Cards — white on warm stone */
+  --color-card: #FFFFFF;
+  --color-card-hover: #FFF8F4;
+  --color-medal-gold: #B8860B;
+  --color-medal-silver: #6B7280;
+  --color-medal-bronze: #A0522D;
+  --color-danger: #DC2626;
+  --color-success: #16A34A;
+  --color-muted: #9CA3AF;
+  /* Tagline — muted under headings */
+  --color-text-tagline: #9CA3AF;
+  --color-text-on-primary: #FFFFFF;
 
-  /* Text hierarchy - warm cream primary, warm-tinted grays */
-  --color-text-primary: #F5F1E8;      /* Soft cream */
-  --color-text-secondary: #B8A99A;    /* Warm taupe gray */
-  --color-text-tertiary: #7D7168;     /* Warm brown-gray */
-
-  /* Surfaces - deep charcoal-navy, ocean depth feel */
-  --color-bg: #0D1B22;                /* Deep charcoal-navy */
-  --color-surface: #0F1F2B;           /* Slightly lighter */
-  --color-surface-elevated: #162B35;
-  --color-divider: rgba(200, 90, 84, 0.10);  /* Rust tint dividers */
-
-  /* Category strip background */
-  --color-category-strip: #162B35;
-
-  /* Cards - rich navy-teal, tropical water depth */
-  --color-card: #1A3A42;
-  --color-card-hover: #243A43;
-
-  /* Medal ranks — top 3 in lists */
-  --color-medal-gold: #D9A765;          /* Same as accent-gold */
-  --color-medal-silver: #A8B5BF;        /* Cool slate silver */
-  --color-medal-bronze: #C4855C;        /* Warm copper-bronze */
-
-  /* Feedback states */
-  --color-danger: #C85A54;            /* Same as primary */
-  --color-success: #6BB384;           /* Muted natural green */
-
-  /* "Avoid" action */
-  --color-muted: #6B7680;
-
-  /* Tagline — muted coral whisper under headings */
-  --color-text-tagline: #C08B7A;
-
-  /* Text on primary-colored backgrounds (buttons, banners) */
-  --color-text-on-primary: #1A1A1A;
-
-  /* Semantic status colors — success/error/warning variants */
+  /* Semantic status colors */
   --color-emerald: #10B981;
   --color-emerald-light: #22C55E;
   --color-red: #EF4444;
@@ -111,52 +90,51 @@
   --color-tier-hidden: #6B7280;
 
   /* Glow effects */
-  --glow-primary: 0 0 20px rgba(200, 90, 84, 0.25), 0 0 40px rgba(200, 90, 84, 0.1);
-  --glow-gold: 0 0 15px rgba(217, 167, 101, 0.2);
+  --glow-primary: 0 0 20px rgba(232, 102, 60, 0.15), 0 0 40px rgba(232, 102, 60, 0.05);
+  --glow-gold: 0 0 15px rgba(233, 161, 21, 0.15);
 
   /* Focus ring */
-  --focus-ring: 0 0 0 3px rgba(200, 90, 84, 0.25);
+  --focus-ring: 0 0 0 3px rgba(232, 102, 60, 0.25);
 }
 
 /* ===========================
-   Appetite Theme (Light Mode Toggle)
-   Food psychology colors: orange-red + warm stone
+   Island Depths Theme (Dark Mode Toggle)
+   Dark mode with ocean island vibes
    =========================== */
-[data-theme="light"] {
-  /* V1 — White + Orange original */
-  --color-primary: #E8663C;
-  --color-primary-muted: rgba(232, 102, 60, 0.10);
-  --color-primary-glow: rgba(232, 102, 60, 0.20);
-  --color-rating: #16A34A;
-  --color-accent-gold: #E9A115;
-  --color-accent-gold-muted: rgba(233, 161, 21, 0.12);
-  --color-link-secondary: #E9A115;
-  --color-accent-orange: #E07856;
+[data-theme="dark"] {
+  --color-primary: #C85A54;
+  --color-primary-muted: rgba(200, 90, 84, 0.15);
+  --color-primary-glow: rgba(200, 90, 84, 0.3);
+  --color-rating: #6BB384;
+  --color-accent-gold: #D9A765;
+  --color-accent-gold-muted: rgba(217, 167, 101, 0.15);
+  --color-link-secondary: #D9A765;
   --color-accent-yellow: #F5B731;
-  /* Text — neutral dark on white */
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
-  /* Surfaces — warm stone + white */
-  --color-bg: #F0ECE8;
-  --color-surface: #F7F4F1;
-  --color-surface-elevated: #FFFFFF;
-  --color-divider: rgba(0, 0, 0, 0.08);
-  /* Category strip — peach accent band for icon backgrounds */
-  --color-category-strip: #FADCC8;
-  /* Cards — white on warm stone */
-  --color-card: #FFFFFF;
-  --color-card-hover: #FFF8F4;
-  --color-medal-gold: #B8860B;
-  --color-medal-silver: #6B7280;
-  --color-medal-bronze: #A0522D;
-  --color-danger: #DC2626;
-  --color-success: #16A34A;
-  --color-muted: #9CA3AF;
-  --color-text-on-primary: #FFFFFF;
-  --glow-primary: 0 0 20px rgba(232, 102, 60, 0.15), 0 0 40px rgba(232, 102, 60, 0.05);
-  --glow-gold: 0 0 15px rgba(233, 161, 21, 0.15);
-  --focus-ring: 0 0 0 3px rgba(232, 102, 60, 0.25);
+  --color-accent-orange: #E07856;
+  /* Text — warm cream on dark */
+  --color-text-primary: #F5F1E8;
+  --color-text-secondary: #B8A99A;
+  --color-text-tertiary: #7D7168;
+  /* Surfaces — deep charcoal-navy */
+  --color-bg: #0D1B22;
+  --color-surface: #0F1F2B;
+  --color-surface-elevated: #162B35;
+  --color-divider: rgba(200, 90, 84, 0.10);
+  --color-category-strip: #162B35;
+  /* Cards — navy-teal */
+  --color-card: #1A3A42;
+  --color-card-hover: #243A43;
+  --color-medal-gold: #D9A765;
+  --color-medal-silver: #A8B5BF;
+  --color-medal-bronze: #C4855C;
+  --color-danger: #C85A54;
+  --color-success: #6BB384;
+  --color-muted: #6B7680;
+  --color-text-tagline: #C08B7A;
+  --color-text-on-primary: #1A1A1A;
+  --glow-primary: 0 0 20px rgba(200, 90, 84, 0.25), 0 0 40px rgba(200, 90, 84, 0.1);
+  --glow-gold: 0 0 15px rgba(217, 167, 101, 0.2);
+  --focus-ring: 0 0 0 3px rgba(200, 90, 84, 0.25);
 }
 
 @tailwind base;

@@ -4,8 +4,8 @@ import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../lib/storage'
 const ThemeContext = createContext()
 
 function applyTheme(theme) {
-  if (theme === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light')
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark')
   } else {
     document.documentElement.removeAttribute('data-theme')
   }
@@ -13,7 +13,7 @@ function applyTheme(theme) {
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    return getStorageItem(STORAGE_KEYS.THEME) || 'dark'
+    return getStorageItem(STORAGE_KEYS.THEME) || 'light'
   })
 
   useEffect(() => {
