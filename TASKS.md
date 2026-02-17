@@ -348,8 +348,19 @@
 - Chevron removed from finalist rows (4-10)
 - Expandable category lists — "Show all N [Category]" / "Show less" toggle when >10 dishes
 
+**What's done (Feb 17):**
+- Light mode now default — V1 white + orange theme (every user tested preferred it)
+- Theme CSS swapped: light = `:root`, dark = `[data-theme="dark"]`
+- Hero card dramatic redesign: 28px/800 gold dish name, 36px rating, gold edge glow, floating shadow
+- Typography hierarchy: heavier brand title (800), lighter tagline (400)
+- Richer coral primary `#E45A35`, warmer medal gold `#C48A12`
+- Silver/bronze podium rows sized up
+- Category icons: floating shadows, 1.05x scale on active
+- Search bars white across all pages
+
 **What's remaining:**
 - Trust signal: deferred until vote counts are more impressive (live stats looked empty)
+- Category icon PNGs need transparent backgrounds (currently baked peach circles)
 - Logo animation: creative brief written (`docs/plans/2026-02-15-logo-creative-brief.md`), needs external designer
 - Further brand signature refinement as the visual identity matures
 

@@ -201,9 +201,26 @@ export function useFoo(params) {
 | Use "favorites" not "saved" | Database table is `favorites` | `useFavorites`, `isFavorite` |
 
 ### 4.5 Design Tokens (Dual Theme)
-Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode. Dark "Island Depths" is the default; light "Appetite" is toggled via `[data-theme="light"]`.
+Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode. Light "Appetite" is the default; dark "Island Depths" is toggled via `[data-theme="dark"]`.
 
-**Default — Island Depths (Dark)**
+**Default — Appetite (Light)**
+| Token | Value | Usage |
+|---|---|---|
+| `--color-primary` | `#E45A35` (Warm Coral) | CTAs, primary actions |
+| `--color-accent-gold` | `#E9A115` (Warm Yellow) | Links, secondary accents |
+| `--color-accent-orange` | `#E07856` (Warm Orange) | Hover states |
+| `--color-rating` | `#16A34A` (Bright Green) | Rating displays |
+| `--color-text-primary` | `#1A1A1A` (Near Black) | Main text |
+| `--color-text-secondary` | `#6B7280` (Cool Gray) | Secondary text |
+| `--color-text-tertiary` | `#9CA3AF` (Light Gray) | Tertiary text |
+| `--color-bg` | `#F0ECE8` (Warm Stone) | Page background |
+| `--color-surface` | `#F7F4F1` (Near White) | Surface areas |
+| `--color-surface-elevated` | `#FFFFFF` (White) | Cards, modals |
+| `--color-card` | `#FFFFFF` (White) | Card backgrounds |
+| `--color-medal-gold` | `#C48A12` (Warm Amber) | #1 rank, gold medal |
+| `--color-category-strip` | `#FADCC8` (Warm Orange) | Category icon area |
+
+**Toggle — Island Depths (Dark)**
 | Token | Value | Usage |
 |---|---|---|
 | `--color-primary` | `#C85A54` (Deep Rust) | CTAs, primary actions, danger |
@@ -216,22 +233,6 @@ Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode. Dark
 | `--color-bg` | `#0D1B22` (Deep Charcoal-Navy) | Page background |
 | `--color-surface` | `#0F1F2B` | Slightly lighter surface |
 | `--color-card` | `#1A3A42` (Navy-Teal) | Card backgrounds |
-
-**Toggle — Appetite (Light) — 60/30/10 Food Psychology Ratio**
-| Token | Value | Usage | Layer |
-|---|---|---|---|
-| `--color-primary` | `#9E2B1E` (Deep Warm Crimson) | CTAs, primary actions, danger | 10% accent |
-| `--color-accent-gold` | `#E9A115` (Warm Yellow) | Links, secondary accents | 10% accent |
-| `--color-accent-orange` | `#E07856` (Warm Orange) | Hover states | 10% accent |
-| `--color-rating` | `#16A34A` (Bright Green) | Rating displays | Functional |
-| `--color-text-primary` | `#3A2818` (Warm Dark Brown) | Main text | Text |
-| `--color-text-secondary` | `#7A6E62` (Warm Taupe) | Secondary text | Text |
-| `--color-text-tertiary` | `#A89888` (Warm Sand) | Tertiary text | Text |
-| `--color-bg` | `#F0ECE8` (Warm Stone) | Page background | 60% backdrop |
-| `--color-surface` | `#E8D4C8` (Warm Peach Stone) | Surface areas | 60% backdrop |
-| `--color-card` | `#F2CDBC` (Copper Peach) | Card backgrounds | 30% atmosphere |
-| `--color-card-hover` | `#EBC2AE` (Deeper Copper) | Card hover states | 30% atmosphere |
-| `--color-surface-elevated` | `#EFCFBE` (Warm Elevated) | Modals, panels | 30% atmosphere |
 
 ### 4.6 Constants & Configuration
 - **`MIN_VOTES_FOR_RANKING` = 5** — `src/constants/app.js` — dishes below this show as "Early"
@@ -302,4 +303,4 @@ Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode. Dark
 - **Optimistic updates with rollback.** UI updates before server confirms, reverts on error.
 - **All errors classified.** `createClassifiedError()` on every API boundary.
 - **Lazy-loaded pages.** All pages use `lazyWithRetry()` for code splitting with chunk failure recovery.
-- **Dual theme with dark default.** "Island Depths" (dark) is the default. "Appetite" (light) is a user toggle. Theme controlled via `ThemeContext` + `[data-theme="light"]` CSS selector. All colors via CSS variables.
+- **Dual theme with light default.** "Appetite" (light) is the default. "Island Depths" (dark) is a user toggle. Theme controlled via `ThemeContext` + `[data-theme="dark"]` CSS selector. All colors via CSS variables.

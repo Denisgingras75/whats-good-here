@@ -5,7 +5,53 @@ A shared log of what each contributor worked on. Add your entries at the top.
 
 ---
 
-## 2026-02-16 - Daniel + Claude
+## 2026-02-17 - Daniel + Claude
+
+### Light Mode Default + V1 Theme + Hero Card Redesign
+
+**Theme overhaul:**
+- Light mode ("Appetite") is now the default — every user tested preferred it
+- Swapped CSS: light is `:root`, dark is `[data-theme="dark"]`
+- Reverted light theme from V2 (peach/copper everywhere) to V1 (white cards, orange-red primary, neutral gray text)
+- Primary coral richer: `#E8663C` → `#E45A35`
+- Medal gold warmer: `#B8860B` → `#C48A12` (amber, no olive undertone)
+- Fixed `getCategoryNeonImage()` theme detection for new default
+- Search bars on all pages now use `var(--color-bg)` for consistent white look
+- Removed border from Restaurants Open/Closed tab switcher
+
+**#1 Hero card — dramatic redesign:**
+- Dish name: 24→28px, weight 800, gold medal color
+- Rating: 28→36px with breathing room
+- "#1 in..." label: tighter tracking (0.06em), smaller (13px) — whispers, doesn't compete
+- Gold left border 4px with soft amber edge glow
+- Floating card shadow for depth
+- More padding throughout
+
+**Typography hierarchy tightened:**
+- "What's Good Here" brand: 30→32px, weight 800, tighter tracking
+- Tagline: lighter weight (400), tertiary color, wider tracking — recedes
+
+**Contender rows:**
+- Silver podium: rank 22→24px, name 15→17px
+- Bronze podium: rank 20→22px, name 14→16px
+- Category icons: soft floating shadows, 1.05x scale on active
+
+**Category strip removed** — icons sit directly on surface with peach circle backgrounds matching PNG assets
+
+### Files changed
+- `src/index.css` — Theme swap (light=:root, dark=[data-theme="dark"]), new tokens
+- `src/context/ThemeContext.jsx` — Default 'light', apply dark via data-theme="dark"
+- `src/constants/categories.js` — Fixed theme detection for icon sets
+- `src/pages/Home.jsx` — Hero card redesign, category icon shadows/scale, typography
+- `src/components/home/SearchHero.jsx` — Surface background, heavier brand title
+- `src/components/home/Top10Compact.jsx` — Bigger silver/bronze podium sizing
+- `src/components/TownPicker.jsx` — Category strip background with border
+- `src/pages/Restaurants.jsx` — White search bar, removed tab border
+- `src/components/UserSearch.jsx` — White search bar
+- `CLAUDE.md` — Updated design tokens, theme default docs
+- `TASKS.md` — T26 progress updated
+
+---
 
 ### Contender Row Reading Flow + Expandable Category Lists
 - **Reading flow fix:** Moved rating + vote count below restaurant name in all contender rows (ranks 2-10), matching the hero card's top-to-bottom scan pattern. Removes eye zigzag to far-right rating column.
