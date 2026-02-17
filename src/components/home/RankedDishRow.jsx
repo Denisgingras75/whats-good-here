@@ -21,6 +21,7 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
     total_votes,
     distance_miles,
     price,
+    photo_url,
     value_percentile,
   } = dish
 
@@ -112,6 +113,17 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
             </span>
           )}
         </div>
+
+        {/* Photo thumbnail */}
+        {photo_url && (
+          <img
+            src={photo_url}
+            alt=""
+            loading="lazy"
+            className="flex-shrink-0 rounded-lg object-cover"
+            style={{ width: '52px', height: '52px' }}
+          />
+        )}
       </button>
     )
   }
@@ -177,6 +189,17 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
           </span>
         )}
       </div>
+
+      {/* Photo thumbnail */}
+      {photo_url && (
+        <img
+          src={photo_url}
+          alt=""
+          loading="lazy"
+          className="flex-shrink-0 rounded-lg object-cover"
+          style={{ width: '44px', height: '44px' }}
+        />
+      )}
 
       {/* Chevron — tappable affordance */}
       <svg

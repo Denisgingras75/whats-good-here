@@ -461,36 +461,41 @@ export function Dish() {
         </div>
       ) : (
         <>
-          {/* Hero Image — pure photo, no overlays */}
-          <div className="relative aspect-[4/3] overflow-hidden">
-            {heroImage ? (
+          {/* Hero Image — full photo when available, compact strip when not */}
+          {heroImage ? (
+            <div className="relative aspect-[4/3] overflow-hidden">
               <img
                 src={heroImage}
                 alt={dish.dish_name}
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
-            ) : (
+
+              {/* Official badge if featured from restaurant */}
+              {featuredPhoto?.source_type === 'restaurant' && (
+                <div className="absolute top-4 right-4 px-2 py-1 rounded-lg bg-white/90 backdrop-blur-sm">
+                  <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
+                    Official Photo
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div
+              className="relative overflow-hidden flex items-center justify-center"
+              style={{ height: '80px', background: 'var(--color-surface)' }}
+            >
               <DishPlaceholder restaurantName={dish.restaurant_name} restaurantTown={dish.restaurant_town} category={dish.category} />
-            )}
+            </div>
+          )}
 
-            {/* Official badge if featured from restaurant */}
-            {featuredPhoto?.source_type === 'restaurant' && (
-              <div className="absolute top-4 right-4 px-2 py-1 rounded-lg bg-white/90 backdrop-blur-sm">
-                <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
-                  Official Photo
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Stats Bar — overlapping hero */}
+          {/* Stats Bar — overlapping hero when photo exists, flush when no photo */}
           <div
             className="mx-4 rounded-xl px-5 py-4"
             style={{
               background: 'var(--color-surface-elevated)',
               boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-              marginTop: '-20px',
+              marginTop: heroImage ? '-20px' : '0',
               position: 'relative',
               zIndex: 5,
             }}

@@ -260,80 +260,100 @@ function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange })
   )
 }
 
-// #1 Dish — typographic hero announcement
+// #1 Dish — hero card with optional photo
 function NumberOneHero({ dish, town, onClick }) {
-  const { dish_name, restaurant_name, avg_rating, total_votes } = dish
+  const { dish_name, restaurant_name, avg_rating, total_votes, photo_url } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
 
   return (
     <button
       onClick={onClick}
-      className="w-full text-left mb-6 py-6 px-5 rounded-2xl transition-all active:scale-[0.98]"
+      className="w-full text-left mb-6 rounded-2xl overflow-hidden transition-all active:scale-[0.98]"
       style={{
         background: 'var(--color-surface-elevated)',
         borderLeft: '4px solid var(--color-medal-gold)',
         boxShadow: '0 4px 20px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), -4px 0 16px -2px rgba(184,134,11,0.15)',
       }}
     >
-      <p
-        style={{
-          fontSize: '13px',
-          fontWeight: 700,
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-          color: 'var(--color-primary)',
-          marginBottom: '10px',
-        }}
-      >
-        #1 {town ? `in ${town}` : 'on the Vineyard'} right now
-      </p>
-      <h2
-        style={{
-          fontFamily: "'aglet-sans', sans-serif",
-          fontWeight: 800,
-          fontSize: '28px',
-          color: 'var(--color-medal-gold)',
-          lineHeight: 1.1,
-          letterSpacing: '-0.03em',
-        }}
-      >
-        {dish_name}
-      </h2>
-      <p
-        style={{
-          fontSize: '12px',
-          fontWeight: 500,
-          letterSpacing: '0.04em',
-          textTransform: 'uppercase',
-          color: 'var(--color-text-secondary)',
-          marginTop: '5px',
-        }}
-      >
-        {restaurant_name}
-      </p>
-      <div className="flex items-baseline gap-2 mt-5">
-        {isRanked && (
-          <span
+      <div className="flex">
+        {/* Text content */}
+        <div className="flex-1 min-w-0 py-6 px-5">
+          <p
+            style={{
+              fontSize: '13px',
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: 'var(--color-primary)',
+              marginBottom: '10px',
+            }}
+          >
+            #1 {town ? `in ${town}` : 'on the Vineyard'} right now
+          </p>
+          <h2
             style={{
               fontFamily: "'aglet-sans', sans-serif",
               fontWeight: 800,
-              fontSize: '36px',
-              color: 'var(--color-rating)',
-              lineHeight: 1,
+              fontSize: '28px',
+              color: 'var(--color-medal-gold)',
+              lineHeight: 1.1,
+              letterSpacing: '-0.03em',
             }}
           >
-            {avg_rating}
-          </span>
+            {dish_name}
+          </h2>
+          <p
+            style={{
+              fontSize: '12px',
+              fontWeight: 500,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: 'var(--color-text-secondary)',
+              marginTop: '5px',
+            }}
+          >
+            {restaurant_name}
+          </p>
+          <div className="flex items-baseline gap-2 mt-5">
+            {isRanked && (
+              <span
+                style={{
+                  fontFamily: "'aglet-sans', sans-serif",
+                  fontWeight: 800,
+                  fontSize: '36px',
+                  color: 'var(--color-rating)',
+                  lineHeight: 1,
+                }}
+              >
+                {avg_rating}
+              </span>
+            )}
+            <span
+              style={{
+                fontSize: '12px',
+                color: 'var(--color-text-tertiary)',
+                fontWeight: 500,
+              }}
+            >
+              {total_votes} vote{total_votes === 1 ? '' : 's'}
+            </span>
+          </div>
+        </div>
+
+        {/* Photo — right side, only when available */}
+        {photo_url && (
+          <div
+            className="flex-shrink-0"
+            style={{ width: '140px', minHeight: '100%' }}
+          >
+            <img
+              src={photo_url}
+              alt={dish_name}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
-        <span
-          style={{
-            fontSize: '12px',
-            color: 'var(--color-text-tertiary)',
-            fontWeight: 500,
-          }}
-        >
-          {total_votes} vote{total_votes === 1 ? '' : 's'}
-        </span>
       </div>
     </button>
   )

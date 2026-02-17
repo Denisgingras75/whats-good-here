@@ -159,7 +159,7 @@ const PODIUM_STYLE = {
 
 // Top 10 row — podium layout for 1-3, compact for 4+
 const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
-  const { dish_name, restaurant_name, avg_rating, total_votes } = dish
+  const { dish_name, restaurant_name, avg_rating, total_votes, photo_url } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
   const podium = PODIUM_STYLE[rank]
 
@@ -233,6 +233,17 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
             )}
           </p>
         </div>
+
+        {/* Photo thumbnail */}
+        {photo_url && (
+          <img
+            src={photo_url}
+            alt=""
+            loading="lazy"
+            className="flex-shrink-0 rounded-lg object-cover"
+            style={{ width: '52px', height: '52px' }}
+          />
+        )}
       </button>
     )
   }
@@ -294,6 +305,17 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           )}
         </p>
       </div>
+
+      {/* Photo thumbnail */}
+      {photo_url && (
+        <img
+          src={photo_url}
+          alt=""
+          loading="lazy"
+          className="flex-shrink-0 rounded-lg object-cover"
+          style={{ width: '44px', height: '44px' }}
+        />
+      )}
     </button>
   )
 })
