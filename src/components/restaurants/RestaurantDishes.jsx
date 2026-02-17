@@ -6,7 +6,7 @@ import { TopDishCard } from './TopDishCard'
 const TOP_DISHES_COUNT = 5
 
 // Restaurant dishes component - Job #2: "What should I order?"
-export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isFavorite, onToggleFavorite, user, searchQuery = '', friendsVotesByDish = {} }) {
+export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isFavorite, onToggleFavorite, user, searchQuery = '', friendsVotesByDish = {}, onAddDish }) {
   const [showAllDishes, setShowAllDishes] = useState(false)
 
   // Filter and sort dishes
@@ -188,16 +188,39 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
             boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.2)',
           }}
         >
-          <p className="font-semibold" style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>
-            {sortedDishes.filtered
-              ? `No dishes matching "${searchQuery}"`
-              : 'No dishes at this restaurant yet'
-            }
-          </p>
-          {sortedDishes.filtered && (
-            <p className="mt-1.5 font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
-              Try a different search term
-            </p>
+          {sortedDishes.filtered ? (
+            <>
+              <p className="font-semibold" style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>
+                No dishes matching "{searchQuery}"
+              </p>
+              <p className="mt-1.5 font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
+                Try a different search term
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-2xl mb-2" aria-hidden="true">
+                🍽
+              </p>
+              <p className="font-semibold" style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>
+                No dishes here yet
+              </p>
+              <p className="mt-1 font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
+                Be the first to add one and help others decide what to order
+              </p>
+              {onAddDish && (
+                <button
+                  onClick={onAddDish}
+                  className="mt-4 px-5 py-2.5 rounded-full font-semibold text-sm transition-all active:scale-[0.97]"
+                  style={{
+                    background: 'var(--color-primary)',
+                    color: 'white',
+                  }}
+                >
+                  + Add a dish
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
