@@ -292,7 +292,7 @@ function NumberOneHero({ dish, town, onClick }) {
           fontFamily: "'aglet-sans', sans-serif",
           fontWeight: 800,
           fontSize: '28px',
-          color: 'var(--color-text-primary)',
+          color: 'var(--color-medal-gold)',
           lineHeight: 1.1,
           letterSpacing: '-0.03em',
         }}
