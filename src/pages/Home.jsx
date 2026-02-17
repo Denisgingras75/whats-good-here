@@ -6,7 +6,7 @@ import { useDishes } from '../hooks/useDishes'
 import { useProfile } from '../hooks/useProfile'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { BROWSE_CATEGORIES, getCategoryNeonImage } from '../constants/categories'
-import { SearchHero, Top10Compact } from '../components/home'
+import { SearchHero, Top10Compact, NearbyDiscovery } from '../components/home'
 import { TownPicker } from '../components/TownPicker'
 import { RadiusSheet } from '../components/LocationPicker'
 import { LocationBanner } from '../components/LocationBanner'
@@ -170,7 +170,10 @@ export function Home() {
             />
           </div>
         ) : (
-          <EmptyState onBrowse={(path) => navigate(path || '/restaurants')} />
+          <>
+            <EmptyState onBrowse={(path) => navigate(path || '/restaurants')} />
+            <NearbyDiscovery />
+          </>
         )}
 
         {/* Browse all restaurants link */}
