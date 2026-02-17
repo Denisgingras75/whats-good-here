@@ -626,10 +626,10 @@ BEGIN
     ORDER BY d.parent_dish_id, AVG(v.rating_10) DESC NULLS LAST, COUNT(v.id) DESC
   ),
   recent_vote_counts AS (
-    SELECT dish_id, COUNT(*)::INT AS recent_votes
+    SELECT votes.dish_id, COUNT(*)::INT AS recent_votes
     FROM votes
-    WHERE created_at > NOW() - INTERVAL '14 days'
-    GROUP BY dish_id
+    WHERE votes.created_at > NOW() - INTERVAL '14 days'
+    GROUP BY votes.dish_id
   )
   SELECT
     d.id AS dish_id,
