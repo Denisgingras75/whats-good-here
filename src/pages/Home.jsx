@@ -143,7 +143,18 @@ export function Home() {
           </div>
         ) : top10Dishes.length > 0 ? (
           <div className="max-w-lg mx-auto">
-            {/* Category headline — above the #1 hero when filtering */}
+            {/* Category scroll — above all content it controls */}
+            <div className="mb-5 -mx-4 stagger-item">
+              <CategoryNav
+                selectedCategory={selectedCategory}
+                onCategoryChange={(cat) => {
+                  setSelectedCategory(cat)
+                  if (cat) setSearchQuery('')
+                }}
+              />
+            </div>
+
+            {/* Category headline — when filtering */}
             {selectedCategoryLabel && (
               <p
                 className="font-bold mb-4 stagger-item"
@@ -157,7 +168,7 @@ export function Home() {
                 {town ? `Best ${selectedCategoryLabel} in ${town}` : `Best ${selectedCategoryLabel} on the Vineyard`}
               </p>
             )}
-            {/* #1 Hero — always shown */}
+            {/* #1 Hero */}
             {(selectedCategory ? categoryDishes[0] : top10Dishes[0]) && (
               <NumberOneHero
                 dish={selectedCategory ? categoryDishes[0] : top10Dishes[0]}
@@ -165,17 +176,6 @@ export function Home() {
                 onClick={() => navigate(`/dish/${(selectedCategory ? categoryDishes[0] : top10Dishes[0]).dish_id}`)}
               />
             )}
-
-            {/* Category scroll — between #1 and the rest */}
-            <div className="mb-5 -mx-4 stagger-item">
-              <CategoryNav
-                selectedCategory={selectedCategory}
-                onCategoryChange={(cat) => {
-                  setSelectedCategory(cat)
-                  if (cat) setSearchQuery('')
-                }}
-              />
-            </div>
 
             <Top10Compact
               key={selectedCategory || 'top10'}
