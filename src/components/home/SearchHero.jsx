@@ -1,10 +1,10 @@
 import { DishSearch } from '../DishSearch'
 
 /**
- * SearchHero - Massive editorial title + compact search
+ * SearchHero - Massive editorial title + search + town filter
  * Staggered entrance for premium feel
  */
-export function SearchHero({ town, loading, onSearchChange }) {
+export function SearchHero({ town, loading, onSearchChange, townPicker }) {
   return (
     <section
       className="pt-10 pb-0"
@@ -29,6 +29,12 @@ export function SearchHero({ town, loading, onSearchChange }) {
       <div className="px-4 stagger-item">
         <DishSearch loading={loading} placeholder="What are you craving?" town={town} onSearchChange={onSearchChange} />
       </div>
+
+      {townPicker && (
+        <div className="px-4 mt-3 stagger-item">
+          {townPicker}
+        </div>
+      )}
     </section>
   )
 }

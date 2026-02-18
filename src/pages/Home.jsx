@@ -17,6 +17,9 @@ export function Home() {
 
   const { location, radius, town, setTown } = useLocationContext()
 
+  // Town picker
+  const [townPickerOpen, setTownPickerOpen] = useState(false)
+
   // Inline category filtering
   const [selectedCategory, setSelectedCategory] = useState(null)
 
@@ -65,11 +68,19 @@ export function Home() {
     <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
       <h1 className="sr-only">What's Good Here - Top Ranked Dishes Near You</h1>
 
-      {/* Section 1: Hero with search (no categories) */}
+      {/* Section 1: Hero with search + town filter */}
       <SearchHero
         town={town}
         loading={loading}
         onSearchChange={handleSearchChange}
+        townPicker={
+          <TownPicker
+            town={town}
+            onTownChange={setTown}
+            isOpen={townPickerOpen}
+            onToggle={setTownPickerOpen}
+          />
+        }
       />
 
       {/* Section 2: #1 Hero → Categories → Rest of Top 10 */}
@@ -158,8 +169,6 @@ export function Home() {
             {/* Category scroll — between #1 and the rest */}
             <div className="mb-5 -mx-4 stagger-item">
               <CategoryNav
-                town={town}
-                onTownChange={setTown}
                 selectedCategory={selectedCategory}
                 onCategoryChange={(cat) => {
                   setSelectedCategory(cat)
@@ -192,58 +201,46 @@ const scrollStyle = {
   touchAction: 'pan-x',
 }
 
-function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange }) {
-  const [townPickerOpen, setTownPickerOpen] = useState(false)
-
+function CategoryNav({ selectedCategory, onCategoryChange }) {
   return (
     <div className="flex items-center gap-2 pl-3 pr-4 pb-2 overflow-x-auto" style={scrollStyle}>
-      <TownPicker
-        town={town}
-        onTownChange={onTownChange}
-        isOpen={townPickerOpen}
-        onToggle={setTownPickerOpen}
-      />
-      {!townPickerOpen && (
-        <div className="flex items-center gap-2">
-          {BROWSE_CATEGORIES.map((cat) => {
-            const isActive = selectedCategory === cat.id
-            return (
-              <button
-                key={cat.id}
-                onClick={() => onCategoryChange(isActive ? null : cat.id)}
-                className="flex-shrink-0 flex flex-col items-center justify-center card-press"
-                style={{
-                  width: '60px',
-                  height: '80px',
-                  background: isActive ? '#E4440A' : '#FFFFFF',
-                  border: '3px solid #1A1A1A',
-                  borderRadius: '12px',
-                  boxShadow: '3px 3px 0px #1A1A1A',
-                }}
-              >
-                <CategoryIcon
-                  categoryId={cat.id}
-                  size={48}
-                  color={isActive ? '#FFFFFF' : '#E4440A'}
-                />
-                <span
-                  style={{
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    letterSpacing: '0.02em',
-                    color: isActive ? '#FFFFFF' : '#1A1A1A',
-                    marginTop: '4px',
-                    lineHeight: 1.1,
-                    textAlign: 'center',
-                  }}
-                >
-                  {cat.label}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      )}
+      {BROWSE_CATEGORIES.map((cat) => {
+        const isActive = selectedCategory === cat.id
+        return (
+          <button
+            key={cat.id}
+            onClick={() => onCategoryChange(isActive ? null : cat.id)}
+            className="flex-shrink-0 flex flex-col items-center justify-center card-press"
+            style={{
+              width: '60px',
+              height: '80px',
+              background: isActive ? '#E4440A' : '#FFFFFF',
+              border: '3px solid #1A1A1A',
+              borderRadius: '12px',
+              boxShadow: '3px 3px 0px #1A1A1A',
+            }}
+          >
+            <CategoryIcon
+              categoryId={cat.id}
+              size={48}
+              color={isActive ? '#FFFFFF' : '#E4440A'}
+            />
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.02em',
+                color: isActive ? '#FFFFFF' : '#1A1A1A',
+                marginTop: '4px',
+                lineHeight: 1.1,
+                textAlign: 'center',
+              }}
+            >
+              {cat.label}
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }
