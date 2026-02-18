@@ -36,6 +36,7 @@ export function AddRestaurantModal({ isOpen, onClose, initialQuery = '' }) {
   const [town, setTown] = useState('')
   const [phone, setPhone] = useState('')
   const [websiteUrl, setWebsiteUrl] = useState('')
+  const [menuUrl, setMenuUrl] = useState('')
   const [googlePlaceId, setGooglePlaceId] = useState(null)
 
   // Optional first dish
@@ -65,6 +66,7 @@ export function AddRestaurantModal({ isOpen, onClose, initialQuery = '' }) {
       setTown('')
       setPhone('')
       setWebsiteUrl('')
+      setMenuUrl('')
       setGooglePlaceId(null)
       setDishName('')
       setDishCategory('')
@@ -113,6 +115,7 @@ export function AddRestaurantModal({ isOpen, onClose, initialQuery = '' }) {
         setLng(details.lng)
         setPhone(details.phone || '')
         setWebsiteUrl(details.websiteUrl || '')
+        setMenuUrl(details.menuUrl || '')
         setGooglePlaceId(prediction.placeId)
         // Try to extract town from address
         const parts = (details.address || '').split(',')
@@ -187,6 +190,7 @@ export function AddRestaurantModal({ isOpen, onClose, initialQuery = '' }) {
         town: town.trim() || null,
         googlePlaceId,
         websiteUrl: websiteUrl.trim() || null,
+        menuUrl: menuUrl.trim() || null,
         phone: phone.trim() || null,
       })
 
