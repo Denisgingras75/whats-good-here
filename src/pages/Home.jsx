@@ -169,6 +169,7 @@ export function Home() {
               key={selectedCategory || 'top10'}
               dishes={selectedCategory ? categoryDishes.slice(1) : top10Dishes.slice(1)}
               town={town}
+              categoryLabel={selectedCategoryLabel}
               startRank={2}
             />
           </div>
