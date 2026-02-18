@@ -91,11 +91,19 @@ export function Home() {
               <Top10Skeleton />
             ) : searchResults.length > 0 ? (
               <>
+                {searchResults[0] && (
+                  <NumberOneHero
+                    dish={searchResults[0]}
+                    town={town}
+                    onClick={() => navigate(`/dish/${searchResults[0].dish_id}`)}
+                  />
+                )}
                 <Top10Compact
                   key={`search-${searchQuery}`}
-                  dishes={searchResults}
+                  dishes={searchResults.slice(1)}
                   town={town}
                   categoryLabel={`"${searchQuery}"`}
+                  startRank={2}
                 />
                 {hasMoreResults && (
                   <button
