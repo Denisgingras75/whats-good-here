@@ -29,17 +29,17 @@ const posterIcons = {
 
 // Dish-name overrides — specific icons for dishes matching keywords
 // More specific matches first (e.g. "fried chicken" before "chicken" category)
-// `not` = categories where this override should NOT apply (the category icon is better)
+// `solo` = only match when this word is the main dish, not a side (e.g. "Truffle Fries" yes, "Tenders and Fries" no)
 const dishNameIcons = [
   { match: 'benedict', src: '/categories/poster/eggs-benedict.png' },
   { match: 'cauliflower', src: '/categories/poster/veggies.png' },
   { match: 'carrot', src: '/categories/poster/veggies.png' },
   { match: 'fried chicken', src: '/categories/poster/fried-chicken.png' },
   { match: 'shrimp', src: '/categories/poster/shrimp.png' },
-  { match: 'fries', src: '/categories/poster/fries.png', not: ['tendys', 'wings', 'burger'] },
-  { match: 'french fry', src: '/categories/poster/fries.png', not: ['tendys', 'wings', 'burger'] },
-  { match: 'soup', src: '/categories/poster/soup.png', not: ['chowder'] },
-  { match: 'bisque', src: '/categories/poster/soup.png', not: ['chowder'] },
+  { match: 'fries', src: '/categories/poster/fries.png', solo: true },
+  { match: 'french fry', src: '/categories/poster/fries.png', solo: true },
+  { match: 'soup', src: '/categories/poster/soup.png' },
+  { match: 'bisque', src: '/categories/poster/soup.png' },
   { match: 'wrap', src: '/categories/poster/wrap.png' },
   { match: 'rib', src: '/categories/poster/ribs.png' },
 ]
@@ -202,10 +202,18 @@ const defaultIcon = (
 export function CategoryIcon({ categoryId, dishName, size = 32, color = 'currentColor' }) {
   const key = categoryId?.toLowerCase()
 
-  // Dish-name overrides win (more specific), but back off for excluded categories
-  const nameMatch = dishName && dishNameIcons.find(d =>
-    dishName.toLowerCase().includes(d.match) && !(d.not && d.not.includes(key))
-  )
+  // Dish-name overrides win (more specific than category icons)
+  // `solo` entries only match when the word is the main dish, not a side after "and"/"with"/"&"
+  const nameLower = dishName?.toLowerCase() || ''
+  const nameMatch = dishName && dishNameIcons.find(d => {
+    if (!nameLower.includes(d.match)) return false
+    if (d.solo) {
+      const idx = nameLower.indexOf(d.match)
+      const before = nameLower.slice(0, idx).trim()
+      if (before.endsWith('and') || before.endsWith('with') || before.endsWith('&') || before.endsWith('w/')) return false
+    }
+    return true
+  })
   const posterSrc = nameMatch?.src || posterIcons[key]
 
   // Prefer poster PNG when available
