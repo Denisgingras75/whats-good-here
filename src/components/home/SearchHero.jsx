@@ -1,40 +1,28 @@
 import { DishSearch } from '../DishSearch'
 
 /**
- * SearchHero - Hero section with value proposition, search, and category scroll
+ * SearchHero - Massive editorial title + compact search
  */
 export function SearchHero({ town, loading, categoryScroll, onSearchChange }) {
   return (
     <section
-      className="pt-8 pb-0"
+      className="pt-10 pb-0"
       style={{ background: '#FFFFFF' }}
     >
-      <div className="mb-3 text-center px-4">
+      <div className="px-4 mb-4">
         <h1
           style={{
             fontFamily: "'aglet-sans', sans-serif",
             fontWeight: 800,
-            color: 'var(--color-primary)',
-            fontSize: '32px',
-            letterSpacing: '-0.03em',
-            marginBottom: '14px',
-            lineHeight: 1.15,
+            color: '#1A1A1A',
+            fontSize: '44px',
+            letterSpacing: '-0.04em',
+            lineHeight: 0.95,
           }}
         >
-          What's Good Here
+          What's Good{' '}
+          <span style={{ color: '#E4440A' }}>Here</span>
         </h1>
-        <p
-          style={{
-            color: 'var(--color-text-tertiary)',
-            fontSize: '11.5px',
-            fontWeight: 400,
-            letterSpacing: '0.10em',
-            textTransform: 'uppercase',
-            marginTop: '4px',
-          }}
-        >
-          the #1 bite near you
-        </p>
       </div>
 
       <div className="px-4">
@@ -42,8 +30,8 @@ export function SearchHero({ town, loading, categoryScroll, onSearchChange }) {
       </div>
 
       {categoryScroll && (
-        <div className="mt-4" style={{ position: 'relative' }}>
-          <div className="py-3">
+        <div className="mt-4">
+          <div className="py-2">
             {categoryScroll}
           </div>
         </div>

@@ -97,7 +97,7 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
             <span
               className="font-bold"
               style={{
-                color: '#E4440A',
+                color: getRatingColor(avg_rating),
                 fontSize: podium.ratingSize,
               }}
             >
@@ -161,7 +161,7 @@ export const RankedDishRow = memo(function RankedDishRow({ dish, rank, sortBy, i
       </div>
       <div className="flex-shrink-0 text-right">
         {isRanked ? (
-          <span className="text-sm font-bold" style={{ color: '#E4440A' }}>
+          <span className="text-sm font-bold" style={{ color: getRatingColor(avg_rating) }}>
             {avg_rating}
           </span>
         ) : (

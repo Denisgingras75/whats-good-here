@@ -7,24 +7,18 @@ import { CategoryIcon } from './CategoryIcons'
 /**
  * Top10Compact - Ranked dish list for the homepage
  *
- * Supports MV vs Personal toggle for logged-in users with preferences.
- * Accepts categoryLabel for inline category filtering.
+ * Editorial layout: big rank numbers, bold names, rating colored by value.
  */
 export function Top10Compact({
   dishes,
-  personalDishes,
-  showToggle = false,
   town,
   categoryLabel,
   startRank = 1,
 }) {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('mv')
   const [expanded, setExpanded] = useState(false)
 
-  const allDishes = activeTab === 'personal' && showToggle
-    ? (personalDishes || [])
-    : (dishes || [])
+  const allDishes = dishes || []
 
   const INITIAL_COUNT = 10
   const hasMore = categoryLabel && allDishes.length > INITIAL_COUNT
@@ -32,65 +26,48 @@ export function Top10Compact({
 
   if (!dishes?.length && !categoryLabel) return null
 
+  // Podium = ranks that get bordered card treatment (up to rank 3)
+  const podiumCount = Math.max(0, 4 - startRank)
+  const podiumDishes = activeDishes.slice(0, podiumCount)
+  const finalistDishes = activeDishes.slice(podiumCount)
+
   return (
     <section className="animate-fadeIn">
-      {/* Micro-headline — only for category filtering */}
-      {categoryLabel && (
+      {/* Section headline */}
+      {categoryLabel ? (
         <p
-          className="font-bold mb-3"
-          style={{ color: 'var(--color-primary)', fontSize: '19px', letterSpacing: '-0.02em' }}
-        >
-          {town ? `Best ${categoryLabel} in ${town}` : `Best ${categoryLabel} on the Vineyard`}
-        </p>
-      )}
-
-      {/* Header */}
-      {showToggle ? (
-        <div role="tablist" aria-label="Top 10 list filter" className="flex gap-2 mb-4">
-          <button
-            role="tab"
-            aria-selected={activeTab === 'mv'}
-            onClick={() => setActiveTab('mv')}
-            className="flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
-            style={{
-              background: activeTab === 'mv' ? 'var(--color-primary)' : 'var(--color-surface-elevated)',
-              color: activeTab === 'mv' ? '#FFFFFF' : 'var(--color-text-secondary)',
-            }}
-          >
-            {town || 'MV'} Top 10
-          </button>
-          <button
-            role="tab"
-            aria-selected={activeTab === 'personal'}
-            onClick={() => setActiveTab('personal')}
-            className="flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
-            style={{
-              background: activeTab === 'personal' ? 'var(--color-accent-gold)' : 'var(--color-surface-elevated)',
-              color: activeTab === 'personal' ? '#FFFFFF' : 'var(--color-text-secondary)',
-            }}
-          >
-            My Top 10
-          </button>
-        </div>
-      ) : !categoryLabel ? (
-        <h3
           className="font-bold mb-4"
           style={{
-            color: 'var(--color-primary)',
-            fontSize: '19px',
+            fontFamily: "'aglet-sans', sans-serif",
+            color: '#E4440A',
+            fontSize: '20px',
             letterSpacing: '-0.02em',
           }}
         >
-          The Contenders
-        </h3>
-      ) : null}
+          {town ? `Best ${categoryLabel} in ${town}` : `Best ${categoryLabel} on the Vineyard`}
+        </p>
+      ) : (
+        <p
+          className="mb-4"
+          style={{
+            fontFamily: "'aglet-sans', sans-serif",
+            fontWeight: 800,
+            fontSize: '14px',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: '#999999',
+          }}
+        >
+          Top 10
+        </p>
+      )}
 
       {/* Dishes list */}
       <div>
         {activeDishes.length > 0 ? (
           <>
-            {/* Podium rows — up to 3 with medal styling */}
-            {activeDishes.slice(0, Math.max(0, 4 - startRank)).map((dish, index) => (
+            {/* Podium rows — bordered cards */}
+            {podiumDishes.map((dish, index) => (
               <div key={dish.dish_id} style={{ marginBottom: '6px' }}>
                 <Top10Row
                   dish={dish}
@@ -100,19 +77,19 @@ export function Top10Compact({
               </div>
             ))}
 
-            {/* Finalists — grouped list with border */}
-            {activeDishes.length > Math.max(0, 4 - startRank) && (
+            {/* Finalists — grouped in one bordered container */}
+            {finalistDishes.length > 0 && (
               <div
-                className="mt-3 rounded-xl overflow-hidden"
+                className="mt-2 rounded-xl overflow-hidden"
                 style={{ border: '3px solid #1A1A1A' }}
               >
-                {activeDishes.slice(Math.max(0, 4 - startRank)).map((dish, index) => (
+                {finalistDishes.map((dish, index) => (
                   <Top10Row
                     key={dish.dish_id}
                     dish={dish}
-                    rank={index + startRank + Math.max(0, 4 - startRank)}
+                    rank={index + startRank + podiumCount}
                     onClick={() => navigate(`/dish/${dish.dish_id}`)}
-                    isLast={index === activeDishes.length - Math.max(0, 4 - startRank) - 1}
+                    isLast={index === finalistDishes.length - 1}
                   />
                 ))}
               </div>
@@ -120,18 +97,9 @@ export function Top10Compact({
           </>
         ) : (
           <div className="text-center py-6">
-            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-              {categoryLabel ? `No ${categoryLabel} ranked yet` : 'No dishes found in your categories yet'}
+            <p className="text-sm" style={{ color: '#999999' }}>
+              {categoryLabel ? `No ${categoryLabel} ranked yet` : 'No dishes found'}
             </p>
-            {!categoryLabel && (
-              <button
-                onClick={() => navigate('/profile')}
-                className="mt-2 text-xs font-medium"
-                style={{ color: 'var(--color-primary)' }}
-              >
-                Edit favorites
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -140,10 +108,10 @@ export function Top10Compact({
       {hasMore && (
         <button
           onClick={() => setExpanded(prev => !prev)}
-          className="w-full mt-3 pt-3 text-sm font-medium transition-opacity hover:opacity-70"
+          className="w-full mt-3 pt-3 text-sm font-bold transition-opacity hover:opacity-70"
           style={{
-            color: 'var(--color-accent-gold)',
-            borderTop: '1px solid var(--color-divider)',
+            color: '#E4440A',
+            borderTop: '1px solid #E8E8E8',
           }}
         >
           {expanded ? 'Show less' : `Show all ${allDishes.length} ${categoryLabel}`}
@@ -153,33 +121,23 @@ export function Top10Compact({
   )
 }
 
-const PODIUM_STYLE = {
-  1: { color: '#E4440A', rankSize: '25px', nameSize: '16px', ratingSize: '16px' },
-  2: { color: '#1A1A1A', rankSize: '24px', nameSize: '17px', ratingSize: '16px' },
-  3: { color: '#1A1A1A', rankSize: '22px', nameSize: '16px', ratingSize: '15px' },
-}
-
-// Top 10 row — photo-left card when photo exists, compact text row when not
+// Podium rows: ranks 1-3 get individual bordered cards
+// Finalist rows: ranks 4+ sit inside a shared bordered container with dividers
 const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
-  const { dish_name, restaurant_name, avg_rating, total_votes, photo_url, category } = dish
+  const { dish_name, restaurant_name, avg_rating, total_votes, category } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
-  const podium = PODIUM_STYLE[rank]
+  const isPodium = rank <= 3
 
   const accessibleLabel = isRanked
     ? `Rank ${rank}: ${dish_name} at ${restaurant_name}, rated ${avg_rating} out of 10 with ${total_votes} votes`
     : `Rank ${rank}: ${dish_name} at ${restaurant_name}, ${total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'new dish'}`
 
-  const rankColor = podium?.color || 'var(--color-text-secondary)'
-  const nameColor = podium?.color || 'var(--color-text-primary)'
-  const nameSize = podium?.nameSize || '14px'
-
-  // Podium rows (1-3) — bordered card with icon
-  if (podium) {
+  if (isPodium) {
     return (
       <button
         onClick={onClick}
         aria-label={accessibleLabel}
-        className="w-full flex items-center gap-3 py-3.5 px-3 rounded-xl transition-colors text-left"
+        className="w-full flex items-center gap-3 py-3.5 px-4 rounded-xl transition-colors text-left active:scale-[0.98]"
         style={{
           background: '#FFFFFF',
           border: '3px solid #1A1A1A',
@@ -188,10 +146,12 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
         <span
           className="font-bold flex-shrink-0"
           style={{
-            color: podium.color,
-            fontSize: podium.rankSize,
+            fontFamily: "'aglet-sans', sans-serif",
+            fontWeight: 800,
+            color: '#1A1A1A',
+            fontSize: rank === 1 ? '28px' : rank === 2 ? '24px' : '22px',
             lineHeight: 1,
-            minWidth: '24px',
+            minWidth: '28px',
             textAlign: 'center',
           }}
         >
@@ -201,8 +161,8 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           <p
             className="font-bold truncate"
             style={{
-              color: podium.color,
-              fontSize: podium.nameSize,
+              color: '#1A1A1A',
+              fontSize: rank === 1 ? '17px' : '16px',
               lineHeight: 1.2,
               letterSpacing: '-0.01em',
             }}
@@ -212,52 +172,55 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           <p
             className="truncate font-medium"
             style={{
-              color: 'var(--color-text-secondary)',
+              color: '#999999',
               fontSize: '11px',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.04em',
               textTransform: 'uppercase',
               marginTop: '2px',
             }}
           >
             {restaurant_name}
           </p>
-          <p style={{ marginTop: '3px', fontSize: '13px' }}>
-            {isRanked ? (
-              <>
-                <span className="font-bold" style={{ color: '#E4440A' }}>
-                  {avg_rating}
-                </span>
-                <span style={{ color: '#999999' }}> · {total_votes} votes</span>
-              </>
-            ) : (
-              <span style={{ color: '#999999' }}>
-                {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
-              </span>
-            )}
-          </p>
         </div>
-        <CategoryIcon categoryId={category} size={28} color="#E4440A" />
+        {isRanked ? (
+          <span
+            className="font-bold flex-shrink-0"
+            style={{
+              fontFamily: "'aglet-sans', sans-serif",
+              fontSize: '18px',
+              color: getRatingColor(avg_rating),
+            }}
+          >
+            {avg_rating}
+          </span>
+        ) : (
+          <span className="text-xs flex-shrink-0" style={{ color: '#999999' }}>
+            {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+          </span>
+        )}
+        <CategoryIcon categoryId={category} size={24} color="#E4440A" />
       </button>
     )
   }
 
-  // Finalist row (4+), no photo
+  // Finalist row (4+)
   return (
     <button
       onClick={onClick}
       aria-label={accessibleLabel}
-      className="w-full flex items-center gap-3 py-4 px-3 transition-colors text-left active:scale-[0.99]"
+      className="w-full flex items-center gap-3 py-3.5 px-4 transition-colors text-left active:scale-[0.99]"
       style={{
         background: '#FFFFFF',
-        borderBottom: isLast ? 'none' : '1px solid #1A1A1A',
+        borderBottom: isLast ? 'none' : '1px solid #E8E8E8',
       }}
     >
       <span
         className="font-bold flex-shrink-0"
         style={{
+          fontFamily: "'aglet-sans', sans-serif",
           color: '#1A1A1A',
-          fontSize: '15px',
-          minWidth: '24px',
+          fontSize: '16px',
+          minWidth: '28px',
           textAlign: 'center',
         }}
       >
@@ -282,22 +245,24 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
         >
           {restaurant_name}
         </p>
-        <p style={{ marginTop: '3px', fontSize: '13px' }}>
-          {isRanked ? (
-            <>
-              <span className="font-bold" style={{ color: '#E4440A' }}>
-                {avg_rating}
-              </span>
-              <span style={{ color: '#999999' }}> · {total_votes} votes</span>
-            </>
-          ) : (
-            <span style={{ color: '#999999' }}>
-              {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
-            </span>
-          )}
-        </p>
       </div>
-      <CategoryIcon categoryId={category} size={24} color="#E4440A" />
+      {isRanked ? (
+        <span
+          className="font-bold flex-shrink-0"
+          style={{
+            fontFamily: "'aglet-sans', sans-serif",
+            fontSize: '15px',
+            color: getRatingColor(avg_rating),
+          }}
+        >
+          {avg_rating}
+        </span>
+      ) : (
+        <span className="text-xs flex-shrink-0" style={{ color: '#999999' }}>
+          {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+        </span>
+      )}
+      <CategoryIcon categoryId={category} size={20} color="#E4440A" />
     </button>
   )
 })

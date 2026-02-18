@@ -1,21 +1,19 @@
-import { useMemo, useState, useCallback, useRef } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
-import { useProfile } from '../hooks/useProfile'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { BROWSE_CATEGORIES } from '../constants/categories'
-import { useTheme } from '../context/ThemeContext'
 import { SearchHero, Top10Compact } from '../components/home'
 import { CategoryIcon } from '../components/home/CategoryIcons'
 import { TownPicker } from '../components/TownPicker'
+import { getRatingColor } from '../utils/ranking'
 
 export function Home() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { profile } = useProfile(user?.id)
 
   const { location, radius, town, setTown } = useLocationContext()
 
@@ -44,12 +42,11 @@ export function Home() {
     return (b.avg_rating || 0) - (a.avg_rating || 0)
   }
 
-  // Top 10 dishes on the island (all categories)
+  // Top 10 dishes (all categories)
   const top10Dishes = useMemo(() => {
     if (!dishes?.length) return []
     return dishes.slice().sort(rankSort).slice(0, 10)
   }, [dishes])
-
 
   // Category-filtered dishes
   const categoryDishes = useMemo(() => {
@@ -64,34 +61,17 @@ export function Home() {
     ? BROWSE_CATEGORIES.find(c => c.id === selectedCategory)?.label
     : null
 
-  // Personal Top 10 based on user's preferred categories
-  const personalTop10Dishes = useMemo(() => {
-    if (!dishes?.length || !profile?.preferred_categories?.length) return []
-
-    const preferredCats = profile.preferred_categories.map(c => c.toLowerCase())
-
-    return dishes
-      .filter(dish => preferredCats.includes(dish.category?.toLowerCase()))
-      .slice()
-      .sort(rankSort)
-      .slice(0, 10)
-  }, [dishes, profile?.preferred_categories])
-
-  // Personal toggle disabled for now — re-enable later
-  // const showPersonalToggle = !selectedCategory && user && profile?.preferred_categories?.length > 0
-  const showPersonalToggle = false
-
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-surface)' }}>
+    <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
       <h1 className="sr-only">What's Good Here - Top Ranked Dishes Near You</h1>
 
-      {/* Section 1: Hero with search, town filter, categories */}
+      {/* Section 1: Hero with search + categories */}
       <SearchHero
         town={town}
         loading={loading}
         onSearchChange={handleSearchChange}
         categoryScroll={
-          <CategoryNav
+          <CategoryGrid
             town={town}
             onTownChange={setTown}
             selectedCategory={selectedCategory}
@@ -104,7 +84,7 @@ export function Home() {
       />
 
       {/* Section 2: Top 10 / Search Results */}
-      <section className="px-4 pt-8 pb-6" style={{ background: 'var(--color-surface)' }}>
+      <section className="px-4 pt-6 pb-6" style={{ background: '#FFFFFF' }}>
         {searchQuery ? (
           <div className="max-w-lg mx-auto">
             {searchLoading ? (
@@ -121,7 +101,7 @@ export function Home() {
                   <button
                     onClick={() => setSearchLimit(prev => prev + 10)}
                     className="w-full mt-3 py-3 text-sm font-medium rounded-xl transition-opacity hover:opacity-70"
-                    style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-accent-gold)' }}
+                    style={{ background: '#F5F5F5', color: '#1A1A1A' }}
                   >
                     Show more
                   </button>
@@ -129,10 +109,10 @@ export function Home() {
               </>
             ) : (
               <div className="py-8 text-center">
-                <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-sm font-medium" style={{ color: '#999999' }}>
                   No dishes found for "{searchQuery}"
                 </p>
-                <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                <p className="text-xs mt-1" style={{ color: '#CCCCCC' }}>
                   Try a different search
                 </p>
               </div>
@@ -142,13 +122,13 @@ export function Home() {
           <Top10Skeleton />
         ) : error ? (
           <div className="py-8 text-center">
-            <p role="alert" className="text-sm" style={{ color: 'var(--color-danger)' }}>
+            <p role="alert" className="text-sm" style={{ color: 'var(--color-red)' }}>
               {error?.message || error}
             </p>
             <button
               onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 text-sm font-medium rounded-lg"
-              style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+              style={{ background: '#E4440A', color: '#FFFFFF' }}
             >
               Retry
             </button>
@@ -162,8 +142,6 @@ export function Home() {
             <Top10Compact
               key={selectedCategory || 'top10'}
               dishes={selectedCategory ? categoryDishes : (top10Dishes.slice(1))}
-              personalDishes={personalTop10Dishes}
-              showToggle={showPersonalToggle}
               town={town}
               categoryLabel={selectedCategoryLabel}
               startRank={selectedCategory ? 1 : 2}
@@ -177,80 +155,100 @@ export function Home() {
   )
 }
 
-const scrollStyle = {
-  scrollbarWidth: 'none',
-  msOverflowStyle: 'none',
-  WebkitOverflowScrolling: 'touch',
-  overscrollBehaviorX: 'contain',
-  touchAction: 'pan-x',
-}
-
-function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange }) {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+function CategoryGrid({ town, onTownChange, selectedCategory, onCategoryChange }) {
   const [townPickerOpen, setTownPickerOpen] = useState(false)
-  const scrollRef = useRef(null)
+  const [showAllCategories, setShowAllCategories] = useState(false)
 
-  const handleTownToggle = useCallback((open) => {
-    setTownPickerOpen(open)
-    if (!open && scrollRef.current) {
-      scrollRef.current.scrollLeft = 0
-    }
-  }, [])
+  const VISIBLE_COUNT = 6
+  const visibleCategories = showAllCategories ? BROWSE_CATEGORIES : BROWSE_CATEGORIES.slice(0, VISIBLE_COUNT)
+  const hasMore = BROWSE_CATEGORIES.length > VISIBLE_COUNT
 
   return (
-    <div ref={scrollRef} className="flex items-center gap-2 pl-3 pr-4 pb-2 overflow-x-auto" style={scrollStyle}>
-      <TownPicker
-        town={town}
-        onTownChange={onTownChange}
-        isOpen={townPickerOpen}
-        onToggle={handleTownToggle}
-      />
+    <div className="px-4">
+      <div className="flex items-center gap-2 mb-3">
+        <TownPicker
+          town={town}
+          onTownChange={onTownChange}
+          isOpen={townPickerOpen}
+          onToggle={setTownPickerOpen}
+        />
+      </div>
       {!townPickerOpen && (
-        <div className="flex items-center gap-2">
-          {BROWSE_CATEGORIES.map((cat) => {
-            const isActive = selectedCategory === cat.id
-            return (
-              <button
-                key={cat.id}
-                onClick={() => onCategoryChange(isActive ? null : cat.id)}
-                className="flex-shrink-0 flex flex-col items-center justify-center transition-all active:scale-[0.96]"
-                style={{
-                  width: '64px',
-                  height: '84px',
-                  background: isActive ? '#E4440A' : '#FFFFFF',
-                  border: '3px solid #1A1A1A',
-                  borderRadius: '12px',
-                }}
-              >
-                <CategoryIcon
-                  categoryId={cat.id}
-                  size={34}
-                  color={isActive ? '#FFFFFF' : '#E4440A'}
-                />
-                <span
+        <>
+          <div
+            className="grid gap-2"
+            style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
+          >
+            {visibleCategories.map((cat) => {
+              const isActive = selectedCategory === cat.id
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => onCategoryChange(isActive ? null : cat.id)}
+                  className="flex flex-col items-center justify-center transition-all active:scale-[0.96]"
                   style={{
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    letterSpacing: '0.02em',
-                    color: isActive ? '#FFFFFF' : '#1A1A1A',
-                    marginTop: '4px',
-                    lineHeight: 1.1,
-                    textAlign: 'center',
+                    height: '72px',
+                    background: isActive ? '#E4440A' : '#FFFFFF',
+                    border: '3px solid #1A1A1A',
+                    borderRadius: '12px',
                   }}
                 >
-                  {cat.label}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+                  <CategoryIcon
+                    categoryId={cat.id}
+                    size={28}
+                    color={isActive ? '#FFFFFF' : '#E4440A'}
+                  />
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      fontWeight: 700,
+                      letterSpacing: '0.02em',
+                      color: isActive ? '#FFFFFF' : '#1A1A1A',
+                      marginTop: '4px',
+                      lineHeight: 1.1,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {cat.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {hasMore && (
+            <button
+              onClick={() => setShowAllCategories(prev => !prev)}
+              className="w-full mt-2 py-2.5 text-center transition-all active:scale-[0.98]"
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: '#1A1A1A',
+                letterSpacing: '0.02em',
+                border: '3px solid #1A1A1A',
+                borderRadius: '12px',
+                background: '#FFFFFF',
+              }}
+            >
+              {showAllCategories ? 'Less' : `More categories`}
+              <span
+                style={{
+                  display: 'inline-block',
+                  marginLeft: '6px',
+                  transform: showAllCategories ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.2s ease',
+                }}
+              >
+                ▾
+              </span>
+            </button>
+          )}
+        </>
       )}
     </div>
   )
 }
 
-// #1 Dish — hero card with category icon
+// #1 Dish — massive editorial hero
 function NumberOneHero({ dish, town, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes, category } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
@@ -258,83 +256,76 @@ function NumberOneHero({ dish, town, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left mb-6 rounded-2xl overflow-hidden transition-all active:scale-[0.98]"
+      className="w-full text-left mb-5 rounded-2xl overflow-hidden transition-all active:scale-[0.98]"
       style={{
         background: '#FFFFFF',
         border: '3px solid #1A1A1A',
       }}
     >
-      <div className="flex">
-        {/* Text content */}
-        <div className="flex-1 min-w-0 py-6 px-5">
-          <p
-            style={{
-              fontSize: '13px',
-              fontWeight: 700,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              color: '#E4440A',
-              marginBottom: '10px',
-            }}
-          >
-            #1 {town ? `in ${town}` : 'on the Vineyard'} right now
-          </p>
-          <h2
-            style={{
-              fontFamily: "'aglet-sans', sans-serif",
-              fontWeight: 800,
-              fontSize: '28px',
-              color: '#E4440A',
-              lineHeight: 1.1,
-              letterSpacing: '-0.03em',
-            }}
-          >
-            {dish_name}
-          </h2>
-          <p
-            style={{
-              fontSize: '12px',
-              fontWeight: 600,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              color: '#555555',
-              marginTop: '5px',
-            }}
-          >
-            {restaurant_name}
-          </p>
-          <div className="flex items-baseline gap-2 mt-5">
-            {isRanked && (
-              <span
-                style={{
-                  fontFamily: "'aglet-sans', sans-serif",
-                  fontWeight: 800,
-                  fontSize: '36px',
-                  color: '#E4440A',
-                  lineHeight: 1,
-                }}
-              >
-                {avg_rating}
-              </span>
-            )}
-            <span
+      <div className="py-6 px-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p
               style={{
-                fontSize: '12px',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
                 color: '#999999',
-                fontWeight: 500,
+                marginBottom: '6px',
               }}
             >
-              {total_votes} vote{total_votes === 1 ? '' : 's'}
-            </span>
+              #1 {town ? `in ${town}` : 'on the Vineyard'}
+            </p>
+            <h2
+              style={{
+                fontFamily: "'aglet-sans', sans-serif",
+                fontWeight: 800,
+                fontSize: '32px',
+                color: '#1A1A1A',
+                lineHeight: 1.0,
+                letterSpacing: '-0.03em',
+              }}
+            >
+              {dish_name}
+            </h2>
+            <p
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#999999',
+                marginTop: '6px',
+                letterSpacing: '0.01em',
+              }}
+            >
+              {restaurant_name}
+            </p>
           </div>
+          <CategoryIcon categoryId={category} size={56} color="#E4440A" />
         </div>
-
-        {/* Category icon — right side */}
-        <div
-          className="flex-shrink-0 flex items-center justify-center"
-          style={{ width: '120px' }}
-        >
-          <CategoryIcon categoryId={category} size={72} color="#E4440A" />
+        <div className="flex items-baseline gap-3 mt-5">
+          {isRanked && (
+            <span
+              style={{
+                fontFamily: "'aglet-sans', sans-serif",
+                fontWeight: 800,
+                fontSize: '42px',
+                color: getRatingColor(avg_rating),
+                lineHeight: 1,
+              }}
+            >
+              {avg_rating}
+            </span>
+          )}
+          <span
+            style={{
+              fontSize: '12px',
+              color: '#999999',
+              fontWeight: 500,
+            }}
+          >
+            {total_votes} vote{total_votes === 1 ? '' : 's'}
+          </span>
         </div>
       </div>
     </button>
@@ -345,27 +336,26 @@ function NumberOneHero({ dish, town, onClick }) {
 function Top10Skeleton() {
   return (
     <div className="max-w-lg mx-auto animate-pulse">
-      <div className="h-4 w-48 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
-      <div className="h-5 w-36 rounded mb-4" style={{ background: 'var(--color-surface-elevated)' }} />
+      <div className="h-5 w-32 rounded mb-4" style={{ background: '#F0F0F0' }} />
       <div className="space-y-1">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-center gap-3 py-3 px-3 rounded-lg mb-1.5" style={{ background: 'var(--color-surface-elevated)' }}>
-            <div className="w-6 h-6 rounded-full" style={{ background: 'var(--color-surface)' }} />
+          <div key={i} className="flex items-center gap-3 py-3 px-3 rounded-xl mb-1.5" style={{ background: '#F5F5F5' }}>
+            <div className="w-6 h-6 rounded-full" style={{ background: '#E8E8E8' }} />
             <div className="flex-1">
-              <div className="h-4 w-32 rounded mb-1" style={{ background: 'var(--color-surface)' }} />
-              <div className="h-3 w-24 rounded" style={{ background: 'var(--color-surface)' }} />
+              <div className="h-4 w-32 rounded mb-1" style={{ background: '#E8E8E8' }} />
+              <div className="h-3 w-24 rounded" style={{ background: '#E8E8E8' }} />
             </div>
-            <div className="h-5 w-8 rounded" style={{ background: 'var(--color-surface)' }} />
+            <div className="h-5 w-8 rounded" style={{ background: '#E8E8E8' }} />
           </div>
         ))}
         {[...Array(7)].map((_, i) => (
           <div key={i + 3} className="flex items-center gap-3 py-2.5 px-2" style={{ opacity: 0.6 }}>
-            <div className="w-6 h-4 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            <div className="w-6 h-4 rounded" style={{ background: '#F0F0F0' }} />
             <div className="flex-1">
-              <div className="h-3.5 w-28 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
-              <div className="h-3 w-20 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+              <div className="h-3.5 w-28 rounded mb-1" style={{ background: '#F0F0F0' }} />
+              <div className="h-3 w-20 rounded" style={{ background: '#F0F0F0' }} />
             </div>
-            <div className="h-4 w-7 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            <div className="h-4 w-7 rounded" style={{ background: '#F0F0F0' }} />
           </div>
         ))}
       </div>
@@ -377,21 +367,16 @@ function Top10Skeleton() {
 function EmptyState({ onBrowse }) {
   return (
     <div className="py-12 text-center">
-      <img
-        src="/search-not-found.png"
-        alt=""
-        className="w-16 h-16 mx-auto mb-4 rounded-full object-cover"
-      />
-      <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
+      <p className="font-bold text-lg" style={{ color: '#1A1A1A' }}>
         No dishes found
       </p>
-      <p className="text-sm mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+      <p className="text-sm mt-1" style={{ color: '#999999' }}>
         Try selecting a different town
       </p>
       <button
         onClick={onBrowse}
-        className="mt-4 px-6 py-2 rounded-full text-sm font-medium transition-opacity hover:opacity-90"
-        style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+        className="mt-4 px-6 py-2 rounded-full text-sm font-bold transition-opacity hover:opacity-90"
+        style={{ background: '#E4440A', color: '#FFFFFF' }}
       >
         Browse All Dishes
       </button>
