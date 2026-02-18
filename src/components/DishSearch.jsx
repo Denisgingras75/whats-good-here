@@ -182,7 +182,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
         style={{
           background: '#FFFFFF',
           border: `3px solid ${isFocused ? '#E4440A' : '#1A1A1A'}`,
-          boxShadow: 'none',
+          boxShadow: isFocused ? '4px 4px 0px #E4440A' : '4px 4px 0px #1A1A1A',
           minHeight: '48px',
         }}
       >

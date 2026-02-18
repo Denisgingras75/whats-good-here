@@ -2,6 +2,7 @@ import { DishSearch } from '../DishSearch'
 
 /**
  * SearchHero - Massive editorial title + compact search
+ * Staggered entrance for premium feel
  */
 export function SearchHero({ town, loading, categoryScroll, onSearchChange }) {
   return (
@@ -9,7 +10,7 @@ export function SearchHero({ town, loading, categoryScroll, onSearchChange }) {
       className="pt-10 pb-0"
       style={{ background: '#FFFFFF' }}
     >
-      <div className="px-4 mb-4">
+      <div className="px-4 mb-4 stagger-item">
         <h1
           style={{
             fontFamily: "'aglet-sans', sans-serif",
@@ -25,12 +26,12 @@ export function SearchHero({ town, loading, categoryScroll, onSearchChange }) {
         </h1>
       </div>
 
-      <div className="px-4">
+      <div className="px-4 stagger-item">
         <DishSearch loading={loading} placeholder="What are you craving?" town={town} onSearchChange={onSearchChange} />
       </div>
 
       {categoryScroll && (
-        <div className="mt-4">
+        <div className="mt-4 stagger-item">
           <div className="py-2">
             {categoryScroll}
           </div>

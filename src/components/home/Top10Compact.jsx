@@ -8,6 +8,7 @@ import { CategoryIcon } from './CategoryIcons'
  * Top10Compact - Ranked dish list for the homepage
  *
  * Editorial layout: big rank numbers, bold names, rating colored by value.
+ * Staggered row entrances for smooth reveal.
  */
 export function Top10Compact({
   dishes,
@@ -26,75 +27,50 @@ export function Top10Compact({
 
   if (!dishes?.length && !categoryLabel) return null
 
-  // Podium = ranks that get bordered card treatment (up to rank 3)
-  const podiumCount = Math.max(0, 4 - startRank)
-  const podiumDishes = activeDishes.slice(0, podiumCount)
-  const finalistDishes = activeDishes.slice(podiumCount)
+  // Stagger offset — accounts for hero sections above (title, search, categories, #1 hero = ~4 items)
+  const staggerBase = 4
 
   return (
-    <section className="animate-fadeIn">
-      {/* Section headline */}
-      {categoryLabel ? (
+    <section>
+      {/* Section headline — only for category-filtered views */}
+      {categoryLabel && (
         <p
-          className="font-bold mb-4"
+          className="font-bold mb-4 stagger-item"
           style={{
             fontFamily: "'aglet-sans', sans-serif",
             color: '#E4440A',
             fontSize: '20px',
             letterSpacing: '-0.02em',
+            animationDelay: `${staggerBase * 50}ms`,
           }}
         >
           {town ? `Best ${categoryLabel} in ${town}` : `Best ${categoryLabel} on the Vineyard`}
         </p>
-      ) : (
-        <p
-          className="mb-4"
-          style={{
-            fontFamily: "'aglet-sans', sans-serif",
-            fontWeight: 800,
-            fontSize: '14px',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: '#999999',
-          }}
-        >
-          Top 10
-        </p>
       )}
 
-      {/* Dishes list */}
-      <div>
+      {/* Dishes list — every row is its own bordered card */}
+      <div className="flex flex-col" style={{ gap: '6px' }}>
         {activeDishes.length > 0 ? (
-          <>
-            {/* Podium rows — bordered cards */}
-            {podiumDishes.map((dish, index) => (
-              <div key={dish.dish_id} style={{ marginBottom: '6px' }}>
+          activeDishes.map((dish, index) => {
+            const rank = index + startRank
+            const isPodiumBreak = rank === 3 && activeDishes.length > 3
+            return (
+              <div
+                key={dish.dish_id}
+                className="stagger-item"
+                style={{
+                  animationDelay: `${(staggerBase + 1 + index) * 50}ms`,
+                  marginBottom: isPodiumBreak ? '6px' : 0,
+                }}
+              >
                 <Top10Row
                   dish={dish}
-                  rank={index + startRank}
+                  rank={rank}
                   onClick={() => navigate(`/dish/${dish.dish_id}`)}
                 />
               </div>
-            ))}
-
-            {/* Finalists — grouped in one bordered container */}
-            {finalistDishes.length > 0 && (
-              <div
-                className="mt-2 rounded-xl overflow-hidden"
-                style={{ border: '3px solid #1A1A1A' }}
-              >
-                {finalistDishes.map((dish, index) => (
-                  <Top10Row
-                    key={dish.dish_id}
-                    dish={dish}
-                    rank={index + startRank + podiumCount}
-                    onClick={() => navigate(`/dish/${dish.dish_id}`)}
-                    isLast={index === finalistDishes.length - 1}
-                  />
-                ))}
-              </div>
-            )}
-          </>
+            )
+          })
         ) : (
           <div className="text-center py-6">
             <p className="text-sm" style={{ color: '#999999' }}>
@@ -111,7 +87,7 @@ export function Top10Compact({
           className="w-full mt-3 pt-3 text-sm font-bold transition-opacity hover:opacity-70"
           style={{
             color: '#E4440A',
-            borderTop: '1px solid #E8E8E8',
+            borderTop: '1px solid #1A1A1A',
           }}
         >
           {expanded ? 'Show less' : `Show all ${allDishes.length} ${categoryLabel}`}
@@ -121,105 +97,124 @@ export function Top10Compact({
   )
 }
 
-// Podium rows: ranks 1-3 get individual bordered cards
-// Finalist rows: ranks 4+ sit inside a shared bordered container with dividers
-const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
+// Podium colors — silver (#2) and bronze (#3) banner bars
+const PODIUM_COLORS = {
+  2: { bg: '#8A8A8A', text: '#FFFFFF' },
+  3: { bg: '#A0764E', text: '#FFFFFF' },
+}
+
+// Every rank gets its own bordered card — podium (2-3) get banner bars
+const Top10Row = memo(function Top10Row({ dish, rank, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes, category } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
   const isPodium = rank <= 3
+  const podium = PODIUM_COLORS[rank]
 
   const accessibleLabel = isRanked
     ? `Rank ${rank}: ${dish_name} at ${restaurant_name}, rated ${avg_rating} out of 10 with ${total_votes} votes`
     : `Rank ${rank}: ${dish_name} at ${restaurant_name}, ${total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'new dish'}`
 
-  if (isPodium) {
+  if (podium) {
     return (
       <button
         onClick={onClick}
         aria-label={accessibleLabel}
-        className="w-full flex items-center gap-3 py-3.5 px-4 rounded-xl transition-colors text-left active:scale-[0.98]"
+        className="w-full text-left rounded-xl overflow-hidden transition-colors active:scale-[0.98]"
         style={{
           background: '#FFFFFF',
           border: '3px solid #1A1A1A',
+          boxShadow: '5px 5px 0px #1A1A1A',
         }}
       >
-        <span
-          className="font-bold flex-shrink-0"
+        {/* Colored banner bar */}
+        <div
+          className="flex items-center justify-between px-5 py-2"
           style={{
-            fontFamily: "'aglet-sans', sans-serif",
-            fontWeight: 800,
-            color: '#1A1A1A',
-            fontSize: rank === 1 ? '28px' : rank === 2 ? '24px' : '22px',
-            lineHeight: 1,
-            minWidth: '28px',
-            textAlign: 'center',
+            background: podium.bg,
+            borderBottom: '2px solid #1A1A1A',
           }}
         >
-          {rank}
-        </span>
-        <div className="flex-1 min-w-0">
-          <p
-            className="font-bold truncate"
-            style={{
-              color: '#1A1A1A',
-              fontSize: rank === 1 ? '17px' : '16px',
-              lineHeight: 1.2,
-              letterSpacing: '-0.01em',
-            }}
-          >
-            {dish_name}
-          </p>
-          <p
-            className="truncate font-medium"
-            style={{
-              color: '#999999',
-              fontSize: '11px',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              marginTop: '2px',
-            }}
-          >
-            {restaurant_name}
-          </p>
-        </div>
-        {isRanked ? (
           <span
-            className="font-bold flex-shrink-0"
             style={{
-              fontFamily: "'aglet-sans', sans-serif",
-              fontSize: '18px',
-              color: getRatingColor(avg_rating),
+              fontSize: '12px',
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: podium.text,
             }}
           >
-            {avg_rating}
+            #{rank} {rank === 2 ? 'Runner Up' : 'Bronze'}
           </span>
-        ) : (
-          <span className="text-xs flex-shrink-0" style={{ color: '#999999' }}>
-            {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
-          </span>
-        )}
-        <CategoryIcon categoryId={category} size={24} color="#E4440A" />
+          <CategoryIcon categoryId={category} size={24} color={podium.text} />
+        </div>
+        {/* Content */}
+        <div className="flex items-center gap-3 py-4 px-5">
+          <div className="flex-1 min-w-0">
+            <p
+              className="font-bold truncate"
+              style={{
+                color: '#1A1A1A',
+                fontSize: '17px',
+                lineHeight: 1.2,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {dish_name}
+            </p>
+            <p
+              className="truncate font-medium"
+              style={{
+                color: '#999999',
+                fontSize: '12px',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                marginTop: '2px',
+              }}
+            >
+              {restaurant_name}
+            </p>
+          </div>
+          {isRanked ? (
+            <span
+              className="font-bold flex-shrink-0"
+              style={{
+                fontFamily: "'aglet-sans', sans-serif",
+                fontSize: '22px',
+                color: getRatingColor(avg_rating),
+              }}
+            >
+              {avg_rating}
+            </span>
+          ) : (
+            <span className="text-xs flex-shrink-0" style={{ color: '#999999' }}>
+              {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+            </span>
+          )}
+        </div>
       </button>
     )
   }
 
-  // Finalist row (4+)
+  // Ranks 4+ — standard row cards
   return (
     <button
       onClick={onClick}
       aria-label={accessibleLabel}
-      className="w-full flex items-center gap-3 py-3.5 px-4 transition-colors text-left active:scale-[0.99]"
+      className="w-full flex items-center gap-3 py-3 px-4 rounded-xl transition-colors text-left active:scale-[0.98]"
       style={{
         background: '#FFFFFF',
-        borderBottom: isLast ? 'none' : '1px solid #E8E8E8',
+        border: '3px solid #1A1A1A',
+        boxShadow: `${rank <= 6 ? 3 : 2}px ${rank <= 6 ? 3 : 2}px 0px #1A1A1A`,
       }}
     >
       <span
         className="font-bold flex-shrink-0"
         style={{
           fontFamily: "'aglet-sans', sans-serif",
+          fontWeight: 800,
           color: '#1A1A1A',
           fontSize: '16px',
+          lineHeight: 1,
           minWidth: '28px',
           textAlign: 'center',
         }}
@@ -228,8 +223,13 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
       </span>
       <div className="flex-1 min-w-0">
         <p
-          className="font-semibold text-sm truncate"
-          style={{ color: '#1A1A1A' }}
+          className="font-bold truncate"
+          style={{
+            color: '#1A1A1A',
+            fontSize: '15px',
+            lineHeight: 1.2,
+            letterSpacing: '-0.01em',
+          }}
         >
           {dish_name}
         </p>
@@ -238,9 +238,9 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           style={{
             color: '#999999',
             fontSize: '11px',
-            letterSpacing: '0.03em',
+            letterSpacing: '0.04em',
             textTransform: 'uppercase',
-            marginTop: '1px',
+            marginTop: '2px',
           }}
         >
           {restaurant_name}
@@ -251,7 +251,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           className="font-bold flex-shrink-0"
           style={{
             fontFamily: "'aglet-sans', sans-serif",
-            fontSize: '15px',
+            fontSize: '17px',
             color: getRatingColor(avg_rating),
           }}
         >
@@ -262,7 +262,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, onClick, isLast }) {
           {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
         </span>
       )}
-      <CategoryIcon categoryId={category} size={20} color="#E4440A" />
+      <CategoryIcon categoryId={category} size={22} color="#E4440A" />
     </button>
   )
 })

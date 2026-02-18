@@ -189,6 +189,7 @@ function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange })
                   background: isActive ? '#E4440A' : '#FFFFFF',
                   border: '3px solid #1A1A1A',
                   borderRadius: '12px',
+                  boxShadow: '3px 3px 0px #1A1A1A',
                 }}
               >
                 <CategoryIcon
@@ -218,7 +219,7 @@ function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange })
   )
 }
 
-// #1 Dish — massive editorial hero
+// #1 Dish — massive editorial hero card
 function NumberOneHero({ dish, town, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes, category } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
@@ -226,60 +227,68 @@ function NumberOneHero({ dish, town, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left mb-5 rounded-2xl overflow-hidden transition-all active:scale-[0.98]"
+      className="w-full text-left mb-6 rounded-2xl overflow-hidden transition-all active:scale-[0.98] stagger-item"
       style={{
         background: '#FFFFFF',
-        border: '3px solid #1A1A1A',
+        border: '4px solid #1A1A1A',
+        boxShadow: '6px 6px 0px #1A1A1A',
       }}
     >
+      {/* Top bar — rank label + icon */}
+      <div
+        className="flex items-center justify-between px-5 py-3"
+        style={{
+          borderBottom: '3px solid #1A1A1A',
+          background: '#E4440A',
+        }}
+      >
+        <p
+          style={{
+            fontSize: '13px',
+            fontWeight: 800,
+            letterSpacing: '0.10em',
+            textTransform: 'uppercase',
+            color: '#FFFFFF',
+          }}
+        >
+          #1 {town ? `in ${town}` : 'on the Vineyard'}
+        </p>
+        <CategoryIcon categoryId={category} size={32} color="#FFFFFF" />
+      </div>
+
+      {/* Main content */}
       <div className="py-6 px-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <p
-              style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: '#999999',
-                marginBottom: '6px',
-              }}
-            >
-              #1 {town ? `in ${town}` : 'on the Vineyard'}
-            </p>
-            <h2
-              style={{
-                fontFamily: "'aglet-sans', sans-serif",
-                fontWeight: 800,
-                fontSize: '32px',
-                color: '#1A1A1A',
-                lineHeight: 1.0,
-                letterSpacing: '-0.03em',
-              }}
-            >
-              {dish_name}
-            </h2>
-            <p
-              style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#999999',
-                marginTop: '6px',
-                letterSpacing: '0.01em',
-              }}
-            >
-              {restaurant_name}
-            </p>
-          </div>
-          <CategoryIcon categoryId={category} size={56} color="#E4440A" />
-        </div>
+        <h2
+          style={{
+            fontFamily: "'aglet-sans', sans-serif",
+            fontWeight: 800,
+            fontSize: '38px',
+            color: '#1A1A1A',
+            lineHeight: 1.0,
+            letterSpacing: '-0.03em',
+          }}
+        >
+          {dish_name}
+        </h2>
+        <p
+          style={{
+            fontSize: '14px',
+            fontWeight: 600,
+            color: '#999999',
+            marginTop: '8px',
+            letterSpacing: '0.02em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {restaurant_name}
+        </p>
         <div className="flex items-baseline gap-3 mt-5">
           {isRanked && (
             <span
               style={{
                 fontFamily: "'aglet-sans', sans-serif",
                 fontWeight: 800,
-                fontSize: '42px',
+                fontSize: '56px',
                 color: getRatingColor(avg_rating),
                 lineHeight: 1,
               }}
@@ -289,8 +298,8 @@ function NumberOneHero({ dish, town, onClick }) {
           )}
           <span
             style={{
-              fontSize: '12px',
-              color: '#999999',
+              fontSize: '13px',
+              color: '#BBBBBB',
               fontWeight: 500,
             }}
           >
