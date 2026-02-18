@@ -71,7 +71,7 @@ export function Home() {
         loading={loading}
         onSearchChange={handleSearchChange}
         categoryScroll={
-          <CategoryGrid
+          <CategoryNav
             town={town}
             onTownChange={setTown}
             selectedCategory={selectedCategory}
@@ -155,94 +155,64 @@ export function Home() {
   )
 }
 
-function CategoryGrid({ town, onTownChange, selectedCategory, onCategoryChange }) {
-  const [townPickerOpen, setTownPickerOpen] = useState(false)
-  const [showAllCategories, setShowAllCategories] = useState(false)
+const scrollStyle = {
+  scrollbarWidth: 'none',
+  msOverflowStyle: 'none',
+  WebkitOverflowScrolling: 'touch',
+  overscrollBehaviorX: 'contain',
+  touchAction: 'pan-x',
+}
 
-  const VISIBLE_COUNT = 6
-  const visibleCategories = showAllCategories ? BROWSE_CATEGORIES : BROWSE_CATEGORIES.slice(0, VISIBLE_COUNT)
-  const hasMore = BROWSE_CATEGORIES.length > VISIBLE_COUNT
+function CategoryNav({ town, onTownChange, selectedCategory, onCategoryChange }) {
+  const [townPickerOpen, setTownPickerOpen] = useState(false)
 
   return (
-    <div className="px-4">
-      <div className="flex items-center gap-2 mb-3">
-        <TownPicker
-          town={town}
-          onTownChange={onTownChange}
-          isOpen={townPickerOpen}
-          onToggle={setTownPickerOpen}
-        />
-      </div>
+    <div className="flex items-center gap-2 pl-3 pr-4 pb-2 overflow-x-auto" style={scrollStyle}>
+      <TownPicker
+        town={town}
+        onTownChange={onTownChange}
+        isOpen={townPickerOpen}
+        onToggle={setTownPickerOpen}
+      />
       {!townPickerOpen && (
-        <>
-          <div
-            className="grid gap-2"
-            style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
-          >
-            {visibleCategories.map((cat) => {
-              const isActive = selectedCategory === cat.id
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => onCategoryChange(isActive ? null : cat.id)}
-                  className="flex flex-col items-center justify-center transition-all active:scale-[0.96]"
-                  style={{
-                    height: '72px',
-                    background: isActive ? '#E4440A' : '#FFFFFF',
-                    border: '3px solid #1A1A1A',
-                    borderRadius: '12px',
-                  }}
-                >
-                  <CategoryIcon
-                    categoryId={cat.id}
-                    size={28}
-                    color={isActive ? '#FFFFFF' : '#E4440A'}
-                  />
-                  <span
-                    style={{
-                      fontSize: '9px',
-                      fontWeight: 700,
-                      letterSpacing: '0.02em',
-                      color: isActive ? '#FFFFFF' : '#1A1A1A',
-                      marginTop: '4px',
-                      lineHeight: 1.1,
-                      textAlign: 'center',
-                    }}
-                  >
-                    {cat.label}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-          {hasMore && (
-            <button
-              onClick={() => setShowAllCategories(prev => !prev)}
-              className="w-full mt-2 py-2.5 text-center transition-all active:scale-[0.98]"
-              style={{
-                fontSize: '12px',
-                fontWeight: 700,
-                color: '#1A1A1A',
-                letterSpacing: '0.02em',
-                border: '3px solid #1A1A1A',
-                borderRadius: '12px',
-                background: '#FFFFFF',
-              }}
-            >
-              {showAllCategories ? 'Less' : `More categories`}
-              <span
+        <div className="flex items-center gap-2">
+          {BROWSE_CATEGORIES.map((cat) => {
+            const isActive = selectedCategory === cat.id
+            return (
+              <button
+                key={cat.id}
+                onClick={() => onCategoryChange(isActive ? null : cat.id)}
+                className="flex-shrink-0 flex flex-col items-center justify-center transition-all active:scale-[0.96]"
                 style={{
-                  display: 'inline-block',
-                  marginLeft: '6px',
-                  transform: showAllCategories ? 'rotate(180deg)' : 'none',
-                  transition: 'transform 0.2s ease',
+                  width: '64px',
+                  height: '84px',
+                  background: isActive ? '#E4440A' : '#FFFFFF',
+                  border: '3px solid #1A1A1A',
+                  borderRadius: '12px',
                 }}
               >
-                ▾
-              </span>
-            </button>
-          )}
-        </>
+                <CategoryIcon
+                  categoryId={cat.id}
+                  size={34}
+                  color={isActive ? '#FFFFFF' : '#E4440A'}
+                />
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.02em',
+                    color: isActive ? '#FFFFFF' : '#1A1A1A',
+                    marginTop: '4px',
+                    lineHeight: 1.1,
+                    textAlign: 'center',
+                  }}
+                >
+                  {cat.label}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       )}
     </div>
   )
