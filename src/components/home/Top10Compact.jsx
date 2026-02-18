@@ -32,19 +32,24 @@ export function Top10Compact({
 
   return (
     <section>
-      {/* Dishes list — every row is its own bordered card */}
+      {/* Dishes list — podium cards (2-3) then clean rows (4+) */}
       <div className="flex flex-col" style={{ gap: '6px' }}>
         {activeDishes.length > 0 ? (
           activeDishes.map((dish, index) => {
             const rank = index + startRank
             const isPodiumBreak = rank === 3 && activeDishes.length > 3
+            const isAfterPodium = rank > 3
+            const isLastRow = index === activeDishes.length - 1
+            const nextRank = index + startRank + 1
+            const nextIsAfterPodium = nextRank > 3
             return (
               <div
                 key={dish.dish_id}
                 className="stagger-item"
                 style={{
                   animationDelay: `${(staggerBase + 1 + index) * 50}ms`,
-                  marginBottom: isPodiumBreak ? '6px' : 0,
+                  marginBottom: isPodiumBreak ? '12px' : 0,
+                  borderBottom: 'none', // rows handle their own dividers
                 }}
               >
                 <Top10Row
@@ -72,7 +77,7 @@ export function Top10Compact({
           className="w-full mt-3 pt-3 text-sm font-bold transition-opacity hover:opacity-70"
           style={{
             color: '#E4440A',
-            borderTop: '1px solid #1A1A1A',
+            borderTop: '1px solid #E0E0E0',
           }}
         >
           {expanded ? 'Show less' : `Show all ${allDishes.length} ${categoryLabel}`}
@@ -88,7 +93,7 @@ const PODIUM_COLORS = {
   3: { bg: '#A0764E', text: '#FFFFFF' },
 }
 
-// Every rank gets its own bordered card — podium (2-3) get banner bars
+// Podium (2-3) get banner cards, ranks 4+ are clean rows
 const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes, category } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
@@ -107,8 +112,8 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
         className="w-full text-left rounded-xl overflow-hidden card-press"
         style={{
           background: '#FFFFFF',
-          border: '3px solid #1A1A1A',
-          boxShadow: '5px 5px 0px #1A1A1A',
+          border: '2px solid #1A1A1A',
+          boxShadow: rank === 2 ? '3px 3px 0px #1A1A1A' : '2px 2px 0px #1A1A1A',
         }}
       >
         {/* Colored banner bar */}
@@ -116,7 +121,6 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
           className="px-5 py-2"
           style={{
             background: podium.bg,
-            borderBottom: '2px solid #1A1A1A',
           }}
         >
           <span
@@ -131,14 +135,14 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
             #{rank} {town ? `in ${town}` : 'on the Vineyard'}
           </span>
         </div>
-        {/* Content — text left, icon right */}
-        <div className="flex items-center gap-3 py-4 px-5">
+        {/* Content — text left, icon right. #2 is bigger than #3. */}
+        <div className={`flex items-center gap-3 ${rank === 2 ? 'py-5 px-5' : 'py-3 px-5'}`}>
           <div className="flex-1 min-w-0">
             <p
               className="font-bold truncate"
               style={{
                 color: '#1A1A1A',
-                fontSize: '16px',
+                fontSize: rank === 2 ? '18px' : '15px',
                 lineHeight: 1.2,
                 letterSpacing: '-0.01em',
               }}
@@ -164,7 +168,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
                     className="font-bold"
                     style={{
                       fontFamily: "'aglet-sans', sans-serif",
-                      fontSize: '20px',
+                      fontSize: rank === 2 ? '22px' : '18px',
                       color: getRatingColor(avg_rating),
                     }}
                   >
@@ -181,22 +185,21 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
               )}
             </div>
           </div>
-          <CategoryIcon categoryId={category} dishName={dish_name} size={72} color="#E4440A" />
+          <CategoryIcon categoryId={category} dishName={dish_name} size={rank === 2 ? 72 : 60} color="#E4440A" />
         </div>
       </button>
     )
   }
 
-  // Ranks 4+ — stacked layout with rank on left
+  // Ranks 4+ — clean rows with divider line, editorial list feel
   return (
     <button
       onClick={onClick}
       aria-label={accessibleLabel}
-      className="w-full flex gap-3 py-3 px-4 rounded-xl text-left card-press"
+      className="w-full flex gap-3 py-3 px-4 text-left card-press"
       style={{
         background: '#FFFFFF',
-        border: '3px solid #1A1A1A',
-        boxShadow: `${rank <= 6 ? 3 : 2}px ${rank <= 6 ? 3 : 2}px 0px #1A1A1A`,
+        borderBottom: '1px solid #CCCCCC',
       }}
     >
       <span

@@ -214,10 +214,8 @@ function CategoryNav({ selectedCategory, onCategoryChange }) {
             style={{
               width: '60px',
               height: '80px',
-              background: isActive ? '#E4440A' : '#FFFFFF',
-              border: '3px solid #1A1A1A',
+              background: isActive ? '#E4440A' : '#F5F5F5',
               borderRadius: '12px',
-              boxShadow: '3px 3px 0px #1A1A1A',
             }}
           >
             <CategoryIcon
