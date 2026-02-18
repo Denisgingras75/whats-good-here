@@ -134,12 +134,6 @@ export const placesApi = {
     if (!placeId) return null
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        this._lastError = { reason: 'no_session', message: 'Not authenticated' }
-        return null
-      }
-
       const response = await supabase.functions.invoke('places-details', {
         body: { placeId },
       })
