@@ -39,10 +39,21 @@ export function Home() {
     return (b.avg_rating || 0) - (a.avg_rating || 0)
   }
 
-  // Top 10 dishes
+  // Top 10 dishes — max 2 per restaurant to avoid one place dominating
   const top10Dishes = useMemo(() => {
     if (!dishes?.length) return []
-    return dishes.slice().sort(rankSort).slice(0, 10)
+    const sorted = dishes.slice().sort(rankSort)
+    const perRestaurant = {}
+    const result = []
+    for (const dish of sorted) {
+      const count = perRestaurant[dish.restaurant_id] || 0
+      if (count < 2) {
+        result.push(dish)
+        perRestaurant[dish.restaurant_id] = count + 1
+      }
+      if (result.length === 10) break
+    }
+    return result
   }, [dishes])
 
   // "More Top Picks" — dishes 11-20
