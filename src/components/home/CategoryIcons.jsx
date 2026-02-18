@@ -201,9 +201,10 @@ const defaultIcon = (
 export function CategoryIcon({ categoryId, dishName, size = 32, color = 'currentColor' }) {
   const key = categoryId?.toLowerCase()
 
-  // Check dish-name overrides first
-  const nameMatch = dishName && dishNameIcons.find(d => dishName.toLowerCase().includes(d.match))
-  const posterSrc = nameMatch?.src || posterIcons[key]
+  // Category poster icon takes priority — dish-name overrides only for uncovered categories
+  const categoryPoster = posterIcons[key]
+  const nameMatch = !categoryPoster && dishName && dishNameIcons.find(d => dishName.toLowerCase().includes(d.match))
+  const posterSrc = categoryPoster || nameMatch?.src
 
   // Prefer poster PNG when available
   if (posterSrc) {
