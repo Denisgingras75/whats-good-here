@@ -28,10 +28,19 @@ const posterIcons = {
 }
 
 // Dish-name overrides — specific icons for dishes matching keywords
+// More specific matches first (e.g. "fried chicken" before "chicken" category)
 const dishNameIcons = [
   { match: 'benedict', src: '/categories/poster/eggs-benedict.png' },
   { match: 'cauliflower', src: '/categories/poster/veggies.png' },
   { match: 'carrot', src: '/categories/poster/veggies.png' },
+  { match: 'fried chicken', src: '/categories/poster/fried-chicken.png' },
+  { match: 'shrimp', src: '/categories/poster/shrimp.png' },
+  { match: 'fries', src: '/categories/poster/fries.png' },
+  { match: 'french fry', src: '/categories/poster/fries.png' },
+  { match: 'soup', src: '/categories/poster/soup.png' },
+  { match: 'bisque', src: '/categories/poster/soup.png' },
+  { match: 'wrap', src: '/categories/poster/wrap.png' },
+  { match: 'rib', src: '/categories/poster/ribs.png' },
 ]
 
 const icons = {
