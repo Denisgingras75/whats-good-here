@@ -477,14 +477,21 @@ describe('dishesApi', () => {
           cuisine: 'Seafood',
         },
       }
-      // First call: get dish (avg_rating and total_votes are pre-computed columns)
+      // First call: get dish with .maybeSingle()
       supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: { ...mockDish, avg_rating: 8, total_votes: 3 }, error: null }),
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: { ...mockDish, avg_rating: 8 }, error: null }),
+          }),
         }),
       })
-      // Second call: count yes_votes (head: true count query)
+      // Second call: count total_votes (head: true count query, single .eq())
+      supabase.from.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ count: 3, error: null }),
+        }),
+      })
+      // Third call: count yes_votes (head: true count query, double .eq())
       supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
@@ -492,7 +499,7 @@ describe('dishesApi', () => {
           }),
         }),
       })
-      // Third call: check variants
+      // Fourth call: check variants
       supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({ count: 0, error: null }),
@@ -508,14 +515,22 @@ describe('dishesApi', () => {
     })
 
     it('should handle dish with no votes', async () => {
-      const mockDish = { id: 'dish-1', name: 'New Dish', avg_rating: null, total_votes: 0, restaurants: {} }
+      const mockDish = { id: 'dish-1', name: 'New Dish', avg_rating: null, restaurants: {} }
 
       supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: mockDish, error: null }),
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: mockDish, error: null }),
+          }),
         }),
       })
+      // count total_votes
+      supabase.from.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ count: 0, error: null }),
+        }),
+      })
+      // count yes_votes
       supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
@@ -523,6 +538,7 @@ describe('dishesApi', () => {
           }),
         }),
       })
+      // check variants
       supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({ count: 0, error: null }),
@@ -539,8 +555,9 @@ describe('dishesApi', () => {
     it('should throw error when dish not found', async () => {
       supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Not found', code: 'PGRST116' } }),
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: null, error: { message: 'Not found', code: 'PGRST116' } }),
+          }),
         }),
       })
 
@@ -548,12 +565,19 @@ describe('dishesApi', () => {
     })
 
     it('should continue with dish data if yes_votes count fails (graceful degradation)', async () => {
-      const mockDish = { id: 'dish-1', name: 'Lobster Roll', avg_rating: 8, total_votes: 3, restaurants: {} }
+      const mockDish = { id: 'dish-1', name: 'Lobster Roll', avg_rating: 8, restaurants: {} }
 
       supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: mockDish, error: null }),
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: mockDish, error: null }),
+          }),
+        }),
+      })
+      // count total_votes
+      supabase.from.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ count: 3, error: null }),
         }),
       })
       // yes_votes count query fails

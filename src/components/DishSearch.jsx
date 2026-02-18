@@ -216,22 +216,23 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
 
   return (
     <div className="relative w-full">
-      {/* Search Input */}
+      {/* Search Input — Neo-Brutalist */}
       <div
-        className="relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
+        className="relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150"
         style={{
-          background: 'var(--color-bg)',
-          border: `2px solid ${isFocused ? 'var(--color-primary)' : 'var(--color-card-border, var(--color-divider))'}`,
+          background: '#FFFFFF',
+          border: `3px solid #000000`,
+          boxShadow: isFocused ? '4px 4px 0px 0px #000000' : '3px 3px 0px 0px #000000',
           minHeight: '48px',
         }}
       >
         <svg
           className="w-5 h-5 flex-shrink-0"
-          style={{ color: 'var(--color-text-tertiary)' }}
+          style={{ color: '#000000' }}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
-          strokeWidth={2}
+          strokeWidth={2.5}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
@@ -252,7 +253,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
           aria-expanded={showDropdown}
           aria-controls="dish-search-dropdown"
           className="flex-1 bg-transparent outline-none border-none text-sm"
-          style={{ color: 'var(--color-text-primary)', outline: 'none', border: 'none', boxShadow: 'none' }}
+          style={{ color: '#000000', fontWeight: 600, outline: 'none', border: 'none', boxShadow: 'none' }}
         />
 
         {query && (
@@ -262,18 +263,18 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
               inputRef.current?.focus()
             }}
             aria-label="Clear search"
-            className="p-1 rounded-full transition-colors"
-            style={{ ':hover': { background: 'var(--color-surface-elevated)' } }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            className="p-1 rounded-lg transition-colors"
+            style={{ border: '2px solid #000000' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F5F5' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
           >
             <svg
               className="w-4 h-4"
-              style={{ color: 'var(--color-text-tertiary)' }}
+              style={{ color: '#000000' }}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={2}
+              strokeWidth={2.5}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -281,7 +282,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
         )}
       </div>
 
-      {/* Autocomplete Dropdown */}
+      {/* Autocomplete Dropdown — Neo-Brutalist */}
       {showDropdown && (
         <div
           ref={dropdownRef}
@@ -290,16 +291,16 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
           aria-label="Search results"
           className="absolute top-full left-0 right-0 mt-2 rounded-xl overflow-hidden z-50"
           style={{
-            background: 'var(--color-surface)',
-            border: '2px solid var(--color-card-border, var(--color-divider))',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            background: '#FFFFFF',
+            border: '3px solid #000000',
+            boxShadow: '6px 6px 0px 0px #000000',
           }}
         >
           {/* Nearby restaurants (shown on focus before typing) */}
           {showNearby && query.length < MIN_SEARCH_LENGTH && (
             <div className="max-h-80 overflow-y-auto">
-              <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+              <div className="px-4 py-2" style={{ borderBottom: '2px solid #000000' }}>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: '#000000', fontWeight: 800 }}>
                   Nearby
                 </span>
               </div>
@@ -308,22 +309,25 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                   key={r.id}
                   onClick={() => handleNearbySelect(r)}
                   className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF7ED' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--color-surface-elevated)' }}>
-                    <svg className="w-4 h-4" style={{ color: 'var(--color-primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: '#FFF7ED', border: '2px solid #000000' }}
+                  >
+                    <svg className="w-4 h-4" style={{ color: '#F97316' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                     </svg>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{r.name}</p>
-                    <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+                    <p className="text-sm truncate" style={{ color: '#000000', fontWeight: 700 }}>{r.name}</p>
+                    <p className="text-xs truncate" style={{ color: '#666666' }}>
                       {(r.distance_meters / 1609).toFixed(1)} mi away
                     </p>
                   </div>
-                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#000000' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -336,26 +340,41 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
             <>
               {isLoading ? (
                 <div className="px-4 py-6 text-center">
-                  <div className="animate-spin w-5 h-5 border-2 rounded-full mx-auto" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-primary)' }} />
-                  <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                  <div className="animate-spin w-5 h-5 border-2 rounded-full mx-auto" style={{ borderColor: '#F5F5F5', borderTopColor: '#F97316' }} />
+                  <p className="text-xs mt-2" style={{ color: '#666666', fontWeight: 600 }}>
                     Searching...
                   </p>
                 </div>
               ) : !hasResults ? (
                 <div className="px-4 py-6 text-center">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-sm" style={{ color: '#000000', fontWeight: 700 }}>
                     No results for &quot;{query}&quot;
                   </p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                  <p className="text-xs mt-1" style={{ color: '#666666' }}>
                     {!user ? 'Sign in to search Google Places for more restaurants' : 'Try a different spelling'}
                   </p>
                   {user ? (
                     <button
                       onClick={handleAddRestaurant}
-                      className="mt-3 px-4 py-2 rounded-full font-semibold text-xs transition-all active:scale-[0.97]"
+                      className="mt-3 px-4 py-2 rounded-xl text-xs transition-all duration-150"
                       style={{
-                        background: 'var(--color-primary)',
-                        color: 'white',
+                        background: '#F97316',
+                        color: '#000000',
+                        fontWeight: 700,
+                        border: '3px solid #000000',
+                        boxShadow: '3px 3px 0px 0px #000000',
+                      }}
+                      onMouseDown={(e) => {
+                        e.currentTarget.style.transform = 'translate(2px, 2px)'
+                        e.currentTarget.style.boxShadow = '1px 1px 0px 0px #000000'
+                      }}
+                      onMouseUp={(e) => {
+                        e.currentTarget.style.transform = 'translate(0, 0)'
+                        e.currentTarget.style.boxShadow = '3px 3px 0px 0px #000000'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translate(0, 0)'
+                        e.currentTarget.style.boxShadow = '3px 3px 0px 0px #000000'
                       }}
                     >
                       Add a restaurant
@@ -363,10 +382,25 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                   ) : (
                     <button
                       onClick={() => { setIsFocused(false); navigate('/login') }}
-                      className="mt-3 px-4 py-2 rounded-full font-semibold text-xs transition-all active:scale-[0.97]"
+                      className="mt-3 px-4 py-2 rounded-xl text-xs transition-all duration-150"
                       style={{
-                        background: 'var(--color-primary)',
-                        color: 'white',
+                        background: '#F97316',
+                        color: '#000000',
+                        fontWeight: 700,
+                        border: '3px solid #000000',
+                        boxShadow: '3px 3px 0px 0px #000000',
+                      }}
+                      onMouseDown={(e) => {
+                        e.currentTarget.style.transform = 'translate(2px, 2px)'
+                        e.currentTarget.style.boxShadow = '1px 1px 0px 0px #000000'
+                      }}
+                      onMouseUp={(e) => {
+                        e.currentTarget.style.transform = 'translate(0, 0)'
+                        e.currentTarget.style.boxShadow = '3px 3px 0px 0px #000000'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translate(0, 0)'
+                        e.currentTarget.style.boxShadow = '3px 3px 0px 0px #000000'
                       }}
                     >
                       Sign in to search more
@@ -378,8 +412,8 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                   {/* Dish Results */}
                   {results.dishes.length > 0 && (
                     <div>
-                      <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                      <div className="px-4 py-2" style={{ borderBottom: '2px solid #000000' }}>
+                        <span className="text-[10px] uppercase tracking-wider" style={{ color: '#000000', fontWeight: 800 }}>
                           {town ? `Best in ${town}` : 'Best Matches'}
                         </span>
                       </div>
@@ -397,8 +431,8 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                   {/* Restaurant Results (local DB) */}
                   {results.restaurants.length > 0 && (
                     <div>
-                      <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                      <div className="px-4 py-2" style={{ borderBottom: '2px solid #000000' }}>
+                        <span className="text-[10px] uppercase tracking-wider" style={{ color: '#000000', fontWeight: 800 }}>
                           Restaurants
                         </span>
                       </div>
@@ -407,15 +441,15 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                           key={r.id}
                           onClick={() => handleRestaurantSelect(r)}
                           className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
-                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
-                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF7ED' }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                         >
                           <RestaurantAvatar name={r.name} size={24} />
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{r.name}</p>
-                            <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{r.address}</p>
+                            <p className="text-sm truncate" style={{ color: '#000000', fontWeight: 700 }}>{r.name}</p>
+                            <p className="text-xs truncate" style={{ color: '#666666' }}>{r.address}</p>
                           </div>
-                          <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#000000' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                           </svg>
                         </button>
@@ -426,8 +460,8 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                   {/* Google Places Results */}
                   {results.places.length > 0 && (
                     <div>
-                      <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--color-divider)' }}>
-                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-primary)' }}>
+                      <div className="px-4 py-2" style={{ borderBottom: '2px solid #000000' }}>
+                        <span className="text-[10px] uppercase tracking-wider" style={{ color: '#F97316', fontWeight: 800 }}>
                           From Google Places
                         </span>
                       </div>
@@ -440,19 +474,30 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                             setAddRestaurantOpen(true)
                           }}
                           className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
-                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
-                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF7ED' }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                         >
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--color-primary)', color: 'white' }}>
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <div
+                            className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{ background: '#F97316', border: '2px solid #000000' }}
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="#000000" strokeWidth={3}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{p.name}</p>
-                            <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{p.address}</p>
+                            <p className="text-sm truncate" style={{ color: '#000000', fontWeight: 700 }}>{p.name}</p>
+                            <p className="text-xs truncate" style={{ color: '#666666' }}>{p.address}</p>
                           </div>
-                          <span className="flex-shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--color-primary)', color: 'white' }}>
+                          <span
+                            className="flex-shrink-0 text-[10px] px-2 py-0.5 rounded-lg"
+                            style={{
+                              background: '#F97316',
+                              color: '#000000',
+                              fontWeight: 800,
+                              border: '2px solid #000000',
+                            }}
+                          >
                             + Add
                           </span>
                         </button>
@@ -463,14 +508,8 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                   {/* Category Results */}
                   {results.categories.length > 0 && (
                     <div>
-                      <div
-                        className="px-4 py-2 border-b"
-                        style={{
-                          borderColor: 'var(--color-divider)',
-                          background: results.dishes.length > 0 ? 'var(--color-surface)' : 'transparent',
-                        }}
-                      >
-                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                      <div className="px-4 py-2" style={{ borderBottom: '2px solid #000000' }}>
+                        <span className="text-[10px] uppercase tracking-wider" style={{ color: '#000000', fontWeight: 800 }}>
                           Categories
                         </span>
                       </div>
@@ -490,17 +529,20 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
               {user && (
                 <button
                   onClick={handleAddRestaurant}
-                  className="w-full flex items-center gap-3 px-4 py-3 border-t transition-colors text-left"
-                  style={{ borderColor: 'var(--color-divider)' }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
+                  style={{ borderTop: '2px solid #000000' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF7ED' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--color-primary)', color: 'white' }}>
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <div
+                    className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: '#F97316', border: '2px solid #000000' }}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="#000000" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
                   </div>
-                  <span className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
+                  <span className="text-sm" style={{ color: '#F97316', fontWeight: 700 }}>
                     Don&apos;t see it? Add a restaurant
                   </span>
                 </button>
@@ -520,7 +562,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
   )
 }
 
-// Individual dish result row
+// Individual dish result row — Neo-Brutalist
 function DishResult({ dish, rank, onClick }) {
   const {
     dish_name,
@@ -539,18 +581,20 @@ function DishResult({ dish, rank, onClick }) {
     <button
       onClick={onClick}
       className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
-      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
-      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+      onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF7ED' }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     >
       {/* Restaurant avatar with town color */}
       <RestaurantAvatar name={restaurant_name} town={restaurant_town} size={24} />
 
       {/* Rank badge */}
       <div
-        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+        className="w-6 h-6 rounded-lg flex items-center justify-center text-xs flex-shrink-0"
         style={{
-          background: rank === 1 ? 'var(--color-primary)' : 'var(--color-surface)',
-          color: rank === 1 ? 'white' : 'var(--color-text-tertiary)',
+          background: rank === 1 ? '#F97316' : '#F5F5F5',
+          color: rank === 1 ? '#000000' : '#666666',
+          fontWeight: 800,
+          border: '2px solid #000000',
         }}
       >
         {rank}
@@ -559,7 +603,7 @@ function DishResult({ dish, rank, onClick }) {
       {/* Photo */}
       <div
         className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
-        style={{ background: 'var(--color-surface)' }}
+        style={{ border: '2px solid #000000' }}
       >
         <img
           src={imgSrc}
@@ -571,10 +615,10 @@ function DishResult({ dish, rank, onClick }) {
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+        <h4 className="text-sm truncate" style={{ color: '#000000', fontWeight: 700 }}>
           {dish_name}
         </h4>
-        <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-xs truncate" style={{ color: '#666666' }}>
           {restaurant_name}
         </p>
       </div>
@@ -583,19 +627,30 @@ function DishResult({ dish, rank, onClick }) {
       <div className="flex-shrink-0 text-right">
         {isRanked ? (
           <div className="flex flex-col items-end">
-            <span className="text-sm font-bold leading-tight" style={{ color: getRatingColor(avg_rating) }}>
+            <span
+              className="text-xs px-1.5 py-0.5 rounded-lg"
+              style={{
+                background: '#F97316',
+                color: '#000000',
+                fontWeight: 800,
+                border: '2px solid #000000',
+                boxShadow: '2px 2px 0px 0px #000000',
+              }}
+            >
               {avg_rating || '—'}
             </span>
-            <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+            <span className="text-[10px] mt-0.5" style={{ color: '#666666', fontWeight: 600 }}>
               {total_votes} votes
             </span>
           </div>
         ) : (
           <div
-            className="text-[10px] font-medium px-2 py-1 rounded-full"
+            className="text-[10px] px-2 py-1 rounded-lg"
             style={{
-              background: 'var(--color-surface)',
-              color: 'var(--color-text-tertiary)',
+              background: '#F5F5F5',
+              color: '#666666',
+              fontWeight: 700,
+              border: '2px solid #000000',
             }}
           >
             {total_votes ? `Early · ${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'Be first to vote'}
@@ -606,19 +661,19 @@ function DishResult({ dish, rank, onClick }) {
   )
 }
 
-// Category result row
+// Category result row — Neo-Brutalist
 function CategoryResult({ category, onClick }) {
   return (
     <button
       onClick={onClick}
       className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
-      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
-      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+      onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF7ED' }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     >
       {/* Category image */}
       <div
         className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
-        style={{ background: 'var(--color-surface)' }}
+        style={{ border: '2px solid #000000' }}
       >
         <img
           src={getCategoryImage(category.id)}
@@ -630,10 +685,10 @@ function CategoryResult({ category, onClick }) {
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+        <h4 className="text-sm" style={{ color: '#000000', fontWeight: 700 }}>
           {category.label}
         </h4>
-        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+        <p className="text-xs" style={{ color: '#666666' }}>
           View all ranked dishes
         </p>
       </div>
@@ -641,11 +696,11 @@ function CategoryResult({ category, onClick }) {
       {/* Arrow */}
       <svg
         className="w-4 h-4 flex-shrink-0"
-        style={{ color: 'var(--color-text-tertiary)' }}
+        style={{ color: '#000000' }}
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-        strokeWidth={2}
+        strokeWidth={2.5}
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
       </svg>

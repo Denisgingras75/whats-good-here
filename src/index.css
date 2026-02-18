@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* ===========================
    NProgress Route Transition Bar
@@ -29,46 +29,46 @@
 }
 
 /* ===========================
-   What's Good Here — Bold Light Theme
-   Clean white, bold borders, orange accent
+   What's Good Here — Neo-Brutalist Theme
+   Pure white, hard black shadows, orange accent
    =========================== */
 :root {
-  /* Primary: Bold Orange-Red - appetite trigger, high energy */
-  --color-primary: #E8530E;
-  --color-primary-muted: rgba(232, 83, 14, 0.08);
-  --color-primary-glow: rgba(232, 83, 14, 0.15);
+  /* Primary: Orange accent — appetite trigger */
+  --color-primary: #F97316;
+  --color-primary-muted: rgba(249, 115, 22, 0.1);
+  --color-primary-glow: rgba(249, 115, 22, 0.15);
 
-  /* Rating: Orange (matches primary for bold consistency) */
-  --color-rating: #E8530E;
+  /* Rating: Same orange for badge consistency */
+  --color-rating: #F97316;
 
-  /* Secondary: Warm Gold - secondary accents */
-  --color-accent-gold: #D9A765;
-  --color-accent-gold-muted: rgba(217, 167, 101, 0.1);
-  --color-link-secondary: #E8530E;
+  /* Secondary accents — use primary everywhere for simplicity */
+  --color-accent-gold: #F97316;
+  --color-accent-gold-muted: rgba(249, 115, 22, 0.08);
+  --color-link-secondary: #F97316;
 
-  /* Tertiary: Warm Orange - hover states */
-  --color-accent-orange: #E07856;
+  /* Tertiary: Orange hover */
+  --color-accent-orange: #EA580C;
 
-  /* Text hierarchy — dark on light */
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #555555;
-  --color-text-tertiary: #999999;
+  /* Text hierarchy — pure black on white */
+  --color-text-primary: #000000;
+  --color-text-secondary: #333333;
+  --color-text-tertiary: #666666;
 
-  /* Surfaces — clean white */
+  /* Surfaces — pure white */
   --color-bg: #FFFFFF;
   --color-surface: #FFFFFF;
-  --color-surface-elevated: #F7F7F7;
-  --color-divider: #E5E5E5;
+  --color-surface-elevated: #F5F5F5;
+  --color-divider: #000000;
 
-  /* Cards — white with bold dark borders */
+  /* Cards — white with thick black borders */
   --color-card: #FFFFFF;
-  --color-card-hover: #FAFAFA;
-  --color-card-border: #1A1A1A;
+  --color-card-hover: #FFF7ED;
+  --color-card-border: #000000;
 
-  /* Medal ranks — top 3 in lists */
-  --color-medal-gold: #E8530E;
-  --color-medal-silver: #888888;
-  --color-medal-bronze: #C4855C;
+  /* Medal ranks */
+  --color-medal-gold: #F97316;
+  --color-medal-silver: #666666;
+  --color-medal-bronze: #92400E;
 
   /* Feedback states */
   --color-danger: #DC2626;
@@ -77,8 +77,8 @@
   /* "Avoid" action */
   --color-muted: #9CA3AF;
 
-  /* Text on primary-colored backgrounds (buttons, banners) */
-  --color-text-on-primary: #FFFFFF;
+  /* Text on primary-colored backgrounds */
+  --color-text-on-primary: #000000;
 
   /* Semantic status colors */
   --color-emerald: #10B981;
@@ -102,12 +102,15 @@
   --color-tier-community: #3B82F6;
   --color-tier-hidden: #6B7280;
 
-  /* Glow effects — subtle on light */
-  --glow-primary: 0 2px 12px rgba(232, 83, 14, 0.12);
-  --glow-gold: 0 2px 12px rgba(217, 167, 101, 0.12);
+  /* Neo-Brutalist shadows — hard, zero-blur */
+  --shadow-brutal: 6px 6px 0px 0px #000000;
+  --shadow-brutal-sm: 4px 4px 0px 0px #000000;
+  --shadow-brutal-pressed: 2px 2px 0px 0px #000000;
+  --glow-primary: none;
+  --glow-gold: none;
 
   /* Focus ring */
-  --focus-ring: 0 0 0 3px rgba(232, 83, 14, 0.2);
+  --focus-ring: 4px 4px 0px 0px #000000;
 }
 
 @tailwind base;
@@ -134,12 +137,13 @@
     min-height: 100dvh; /* Dynamic viewport height - accounts for mobile browser chrome */
     background: var(--color-surface);
     color: var(--color-text-primary);
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     overscroll-behavior-y: none;
   }
 
   h1, h2, h3 {
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -164,23 +168,28 @@
   }
 
   .card-elevated {
-    @apply rounded-2xl transition-all duration-300;
+    @apply rounded-xl transition-all duration-150;
     background: var(--color-card);
-    border: 2px solid var(--color-card-border, #1A1A1A);
-    box-shadow: none;
+    border: 3px solid #000000;
+    box-shadow: var(--shadow-brutal);
   }
 
   .card-elevated:hover {
     background: var(--color-card-hover);
-    border-color: var(--color-primary);
-    box-shadow: 0 4px 12px rgba(232, 83, 14, 0.1);
-    transform: translateY(-2px);
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-brutal-sm);
+  }
+
+  .card-elevated:active {
+    transform: translate(4px, 4px);
+    box-shadow: var(--shadow-brutal-pressed);
   }
 
   .card-subtle {
     @apply rounded-xl;
     background: var(--color-card);
-    border: 2px solid var(--color-card-border, #1A1A1A);
+    border: 3px solid #000000;
+    box-shadow: var(--shadow-brutal-sm);
   }
 
   .image-zoom {
@@ -191,13 +200,13 @@
     transform: scale(1.05);
   }
 
-  /* TopBar - Subtle brand anchor in safe-area region */
+  /* TopBar - Brutal brand anchor */
   .top-bar {
     position: relative;
     width: 100%;
     background: var(--color-bg);
     padding-top: env(safe-area-inset-top, 0px);
-    border-bottom: 2px solid var(--color-card-border, #1A1A1A);
+    border-bottom: 3px solid #000000;
     box-shadow: none;
   }
 
@@ -358,34 +367,36 @@
     padding: 14px 24px;
     border-radius: 12px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
+    transition: all 0.15s ease;
+    border: 3px solid #000000;
+    box-shadow: var(--shadow-brutal-sm);
   }
 
   .welcome-splash__btn--primary {
     background: var(--color-primary);
-    color: white;
+    color: #000000;
   }
 
   .welcome-splash__btn--primary:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-brutal-pressed);
   }
 
   .welcome-splash__btn--primary:active {
-    transform: scale(0.98);
+    transform: translate(4px, 4px);
+    box-shadow: none;
   }
 
   .welcome-splash__btn--secondary {
     background: var(--color-surface-elevated);
     color: var(--color-text-secondary);
-    border: 1px solid var(--color-divider);
   }
 
   .welcome-splash__btn--secondary:hover {
-    background: var(--color-card-hover);
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-brutal-pressed);
   }
 
   .welcome-splash__btn--skip {
@@ -423,13 +434,12 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Tap target - pressed state for buttons */
+  /* Tap target - brutal press effect */
   .tap-target {
     @apply transition-all duration-150;
   }
   .tap-target:active {
-    transform: scale(0.95);
-    opacity: 0.8;
+    transform: translate(2px, 2px);
   }
 
   /* Image placeholder background while loading */
@@ -503,20 +513,20 @@
     background: var(--color-bg);
   }
 
-  /* Search input focus ring */
+  /* Search input focus ring - brutal */
   .glow-search:focus-within {
-    box-shadow: 0 0 0 2px var(--color-primary);
-    border-color: var(--color-primary) !important;
+    box-shadow: var(--shadow-brutal-sm);
+    border-color: #000000 !important;
   }
 
-  /* Rating glow for high scores */
+  /* Rating glow - disabled for brutalist */
   .glow-rating-high {
-    text-shadow: 0 0 12px rgba(107, 179, 132, 0.5);
+    text-shadow: none;
   }
 
-  /* Gold text glow */
+  /* Gold text glow - disabled for brutalist */
   .glow-gold-text {
-    text-shadow: 0 0 16px rgba(217, 167, 101, 0.4), 0 0 32px rgba(217, 167, 101, 0.15);
+    text-shadow: none;
   }
 
   .focus-ring {
@@ -818,19 +828,22 @@
   width: 100%;
   padding: 12px 16px;
   background: var(--color-surface);
-  border: 2px dashed var(--color-divider);
+  border: 3px dashed #000000;
   border-radius: 12px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-brutal-sm);
 }
 
 .photo-upload-btn:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background: var(--color-primary-muted);
+  border-style: solid;
+  background: var(--color-primary);
+  color: #000000;
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-pressed);
 }
 
 .photo-upload-btn:disabled {
@@ -1304,9 +1317,9 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid var(--color-accent-gold);
+  outline: 3px solid #000000;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(217, 167, 101, 0.2);
+  box-shadow: var(--shadow-brutal-sm);
 }
 
 /* Override focus styles for inputs inside styled containers (they handle their own focus) */

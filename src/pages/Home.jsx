@@ -52,24 +52,25 @@ export function Home() {
   }, [dishes])
 
   return (
-    <div className="min-h-screen pb-20" style={{ background: 'var(--color-bg)' }}>
-      <h1 className="sr-only">What's Good Here - Top Ranked Dishes Near You</h1>
+    <div className="min-h-screen pb-20" style={{ background: '#FFFFFF' }}>
+      <h1 className="sr-only">What&apos;s Good Here - Top Ranked Dishes Near You</h1>
 
       {/* Header: Logo */}
       <header className="px-5 pt-6 pb-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: 'var(--color-primary)' }}
+            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            style={{
+              background: '#F97316',
+              border: '3px solid #000000',
+              boxShadow: '4px 4px 0px 0px #000000',
+            }}
           >
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="white" stroke="none">
+            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="#000000" stroke="none">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
           </div>
-          <h2
-            className="font-bold"
-            style={{ color: 'var(--color-text-primary)', fontSize: '22px', letterSpacing: '-0.02em' }}
-          >
+          <h2 style={{ color: '#000000', fontSize: '24px', fontWeight: 800, letterSpacing: '-0.03em' }}>
             What&apos;s Good Here
           </h2>
         </div>
@@ -80,24 +81,34 @@ export function Home() {
         <DishSearch loading={loading} placeholder="What are you craving?" town={town} />
       </div>
 
-      {/* Category Grid — 2x3 bold cards */}
+      {/* Category Grid — 2x3 brutal cards */}
       <section className="px-5 pb-4">
         <div className="grid grid-cols-3 gap-3">
           {HOME_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => navigate(`/browse?category=${encodeURIComponent(cat.id)}`)}
-              className="flex flex-col items-center justify-center py-5 rounded-2xl transition-all active:scale-[0.96]"
+              className="flex flex-col items-center justify-center py-5 rounded-xl transition-all duration-150"
               style={{
-                background: 'var(--color-card)',
-                border: '2px solid var(--color-card-border, #1A1A1A)',
+                background: '#FFFFFF',
+                border: '3px solid #000000',
+                boxShadow: '4px 4px 0px 0px #000000',
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'translate(2px, 2px)'
+                e.currentTarget.style.boxShadow = '2px 2px 0px 0px #000000'
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)'
+                e.currentTarget.style.boxShadow = '4px 4px 0px 0px #000000'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)'
+                e.currentTarget.style.boxShadow = '4px 4px 0px 0px #000000'
               }}
             >
               <span style={{ fontSize: '32px' }}>{cat.emoji}</span>
-              <span
-                className="mt-2 text-sm font-bold"
-                style={{ color: 'var(--color-text-primary)' }}
-              >
+              <span className="mt-2 text-sm" style={{ color: '#000000', fontWeight: 700 }}>
                 {cat.label}
               </span>
             </button>
@@ -107,10 +118,25 @@ export function Home() {
         {/* See all categories link */}
         <button
           onClick={() => navigate('/browse')}
-          className="w-full mt-3 py-2 text-sm font-semibold text-center rounded-xl transition-all active:scale-[0.98]"
+          className="w-full mt-3 py-2.5 text-sm text-center rounded-xl transition-all duration-150"
           style={{
-            color: 'var(--color-primary)',
-            border: '2px solid var(--color-card-border, #1A1A1A)',
+            color: '#000000',
+            fontWeight: 700,
+            border: '3px solid #000000',
+            boxShadow: '4px 4px 0px 0px #000000',
+            background: '#F97316',
+          }}
+          onMouseDown={(e) => {
+            e.currentTarget.style.transform = 'translate(2px, 2px)'
+            e.currentTarget.style.boxShadow = '2px 2px 0px 0px #000000'
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.transform = 'translate(0, 0)'
+            e.currentTarget.style.boxShadow = '4px 4px 0px 0px #000000'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translate(0, 0)'
+            e.currentTarget.style.boxShadow = '4px 4px 0px 0px #000000'
           }}
         >
           See all categories
@@ -123,18 +149,29 @@ export function Home() {
       {/* Locals' Top 10 */}
       <section className="px-5 py-4">
         <div className="flex items-center justify-between mb-4">
-          <h2
-            className="font-bold"
-            style={{ color: 'var(--color-primary)', fontSize: '22px', letterSpacing: '-0.02em' }}
-          >
+          <h2 style={{ color: '#000000', fontSize: '22px', fontWeight: 800, letterSpacing: '-0.03em' }}>
             Locals&apos; Top 10
           </h2>
           <button
             onClick={() => setShowRadiusSheet(true)}
-            className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all active:scale-[0.97]"
+            className="flex items-center gap-1 px-3 py-1 rounded-xl text-xs transition-all duration-150"
             style={{
-              border: '2px solid var(--color-card-border, #1A1A1A)',
-              color: 'var(--color-text-primary)',
+              border: '3px solid #000000',
+              color: '#000000',
+              fontWeight: 700,
+              boxShadow: '3px 3px 0px 0px #000000',
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'translate(2px, 2px)'
+              e.currentTarget.style.boxShadow = '1px 1px 0px 0px #000000'
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)'
+              e.currentTarget.style.boxShadow = '3px 3px 0px 0px #000000'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)'
+              e.currentTarget.style.boxShadow = '3px 3px 0px 0px #000000'
             }}
           >
             {radius} mi
@@ -144,22 +181,31 @@ export function Home() {
         {loading ? (
           <Top10Skeleton />
         ) : error ? (
-          <div className="py-8 text-center">
-            <p role="alert" className="text-sm font-medium" style={{ color: 'var(--color-danger)' }}>
+          <div
+            className="py-8 text-center rounded-xl"
+            style={{ border: '3px solid #000000', boxShadow: '6px 6px 0px 0px #000000' }}
+          >
+            <p role="alert" className="text-sm" style={{ color: '#DC2626', fontWeight: 700 }}>
               {error?.message || error}
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-3 px-5 py-2 text-sm font-bold rounded-xl"
-              style={{ background: 'var(--color-primary)', color: 'white' }}
+              className="mt-3 px-5 py-2 text-sm rounded-xl"
+              style={{
+                background: '#F97316',
+                color: '#000000',
+                fontWeight: 700,
+                border: '3px solid #000000',
+                boxShadow: '4px 4px 0px 0px #000000',
+              }}
             >
               Retry
             </button>
           </div>
         ) : top10Dishes.length > 0 ? (
           <div
-            className="rounded-2xl overflow-hidden"
-            style={{ border: '2px solid var(--color-card-border, #1A1A1A)' }}
+            className="rounded-xl overflow-hidden"
+            style={{ border: '3px solid #000000', boxShadow: '6px 6px 0px 0px #000000' }}
           >
             {top10Dishes.map((dish, i) => (
               <button
@@ -167,15 +213,19 @@ export function Home() {
                 onClick={() => navigate(`/dish/${dish.id}`)}
                 className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors"
                 style={{
-                  borderBottom: i < top10Dishes.length - 1 ? '1px solid var(--color-divider)' : 'none',
+                  borderBottom: i < top10Dishes.length - 1 ? '2px solid #000000' : 'none',
+                  background: '#FFFFFF',
                 }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF7ED' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF' }}
               >
                 {/* Rank number */}
                 <span
-                  className="w-7 text-center font-bold flex-shrink-0"
+                  className="w-7 text-center flex-shrink-0"
                   style={{
-                    color: i < 3 ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
-                    fontSize: i < 3 ? '18px' : '15px',
+                    color: i < 3 ? '#F97316' : '#666666',
+                    fontSize: i < 3 ? '20px' : '15px',
+                    fontWeight: 800,
                   }}
                 >
                   {i + 1}
@@ -183,24 +233,16 @@ export function Home() {
 
                 {/* Dish info */}
                 <div className="flex-1 min-w-0">
-                  <p
-                    className="font-bold truncate"
-                    style={{ color: 'var(--color-text-primary)', fontSize: '15px' }}
-                  >
+                  <p className="truncate" style={{ color: '#000000', fontSize: '15px', fontWeight: 700 }}>
                     {dish.name}
                   </p>
-                  <p
-                    className="text-xs truncate"
-                    style={{ color: 'var(--color-text-tertiary)' }}
-                  >
+                  <p className="text-xs truncate" style={{ color: '#666666' }}>
                     {dish.restaurant_name}
                   </p>
                 </div>
 
-                {/* Star rating */}
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <StarRating rating={dish.avg_rating} />
-                </div>
+                {/* Rating badge — Neo-Brutalist */}
+                <RatingBadge rating={dish.avg_rating} votes={dish.total_votes} />
 
                 {/* Category emoji */}
                 <span className="text-lg flex-shrink-0">
@@ -221,8 +263,8 @@ export function Home() {
       {!loading && moreTopPicks.length > 0 && (
         <section className="py-4">
           <h2
-            className="px-5 font-bold mb-3"
-            style={{ color: 'var(--color-text-primary)', fontSize: '20px', letterSpacing: '-0.02em' }}
+            className="px-5 mb-3"
+            style={{ color: '#000000', fontSize: '20px', fontWeight: 800, letterSpacing: '-0.03em' }}
           >
             More Top Picks
           </h2>
@@ -234,32 +276,30 @@ export function Home() {
               <button
                 key={dish.id}
                 onClick={() => navigate(`/dish/${dish.id}`)}
-                className="flex-shrink-0 w-44 rounded-2xl overflow-hidden text-left transition-all active:scale-[0.97]"
-                style={{ border: '2px solid var(--color-card-border, #1A1A1A)' }}
+                className="flex-shrink-0 w-44 rounded-xl overflow-hidden text-left transition-all duration-150"
+                style={{
+                  border: '3px solid #000000',
+                  boxShadow: '4px 4px 0px 0px #000000',
+                  background: '#FFFFFF',
+                }}
               >
                 {/* Food icon area */}
                 <div
                   className="h-28 flex items-center justify-center"
-                  style={{ background: 'var(--color-surface-elevated)' }}
+                  style={{ background: '#FFF7ED', borderBottom: '3px solid #000000' }}
                 >
                   <span style={{ fontSize: '48px' }}>{getCategoryEmoji(dish.category)}</span>
                 </div>
                 <div className="p-3">
-                  <p
-                    className="font-bold truncate"
-                    style={{ color: 'var(--color-text-primary)', fontSize: '14px' }}
-                  >
-                    {dish.name}
-                  </p>
-                  <p
-                    className="text-xs truncate mt-0.5"
-                    style={{ color: 'var(--color-text-tertiary)' }}
-                  >
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate flex-1" style={{ color: '#000000', fontSize: '14px', fontWeight: 700 }}>
+                      {dish.name}
+                    </p>
+                    <RatingBadge rating={dish.avg_rating} votes={dish.total_votes} size="sm" />
+                  </div>
+                  <p className="text-xs truncate mt-0.5" style={{ color: '#666666' }}>
                     {dish.restaurant_name}
                   </p>
-                  <div className="flex items-center gap-1 mt-1.5">
-                    <StarRating rating={dish.avg_rating} size="sm" />
-                  </div>
                 </div>
               </button>
             ))}
@@ -272,10 +312,25 @@ export function Home() {
         <div className="px-5 pb-6 text-center">
           <button
             onClick={() => navigate('/browse')}
-            className="w-full py-3 rounded-2xl font-bold text-sm transition-all active:scale-[0.98]"
+            className="w-full py-3 rounded-xl text-sm transition-all duration-150"
             style={{
-              background: 'var(--color-primary)',
-              color: 'white',
+              background: '#F97316',
+              color: '#000000',
+              fontWeight: 800,
+              border: '3px solid #000000',
+              boxShadow: '6px 6px 0px 0px #000000',
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'translate(3px, 3px)'
+              e.currentTarget.style.boxShadow = '3px 3px 0px 0px #000000'
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)'
+              e.currentTarget.style.boxShadow = '6px 6px 0px 0px #000000'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)'
+              e.currentTarget.style.boxShadow = '6px 6px 0px 0px #000000'
             }}
           >
             Browse all dishes
@@ -293,28 +348,39 @@ export function Home() {
   )
 }
 
-// Star rating component matching mockup
-function StarRating({ rating, size = 'md' }) {
-  const stars = 5
-  const normalizedRating = Math.min(5, Math.max(0, (rating || 0) / 2)) // Convert 10-scale to 5-scale
-  const starSize = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'
+// Neo-Brutalist rating badge — 1-10 decimal, orange bg, black border, hard shadow
+function RatingBadge({ rating, votes, size = 'md' }) {
+  const isRanked = (votes || 0) >= MIN_VOTES_FOR_RANKING
+  if (!isRanked) {
+    return (
+      <span
+        className="flex-shrink-0 text-[10px] px-2 py-0.5 rounded-lg"
+        style={{
+          background: '#F5F5F5',
+          color: '#666666',
+          fontWeight: 700,
+          border: '2px solid #000000',
+        }}
+      >
+        Early
+      </span>
+    )
+  }
 
+  const isSm = size === 'sm'
   return (
-    <div className="flex items-center gap-0.5">
-      {[...Array(stars)].map((_, i) => {
-        const filled = i < Math.round(normalizedRating)
-        return (
-          <svg
-            key={i}
-            className={starSize}
-            viewBox="0 0 20 20"
-            fill={filled ? 'var(--color-primary)' : 'var(--color-divider)'}
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        )
-      })}
-    </div>
+    <span
+      className={`flex-shrink-0 ${isSm ? 'text-xs px-1.5 py-0.5' : 'text-sm px-2 py-0.5'} rounded-lg`}
+      style={{
+        background: '#F97316',
+        color: '#000000',
+        fontWeight: 800,
+        border: '2px solid #000000',
+        boxShadow: '2px 2px 0px 0px #000000',
+      }}
+    >
+      {rating || '—'}
+    </span>
   )
 }
 
@@ -329,21 +395,21 @@ function getCategoryEmoji(category) {
 function Top10Skeleton() {
   return (
     <div
-      className="rounded-2xl overflow-hidden animate-pulse"
-      style={{ border: '2px solid var(--color-divider)' }}
+      className="rounded-xl overflow-hidden animate-pulse"
+      style={{ border: '3px solid #000000', boxShadow: '6px 6px 0px 0px #000000' }}
     >
       {[...Array(5)].map((_, i) => (
         <div
           key={i}
           className="flex items-center gap-3 px-4 py-3.5"
-          style={{ borderBottom: i < 4 ? '1px solid var(--color-divider)' : 'none' }}
+          style={{ borderBottom: i < 4 ? '2px solid #000000' : 'none' }}
         >
-          <div className="w-7 h-5 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+          <div className="w-7 h-5 rounded" style={{ background: '#F5F5F5' }} />
           <div className="flex-1">
-            <div className="h-4 w-32 rounded mb-1" style={{ background: 'var(--color-surface-elevated)' }} />
-            <div className="h-3 w-24 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+            <div className="h-4 w-32 rounded mb-1" style={{ background: '#F5F5F5' }} />
+            <div className="h-3 w-24 rounded" style={{ background: '#F5F5F5' }} />
           </div>
-          <div className="h-4 w-16 rounded" style={{ background: 'var(--color-surface-elevated)' }} />
+          <div className="h-6 w-10 rounded-lg" style={{ background: '#F5F5F5', border: '2px solid #000000' }} />
         </div>
       ))}
     </div>
@@ -354,20 +420,26 @@ function Top10Skeleton() {
 function EmptyState({ onBrowse }) {
   return (
     <div
-      className="py-10 text-center rounded-2xl"
-      style={{ border: '2px solid var(--color-divider)' }}
+      className="py-10 text-center rounded-xl"
+      style={{ border: '3px solid #000000', boxShadow: '6px 6px 0px 0px #000000' }}
     >
       <span style={{ fontSize: '40px' }}>🍽️</span>
-      <p className="font-bold mt-3" style={{ color: 'var(--color-text-primary)', fontSize: '16px' }}>
+      <p className="mt-3" style={{ color: '#000000', fontSize: '16px', fontWeight: 800 }}>
         No dishes rated here yet
       </p>
-      <p className="text-sm mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+      <p className="text-sm mt-1" style={{ color: '#666666' }}>
         Be the first to rate a dish nearby
       </p>
       <button
         onClick={() => onBrowse('/restaurants')}
-        className="mt-4 px-6 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-[0.97]"
-        style={{ background: 'var(--color-primary)', color: 'white' }}
+        className="mt-4 px-6 py-2.5 rounded-xl text-sm transition-all duration-150"
+        style={{
+          background: '#F97316',
+          color: '#000000',
+          fontWeight: 700,
+          border: '3px solid #000000',
+          boxShadow: '4px 4px 0px 0px #000000',
+        }}
       >
         Browse Restaurants
       </button>

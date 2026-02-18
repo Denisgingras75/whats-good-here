@@ -398,7 +398,7 @@ describe('votesApi', () => {
 
   describe('getReviewsForDish', () => {
     it('should fetch paginated reviews for a dish', async () => {
-      const mockReviews = [
+      const mockRawReviews = [
         {
           id: 'review-1',
           review_text: 'Great!',
@@ -406,27 +406,40 @@ describe('votesApi', () => {
           would_order_again: true,
           review_created_at: '2024-01-01',
           user_id: 'user-1',
-          profiles: { id: 'user-1', display_name: 'John' },
         },
       ]
 
-      supabase.from.mockReturnValue({
+      const mockProfiles = [{ id: 'user-1', display_name: 'John' }]
+
+      // First call: fetch reviews from votes table
+      supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             not: vi.fn().mockReturnValue({
               neq: vi.fn().mockReturnValue({
                 order: vi.fn().mockReturnValue({
-                  range: vi.fn().mockResolvedValue({ data: mockReviews, error: null }),
+                  range: vi.fn().mockResolvedValue({ data: mockRawReviews, error: null }),
                 }),
               }),
             }),
           }),
         }),
       })
+      // Second call: fetch profiles for enrichment
+      supabase.from.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          in: vi.fn().mockResolvedValue({ data: mockProfiles, error: null }),
+        }),
+      })
 
       const result = await votesApi.getReviewsForDish('dish-1', { limit: 10, offset: 0 })
 
-      expect(result).toEqual(mockReviews)
+      expect(result).toEqual([
+        {
+          ...mockRawReviews[0],
+          profiles: { id: 'user-1', display_name: 'John' },
+        },
+      ])
     })
 
     it('should return empty array on error (graceful degradation)', async () => {
@@ -452,22 +465,22 @@ describe('votesApi', () => {
 
   describe('getSmartSnippetForDish', () => {
     it('should return best review sorted by rating then date', async () => {
-      const mockBestReview = {
+      const mockRawReview = {
         review_text: 'Amazing!',
         rating_10: 10,
         review_created_at: '2024-01-01',
         user_id: 'user-1',
-        profiles: { id: 'user-1', display_name: 'Foodie' },
       }
 
-      supabase.from.mockReturnValue({
+      // First call: fetch best review from votes table
+      supabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             not: vi.fn().mockReturnValue({
               neq: vi.fn().mockReturnValue({
                 order: vi.fn().mockReturnValue({
                   order: vi.fn().mockReturnValue({
-                    limit: vi.fn().mockResolvedValue({ data: [mockBestReview], error: null }),
+                    limit: vi.fn().mockResolvedValue({ data: [mockRawReview], error: null }),
                   }),
                 }),
               }),
@@ -475,10 +488,21 @@ describe('votesApi', () => {
           }),
         }),
       })
+      // Second call: fetch profile for enrichment
+      supabase.from.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'user-1', display_name: 'Foodie' }, error: null }),
+          }),
+        }),
+      })
 
       const result = await votesApi.getSmartSnippetForDish('dish-1')
 
-      expect(result).toEqual(mockBestReview)
+      expect(result).toEqual({
+        ...mockRawReview,
+        profiles: { id: 'user-1', display_name: 'Foodie' },
+      })
     })
 
     it('should return null when no reviews exist', async () => {

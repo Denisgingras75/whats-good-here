@@ -34,6 +34,7 @@ describe('useVote Hook', () => {
         wouldOrderAgain: true,
         rating10: 8,
         reviewText: null,
+        purityData: null,
       })
     })
 
@@ -98,6 +99,7 @@ describe('useVote Hook', () => {
         wouldOrderAgain: false,
         rating10: undefined,
         reviewText: null,
+        purityData: null,
       })
     })
   })
