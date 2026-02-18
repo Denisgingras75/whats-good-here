@@ -30,25 +30,22 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     })
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    // Auth is optional — guests can search, but logged-in users are rate-limited per-account
+    const { data: { user } } = await supabase.auth.getUser()
 
-    // Rate limit: 3 requests/min (nearby search is heavier than autocomplete)
-    const { data: rateCheck } = await supabase.rpc('check_and_record_rate_limit', {
-      p_action: 'places_nearby_search',
-      p_max_attempts: 3,
-      p_window_seconds: 60,
-    })
-    if (rateCheck && !rateCheck.allowed) {
-      return new Response(JSON.stringify({ error: 'Rate limit exceeded', retry_after: rateCheck.retry_after_seconds }), {
-        status: 429,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    if (user) {
+      // Rate limit: 10 requests/min (nearby search is heavier than autocomplete)
+      const { data: rateCheck } = await supabase.rpc('check_and_record_rate_limit', {
+        p_action: 'places_nearby_search',
+        p_max_attempts: 10,
+        p_window_seconds: 60,
       })
+      if (rateCheck && !rateCheck.allowed) {
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded', retry_after: rateCheck.retry_after_seconds }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
     }
 
     // Parse request

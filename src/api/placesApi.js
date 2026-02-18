@@ -19,9 +19,6 @@ export const placesApi = {
     if (!input || input.trim().length < 2) return []
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return []
-
       const response = await supabase.functions.invoke('places-autocomplete', {
         body: { input: input.trim(), lat, lng, radius },
       })
@@ -52,9 +49,6 @@ export const placesApi = {
    */
   async discoverNearby(lat, lng, radiusMeters) {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return []
-
       // Try nearby search first
       const response = await supabase.functions.invoke('places-nearby-search', {
         body: { lat, lng, radiusMeters },
