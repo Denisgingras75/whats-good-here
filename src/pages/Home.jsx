@@ -10,15 +10,70 @@ import { NearbyDiscovery } from '../components/home'
 import { DishSearch } from '../components/DishSearch'
 import { RadiusSheet } from '../components/LocationPicker'
 import { NearbyNudge } from '../components/NearbyNudge'
+import {
+  PizzaSVG, BurgerSVG, SandwichSVG, WingsSVG, SushiSVG, TacoSVG,
+  BreakfastSVG, LobsterRollSVG, SeafoodSVG, ChowderSVG, PastaSVG,
+  SaladSVG, TendysSVG, DessertSVG, CoffeeSVG, CocktailSVG,
+  FriesSVG, SoupSVG, PokeBowlSVG, FriedChickenSVG, AppsSVG, EntreeSVG,
+  BreakfastSandwichSVG,
+} from '../components/foods'
 
-// Map category IDs to emojis for the grid
+// Map category IDs to SVG components
+const CATEGORY_SVG_MAP = {
+  pizza: PizzaSVG,
+  burger: BurgerSVG,
+  sandwich: SandwichSVG,
+  wings: WingsSVG,
+  sushi: SushiSVG,
+  taco: TacoSVG,
+  breakfast: BreakfastSVG,
+  'lobster roll': LobsterRollSVG,
+  seafood: SeafoodSVG,
+  chowder: ChowderSVG,
+  pasta: PastaSVG,
+  salad: SaladSVG,
+  tendys: TendysSVG,
+  dessert: DessertSVG,
+  coffee: CoffeeSVG,
+  cocktails: CocktailSVG,
+  fries: FriesSVG,
+  soup: SoupSVG,
+  pokebowl: PokeBowlSVG,
+  'fried chicken': FriedChickenSVG,
+  apps: AppsSVG,
+  entree: EntreeSVG,
+  'breakfast sandwich': BreakfastSandwichSVG,
+}
+
+// Render food illustration SVG for a category
+function FoodIcon({ category, size = 48, className = '' }) {
+  const SVGComponent = CATEGORY_SVG_MAP[category?.toLowerCase()]
+  if (!SVGComponent) {
+    // Fallback emoji for categories without SVGs
+    const cat = BROWSE_CATEGORIES.find(c => c.id === category?.toLowerCase())
+    return <span style={{ fontSize: `${size * 0.65}px` }}>{cat?.emoji || '🍽️'}</span>
+  }
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      width={size}
+      height={size}
+      className={className}
+      style={{ overflow: 'visible' }}
+    >
+      <SVGComponent eatenPercent={0} value={0} />
+    </svg>
+  )
+}
+
+// Home category grid items
 const HOME_CATEGORIES = [
-  { id: 'pizza', label: 'Pizza', emoji: '🍕' },
-  { id: 'burger', label: 'Burgers', emoji: '🍔' },
-  { id: 'sandwich', label: 'Sandwiches', emoji: '🥪' },
-  { id: 'wings', label: 'Wings', emoji: '🍗' },
-  { id: 'sushi', label: 'Sushi', emoji: '🍣' },
-  { id: 'taco', label: 'Tacos', emoji: '🌮' },
+  { id: 'pizza', label: 'Pizza' },
+  { id: 'burger', label: 'Burgers' },
+  { id: 'sandwich', label: 'Sandwiches' },
+  { id: 'wings', label: 'Wings' },
+  { id: 'sushi', label: 'Sushi' },
+  { id: 'taco', label: 'Tacos' },
 ]
 
 export function Home() {
@@ -81,14 +136,14 @@ export function Home() {
         <DishSearch loading={loading} placeholder="What are you craving?" town={town} />
       </div>
 
-      {/* Category Grid — 2x3 brutal cards */}
+      {/* Category Grid — 2x3 brutal cards with food illustrations */}
       <section className="px-5 pb-4">
         <div className="grid grid-cols-3 gap-3">
           {HOME_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => navigate(`/browse?category=${encodeURIComponent(cat.id)}`)}
-              className="flex flex-col items-center justify-center py-5 rounded-xl transition-all duration-150"
+              className="flex flex-col items-center justify-center py-4 rounded-xl transition-all duration-150"
               style={{
                 background: '#FFFFFF',
                 border: '3px solid #000000',
@@ -107,8 +162,8 @@ export function Home() {
                 e.currentTarget.style.boxShadow = '4px 4px 0px 0px #000000'
               }}
             >
-              <span style={{ fontSize: '32px' }}>{cat.emoji}</span>
-              <span className="mt-2 text-sm" style={{ color: '#000000', fontWeight: 700 }}>
+              <FoodIcon category={cat.id} size={52} />
+              <span className="mt-1.5 text-sm" style={{ color: '#000000', fontWeight: 700 }}>
                 {cat.label}
               </span>
             </button>
@@ -143,7 +198,7 @@ export function Home() {
         </button>
       </section>
 
-      {/* Nearby nudge */}
+      {/* Nearby nudge / check-in */}
       <NearbyNudge />
 
       {/* Locals' Top 10 */}
@@ -244,10 +299,10 @@ export function Home() {
                 {/* Rating badge — Neo-Brutalist */}
                 <RatingBadge rating={dish.avg_rating} votes={dish.total_votes} />
 
-                {/* Category emoji */}
-                <span className="text-lg flex-shrink-0">
-                  {getCategoryEmoji(dish.category)}
-                </span>
+                {/* Category food illustration */}
+                <div className="flex-shrink-0">
+                  <FoodIcon category={dish.category} size={28} />
+                </div>
               </button>
             ))}
           </div>
@@ -259,7 +314,7 @@ export function Home() {
         )}
       </section>
 
-      {/* More Top Picks — horizontal scroll cards */}
+      {/* More Top Picks — horizontal scroll cards with food illustrations */}
       {!loading && moreTopPicks.length > 0 && (
         <section className="py-4">
           <h2
@@ -283,12 +338,12 @@ export function Home() {
                   background: '#FFFFFF',
                 }}
               >
-                {/* Food icon area */}
+                {/* Food illustration area */}
                 <div
                   className="h-28 flex items-center justify-center"
                   style={{ background: '#FFF7ED', borderBottom: '3px solid #000000' }}
                 >
-                  <span style={{ fontSize: '48px' }}>{getCategoryEmoji(dish.category)}</span>
+                  <FoodIcon category={dish.category} size={64} />
                 </div>
                 <div className="p-3">
                   <div className="flex items-center gap-1.5">
@@ -384,13 +439,6 @@ function RatingBadge({ rating, votes, size = 'md' }) {
   )
 }
 
-// Map category to emoji
-function getCategoryEmoji(category) {
-  if (!category) return '🍽️'
-  const cat = BROWSE_CATEGORIES.find(c => c.id === category.toLowerCase())
-  return cat?.emoji || '🍽️'
-}
-
 // Skeleton for Top 10
 function Top10Skeleton() {
   return (
@@ -423,7 +471,7 @@ function EmptyState({ onBrowse }) {
       className="py-10 text-center rounded-xl"
       style={{ border: '3px solid #000000', boxShadow: '6px 6px 0px 0px #000000' }}
     >
-      <span style={{ fontSize: '40px' }}>🍽️</span>
+      <FoodIcon category="entree" size={56} />
       <p className="mt-3" style={{ color: '#000000', fontSize: '16px', fontWeight: 800 }}>
         No dishes rated here yet
       </p>
