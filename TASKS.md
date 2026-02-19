@@ -364,6 +364,35 @@
 
 ---
 
+## T36: Migrate search to client-side filtering
+
+**Why:** The current search makes up to 5 sequential Supabase API calls (4-level fallback ladder with client-side AND filtering at each level). For our dataset (~300 dishes on Martha's Vineyard), this is over-engineered. On spotty island cell service, each round-trip adds 100-300ms — worst case, search-as-you-type takes 400ms-1.2s before results appear. We already hit a bug where tag results leaked through without filtering (fixed in `db9a703`), a direct consequence of the complexity.
+
+**Approach:** Cache all dishes (id, name, category, tags, restaurant name/town, rating, votes) in React Query on first load (~50KB for 300 dishes). Search becomes zero-latency JavaScript filtering. Works offline. Tag synonym expansion stays in JS. One `useQuery` call to fetch all dishes, one filter function to search them.
+
+**What to keep:**
+- Tag synonym expansion from `constants/tags.js` (smart intent mapping)
+- Misspelling normalization
+- Stop word filtering
+
+**What to delete:**
+- The 4-level fallback ladder in `dishesApi.search()`
+- Multiple sequential/parallel Supabase queries for search
+- Client-side AND filtering workarounds for PostgREST limitations
+
+**Acceptance criteria:**
+- Search results appear in <50ms (no network dependency)
+- "fried chicken sandwich" returns only fried chicken sandwiches
+- "healthy" still returns dishes tagged fresh/light via synonym expansion
+- Single-word searches ("lobster", "pizza") return relevant results
+- Town filter still works
+- `npm run build` passes
+- `npm run test` passes
+
+**Files:** `src/api/dishesApi.js` (delete `search` method), new: `src/hooks/useSearchableDishes.js` or similar, `src/hooks/useDishSearch.js` (rewrite to use local data)
+
+---
+
 ## T34: Dish placeholder photos
 
 **Why:** Dishes without user photos show a generic restaurant avatar or category neon icon. The placeholder situation needs a better solution — either better generated placeholders, a prompt to upload, or a different visual treatment.
