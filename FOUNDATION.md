@@ -90,6 +90,34 @@ Foodies rate dishes → Rankings get better
 
 ---
 
+## The Rants (Raw Founder Thinking)
+
+These are the questions that keep coming up. They're not polished — they're the gut-level "why does nobody else see this?" moments that drive the whole thing.
+
+### Why is texting the best way to get food specials to people?
+It's 2026 and the most effective way a restaurant can tell you about tonight's special is a group text. Not an app, not a platform, not a feed — a text message. That's a broken market. There should be one place where "what's happening tonight" lives for every restaurant in your area. WGH is that place.
+
+### Why can I review a broom handle but not a sandwich?
+Amazon has 47 reviews on a $9 broom handle. Detailed breakdowns. Star ratings. Photos. "Verified purchase." But the $22 lobster roll you're about to order? Nothing. No dish-level reviews anywhere. Google rates the restaurant. Yelp rates the experience. **Nobody rates the actual food item.** That's insane. WGH fixes this.
+
+### Why does everyone blindly copy each other?
+Yelp, Google, TripAdvisor, OpenTable — they all do the same thing. Rate the restaurant 1-5 stars, write a review, move on. Nobody stopped to ask: "Is rating a restaurant even the right unit?" The answer is no. The dish is the unit. But everyone copies the same broken model because it's what they've always seen. WGH breaks the pattern.
+
+### What can DoorDash promote better?
+DoorDash knows what people order. They know delivery times and reorder rates. But they can't tell you which dish at a restaurant is actually *good* — because they don't have dish-level ratings from people who ate in the restaurant. WGH has that data. Imagine DoorDash promoting "the #1 rated pizza within 2 miles" instead of "restaurants near you." That's a partnership. That's what granular dish-level data unlocks.
+
+### How much data can we granulate?
+Every vote is a data point: which dish, which restaurant, what rating, what time, what location, what category, how it compares to consensus, whether they'd order again. Multiply that across thousands of users and you have:
+- **Dish-level demand signals** (what people actually want to eat, not just what they order on delivery apps)
+- **Real-time trend data** (what's hot this week, this season, in this town)
+- **Taste graph** (who likes what, taste compatibility between users, predictive recommendations)
+- **Restaurant performance data** (which dishes are climbing, which are falling, competitive benchmarks)
+- **Hyperlocal food intelligence** (what does Martha's Vineyard eat differently than Boston? What does the Tuesday crowd want vs. Saturday?)
+
+This data doesn't exist anywhere else. Not on Yelp, not on Google, not on DoorDash. It's dish-level, crowd-sourced, real-time food intelligence. That's the long-term asset. That's what makes this worth building — and eventually, worth buying.
+
+---
+
 ## Origin
 
 Built by Denis Gingras — former bar manager on Martha's Vineyard who lived the problems firsthand. The idea started from a simple frustration: Google couldn't answer "what's the best breakfast burrito near me" and there was no way to tell tourists where the live music was tonight on a small island where you literally know the owners. A friend helped build out much of the initial code. The vision has always been the same: **Untappd, but for food.**
