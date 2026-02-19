@@ -141,7 +141,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
         <div
           className="py-10 text-center rounded-xl"
           style={{
-            background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232, 102, 60, 0.04) 0%, transparent 70%), var(--color-bg)',
+            background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232, 102, 60, 0.02) 0%, transparent 70%), var(--color-bg)',
             border: '1px solid var(--color-divider)',
             boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.08)',
           }}
@@ -195,7 +195,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
               className="w-full text-left px-3.5 py-3 transition-all relative"
               style={{
                 background: isActive
-                  ? 'linear-gradient(90deg, rgba(232, 102, 60, 0.08) 0%, transparent 100%)'
+                  ? 'linear-gradient(90deg, rgba(232, 102, 60, 0.04) 0%, transparent 100%)'
                   : 'transparent',
               }}
             >
@@ -205,8 +205,8 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 rounded-full"
                   style={{
                     height: '60%',
-                    background: 'linear-gradient(180deg, var(--color-primary), rgba(232, 102, 60, 0.4))',
-                    boxShadow: '0 0 6px rgba(232, 102, 60, 0.3)',
+                    background: 'linear-gradient(180deg, var(--color-primary), rgba(232, 102, 60, 0.25))',
+                    boxShadow: '0 0 4px rgba(232, 102, 60, 0.15)',
                   }}
                 />
               )}

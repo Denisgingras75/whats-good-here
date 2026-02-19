@@ -327,10 +327,10 @@ export function Restaurants() {
                     className="w-full rounded-xl p-4 text-left card-press"
                     style={{
                       background: restaurant.is_open
-                        ? 'linear-gradient(135deg, #FFFFFF 50%, #FDE8DC 100%)'
-                        : 'linear-gradient(135deg, #F5F5F5 50%, #EDEDED 100%)',
-                      border: restaurant.is_open ? '2px solid #C4753C' : '2px solid #CCCCCC',
-                      boxShadow: restaurant.is_open ? '2px 2px 0px #C4753C' : '2px 2px 0px #CCCCCC',
+                        ? 'linear-gradient(135deg, var(--color-surface-elevated) 50%, rgba(228, 90, 53, 0.04) 100%)'
+                        : 'var(--color-surface)',
+                      border: restaurant.is_open ? '1.5px solid var(--color-divider)' : '1.5px solid var(--color-divider)',
+                      boxShadow: restaurant.is_open ? '0 2px 12px rgba(0, 0, 0, 0.06)' : 'none',
                     }}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -340,7 +340,7 @@ export function Restaurants() {
                           className="font-bold"
                           style={{
                             fontFamily: "'aglet-sans', sans-serif",
-                            color: restaurant.is_open ? '#1A1A1A' : '#999999',
+                            color: restaurant.is_open ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
                             fontSize: restaurant.is_open ? '18px' : '14px',
                             letterSpacing: '-0.01em',
                           }}
@@ -352,7 +352,7 @@ export function Restaurants() {
                             className="mt-0.5 font-medium"
                             style={{
                               fontSize: '12px',
-                              color: '#BBBBBB',
+                              color: 'var(--color-text-tertiary)',
                               letterSpacing: '0.02em',
                               textTransform: 'uppercase',
                             }}
@@ -365,9 +365,9 @@ export function Restaurants() {
                             className="inline-block mt-1 px-2 py-0.5 rounded font-bold"
                             style={{
                               fontSize: '10px',
-                              background: '#FFF0EB',
-                              color: '#E4440A',
-                              border: '1px solid #E4440A',
+                              background: 'rgba(228, 90, 53, 0.08)',
+                              color: 'var(--color-primary)',
+                              border: '1px solid var(--color-primary)',
                             }}
                           >
                             Closed for Season
