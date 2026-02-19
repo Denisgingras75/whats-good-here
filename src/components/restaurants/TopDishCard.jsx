@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { VariantPicker, VariantBadge } from '../VariantPicker'
-import { RestaurantAvatar } from '../RestaurantAvatar'
+import { CategoryIcon } from '../home/CategoryIcons'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
 import { getRatingColor } from '../../utils/ranking'
 import { HearingIcon } from '../HearingIcon'
@@ -23,6 +23,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
     variant_count,
     best_variant_name,
     best_variant_rating,
+    category,
   } = dish
 
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
@@ -62,11 +63,11 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
 
   return (
     <div
-      className="rounded-xl transition-all"
+      className="rounded-xl card-press"
       style={{
-        background: 'var(--color-bg)',
-        border: '1px solid var(--color-divider)',
-        boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06)',
+        background: '#FFFFFF',
+        border: '2px solid #1A1A1A',
+        boxShadow: '2px 2px 0px #1A1A1A',
       }}
     >
       <div
@@ -74,28 +75,33 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className="w-full flex gap-3 p-3.5 text-left transition-all cursor-pointer hover:bg-[var(--color-surface)]"
+        className="w-full flex gap-3 p-3.5 text-left cursor-pointer"
         style={{ borderRadius: '0.75rem' }}
       >
-        {/* Rank Badge */}
+        {/* Rank */}
         {rank != null && (
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center font-bold flex-shrink-0 mt-1"
+          <span
+            className="font-bold flex-shrink-0 mt-1"
             style={{
-              background: rank <= 3 && isRanked ? 'var(--color-primary)' : 'var(--color-surface)',
-              color: rank <= 3 && isRanked ? 'white' : 'var(--color-text-tertiary)',
-              fontSize: '13px',
-              ...(rank <= 3 && isRanked ? { boxShadow: '0 2px 8px -2px rgba(232, 102, 60, 0.4)' } : { border: '1px solid rgba(0, 0, 0, 0.06)' }),
+              fontFamily: "'aglet-sans', sans-serif",
+              fontWeight: 800,
+              color: rank <= 3 && isRanked ? '#E4440A' : '#BBBBBB',
+              fontSize: '16px',
+              minWidth: '20px',
+              textAlign: 'center',
             }}
           >
-            {rank}
-          </div>
+            #{rank}
+          </span>
         )}
 
-        {/* Photo */}
+        {/* Photo or Category Icon */}
         <div
-          className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0"
-          style={{ background: 'var(--color-surface)', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)' }}
+          className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
+          style={{
+            background: photo_url ? '#F5F5F5' : '#FFF0EB',
+            border: '1px solid #E0E0E0',
+          }}
         >
           {photo_url ? (
             <img
@@ -105,7 +111,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
               className="w-full h-full object-cover"
             />
           ) : (
-            <RestaurantAvatar name={restaurantName} town={restaurantTown} fill />
+            <CategoryIcon categoryId={category} dishName={dish_name} size={40} color="#E4440A" />
           )}
         </div>
 
@@ -116,7 +122,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
               <h4
                 className="font-bold truncate"
                 style={{
-                  color: 'var(--color-text-primary)',
+                  color: '#1A1A1A',
                   fontSize: '14px',
                   letterSpacing: '-0.01em',
                 }}
@@ -125,7 +131,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
               </h4>
               <div className="flex items-center gap-2 mt-0.5">
                 {price && (
-                  <span className="font-medium" style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>
+                  <span className="font-bold" style={{ color: '#999999', fontSize: '12px' }}>
                     ${Number(price).toFixed(0)}
                   </span>
                 )}
@@ -148,12 +154,8 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
                   e.stopPropagation()
                   onToggleFavorite(dish_id)
                 }}
-                className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all active:scale-95 ${
-                  isFavorite
-                    ? 'ring-2 ring-[var(--color-primary)]/50'
-                    : 'opacity-70 hover:opacity-100'
-                }`}
-                style={{ background: 'var(--color-surface)' }}
+                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
+                style={{ background: '#F5F5F5' }}
                 aria-label={isFavorite ? 'Remove from heard list' : 'Mark as heard it was good'}
               >
                 <HearingIcon size={22} active={isFavorite} />
@@ -161,7 +163,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
             )}
           </div>
 
-          {/* Rating Info - Score on left, % would order again on right */}
+          {/* Rating Info */}
           <div className="mt-2.5 flex items-center justify-between">
             {isRanked ? (
               <>
@@ -169,27 +171,31 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
                 <div className="flex items-center gap-1.5">
                   <span
                     className="font-bold"
-                    style={{ color: getRatingColor(displayRating), fontSize: '18px' }}
+                    style={{
+                      fontFamily: "'aglet-sans', sans-serif",
+                      color: getRatingColor(displayRating),
+                      fontSize: '18px',
+                    }}
                   >
                     {displayRating}
                   </span>
-                  <span className="font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '10px' }}>
+                  <span className="font-medium" style={{ color: '#BBBBBB', fontSize: '10px' }}>
                     &middot; {votes} votes
                   </span>
                 </div>
                 {/* Right: Would Order Again % */}
                 <div className="flex items-center gap-1">
-                  <span className="font-bold" style={{ color: 'var(--color-success)', fontSize: '14px' }}>
+                  <span className="font-bold" style={{ color: '#16A34A', fontSize: '14px' }}>
                     {Math.round(percent_worth_it)}%
                   </span>
-                  <span className="font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '10px' }}>
+                  <span className="font-medium" style={{ color: '#BBBBBB', fontSize: '10px' }}>
                     would order again
                   </span>
                 </div>
               </>
             ) : (
-              <span className="font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
-                {votes > 0 ? `Early · ${votes} vote${votes === 1 ? '' : 's'} so far` : 'Be first to vote'}
+              <span className="font-medium" style={{ color: '#BBBBBB', fontSize: '12px' }}>
+                {votes > 0 ? `Early \u00B7 ${votes} vote${votes === 1 ? '' : 's'} so far` : 'Be first to vote'}
               </span>
             )}
           </div>
@@ -203,13 +209,13 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
                     <div
                       key={fv.user_id}
                       className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ring-1"
-                      style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)', ringColor: 'var(--color-bg)' }}
+                      style={{ background: '#E4440A', color: '#FFFFFF', ringColor: '#FFFFFF' }}
                     >
                       {fv.display_name?.charAt(0).toUpperCase() || '?'}
                     </div>
                   ))}
                 </div>
-                <span className="font-medium truncate" style={{ color: 'var(--color-text-tertiary)', fontSize: '11px' }}>
+                <span className="font-medium truncate" style={{ color: '#BBBBBB', fontSize: '11px' }}>
                   {friendVotes.slice(0, 2).map(fv => {
                     const name = fv.display_name?.split(' ')[0] || 'Friend'
                     return `${name}: ${fv.rating_10}`

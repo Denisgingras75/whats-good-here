@@ -177,28 +177,18 @@ export function Restaurants() {
   }, [restaurants, searchQuery, restaurantTab])
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg) 100%)' }}>
+    <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
       <h1 className="sr-only">Restaurants</h1>
 
       {/* Header */}
       <header
-        className="px-4 pt-4 pb-3 relative"
+        className="px-4 pt-4 pb-3"
         style={{
-          background: `
-            radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232, 102, 60, 0.04) 0%, transparent 70%),
-            var(--color-bg)
-          `,
+          background: '#FFFFFF',
+          borderBottom: '2px solid #1A1A1A',
         }}
       >
-        {/* Bottom divider */}
-        <div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px"
-          style={{
-            width: '90%',
-            background: 'linear-gradient(90deg, transparent, var(--color-divider), transparent)',
-          }}
-        />
-        {/* Search bar - context-aware */}
+        {/* Search bar */}
         <div className="relative">
           <svg
             aria-hidden="true"
@@ -208,7 +198,7 @@ export function Restaurants() {
             strokeWidth={1.5}
             stroke="currentColor"
             className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--color-text-tertiary)' }}
+            style={{ color: '#999999' }}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
@@ -221,13 +211,12 @@ export function Restaurants() {
             aria-label={selectedRestaurant ? `Search dishes at ${selectedRestaurant.name}` : "Search restaurants"}
             value={selectedRestaurant ? dishSearchQuery : searchQuery}
             onChange={(e) => selectedRestaurant ? setDishSearchQuery(e.target.value) : setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border focus:ring-2 transition-all"
+            className="w-full pl-10 pr-4 py-3 rounded-lg"
             style={{
-              background: 'var(--color-bg)',
-              borderColor: 'var(--color-divider)',
-              color: 'var(--color-text-primary)',
+              background: '#FFFFFF',
+              border: '1px solid #1A1A1A',
+              color: '#1A1A1A',
               fontSize: '14px',
-              '--tw-ring-color': 'var(--color-primary)',
             }}
           />
           {/* Clear button when searching dishes */}
@@ -235,8 +224,8 @@ export function Restaurants() {
             <button
               onClick={() => setDishSearchQuery('')}
               aria-label="Clear search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors"
-              style={{ color: 'var(--color-text-tertiary)' }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
+              style={{ color: '#999999' }}
             >
               <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -250,28 +239,26 @@ export function Restaurants() {
       {!selectedRestaurant && (
         <div className="p-4 pt-5">
           {/* Section Header */}
-          <div className="mb-4 flex items-center gap-3">
-            <div
-              className="w-1 h-6 rounded-full"
-              style={{ background: 'linear-gradient(180deg, var(--color-primary) 0%, var(--color-accent-orange) 100%)' }}
-            />
+          <div className="mb-4">
             <h2
-              className="font-bold"
               style={{
-                color: 'var(--color-text-primary)',
-                fontSize: '18px',
+                fontFamily: "'aglet-sans', sans-serif",
+                fontWeight: 800,
+                color: '#E4440A',
+                fontSize: '22px',
                 letterSpacing: '-0.01em',
               }}
             >
-              Restaurants near you
+              Restaurants
             </h2>
           </div>
 
           {/* Open / Closed Tab Switcher */}
           <div
-            className="flex rounded-xl p-1 mb-5"
+            className="flex rounded-lg p-1 mb-5"
             style={{
-              background: 'var(--color-surface-elevated)',
+              background: '#FFFFFF',
+              border: '1px solid #1A1A1A',
             }}
             role="tablist"
             aria-label="Restaurant status filter"
@@ -280,11 +267,10 @@ export function Restaurants() {
               role="tab"
               aria-selected={restaurantTab === 'open'}
               onClick={() => setRestaurantTab('open')}
-              className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+              className="flex-1 py-1.5 text-sm font-bold rounded-md transition-all"
               style={{
-                background: restaurantTab === 'open' ? 'var(--color-primary)' : 'transparent',
-                color: restaurantTab === 'open' ? 'var(--color-text-on-primary)' : 'var(--color-text-secondary)',
-                boxShadow: restaurantTab === 'open' ? '0 2px 8px -2px rgba(232, 102, 60, 0.3)' : 'none',
+                background: restaurantTab === 'open' ? '#E4440A' : 'transparent',
+                color: restaurantTab === 'open' ? '#FFFFFF' : '#999999',
               }}
             >
               Open
@@ -293,11 +279,10 @@ export function Restaurants() {
               role="tab"
               aria-selected={restaurantTab === 'closed'}
               onClick={() => setRestaurantTab('closed')}
-              className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+              className="flex-1 py-1.5 text-sm font-bold rounded-md transition-all"
               style={{
-                background: restaurantTab === 'closed' ? 'var(--color-primary)' : 'transparent',
-                color: restaurantTab === 'closed' ? 'var(--color-text-on-primary)' : 'var(--color-text-secondary)',
-                boxShadow: restaurantTab === 'closed' ? '0 2px 8px -2px rgba(232, 102, 60, 0.3)' : 'none',
+                background: restaurantTab === 'closed' ? '#E4440A' : 'transparent',
+                color: restaurantTab === 'closed' ? '#FFFFFF' : '#999999',
               }}
             >
               Closed
@@ -306,11 +291,16 @@ export function Restaurants() {
 
           {fetchError ? (
             <div className="text-center py-12">
-              <p role="alert" className="text-sm mb-4" style={{ color: 'var(--color-danger)' }}>{fetchError}</p>
+              <p role="alert" className="text-sm mb-4" style={{ color: '#E4440A' }}>{fetchError}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 text-sm font-medium rounded-lg"
-                style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+                className="px-5 py-2.5 text-sm font-bold rounded-lg card-press"
+                style={{
+                  background: '#E4440A',
+                  color: '#FFFFFF',
+                  border: '2px solid #1A1A1A',
+                  boxShadow: '2px 2px 0px #1A1A1A',
+                }}
               >
                 Try Again
               </button>
@@ -318,7 +308,11 @@ export function Restaurants() {
           ) : loading || dishesLoading ? (
             <div className="space-y-3">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-card)' }} />
+                <div
+                  key={i}
+                  className="h-24 rounded-xl animate-pulse"
+                  style={{ background: '#F5F5F5', border: '2px solid #E0E0E0' }}
+                />
               ))}
             </div>
           ) : (
@@ -330,13 +324,13 @@ export function Restaurants() {
                   <button
                     key={restaurant.id}
                     onClick={() => handleRestaurantSelect(restaurant)}
-                    className="w-full rounded-xl p-4 text-left transition-all active:scale-[0.99] hover:border-[rgba(224,120,86,0.2)]"
+                    className="w-full rounded-xl p-4 text-left card-press"
                     style={{
-                      background: 'linear-gradient(135deg, var(--color-card) 0%, rgba(232, 102, 60, 0.02) 100%)',
-                      border: '1px solid rgba(0, 0, 0, 0.06)',
-                      borderLeft: '3px solid var(--color-accent-gold)',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.03)',
-                      opacity: restaurant.is_open ? 1 : 0.6,
+                      background: restaurant.is_open
+                        ? 'linear-gradient(135deg, #FFFFFF 50%, #FDE8DC 100%)'
+                        : 'linear-gradient(135deg, #F5F5F5 50%, #EDEDED 100%)',
+                      border: restaurant.is_open ? '2px solid #1A1A1A' : '2px solid #CCCCCC',
+                      boxShadow: restaurant.is_open ? '2px 2px 0px #1A1A1A' : '2px 2px 0px #CCCCCC',
                     }}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -345,7 +339,8 @@ export function Restaurants() {
                         <h3
                           className="font-bold"
                           style={{
-                            color: 'var(--color-text-primary)',
+                            fontFamily: "'aglet-sans', sans-serif",
+                            color: '#1A1A1A',
                             fontSize: '15px',
                             letterSpacing: '-0.01em',
                           }}
@@ -354,12 +349,12 @@ export function Restaurants() {
                         </h3>
                         {!restaurant.is_open && (
                           <span
-                            className="inline-block mt-1 px-2 py-0.5 rounded-full font-semibold"
+                            className="inline-block mt-1 px-2 py-0.5 rounded font-bold"
                             style={{
                               fontSize: '10px',
-                              background: 'rgba(232, 102, 60, 0.15)',
-                              color: 'var(--color-primary)',
-                              border: '1px solid rgba(232, 102, 60, 0.25)',
+                              background: '#FFF0EB',
+                              color: '#E4440A',
+                              border: '1px solid #E4440A',
                             }}
                           >
                             Closed for Season
@@ -368,13 +363,13 @@ export function Restaurants() {
                         {restaurant.knownFor && (
                           <p
                             className="mt-1 font-medium"
-                            style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}
+                            style={{ fontSize: '12px', color: '#BBBBBB' }}
                           >
                             Known for{' '}
-                            <span style={{ color: 'var(--color-text-secondary)' }}>
+                            <span style={{ color: '#999999' }}>
                               {restaurant.knownFor.name}
                             </span>
-                            {' · '}
+                            {' \u00B7 '}
                             <span
                               className="font-bold"
                               style={{ color: getRatingColor(restaurant.knownFor.rating) }}
@@ -386,7 +381,7 @@ export function Restaurants() {
                       </div>
 
                       {/* Chevron */}
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--color-primary)' }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0" style={{ color: '#1A1A1A' }}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                       </svg>
                     </div>
@@ -398,12 +393,12 @@ export function Restaurants() {
                 <div
                   className="text-center py-12 rounded-xl"
                   style={{
-                    color: 'var(--color-text-tertiary)',
-                    background: 'var(--color-bg)',
-                    border: '1px solid var(--color-divider)',
+                    color: '#999999',
+                    background: '#FFFFFF',
+                    border: '1px solid #E0E0E0',
                   }}
                 >
-                  <p className="font-medium" style={{ fontSize: '14px' }}>
+                  <p className="font-bold" style={{ fontSize: '14px' }}>
                     {searchQuery
                       ? 'No restaurants found'
                       : restaurantTab === 'open'
@@ -425,9 +420,8 @@ export function Restaurants() {
           <div
             className="sticky top-0 z-20 px-4 py-3"
             style={{
-              background: 'var(--color-bg)',
-              boxShadow: '0 4px 12px -4px rgba(0, 0, 0, 0.08)',
-              borderBottom: '1px solid var(--color-divider)',
+              background: '#FFFFFF',
+              borderBottom: '2px solid #1A1A1A',
             }}
           >
             <div className="flex items-center gap-3">
@@ -440,10 +434,10 @@ export function Restaurants() {
                     navigate('/restaurants', { replace: true })
                   }
                 }}
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
-                style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)' }}
+                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ color: '#1A1A1A' }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                 </svg>
               </button>
@@ -451,14 +445,16 @@ export function Restaurants() {
                 <h2
                   className="font-bold truncate"
                   style={{
-                    color: 'var(--color-text-primary)',
-                    fontSize: '20px',
+                    fontFamily: "'aglet-sans', sans-serif",
+                    fontWeight: 800,
+                    color: '#1A1A1A',
+                    fontSize: '22px',
                     letterSpacing: '-0.02em',
                   }}
                 >
                   {selectedRestaurant.name}
                 </h2>
-                <p className="font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
+                <p className="font-medium" style={{ color: '#BBBBBB', fontSize: '13px' }}>
                   {selectedRestaurant.dishCount} dishes
                 </p>
               </div>
@@ -466,14 +462,7 @@ export function Restaurants() {
           </div>
 
           {/* Restaurant Details Card */}
-          <div className="px-4 py-4 relative" style={{ background: 'var(--color-bg)' }}>
-            <div
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px"
-              style={{
-                width: '90%',
-                background: 'linear-gradient(90deg, transparent, var(--color-divider), transparent)',
-              }}
-            />
+          <div className="px-4 py-4" style={{ background: '#FFFFFF', borderBottom: '1px solid #E0E0E0' }}>
             <div className="space-y-3">
               {/* Address with Maps link */}
               {selectedRestaurant.address && (
@@ -481,15 +470,15 @@ export function Restaurants() {
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedRestaurant.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-start gap-3 hover:text-orange-400 transition-colors group"
-                  style={{ color: 'var(--color-text-secondary)' }}
+                  className="flex items-start gap-3 group"
+                  style={{ color: '#999999' }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mt-0.5 flex-shrink-0 group-hover:opacity-80" style={{ color: 'var(--color-text-tertiary)' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: '#BBBBBB' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                   </svg>
                   <span className="text-sm">{selectedRestaurant.address}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:text-orange-400" style={{ color: 'var(--color-divider)' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#CCCCCC' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                   </svg>
                 </a>
@@ -502,10 +491,10 @@ export function Restaurants() {
           {/* Tab Switcher */}
           <div className="px-4 pt-4">
             <div
-              className="flex rounded-xl p-1"
+              className="flex rounded-lg p-1"
               style={{
-                background: 'var(--color-surface-elevated)',
-                border: '1px solid var(--color-divider)',
+                background: '#FFFFFF',
+                border: '1px solid #1A1A1A',
               }}
               role="tablist"
               aria-label="Restaurant view"
@@ -514,11 +503,10 @@ export function Restaurants() {
                 role="tab"
                 aria-selected={activeTab === 'top'}
                 onClick={() => setActiveTab('top')}
-                className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+                className="flex-1 py-1.5 text-sm font-bold rounded-md transition-all"
                 style={{
-                  background: activeTab === 'top' ? 'var(--color-primary)' : 'transparent',
-                  color: activeTab === 'top' ? 'var(--color-text-on-primary)' : 'var(--color-text-secondary)',
-                  boxShadow: activeTab === 'top' ? '0 2px 8px -2px rgba(232, 102, 60, 0.3)' : 'none',
+                  background: activeTab === 'top' ? '#E4440A' : 'transparent',
+                  color: activeTab === 'top' ? '#FFFFFF' : '#999999',
                 }}
               >
                 Top Rated
@@ -527,20 +515,18 @@ export function Restaurants() {
                 role="tab"
                 aria-selected={activeTab === 'menu'}
                 onClick={() => setActiveTab('menu')}
-                className="flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all"
+                className="flex-1 py-1.5 text-sm font-bold rounded-md transition-all"
                 style={{
-                  background: activeTab === 'menu' ? 'var(--color-primary)' : 'transparent',
-                  color: activeTab === 'menu' ? 'var(--color-text-on-primary)' : 'var(--color-text-secondary)',
-                  boxShadow: activeTab === 'menu' ? '0 2px 8px -2px rgba(232, 102, 60, 0.3)' : 'none',
+                  background: activeTab === 'menu' ? '#E4440A' : 'transparent',
+                  color: activeTab === 'menu' ? '#FFFFFF' : '#999999',
                 }}
               >
                 Menu
               </button>
             </div>
-            {/* Gold divider */}
             <div
               className="mt-3 h-px"
-              style={{ background: 'linear-gradient(90deg, transparent, var(--color-accent-gold), transparent)' }}
+              style={{ background: '#E0E0E0' }}
             />
           </div>
 

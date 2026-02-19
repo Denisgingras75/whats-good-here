@@ -23,10 +23,11 @@ export const SpecialCard = memo(function SpecialCard({ special }) {
   return (
     <button
       onClick={handleClick}
-      className="w-full rounded-xl p-4 text-left transition-all hover:shadow-lg active:scale-[0.99]"
+      className="w-full rounded-xl p-4 text-left card-press"
       style={{
-        background: 'var(--color-card)',
-        border: '1px solid var(--color-divider)',
+        background: '#FFFFFF',
+        border: '2px solid #1A1A1A',
+        boxShadow: '2px 2px 0px #1A1A1A',
       }}
     >
       <div className="flex gap-3">
@@ -40,21 +41,28 @@ export const SpecialCard = memo(function SpecialCard({ special }) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Deal Name */}
-          <h3 className="font-bold text-base" style={{ color: 'var(--color-text-primary)' }}>
+          <h3 className="font-bold text-base" style={{ color: '#1A1A1A' }}>
             {deal_name}
           </h3>
 
           {/* Restaurant Name */}
-          <p className="text-xs mt-0.5" style={{ color: 'var(--color-accent-gold)' }}>
+          <p
+            className="text-xs mt-0.5 font-medium"
+            style={{
+              color: '#999999',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}
+          >
             {restaurant?.name}
-            {restaurant?.town && ` · ${restaurant.town}`}
+            {restaurant?.town && ` \u00B7 ${restaurant.town}`}
           </p>
 
           {/* Description */}
           {description && (
             <p
               className="text-sm mt-2 line-clamp-2"
-              style={{ color: 'var(--color-text-secondary)' }}
+              style={{ color: '#999999' }}
             >
               {description}
             </p>
@@ -64,10 +72,10 @@ export const SpecialCard = memo(function SpecialCard({ special }) {
           {price && (
             <div className="mt-2">
               <span
-                className="inline-block px-2 py-1 rounded-md text-sm font-semibold"
+                className="inline-block px-2 py-1 rounded-md text-sm font-bold"
                 style={{
-                  background: 'var(--color-primary-muted)',
-                  color: 'var(--color-primary)'
+                  background: '#FFF0EB',
+                  color: '#E4440A',
                 }}
               >
                 ${Number(price).toFixed(2)}
@@ -75,18 +83,6 @@ export const SpecialCard = memo(function SpecialCard({ special }) {
             </div>
           )}
         </div>
-
-        {/* Chevron */}
-        <svg
-          className="w-5 h-5 flex-shrink-0 mt-1"
-          style={{ color: 'var(--color-text-tertiary)' }}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
       </div>
     </button>
   )

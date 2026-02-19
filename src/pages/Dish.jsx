@@ -344,20 +344,23 @@ export function Dish() {
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
+      <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
         <div className="animate-pulse">
-          <div className="aspect-[4/3] w-full" style={{ background: 'var(--color-divider)' }} />
-          <div className="mx-4 -mt-5 rounded-xl p-5 space-y-3" style={{ background: 'var(--color-surface-elevated)' }}>
-            <div className="h-6 w-48 rounded" style={{ background: 'var(--color-divider)' }} />
-            <div className="h-4 w-32 rounded" style={{ background: 'var(--color-divider)' }} />
+          <div className="aspect-[4/3] w-full" style={{ background: '#E0E0E0' }} />
+          <div
+            className="mx-4 -mt-5 rounded-xl p-5 space-y-3"
+            style={{ background: '#FFFFFF', border: '2px solid #1A1A1A' }}
+          >
+            <div className="h-6 w-48 rounded" style={{ background: '#E0E0E0' }} />
+            <div className="h-4 w-32 rounded" style={{ background: '#E0E0E0' }} />
             <div className="flex items-end justify-between pt-2">
-              <div className="h-10 w-14 rounded" style={{ background: 'var(--color-divider)' }} />
-              <div className="h-4 w-24 rounded" style={{ background: 'var(--color-divider)' }} />
+              <div className="h-10 w-14 rounded" style={{ background: '#E0E0E0' }} />
+              <div className="h-4 w-24 rounded" style={{ background: '#E0E0E0' }} />
             </div>
           </div>
           <div className="p-4 mt-4 space-y-3">
-            <div className="h-4 w-48 rounded" style={{ background: 'var(--color-divider)' }} />
-            <div className="h-4 w-32 rounded" style={{ background: 'var(--color-divider)' }} />
+            <div className="h-4 w-48 rounded" style={{ background: '#E0E0E0' }} />
+            <div className="h-4 w-32 rounded" style={{ background: '#E0E0E0' }} />
           </div>
         </div>
       </div>
@@ -366,20 +369,25 @@ export function Dish() {
 
   if (error || !dish) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#FFFFFF' }}>
         <div className="text-center p-4">
           <img
             src="/empty-plate.png"
             alt=""
             className="w-16 h-16 mx-auto mb-4 rounded-full object-cover"
           />
-          <p className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          <p className="font-bold mb-2" style={{ color: '#1A1A1A' }}>
             Dish not found
           </p>
           <button
             onClick={() => navigate('/')}
-            className="mt-4 px-4 py-2 text-sm font-medium rounded-lg"
-            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+            className="mt-4 px-5 py-2.5 text-sm font-bold rounded-lg card-press"
+            style={{
+              background: '#E4440A',
+              color: '#FFFFFF',
+              border: '2px solid #1A1A1A',
+              boxShadow: '2px 2px 0px #1A1A1A',
+            }}
           >
             Go Home
           </button>
@@ -391,23 +399,26 @@ export function Dish() {
   const isRanked = dish.total_votes >= MIN_VOTES_FOR_RANKING
 
   return (
-    <div className="min-h-screen pb-20" style={{ background: 'var(--color-bg)' }}>
+    <div className="min-h-screen pb-20" style={{ background: '#FFFFFF' }}>
       {/* Header */}
       <header
         className="sticky top-0 z-30 px-4 py-3 flex items-center gap-3"
-        style={{ background: 'var(--color-bg)', borderBottom: '1px solid var(--color-divider)' }}
+        style={{
+          background: '#FFFFFF',
+          borderBottom: '2px solid #1A1A1A',
+        }}
       >
         <button
           onClick={handleBack}
           aria-label="Go back"
-          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-          style={{ color: 'var(--color-text-primary)' }}
+          className="w-10 h-10 rounded-full flex items-center justify-center"
+          style={{ color: '#1A1A1A' }}
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+        <span className="font-bold truncate" style={{ color: '#1A1A1A' }}>
           {dish.dish_name}
         </span>
 
@@ -416,8 +427,8 @@ export function Dish() {
           <button
             onClick={handleShare}
             aria-label="Share dish"
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95 opacity-80 hover:opacity-100"
-            style={{ color: 'var(--color-text-secondary)' }}
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
+            style={{ color: '#1A1A1A' }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -434,12 +445,8 @@ export function Dish() {
                 handleToggleSave(e)
               }}
               aria-label={isFavorite?.(dishId) ? 'Remove from heard list' : 'Mark as heard it was good'}
-              className={`w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95 ${
-                isFavorite?.(dishId)
-                  ? 'ring-2 ring-[var(--color-primary)]/50'
-                  : 'opacity-80 hover:opacity-100'
-              }`}
-              style={{ background: 'var(--color-bg)' }}
+              className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
+              style={{ background: '#FFFFFF' }}
             >
               <HearingIcon size={28} active={isFavorite?.(dishId)} />
             </button>
@@ -473,8 +480,14 @@ export function Dish() {
 
               {/* Official badge if featured from restaurant */}
               {featuredPhoto?.source_type === 'restaurant' && (
-                <div className="absolute top-4 right-4 px-2 py-1 rounded-lg bg-white/90 backdrop-blur-sm">
-                  <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
+                <div
+                  className="absolute top-4 right-4 px-2.5 py-1 rounded-lg"
+                  style={{
+                    background: '#FFFFFF',
+                    border: '1.5px solid #1A1A1A',
+                  }}
+                >
+                  <span className="text-xs font-bold" style={{ color: '#E4440A' }}>
                     Official Photo
                   </span>
                 </div>
@@ -483,18 +496,19 @@ export function Dish() {
           ) : (
             <div
               className="relative overflow-hidden flex items-center justify-center"
-              style={{ height: '80px', background: 'var(--color-surface)' }}
+              style={{ height: '80px', background: '#F5F5F5' }}
             >
               <DishPlaceholder restaurantName={dish.restaurant_name} restaurantTown={dish.restaurant_town} category={dish.category} />
             </div>
           )}
 
-          {/* Stats Bar — overlapping hero when photo exists, flush when no photo */}
+          {/* Stats Card — overlapping hero when photo exists, flush when no photo */}
           <div
             className="mx-4 rounded-xl px-5 py-4"
             style={{
-              background: 'var(--color-surface-elevated)',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+              background: '#FFFFFF',
+              border: '2px solid #1A1A1A',
+              boxShadow: '3px 3px 0px #1A1A1A',
               marginTop: heroImage ? '-20px' : '0',
               position: 'relative',
               zIndex: 5,
@@ -504,8 +518,8 @@ export function Dish() {
             {isVariant && parentDish && (
               <button
                 onClick={() => navigate(`/dish/${parentDish.id}`)}
-                className="flex items-center gap-1 text-xs font-medium mb-3 hover:underline"
-                style={{ color: 'var(--color-primary)' }}
+                className="flex items-center gap-1 text-xs font-bold mb-3"
+                style={{ color: '#E4440A' }}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -520,10 +534,10 @@ export function Dish() {
                 style={{
                   fontFamily: "'aglet-sans', sans-serif",
                   fontWeight: 800,
-                  fontSize: '22px',
+                  fontSize: '26px',
                   letterSpacing: '-0.02em',
-                  color: 'var(--color-text-primary)',
-                  lineHeight: 1.15,
+                  color: '#1A1A1A',
+                  lineHeight: 1.1,
                   margin: 0,
                 }}
               >
@@ -531,8 +545,8 @@ export function Dish() {
               </h1>
               {dish.price ? (
                 <span
-                  className="flex-shrink-0 text-base font-bold"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  className="flex-shrink-0 font-bold"
+                  style={{ color: '#1A1A1A', fontSize: '18px' }}
                 >
                   ${Number(dish.price).toFixed(0)}
                 </span>
@@ -542,15 +556,17 @@ export function Dish() {
             {/* Restaurant link */}
             <button
               onClick={() => navigate(`/restaurants/${dish.restaurant_id}`)}
-              className="flex items-center gap-1 mt-1"
+              className="flex items-center gap-1 mt-1.5"
               style={{
-                fontSize: '14px',
-                fontWeight: 500,
-                color: 'var(--color-text-secondary)',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#999999',
                 background: 'none',
                 border: 'none',
                 padding: 0,
                 cursor: 'pointer',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
               }}
             >
               {dish.restaurant_name}
@@ -568,7 +584,7 @@ export function Dish() {
                     style={{
                       fontFamily: "'aglet-sans', sans-serif",
                       fontWeight: 800,
-                      fontSize: '40px',
+                      fontSize: '44px',
                       lineHeight: 1,
                       color: getRatingColor(dish.avg_rating),
                     }}
@@ -580,15 +596,15 @@ export function Dish() {
 
               {/* Votes — right side */}
               <div className={`text-right ${isRanked && dish.avg_rating ? '' : 'w-full'}`}>
-                <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                <p className="text-sm font-bold" style={{ color: '#1A1A1A' }}>
                   {dish.total_votes > 0 ? `${dish.total_votes} vote${dish.total_votes === 1 ? '' : 's'}` : ''}
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-xs mt-0.5" style={{ color: '#999999' }}>
                   {dish.total_votes === 0
                     ? 'Start the ranking'
                     : isRanked
                       ? `${dish.percent_worth_it}% would order again`
-                      : `Early · ${dish.total_votes} vote${dish.total_votes === 1 ? '' : 's'} so far`
+                      : `Early \u00B7 ${dish.total_votes} vote${dish.total_votes === 1 ? '' : 's'} so far`
                   }
                 </p>
               </div>
@@ -600,7 +616,7 @@ export function Dish() {
             {/* Variant Selector */}
             {variants.length > 0 && (
               <div className="mb-6">
-                <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                <p className="text-xs font-bold mb-2" style={{ color: '#BBBBBB', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                   {isVariant ? 'Other flavors' : 'Available flavors'}
                 </p>
                 <VariantSelector
@@ -613,8 +629,15 @@ export function Dish() {
 
             {/* Friends who rated this */}
             {friendsVotes.length > 0 && (
-              <div className="mb-6 p-4 rounded-xl" style={{ background: 'var(--color-surface-elevated)', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-                <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+              <div
+                className="mb-6 p-4 rounded-xl"
+                style={{
+                  background: '#FFFFFF',
+                  border: '2px solid #1A1A1A',
+                  boxShadow: '2px 2px 0px #1A1A1A',
+                }}
+              >
+                <h3 className="text-sm font-bold mb-3" style={{ color: '#1A1A1A' }}>
                   Friends who rated this
                 </h3>
                 <div className="space-y-3">
@@ -630,12 +653,12 @@ export function Dish() {
                       <Link
                         key={vote.user_id}
                         to={`/user/${vote.user_id}`}
-                        className="flex items-center gap-3 p-2 -mx-2 rounded-lg transition-colors hover:bg-[color:var(--color-surface-elevated)]"
+                        className="flex items-center gap-3 p-2 -mx-2 rounded-lg"
                       >
                         {/* Avatar */}
                         <div
                           className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                          style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+                          style={{ background: '#E4440A', color: '#FFFFFF' }}
                         >
                           {vote.display_name?.charAt(0).toUpperCase() || '?'}
                         </div>
@@ -643,26 +666,26 @@ export function Dish() {
                         {/* Name, expertise, and verdict */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                            <p className="font-bold text-sm" style={{ color: '#1A1A1A' }}>
                               {vote.display_name || 'Anonymous'}
                             </p>
                             {expertiseLabel && (
                               <span
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
                                 style={{
                                   background: vote.category_expertise === 'authority' ? 'rgba(147, 51, 234, 0.12)' : 'rgba(59, 130, 246, 0.12)',
-                                  color: vote.category_expertise === 'authority' ? 'var(--color-purple)' : 'var(--color-blue)',
+                                  color: vote.category_expertise === 'authority' ? '#9333EA' : '#3B82F6',
                                 }}
                               >
                                 {expertiseLabel}
                               </span>
                             )}
                           </div>
-                          <p className="text-xs flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                          <p className="text-xs flex items-center gap-1" style={{ color: '#BBBBBB' }}>
                             {vote.would_order_again ? <><ThumbsUpIcon size={20} /> Would order again</> : <><ThumbsDownIcon size={20} /> Would skip</>}
                             {friendsCompat[vote.user_id] != null && (
                               <span className="ml-1.5 font-medium" style={{ color: getCompatColor(friendsCompat[vote.user_id]) }}>
-                                · {friendsCompat[vote.user_id]}% match
+                                &middot; {friendsCompat[vote.user_id]}% match
                               </span>
                             )}
                           </p>
@@ -684,7 +707,7 @@ export function Dish() {
             {/* Community Photos */}
             {displayPhotos.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+                <h3 className="text-sm font-bold mb-3" style={{ color: '#1A1A1A' }}>
                   Photos ({displayPhotos.length})
                 </h3>
                 <div className="grid grid-cols-4 gap-2">
@@ -694,6 +717,7 @@ export function Dish() {
                       onClick={() => setLightboxPhoto(photo.photo_url)}
                       aria-label={`View photo of ${dish.dish_name}`}
                       className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                      style={{ border: '1px solid #E0E0E0' }}
                     >
                       <img
                         src={photo.photo_url}
@@ -711,8 +735,8 @@ export function Dish() {
                 {hasMorePhotos && (
                   <button
                     onClick={() => setShowAllPhotos(true)}
-                    className="mt-3 text-sm font-medium"
-                    style={{ color: 'var(--color-link-secondary)' }}
+                    className="mt-3 text-sm font-bold"
+                    style={{ color: '#E4440A' }}
                   >
                     See all {allPhotos.length} photos
                   </button>
@@ -722,8 +746,12 @@ export function Dish() {
 
             {/* Review Flow */}
             <div
-              className="p-4 rounded-2xl mb-4"
-              style={{ background: 'var(--color-surface-elevated)', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+              className="p-4 rounded-xl mb-4"
+              style={{
+                background: '#FFFFFF',
+                border: '2px solid #1A1A1A',
+                boxShadow: '2px 2px 0px #1A1A1A',
+              }}
             >
               <ReviewFlow
                 dishId={dish.dish_id}
@@ -743,7 +771,7 @@ export function Dish() {
             {/* Reviews Section — flowing list with dividers */}
             {reviews.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+                <h3 className="text-sm font-bold mb-3" style={{ color: '#1A1A1A' }}>
                   Reviews ({reviews.length})
                 </h3>
                 <div>
@@ -751,7 +779,7 @@ export function Dish() {
                     <div
                       key={review.id}
                       className="py-4"
-                      style={index < reviews.length - 1 ? { borderBottom: '1px solid var(--color-divider)' } : undefined}
+                      style={index < reviews.length - 1 ? { borderBottom: '1px solid #CCCCCC' } : undefined}
                     >
                       {/* Header: User info and rating */}
                       <div className="flex items-center justify-between mb-2">
@@ -762,12 +790,12 @@ export function Dish() {
                           {/* Avatar */}
                           <div
                             className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
-                            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+                            style={{ background: '#E4440A', color: '#FFFFFF' }}
                           >
                             {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
                           </div>
                           <div>
-                            <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                            <p className="text-sm font-bold" style={{ color: '#1A1A1A' }}>
                               @{review.profiles?.display_name || 'Anonymous'}
                             </p>
                           </div>
@@ -781,12 +809,12 @@ export function Dish() {
                       </div>
 
                       {/* Review text */}
-                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      <p className="text-sm" style={{ color: '#999999' }}>
                         {review.review_text}
                       </p>
 
                       {/* Timestamp */}
-                      <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                      <p className="text-xs mt-2" style={{ color: '#BBBBBB' }}>
                         {formatRelativeTime(review.review_created_at)}
                       </p>
                     </div>
@@ -811,11 +839,11 @@ export function Dish() {
         >
           <button
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-2xl"
-            style={{ background: 'rgba(255, 255, 255, 0.2)', color: 'var(--color-text-primary)' }}
+            style={{ background: 'rgba(255, 255, 255, 0.2)', color: '#FFFFFF' }}
             onClick={() => setLightboxPhoto(null)}
             aria-label="Close lightbox"
           >
-            ×
+            &times;
           </button>
           <img
             src={lightboxPhoto}
