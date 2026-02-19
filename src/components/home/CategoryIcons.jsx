@@ -23,6 +23,7 @@ const posterIcons = {
   fish: '/categories/poster/fish.png',
   clams: '/categories/poster/clams.png',
   chicken: '/categories/poster/chicken.png',
+  'fried chicken': '/categories/poster/fried-chicken.png',
   pork: '/categories/poster/pork.png',
   dessert: '/categories/poster/dessert.png',
 }
@@ -42,6 +43,14 @@ const dishNameIcons = [
   { match: 'bisque', src: '/categories/poster/soup.png' },
   { match: 'wrap', src: '/categories/poster/wrap.png' },
   { match: 'rib', src: '/categories/poster/ribs.png' },
+  { match: 'pork', src: '/categories/poster/pork.png' },
+  { match: 'flat iron', src: '/categories/poster/steak.png' },
+  { match: 'steak', src: '/categories/poster/steak.png' },
+  { match: 'filet', src: '/categories/poster/steak.png' },
+  { match: 'ribeye', src: '/categories/poster/steak.png' },
+  { match: 'sirloin', src: '/categories/poster/steak.png' },
+  { match: 'ny strip', src: '/categories/poster/steak.png' },
+  { match: 'kobe', src: '/categories/poster/steak.png' },
 ]
 
 const icons = {

@@ -8,6 +8,7 @@ export function PhotoUploadButton({
   onPhotoUploaded,
   onLoginRequired,
   compact = false,
+  label,
 }) {
   const fileInputRef = useRef(null)
   const { user } = useAuth()
@@ -77,7 +78,7 @@ export function PhotoUploadButton({
   const getButtonText = () => {
     if (analyzing) return 'Checking photo quality...'
     if (uploading) return `Uploading... ${uploadProgress}%`
-    return 'Add Photo'
+    return label || 'Add Photo'
   }
 
   return (
@@ -103,7 +104,7 @@ export function PhotoUploadButton({
         ) : (
           <>
             <CameraIcon size={18} />
-            <span>Add Photo</span>
+            <span>{label || 'Add Photo'}</span>
           </>
         )}
       </button>

@@ -496,7 +496,7 @@ export function Dish() {
           ) : (
             <div
               className="relative overflow-hidden flex items-center justify-center"
-              style={{ height: '80px', background: '#F5F5F5' }}
+              style={{ height: '48px', background: '#F5F5F5' }}
             >
               <DishPlaceholder restaurantName={dish.restaurant_name} restaurantTown={dish.restaurant_town} category={dish.category} />
             </div>
@@ -504,7 +504,7 @@ export function Dish() {
 
           {/* Stats Card — overlapping hero when photo exists, flush when no photo */}
           <div
-            className="mx-4 rounded-xl px-5 py-4"
+            className="mx-4 rounded-xl px-5 py-3"
             style={{
               background: '#FFFFFF',
               border: '2px solid #1A1A1A',
@@ -576,7 +576,7 @@ export function Dish() {
             </button>
 
             {/* Rating + votes row */}
-            <div className="flex items-end justify-between mt-4">
+            <div className="flex items-end justify-between mt-3">
               {/* Rating — left side */}
               {isRanked && dish.avg_rating ? (
                 <div className="flex-shrink-0">
@@ -599,16 +599,17 @@ export function Dish() {
                 <p className="text-sm font-bold" style={{ color: '#1A1A1A' }}>
                   {dish.total_votes > 0 ? `${dish.total_votes} vote${dish.total_votes === 1 ? '' : 's'}` : ''}
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: '#999999' }}>
-                  {dish.total_votes === 0
-                    ? 'Start the ranking'
-                    : isRanked
-                      ? `${dish.percent_worth_it}% would order again`
+                {!isRanked && (
+                  <p className="text-xs mt-0.5" style={{ color: '#999999' }}>
+                    {dish.total_votes === 0
+                      ? 'Start the ranking'
                       : `Early \u00B7 ${dish.total_votes} vote${dish.total_votes === 1 ? '' : 's'} so far`
-                  }
-                </p>
+                    }
+                  </p>
+                )}
               </div>
             </div>
+
           </div>
 
           {/* Content */}
@@ -762,9 +763,14 @@ export function Dish() {
                 price={dish.price}
                 totalVotes={dish.total_votes}
                 yesVotes={dish.yes_votes}
+                percentWorthIt={dish.percent_worth_it}
+                isRanked={isRanked}
+                hasPhotos={allPhotos.length > 0}
                 onVote={handleVote}
                 onLoginRequired={handleLoginRequired}
                 onPhotoUploaded={handlePhotoUploaded}
+                onToggleFavorite={handleToggleSave}
+                isFavorite={isFavorite?.(dishId)}
               />
             </div>
 
