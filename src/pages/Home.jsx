@@ -65,7 +65,7 @@ export function Home() {
     : null
 
   return (
-    <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
+    <div className="min-h-screen" style={{ background: 'var(--color-surface-elevated)' }}>
       <h1 className="sr-only">What's Good Here - Top Ranked Dishes Near You</h1>
 
       {/* Section 1: Hero with search + town filter */}
@@ -84,7 +84,7 @@ export function Home() {
       />
 
       {/* Section 2: #1 Hero → Categories → Rest of Top 10 */}
-      <section className="px-4 pt-6 pb-6" style={{ background: '#FFFFFF' }}>
+      <section className="px-4 pt-6 pb-6" style={{ background: 'var(--color-surface-elevated)' }}>
         {searchQuery ? (
           <div className="max-w-lg mx-auto">
             {searchLoading ? (
@@ -109,7 +109,7 @@ export function Home() {
                   <button
                     onClick={() => setSearchLimit(prev => prev + 10)}
                     className="w-full mt-3 py-3 text-sm font-medium rounded-xl transition-opacity hover:opacity-70"
-                    style={{ background: '#F5F5F5', color: '#1A1A1A' }}
+                    style={{ background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
                   >
                     Show more
                   </button>
@@ -117,10 +117,10 @@ export function Home() {
               </>
             ) : (
               <div className="py-8 text-center">
-                <p className="text-sm font-medium" style={{ color: '#999999' }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
                   No dishes found for "{searchQuery}"
                 </p>
-                <p className="text-xs mt-1" style={{ color: '#CCCCCC' }}>
+                <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
                   Try a different search
                 </p>
               </div>
@@ -136,7 +136,7 @@ export function Home() {
             <button
               onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 text-sm font-medium rounded-lg"
-              style={{ background: '#E4440A', color: '#FFFFFF' }}
+              style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
             >
               Retry
             </button>
@@ -160,7 +160,7 @@ export function Home() {
                 className="font-bold mb-4 stagger-item"
                 style={{
                   fontFamily: "'aglet-sans', sans-serif",
-                  color: '#E4440A',
+                  color: 'var(--color-primary)',
                   fontSize: '20px',
                   letterSpacing: '-0.02em',
                 }}
@@ -214,21 +214,21 @@ function CategoryNav({ selectedCategory, onCategoryChange }) {
             style={{
               width: '60px',
               height: '80px',
-              background: isActive ? '#E4440A' : '#F5F5F5',
+              background: isActive ? 'var(--color-primary)' : 'var(--color-surface)',
               borderRadius: '12px',
             }}
           >
             <CategoryIcon
               categoryId={cat.id}
               size={48}
-              color={isActive ? '#FFFFFF' : '#E4440A'}
+              color={isActive ? '#FFFFFF' : 'var(--color-primary)'}
             />
             <span
               style={{
                 fontSize: '10px',
                 fontWeight: 700,
                 letterSpacing: '0.02em',
-                color: isActive ? '#FFFFFF' : '#1A1A1A',
+                color: isActive ? '#FFFFFF' : 'var(--color-text-primary)',
                 marginTop: '4px',
                 lineHeight: 1.1,
                 textAlign: 'center',
@@ -253,17 +253,16 @@ function NumberOneHero({ dish, town, onClick }) {
       onClick={onClick}
       className="w-full text-left mb-5 rounded-2xl overflow-hidden card-press-hero stagger-item"
       style={{
-        background: '#FFFFFF',
-        border: '3px solid #1A1A1A',
-        boxShadow: '5px 5px 0px #1A1A1A',
+        background: 'var(--color-surface-elevated)',
+        border: 'none',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
       }}
     >
       {/* Top bar — rank label */}
       <div
         className="px-4 py-2.5"
         style={{
-          borderBottom: '3px solid #1A1A1A',
-          background: '#E4440A',
+          background: 'linear-gradient(135deg, var(--color-medal-gold) 0%, #F5D45A 45%, var(--color-medal-gold) 55%, #C8960E 100%)',
         }}
       >
         <p
@@ -287,7 +286,7 @@ function NumberOneHero({ dish, town, onClick }) {
               fontFamily: "'aglet-sans', sans-serif",
               fontWeight: 800,
               fontSize: '34px',
-              color: '#1A1A1A',
+              color: 'var(--color-text-primary)',
               lineHeight: 1.0,
               letterSpacing: '-0.03em',
             }}
@@ -298,7 +297,7 @@ function NumberOneHero({ dish, town, onClick }) {
             style={{
               fontSize: '13px',
               fontWeight: 600,
-              color: '#999999',
+              color: 'var(--color-text-tertiary)',
               marginTop: '7px',
               letterSpacing: '0.02em',
               textTransform: 'uppercase',
@@ -306,32 +305,30 @@ function NumberOneHero({ dish, town, onClick }) {
           >
             {restaurant_name}
           </p>
-          <div className="flex items-baseline gap-3 mt-4">
-            {isRanked && (
-              <span
-                style={{
-                  fontFamily: "'aglet-sans', sans-serif",
-                  fontWeight: 800,
-                  fontSize: '50px',
-                  color: getRatingColor(avg_rating),
-                  lineHeight: 1,
-                }}
-              >
-                {avg_rating}
-              </span>
-            )}
-            <span
-              style={{
-                fontSize: '12px',
-                color: '#BBBBBB',
-                fontWeight: 500,
-              }}
-            >
-              {total_votes} vote{total_votes === 1 ? '' : 's'}
-            </span>
-          </div>
+          {isRanked && (
+            <div className="flex items-start gap-0 mt-4">
+              <div style={{ paddingRight: '16px' }}>
+                <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: '28px', lineHeight: 1, color: getRatingColor(avg_rating) }}>
+                  {avg_rating}
+                </span>
+                <p style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>avg rating</p>
+              </div>
+              <div style={{ paddingLeft: '16px', paddingRight: '16px', borderLeft: '1px solid var(--color-divider)' }}>
+                <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: '28px', lineHeight: 1, color: getRatingColor(dish.percent_worth_it / 10) }}>
+                  {dish.percent_worth_it}%
+                </span>
+                <p style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>would reorder</p>
+              </div>
+              <div style={{ paddingLeft: '16px', borderLeft: '1px solid var(--color-divider)' }}>
+                <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: '28px', lineHeight: 1, color: 'var(--color-text-primary)' }}>
+                  {total_votes}
+                </span>
+                <p style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>votes</p>
+              </div>
+            </div>
+          )}
         </div>
-        <CategoryIcon categoryId={category} dishName={dish_name} size={96} color="#E4440A" />
+        <CategoryIcon categoryId={category} dishName={dish_name} size={96} color="var(--color-primary)" />
       </div>
     </button>
   )
@@ -372,16 +369,16 @@ function Top10Skeleton() {
 function EmptyState({ onBrowse }) {
   return (
     <div className="py-12 text-center">
-      <p className="font-bold text-lg" style={{ color: '#1A1A1A' }}>
+      <p className="font-bold text-lg" style={{ color: 'var(--color-text-primary)' }}>
         No dishes found
       </p>
-      <p className="text-sm mt-1" style={{ color: '#999999' }}>
+      <p className="text-sm mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
         Try selecting a different town
       </p>
       <button
         onClick={onBrowse}
         className="mt-4 px-6 py-2 rounded-full text-sm font-bold transition-opacity hover:opacity-90"
-        style={{ background: '#E4440A', color: '#FFFFFF' }}
+        style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
       >
         Browse All Dishes
       </button>

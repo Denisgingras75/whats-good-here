@@ -63,7 +63,7 @@ export function Top10Compact({
           })
         ) : (
           <div className="text-center py-6">
-            <p className="text-sm" style={{ color: '#999999' }}>
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
               {categoryLabel ? `No ${categoryLabel} ranked yet` : 'No dishes found'}
             </p>
           </div>
@@ -76,8 +76,8 @@ export function Top10Compact({
           onClick={() => setExpanded(prev => !prev)}
           className="w-full mt-3 pt-3 text-sm font-bold transition-opacity hover:opacity-70"
           style={{
-            color: '#E4440A',
-            borderTop: '1px solid #E0E0E0',
+            color: 'var(--color-primary)',
+            borderTop: '1px solid var(--color-divider)',
           }}
         >
           {expanded ? 'Show less' : `Show all ${allDishes.length} ${categoryLabel}`}
@@ -89,8 +89,8 @@ export function Top10Compact({
 
 // Podium colors — silver (#2) and bronze (#3) banner bars
 const PODIUM_COLORS = {
-  2: { bg: '#8A8A8A', text: '#FFFFFF' },
-  3: { bg: '#A0764E', text: '#FFFFFF' },
+  2: { bg: 'linear-gradient(135deg, var(--color-medal-silver) 0%, #C4CDD3 45%, var(--color-medal-silver) 55%, #7A8890 100%)', text: '#FFFFFF' },
+  3: { bg: 'linear-gradient(135deg, var(--color-medal-bronze) 0%, #D4965A 45%, var(--color-medal-bronze) 55%, #8A5A2A 100%)', text: '#FFFFFF' },
 }
 
 // Podium (2-3) get banner cards, ranks 4+ are clean rows
@@ -111,9 +111,9 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
         aria-label={accessibleLabel}
         className="w-full text-left rounded-xl overflow-hidden card-press"
         style={{
-          background: '#FFFFFF',
-          border: '2px solid #1A1A1A',
-          boxShadow: rank === 2 ? '3px 3px 0px #1A1A1A' : '2px 2px 0px #1A1A1A',
+          background: 'var(--color-surface-elevated)',
+          border: 'none',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
         }}
       >
         {/* Colored banner bar */}
@@ -141,7 +141,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
             <p
               className="font-bold truncate"
               style={{
-                color: '#1A1A1A',
+                color: 'var(--color-text-primary)',
                 fontSize: rank === 2 ? '18px' : '15px',
                 lineHeight: 1.2,
                 letterSpacing: '-0.01em',
@@ -152,7 +152,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
             <p
               className="truncate font-medium"
               style={{
-                color: '#999999',
+                color: 'var(--color-text-tertiary)',
                 fontSize: '11px',
                 letterSpacing: '0.04em',
                 textTransform: 'uppercase',
@@ -161,31 +161,34 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
             >
               {restaurant_name}
             </p>
-            <div className="flex items-baseline gap-2" style={{ marginTop: '6px' }}>
-              {isRanked ? (
-                <>
-                  <span
-                    className="font-bold"
-                    style={{
-                      fontFamily: "'aglet-sans', sans-serif",
-                      fontSize: rank === 2 ? '22px' : '18px',
-                      color: getRatingColor(avg_rating),
-                    }}
-                  >
+            {isRanked ? (
+              <div className="flex items-start gap-0 mt-3">
+                <div style={{ paddingRight: '12px' }}>
+                  <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: getRatingColor(avg_rating) }}>
                     {avg_rating}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#BBBBBB', fontWeight: 500 }}>
-                    {total_votes} vote{total_votes === 1 ? '' : 's'}
+                  <p style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '1px' }}>avg rating</p>
+                </div>
+                <div style={{ paddingLeft: '12px', paddingRight: '12px', borderLeft: '1px solid var(--color-divider)' }}>
+                  <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: getRatingColor(dish.percent_worth_it / 10) }}>
+                    {dish.percent_worth_it}%
                   </span>
-                </>
-              ) : (
-                <span className="text-xs font-medium" style={{ color: '#999999' }}>
-                  {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
-                </span>
-              )}
-            </div>
+                  <p style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '1px' }}>would reorder</p>
+                </div>
+                <div style={{ paddingLeft: '12px', borderLeft: '1px solid var(--color-divider)' }}>
+                  <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: 'var(--color-text-primary)' }}>
+                    {total_votes}
+                  </span>
+                  <p style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '1px' }}>votes</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs font-medium mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+              </p>
+            )}
           </div>
-          <CategoryIcon categoryId={category} dishName={dish_name} size={rank === 2 ? 72 : 60} color="#E4440A" />
+          <CategoryIcon categoryId={category} dishName={dish_name} size={rank === 2 ? 72 : 60} color="var(--color-primary)" />
         </div>
       </button>
     )
@@ -196,75 +199,73 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
     <button
       onClick={onClick}
       aria-label={accessibleLabel}
-      className="w-full flex gap-3 py-3 px-4 text-left card-press"
+      className="w-full py-3 px-4 text-left card-press"
       style={{
-        background: '#FFFFFF',
-        borderBottom: '1px solid #CCCCCC',
+        background: 'var(--color-surface-elevated)',
+        borderBottom: '1px solid var(--color-divider)',
       }}
     >
-      <span
-        className="font-bold flex-shrink-0"
-        style={{
-          fontFamily: "'aglet-sans', sans-serif",
-          fontWeight: 800,
-          color: '#1A1A1A',
-          fontSize: '14px',
-          lineHeight: 1.3,
-          minWidth: '20px',
-          textAlign: 'center',
-        }}
-      >
-        #{rank}
-      </span>
-      <div className="flex-1 min-w-0">
-        <p
-          className="font-bold truncate"
+      {/* Top row: rank + name + icon */}
+      <div className="flex gap-3 items-center">
+        <span
+          className="font-bold flex-shrink-0"
           style={{
-            color: '#1A1A1A',
-            fontSize: '15px',
-            lineHeight: 1.2,
-            letterSpacing: '-0.01em',
+            fontFamily: "'aglet-sans', sans-serif",
+            fontWeight: 800,
+            color: 'var(--color-text-primary)',
+            fontSize: '14px',
+            lineHeight: 1.3,
+            minWidth: '20px',
+            textAlign: 'center',
           }}
         >
-          {dish_name}
-        </p>
-        <p
-          className="truncate font-medium"
-          style={{
-            color: '#999999',
-            fontSize: '11px',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            marginTop: '3px',
-          }}
-        >
-          {restaurant_name}
-        </p>
-        <div className="flex items-baseline gap-2" style={{ marginTop: '4px' }}>
-          {isRanked ? (
-            <>
-              <span
-                className="font-bold"
-                style={{
-                  fontFamily: "'aglet-sans', sans-serif",
-                  fontSize: '18px',
-                  color: getRatingColor(avg_rating),
-                }}
-              >
-                {avg_rating}
-              </span>
-              <span style={{ fontSize: '11px', color: '#BBBBBB', fontWeight: 500 }}>
-                {total_votes} vote{total_votes === 1 ? '' : 's'}
-              </span>
-            </>
-          ) : (
-            <span className="text-xs font-medium" style={{ color: '#999999' }}>
-              {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
-            </span>
-          )}
+          #{rank}
+        </span>
+        <div className="flex-1 min-w-0">
+          <p
+            className="font-bold truncate"
+            style={{
+              color: 'var(--color-text-primary)',
+              fontSize: '15px',
+              lineHeight: 1.2,
+              letterSpacing: '-0.01em',
+            }}
+          >
+            {dish_name}
+          </p>
+          <p
+            className="truncate font-medium"
+            style={{
+              color: 'var(--color-text-tertiary)',
+              fontSize: '11px',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              marginTop: '3px',
+            }}
+          >
+            {restaurant_name}
+          </p>
         </div>
+        <CategoryIcon categoryId={category} dishName={dish_name} size={72} color="var(--color-primary)" />
       </div>
-      <CategoryIcon categoryId={category} dishName={dish_name} size={72} color="#E4440A" />
+      {/* Rating — compact for list rows */}
+      <div className="flex items-baseline gap-2 mt-1 pl-8">
+        {isRanked ? (
+          <>
+            <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: '18px', color: getRatingColor(avg_rating) }}>
+              {avg_rating}
+            </span>
+            <span style={{ width: '1px', height: '14px', background: 'var(--color-divider)', display: 'inline-block', verticalAlign: 'middle' }} />
+            <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', fontWeight: 500 }}>
+              {total_votes} vote{total_votes === 1 ? '' : 's'}
+            </span>
+          </>
+        ) : (
+          <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+            {total_votes ? `${total_votes} vote${total_votes === 1 ? '' : 's'}` : 'New'}
+          </span>
+        )}
+      </div>
     </button>
   )
 })

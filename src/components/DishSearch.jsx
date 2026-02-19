@@ -180,9 +180,9 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
       <div
         className="relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
         style={{
-          background: '#FFFFFF',
-          border: `3px solid ${isFocused ? '#E4440A' : '#1A1A1A'}`,
-          boxShadow: isFocused ? '4px 4px 0px #E4440A' : '4px 4px 0px #1A1A1A',
+          background: 'var(--color-surface-elevated)',
+          border: `1.5px solid ${isFocused ? 'var(--color-primary)' : 'var(--color-divider)'}`,
+          boxShadow: isFocused ? '0 4px 16px rgba(228, 68, 10, 0.12)' : '0 2px 8px rgba(0, 0, 0, 0.06)',
           minHeight: '48px',
         }}
       >

@@ -344,23 +344,23 @@ export function Dish() {
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
+      <div className="min-h-screen" style={{ background: 'var(--color-surface-elevated)' }}>
         <div className="animate-pulse">
-          <div className="aspect-[4/3] w-full" style={{ background: '#E0E0E0' }} />
+          <div className="aspect-[4/3] w-full" style={{ background: 'var(--color-divider)' }} />
           <div
             className="mx-4 -mt-5 rounded-xl p-5 space-y-3"
-            style={{ background: '#FFFFFF', border: '2px solid #1A1A1A' }}
+            style={{ background: 'var(--color-surface-elevated)', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)' }}
           >
-            <div className="h-6 w-48 rounded" style={{ background: '#E0E0E0' }} />
-            <div className="h-4 w-32 rounded" style={{ background: '#E0E0E0' }} />
+            <div className="h-6 w-48 rounded" style={{ background: 'var(--color-divider)' }} />
+            <div className="h-4 w-32 rounded" style={{ background: 'var(--color-divider)' }} />
             <div className="flex items-end justify-between pt-2">
-              <div className="h-10 w-14 rounded" style={{ background: '#E0E0E0' }} />
-              <div className="h-4 w-24 rounded" style={{ background: '#E0E0E0' }} />
+              <div className="h-10 w-14 rounded" style={{ background: 'var(--color-divider)' }} />
+              <div className="h-4 w-24 rounded" style={{ background: 'var(--color-divider)' }} />
             </div>
           </div>
           <div className="p-4 mt-4 space-y-3">
-            <div className="h-4 w-48 rounded" style={{ background: '#E0E0E0' }} />
-            <div className="h-4 w-32 rounded" style={{ background: '#E0E0E0' }} />
+            <div className="h-4 w-48 rounded" style={{ background: 'var(--color-divider)' }} />
+            <div className="h-4 w-32 rounded" style={{ background: 'var(--color-divider)' }} />
           </div>
         </div>
       </div>
@@ -369,24 +369,22 @@ export function Dish() {
 
   if (error || !dish) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#FFFFFF' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-surface-elevated)' }}>
         <div className="text-center p-4">
           <img
             src="/empty-plate.png"
             alt=""
             className="w-16 h-16 mx-auto mb-4 rounded-full object-cover"
           />
-          <p className="font-bold mb-2" style={{ color: '#1A1A1A' }}>
+          <p className="font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             Dish not found
           </p>
           <button
             onClick={() => navigate('/')}
             className="mt-4 px-5 py-2.5 text-sm font-bold rounded-lg card-press"
             style={{
-              background: '#E4440A',
+              background: 'var(--color-primary)',
               color: '#FFFFFF',
-              border: '2px solid #1A1A1A',
-              boxShadow: '2px 2px 0px #1A1A1A',
             }}
           >
             Go Home
@@ -399,26 +397,25 @@ export function Dish() {
   const isRanked = dish.total_votes >= MIN_VOTES_FOR_RANKING
 
   return (
-    <div className="min-h-screen pb-20" style={{ background: '#FFFFFF' }}>
+    <div className="min-h-screen pb-20" style={{ background: 'var(--color-surface-elevated)' }}>
       {/* Header */}
       <header
-        className="sticky top-0 z-30 px-4 py-3 flex items-center gap-3"
+        className="sticky top-0 z-30 px-4 py-3 flex items-center gap-3 top-bar"
         style={{
-          background: '#FFFFFF',
-          borderBottom: '2px solid #1A1A1A',
+          background: 'var(--color-surface-elevated)',
         }}
       >
         <button
           onClick={handleBack}
           aria-label="Go back"
           className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ color: '#1A1A1A' }}
+          style={{ color: 'var(--color-text-primary)' }}
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="font-bold truncate" style={{ color: '#1A1A1A' }}>
+        <span className="font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
           {dish.dish_name}
         </span>
 
@@ -428,7 +425,7 @@ export function Dish() {
             onClick={handleShare}
             aria-label="Share dish"
             className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
-            style={{ color: '#1A1A1A' }}
+            style={{ color: 'var(--color-text-primary)' }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -446,7 +443,7 @@ export function Dish() {
               }}
               aria-label={isFavorite?.(dishId) ? 'Remove from heard list' : 'Mark as heard it was good'}
               className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
-              style={{ background: '#FFFFFF' }}
+              style={{ background: 'var(--color-surface-elevated)' }}
             >
               <HearingIcon size={28} active={isFavorite?.(dishId)} />
             </button>
@@ -483,11 +480,11 @@ export function Dish() {
                 <div
                   className="absolute top-4 right-4 px-2.5 py-1 rounded-lg"
                   style={{
-                    background: '#FFFFFF',
-                    border: '1.5px solid #1A1A1A',
+                    background: 'var(--color-surface-elevated)',
+                    border: '1px solid var(--color-divider)',
                   }}
                 >
-                  <span className="text-xs font-bold" style={{ color: '#E4440A' }}>
+                  <span className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>
                     Official Photo
                   </span>
                 </div>
@@ -496,7 +493,7 @@ export function Dish() {
           ) : (
             <div
               className="relative overflow-hidden flex items-center justify-center"
-              style={{ height: '48px', background: '#F5F5F5' }}
+              style={{ height: '48px', background: 'var(--color-surface)' }}
             >
               <DishPlaceholder restaurantName={dish.restaurant_name} restaurantTown={dish.restaurant_town} category={dish.category} />
             </div>
@@ -506,9 +503,8 @@ export function Dish() {
           <div
             className="mx-4 rounded-xl px-5 py-3"
             style={{
-              background: '#FFFFFF',
-              border: '2px solid #1A1A1A',
-              boxShadow: '3px 3px 0px #1A1A1A',
+              background: 'var(--color-surface-elevated)',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
               marginTop: heroImage ? '-20px' : '0',
               position: 'relative',
               zIndex: 5,
@@ -519,7 +515,7 @@ export function Dish() {
               <button
                 onClick={() => navigate(`/dish/${parentDish.id}`)}
                 className="flex items-center gap-1 text-xs font-bold mb-3"
-                style={{ color: '#E4440A' }}
+                style={{ color: 'var(--color-primary)' }}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -533,10 +529,10 @@ export function Dish() {
               <h1
                 style={{
                   fontFamily: "'aglet-sans', sans-serif",
-                  fontWeight: 800,
-                  fontSize: '26px',
+                  fontWeight: 700,
+                  fontSize: '24px',
                   letterSpacing: '-0.02em',
-                  color: '#1A1A1A',
+                  color: 'var(--color-text-primary)',
                   lineHeight: 1.1,
                   margin: 0,
                 }}
@@ -546,7 +542,7 @@ export function Dish() {
               {dish.price ? (
                 <span
                   className="flex-shrink-0 font-bold"
-                  style={{ color: '#1A1A1A', fontSize: '18px' }}
+                  style={{ color: 'var(--color-text-primary)', fontSize: '18px' }}
                 >
                   ${Number(dish.price).toFixed(0)}
                 </span>
@@ -560,7 +556,7 @@ export function Dish() {
               style={{
                 fontSize: '12px',
                 fontWeight: 600,
-                color: '#999999',
+                color: 'var(--color-text-tertiary)',
                 background: 'none',
                 border: 'none',
                 padding: 0,
@@ -592,7 +588,7 @@ export function Dish() {
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold" style={{ color: '#1A1A1A' }}>
+                  <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
                     {dish.total_votes} vote{dish.total_votes === 1 ? '' : 's'}
                   </p>
                 </div>
@@ -606,7 +602,7 @@ export function Dish() {
             {/* Variant Selector */}
             {variants.length > 0 && (
               <div className="mb-6">
-                <p className="text-xs font-bold mb-2" style={{ color: '#BBBBBB', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                <p className="text-xs font-bold mb-2" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                   {isVariant ? 'Other flavors' : 'Available flavors'}
                 </p>
                 <VariantSelector
@@ -622,12 +618,11 @@ export function Dish() {
               <div
                 className="mb-6 p-4 rounded-xl"
                 style={{
-                  background: '#FFFFFF',
-                  border: '2px solid #1A1A1A',
-                  boxShadow: '2px 2px 0px #1A1A1A',
+                  background: 'var(--color-surface-elevated)',
+                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
                 }}
               >
-                <h3 className="text-sm font-bold mb-3" style={{ color: '#1A1A1A' }}>
+                <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
                   Friends who rated this
                 </h3>
                 <div className="space-y-3">
@@ -648,7 +643,7 @@ export function Dish() {
                         {/* Avatar */}
                         <div
                           className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                          style={{ background: '#E4440A', color: '#FFFFFF' }}
+                          style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
                         >
                           {vote.display_name?.charAt(0).toUpperCase() || '?'}
                         </div>
@@ -656,7 +651,7 @@ export function Dish() {
                         {/* Name, expertise, and verdict */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="font-bold text-sm" style={{ color: '#1A1A1A' }}>
+                            <p className="font-bold text-sm" style={{ color: 'var(--color-text-primary)' }}>
                               {vote.display_name || 'Anonymous'}
                             </p>
                             {expertiseLabel && (
@@ -671,7 +666,7 @@ export function Dish() {
                               </span>
                             )}
                           </div>
-                          <p className="text-xs flex items-center gap-1" style={{ color: '#BBBBBB' }}>
+                          <p className="text-xs flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
                             {vote.would_order_again ? <><ThumbsUpIcon size={20} /> Would order again</> : <><ThumbsDownIcon size={20} /> Would skip</>}
                             {friendsCompat[vote.user_id] != null && (
                               <span className="ml-1.5 font-medium" style={{ color: getCompatColor(friendsCompat[vote.user_id]) }}>
@@ -697,7 +692,7 @@ export function Dish() {
             {/* Community Photos */}
             {displayPhotos.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-bold mb-3" style={{ color: '#1A1A1A' }}>
+                <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
                   Photos ({displayPhotos.length})
                 </h3>
                 <div className="grid grid-cols-4 gap-2">
@@ -707,7 +702,7 @@ export function Dish() {
                       onClick={() => setLightboxPhoto(photo.photo_url)}
                       aria-label={`View photo of ${dish.dish_name}`}
                       className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                      style={{ border: '1px solid #E0E0E0' }}
+                      style={{ border: '1px solid var(--color-divider)' }}
                     >
                       <img
                         src={photo.photo_url}
@@ -726,7 +721,7 @@ export function Dish() {
                   <button
                     onClick={() => setShowAllPhotos(true)}
                     className="mt-3 text-sm font-bold"
-                    style={{ color: '#E4440A' }}
+                    style={{ color: 'var(--color-primary)' }}
                   >
                     See all {allPhotos.length} photos
                   </button>
@@ -738,9 +733,8 @@ export function Dish() {
             <div
               className="p-4 rounded-xl mb-4"
               style={{
-                background: '#FFFFFF',
-                border: '2px solid #1A1A1A',
-                boxShadow: '2px 2px 0px #1A1A1A',
+                background: 'var(--color-surface-elevated)',
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
               }}
             >
               <ReviewFlow
@@ -766,7 +760,7 @@ export function Dish() {
             {/* Reviews Section — flowing list with dividers */}
             {reviews.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-bold mb-3" style={{ color: '#1A1A1A' }}>
+                <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
                   Reviews ({reviews.length})
                 </h3>
                 <div>
@@ -774,7 +768,7 @@ export function Dish() {
                     <div
                       key={review.id}
                       className="py-4"
-                      style={index < reviews.length - 1 ? { borderBottom: '1px solid #CCCCCC' } : undefined}
+                      style={index < reviews.length - 1 ? { borderBottom: '1px solid var(--color-divider)' } : undefined}
                     >
                       {/* Header: User info and rating */}
                       <div className="flex items-center justify-between mb-2">
@@ -785,12 +779,12 @@ export function Dish() {
                           {/* Avatar */}
                           <div
                             className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
-                            style={{ background: '#E4440A', color: '#FFFFFF' }}
+                            style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
                           >
                             {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
                           </div>
                           <div>
-                            <p className="text-sm font-bold" style={{ color: '#1A1A1A' }}>
+                            <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
                               @{review.profiles?.display_name || 'Anonymous'}
                             </p>
                           </div>
@@ -804,12 +798,12 @@ export function Dish() {
                       </div>
 
                       {/* Review text */}
-                      <p className="text-sm" style={{ color: '#999999' }}>
+                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                         {review.review_text}
                       </p>
 
                       {/* Timestamp */}
-                      <p className="text-xs mt-2" style={{ color: '#BBBBBB' }}>
+                      <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
                         {formatRelativeTime(review.review_created_at)}
                       </p>
                     </div>
