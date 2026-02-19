@@ -98,7 +98,7 @@ These are the questions that keep coming up. They're not polished — they're th
 It's 2026 and the most effective way a restaurant can tell you about tonight's special is a group text. Not an app, not a platform, not a feed — a text message. That's a broken market. There should be one place where "what's happening tonight" lives for every restaurant in your area. WGH is that place.
 
 ### Why can I review a broom handle but not a sandwich?
-Amazon has 47 reviews on a $9 broom handle. Detailed breakdowns. Star ratings. Photos. "Verified purchase." But the $22 lobster roll you're about to order? Nothing. No dish-level reviews anywhere. Google rates the restaurant. Yelp rates the experience. **Nobody rates the actual food item.** That's insane. WGH fixes this.
+Amazon has 47 reviews on a $9 broom handle. Detailed breakdowns. Star ratings. Photos. "Verified purchase." But the $22 lobster roll you're about to order? Nothing. No dish-level reviews anywhere. Google rates the restaurant. Yelp rates the experience. **Nobody rates the actual food item.** You can review a broom handle on Amazon but you can't review a sandwich on any platform on earth. That's insane. WGH fixes this.
 
 ### Why does everyone blindly copy each other?
 Yelp, Google, TripAdvisor, OpenTable — they all do the same thing. Rate the restaurant 1-5 stars, write a review, move on. Nobody stopped to ask: "Is rating a restaurant even the right unit?" The answer is no. The dish is the unit. But everyone copies the same broken model because it's what they've always seen. WGH breaks the pattern.
