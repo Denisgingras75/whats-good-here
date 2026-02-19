@@ -37,6 +37,8 @@ const dishNameIcons = [
   { match: 'cauliflower', src: '/categories/poster/veggies.png' },
   { match: 'carrot', src: '/categories/poster/veggies.png' },
   { match: 'wing', src: '/categories/poster/wings.png' },
+  { match: 'breakfast sandwich', src: '/categories/poster/breakfast-sandwich.png' },
+  { match: 'breakfast sammy', src: '/categories/poster/breakfast-sandwich.png' },
   { match: 'fried chicken', src: '/categories/poster/fried-chicken.png' },
   { match: 'shrimp', src: '/categories/poster/shrimp.png' },
   { match: 'fish and chips', src: '/categories/poster/fish-and-chips.png' },
