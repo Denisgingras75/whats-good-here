@@ -1358,3 +1358,32 @@ input.outline-none:focus-visible {
   outline: none;
   box-shadow: none;
 }
+
+/* ===========================
+   Dish Photo — Homepage Cards
+   =========================== */
+
+/* Photo shimmer placeholder — warm pulse while image loads */
+@keyframes photoShimmer {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+
+.photo-shimmer {
+  background: var(--color-bg);
+  animation: photoShimmer 1.5s ease-in-out infinite;
+}
+
+/* Dish photo — gradient fade from transparent (left) to visible (right) */
+.dish-photo-fade {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  object-fit: cover;
+  object-position: center;
+  mask-image: linear-gradient(to right, transparent 0%, black 40%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 40%);
+}
