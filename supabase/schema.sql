@@ -566,7 +566,8 @@ RETURNS TABLE (
   best_variant_rating DECIMAL,
   value_score DECIMAL,
   value_percentile DECIMAL,
-  search_score DECIMAL
+  search_score DECIMAL,
+  featured_photo_url TEXT
 ) AS $$
 DECLARE
   lat_delta DECIMAL := radius_miles / 69.0;
@@ -630,6 +631,17 @@ BEGIN
     FROM votes
     WHERE votes.created_at > NOW() - INTERVAL '14 days'
     GROUP BY votes.dish_id
+  ),
+  best_photos AS (
+    SELECT DISTINCT ON (dp.dish_id)
+      dp.dish_id,
+      dp.photo_url
+    FROM dish_photos dp
+    WHERE dp.status IN ('featured', 'community')
+    ORDER BY dp.dish_id,
+      CASE dp.source_type WHEN 'restaurant' THEN 0 ELSE 1 END,
+      CASE dp.status WHEN 'featured' THEN 0 ELSE 1 END,
+      dp.quality_score DESC NULLS LAST
   )
   SELECT
     d.id AS dish_id,
@@ -662,13 +674,15 @@ BEGIN
       COALESCE(vs.total_child_votes, COUNT(v.id)),
       fr.distance,
       COALESCE(rvc.recent_votes, 0)
-    ) AS search_score
+    ) AS search_score,
+    bp.photo_url AS featured_photo_url
   FROM dishes d
   INNER JOIN filtered_restaurants fr ON d.restaurant_id = fr.id
   LEFT JOIN votes v ON d.id = v.dish_id
   LEFT JOIN variant_stats vs ON vs.parent_dish_id = d.id
   LEFT JOIN best_variants bv ON bv.parent_dish_id = d.id
   LEFT JOIN recent_vote_counts rvc ON rvc.dish_id = d.id
+  LEFT JOIN best_photos bp ON bp.dish_id = d.id
   WHERE (filter_category IS NULL OR d.category = filter_category)
     AND d.parent_dish_id IS NULL
   GROUP BY d.id, d.name, fr.id, fr.name, fr.town, d.category, d.tags, fr.cuisine,
@@ -676,7 +690,8 @@ BEGIN
            vs.total_child_votes, vs.total_child_yes, vs.child_count,
            bv.best_name, bv.best_rating,
            d.value_score, d.value_percentile,
-           rvc.recent_votes
+           rvc.recent_votes,
+           bp.photo_url
   ORDER BY search_score DESC NULLS LAST, total_votes DESC;
 END;
 $$ LANGUAGE plpgsql STABLE SET search_path = public;
