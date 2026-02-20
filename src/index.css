@@ -79,7 +79,7 @@
   --color-orange: #F97316;
   --color-lime: #84CC16;
   --color-yellow: #EAB308;
-  --color-green-deep: #16A34A;
+  --color-green-deep: #1A7A42;
   --color-green-dark: #059669;
   --color-blue: #3B82F6;
   --color-blue-light: #60A5FA;
@@ -128,6 +128,7 @@
   --color-medal-gold: #D9A765;
   --color-medal-silver: #A8B5BF;
   --color-medal-bronze: #C4855C;
+  --color-green-deep: #5BA97A;
   --color-danger: #C85A54;
   --color-success: #6BB384;
   --color-muted: #6B7680;

@@ -267,7 +267,7 @@ function NumberOneHero({ dish, town, onClick }) {
         style={{
           position: 'relative',
           zIndex: 1,
-          background: 'linear-gradient(135deg, var(--color-medal-gold) 0%, #F5D45A 45%, var(--color-medal-gold) 55%, #C8960E 100%)',
+          background: 'linear-gradient(105deg, #B8860B 0%, #D4A520 12%, #C89B18 25%, #E8C840 38%, #D4A520 50%, #B8930F 62%, #D9B32E 75%, #C49318 88%, #A67B0A 100%)',
         }}
       >
         <p

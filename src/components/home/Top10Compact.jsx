@@ -90,8 +90,8 @@ export function Top10Compact({
 
 // Podium colors — silver (#2) and bronze (#3) banner bars
 const PODIUM_COLORS = {
-  2: { bg: 'linear-gradient(135deg, var(--color-medal-silver) 0%, #C4CDD3 45%, var(--color-medal-silver) 55%, #7A8890 100%)', text: '#FFFFFF' },
-  3: { bg: 'linear-gradient(135deg, var(--color-medal-bronze) 0%, #D4965A 45%, var(--color-medal-bronze) 55%, #8A5A2A 100%)', text: '#FFFFFF' },
+  2: { bg: 'linear-gradient(105deg, #7A8890 0%, #9EAAB2 12%, #8E9CA5 25%, #B8C4CC 38%, #9EAAB2 50%, #8A969E 62%, #A8B5BF 75%, #8E9CA5 88%, #6E7E88 100%)', text: '#FFFFFF' },
+  3: { bg: 'linear-gradient(105deg, #8A5A2A 0%, #B07340 12%, #9A6530 25%, #C88850 38%, #B07340 50%, #946028 62%, #BA7E45 75%, #A06A32 88%, #7A4E20 100%)', text: '#FFFFFF' },
 }
 
 // Podium (2-3) get banner cards, ranks 4+ are clean rows
