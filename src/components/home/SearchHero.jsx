@@ -10,7 +10,7 @@ export function SearchHero({ town, loading, onSearchChange, townPicker }) {
       className="pt-10 pb-0"
       style={{ background: 'var(--color-surface-elevated)' }}
     >
-      <div className="px-4 mb-4 stagger-item">
+      <div className="px-4 mb-4 stagger-item text-center">
         <h1
           style={{
             fontFamily: "'aglet-sans', sans-serif",
