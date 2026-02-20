@@ -6,7 +6,7 @@ import { useDishes } from '../hooks/useDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { BROWSE_CATEGORIES } from '../constants/categories'
-import { SearchHero, Top10Compact } from '../components/home'
+import { SearchHero, Top10Compact, DishPhotoFade } from '../components/home'
 import { CategoryIcon } from '../components/home/CategoryIcons'
 import { TownPicker } from '../components/TownPicker'
 import { getRatingColor } from '../utils/ranking'
@@ -247,7 +247,8 @@ function CategoryNav({ selectedCategory, onCategoryChange }) {
 function NumberOneHero({ dish, town, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes, category, featured_photo_url } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
-  const [photoLoaded, setPhotoLoaded] = useState(false)
+  const [photoFailed, setPhotoFailed] = useState(false)
+  const showPhoto = featured_photo_url && !photoFailed
 
   return (
     <button
@@ -282,38 +283,13 @@ function NumberOneHero({ dish, town, onClick }) {
         </p>
       </div>
 
-      {/* Photo (absolute, fades from right) */}
-      {featured_photo_url ? (
-        <>
-          {!photoLoaded && (
-            <div
-              className="photo-shimmer"
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                bottom: 0,
-                width: '55%',
-              }}
-            />
-          )}
-          <img
-            src={featured_photo_url}
-            alt={dish_name}
-            loading="eager"
-            onLoad={() => setPhotoLoaded(true)}
-            className="dish-photo-fade"
-            style={{
-              opacity: photoLoaded ? 1 : 0,
-              transition: 'opacity 200ms ease',
-            }}
-          />
-        </>
-      ) : null}
+      {showPhoto && (
+        <DishPhotoFade photoUrl={featured_photo_url} dishName={dish_name} loading="eager" onPhotoError={() => setPhotoFailed(true)} />
+      )}
 
       {/* Main content — text left, icon right (only when no photo) */}
       <div className="flex items-center gap-3 py-5 px-4" style={{ position: 'relative', zIndex: 1 }}>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0" style={showPhoto ? { maxWidth: '50%' } : undefined}>
           <h2
             style={{
               fontFamily: "'aglet-sans', sans-serif",
@@ -361,7 +337,7 @@ function NumberOneHero({ dish, town, onClick }) {
             </div>
           )}
         </div>
-        {!featured_photo_url && (
+        {!showPhoto && (
           <CategoryIcon categoryId={category} dishName={dish_name} size={96} color="var(--color-primary)" />
         )}
       </div>

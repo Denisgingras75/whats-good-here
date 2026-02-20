@@ -1371,6 +1371,10 @@ input.outline-none:focus-visible {
 }
 
 .photo-shimmer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
   background: var(--color-bg);
   animation: photoShimmer 1.5s ease-in-out infinite;
 }

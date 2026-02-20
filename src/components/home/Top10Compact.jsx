@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
 import { getRatingColor } from '../../utils/ranking'
 import { CategoryIcon } from './CategoryIcons'
+import { DishPhotoFade } from './DishPhotoFade'
 
 /**
  * Top10Compact - Ranked dish list for the homepage
@@ -97,9 +98,7 @@ const PODIUM_COLORS = {
 const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
   const { dish_name, restaurant_name, avg_rating, total_votes, category, featured_photo_url } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
-  const isPodium = rank <= 3
   const podium = PODIUM_COLORS[rank]
-  const [photoLoaded, setPhotoLoaded] = useState(false)
 
   const accessibleLabel = isRanked
     ? `Rank ${rank}: ${dish_name} at ${restaurant_name}, rated ${avg_rating} out of 10 with ${total_votes} votes`
@@ -140,42 +139,16 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
           </span>
         </div>
 
-        {/* Photo (absolute, fades from right) */}
-        {featured_photo_url ? (
-          <>
-            {!photoLoaded && (
-              <div
-                className="photo-shimmer"
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: '50%',
-                }}
-              />
-            )}
-            <img
-              src={featured_photo_url}
-              alt={dish_name}
-              loading="lazy"
-              onLoad={() => setPhotoLoaded(true)}
-              className="dish-photo-fade"
-              style={{
-                opacity: photoLoaded ? 1 : 0,
-                transition: 'opacity 200ms ease',
-                width: '50%',
-              }}
-            />
-          </>
-        ) : null}
+        {featured_photo_url && (
+          <DishPhotoFade photoUrl={featured_photo_url} dishName={dish_name} width="50%" />
+        )}
 
         {/* Content — text left, icon right (only when no photo) */}
         <div
           className={`flex items-center gap-3 ${rank === 2 ? 'py-5 px-5' : 'py-3 px-5'}`}
           style={{ position: 'relative', zIndex: 1 }}
         >
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0" style={featured_photo_url ? { maxWidth: '55%' } : undefined}>
             <p
               className="font-bold truncate"
               style={{
