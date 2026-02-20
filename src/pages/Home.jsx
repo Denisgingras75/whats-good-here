@@ -245,14 +245,16 @@ function CategoryNav({ selectedCategory, onCategoryChange }) {
 
 // #1 Dish — massive editorial hero card
 function NumberOneHero({ dish, town, onClick }) {
-  const { dish_name, restaurant_name, avg_rating, total_votes, category } = dish
+  const { dish_name, restaurant_name, avg_rating, total_votes, category, featured_photo_url } = dish
   const isRanked = (total_votes || 0) >= MIN_VOTES_FOR_RANKING
+  const [photoLoaded, setPhotoLoaded] = useState(false)
 
   return (
     <button
       onClick={onClick}
       className="w-full text-left mb-5 rounded-2xl overflow-hidden card-press-hero stagger-item"
       style={{
+        position: 'relative',
         background: 'var(--color-surface-elevated)',
         border: 'none',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
@@ -262,6 +264,8 @@ function NumberOneHero({ dish, town, onClick }) {
       <div
         className="px-4 py-2.5"
         style={{
+          position: 'relative',
+          zIndex: 1,
           background: 'linear-gradient(135deg, var(--color-medal-gold) 0%, #F5D45A 45%, var(--color-medal-gold) 55%, #C8960E 100%)',
         }}
       >
@@ -278,8 +282,37 @@ function NumberOneHero({ dish, town, onClick }) {
         </p>
       </div>
 
-      {/* Main content — text left, big icon right */}
-      <div className="flex items-center gap-3 py-5 px-4">
+      {/* Photo (absolute, fades from right) */}
+      {featured_photo_url ? (
+        <>
+          {!photoLoaded && (
+            <div
+              className="photo-shimmer"
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: '55%',
+              }}
+            />
+          )}
+          <img
+            src={featured_photo_url}
+            alt={dish_name}
+            loading="eager"
+            onLoad={() => setPhotoLoaded(true)}
+            className="dish-photo-fade"
+            style={{
+              opacity: photoLoaded ? 1 : 0,
+              transition: 'opacity 200ms ease',
+            }}
+          />
+        </>
+      ) : null}
+
+      {/* Main content — text left, icon right (only when no photo) */}
+      <div className="flex items-center gap-3 py-5 px-4" style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex-1 min-w-0">
           <h2
             style={{
@@ -328,7 +361,9 @@ function NumberOneHero({ dish, town, onClick }) {
             </div>
           )}
         </div>
-        <CategoryIcon categoryId={category} dishName={dish_name} size={96} color="var(--color-primary)" />
+        {!featured_photo_url && (
+          <CategoryIcon categoryId={category} dishName={dish_name} size={96} color="var(--color-primary)" />
+        )}
       </div>
     </button>
   )
