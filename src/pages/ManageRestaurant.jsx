@@ -106,6 +106,30 @@ export function ManageRestaurant() {
     }
   }
 
+  // Bulk add dishes handler
+  async function handleBulkAddDishes(dishesArray) {
+    try {
+      const newDishes = await restaurantManagerApi.bulkAddDishes(restaurant.id, dishesArray)
+      setDishes(prev => [...prev, ...newDishes].slice().sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name)))
+      setMessage({ type: 'success', text: `${newDishes.length} dishes added!` })
+    } catch (error) {
+      logger.error('Error bulk adding dishes:', error)
+      setMessage({ type: 'error', text: `Failed to add dishes: ${error.message}` })
+    }
+  }
+
+  // Delete dish handler
+  async function handleDeleteDish(dishId) {
+    try {
+      await restaurantManagerApi.deleteDish(dishId)
+      setDishes(prev => prev.filter(d => d.id !== dishId))
+      setMessage({ type: 'success', text: 'Dish removed' })
+    } catch (error) {
+      logger.error('Error deleting dish:', error)
+      setMessage({ type: 'error', text: `Failed to remove dish: ${error.message}` })
+    }
+  }
+
   // Restaurant info handler
   async function handleUpdateInfo(updates) {
     try {
@@ -240,7 +264,7 @@ export function ManageRestaurant() {
                 : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-secondary)' }
               }
             >
-              {tab === 'specials' ? 'Specials' : tab === 'events' ? 'Events' : tab === 'menu' ? 'Menu' : 'Info'}
+              {tab === 'specials' ? `Specials${!dataLoading && specials.filter(s => s.is_active).length ? ` (${specials.filter(s => s.is_active).length})` : ''}` : tab === 'events' ? `Events${!dataLoading && events.filter(e => e.is_active).length ? ` (${events.filter(e => e.is_active).length})` : ''}` : tab === 'menu' ? `Menu${!dataLoading && dishes.length ? ` (${dishes.length})` : ''}` : 'Info'}
             </button>
           ))}
         </div>
@@ -276,6 +300,9 @@ export function ManageRestaurant() {
             dishes={dishes}
             onAdd={handleAddDish}
             onUpdate={handleUpdateDish}
+            onDelete={handleDeleteDish}
+            onBulkAdd={handleBulkAddDishes}
+            restaurantName={restaurant.name}
           />
         ) : (
           <RestaurantInfoEditor

@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { MAIN_CATEGORIES } from '../../constants/categories'
+import { MenuImportWizard } from './MenuImportWizard'
 
-export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
+export function DishesManager({ restaurantId, dishes, onAdd, onUpdate, onDelete, onBulkAdd, restaurantName }) {
   const [showForm, setShowForm] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [name, setName] = useState('')
   const [category, setCategory] = useState('')
   const [price, setPrice] = useState('')
   const [photoUrl, setPhotoUrl] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   function resetForm() {
     setName('')
@@ -39,6 +42,7 @@ export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
           name: name.trim(),
           price: price || null,
           photoUrl: photoUrl || null,
+          category,
         })
       } else {
         await onAdd({
@@ -57,6 +61,13 @@ export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
     }
   }
 
+  async function handleDelete(dishId) {
+    setConfirmDeleteId(null)
+    if (onDelete) {
+      await onDelete(dishId)
+    }
+  }
+
   // Group dishes by category
   const grouped = {}
   for (const dish of dishes) {
@@ -66,8 +77,32 @@ export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
   }
   const categoryKeys = Object.keys(grouped).sort()
 
+  // Show import wizard
+  if (showImport) {
+    return (
+      <div>
+        <MenuImportWizard
+          restaurantName={restaurantName}
+          onBulkAdd={onBulkAdd}
+          onClose={() => setShowImport(false)}
+        />
+      </div>
+    )
+  }
+
   return (
     <div>
+      {/* Import Menu Button (primary) */}
+      {!showForm && (
+        <button
+          onClick={() => setShowImport(true)}
+          className="w-full py-3 rounded-xl font-semibold text-sm transition-all mb-2"
+          style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+        >
+          Import Menu
+        </button>
+      )}
+
       {/* Add/Edit Form Toggle */}
       {!showForm ? (
         <button
@@ -90,24 +125,22 @@ export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
               placeholder="Dish name"
               required
               className="w-full px-3 py-2 border rounded-lg text-sm"
-              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
             />
-            {!editingId && (
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
-              >
-                <option value="">Select category...</option>
-                {MAIN_CATEGORIES.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.emoji} {cat.label}
-                  </option>
-                ))}
-              </select>
-            )}
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required={!editingId}
+              className="w-full px-3 py-2 border rounded-lg text-sm"
+              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
+            >
+              <option value="">Select category...</option>
+              {MAIN_CATEGORIES.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.emoji} {cat.label}
+                </option>
+              ))}
+            </select>
             <div className="flex gap-3">
               <input
                 type="number"
@@ -117,7 +150,7 @@ export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
                 step="0.01"
                 min="0"
                 className="flex-1 px-3 py-2 border rounded-lg text-sm"
-                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
               />
               <input
                 type="url"
@@ -125,7 +158,7 @@ export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
                 onChange={(e) => setPhotoUrl(e.target.value)}
                 placeholder="Photo URL"
                 className="flex-1 px-3 py-2 border rounded-lg text-sm"
-                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
               />
             </div>
             <div className="flex gap-2">
@@ -158,23 +191,59 @@ export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
           </h3>
           <div className="space-y-1.5">
             {grouped[cat].map((dish) => (
-              <button
+              <div
                 key={dish.id}
-                onClick={() => handleEdit(dish)}
-                className="w-full text-left p-3 rounded-xl border transition-colors"
+                className="p-3 rounded-xl border transition-colors"
                 style={{ background: 'var(--color-bg)', borderColor: editingId === dish.id ? 'var(--color-primary)' : 'var(--color-divider)' }}
               >
                 <div className="flex items-center justify-between">
-                  <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                    {dish.name}
-                  </p>
-                  {dish.price && (
-                    <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                      ${Number(dish.price).toFixed(2)}
-                    </span>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                      {dish.name}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 ml-2">
+                    {dish.price && (
+                      <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                        ${Number(dish.price).toFixed(2)}
+                      </span>
+                    )}
+                    <button
+                      onClick={() => handleEdit(dish)}
+                      className="text-xs font-medium px-2 py-1 rounded"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      Edit
+                    </button>
+                    {confirmDeleteId === dish.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleDelete(dish.id)}
+                          className="text-xs font-medium px-2 py-1 rounded"
+                          style={{ color: 'var(--color-danger, #dc2626)' }}
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="text-xs font-medium px-2 py-1 rounded"
+                          style={{ color: 'var(--color-text-tertiary)' }}
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(dish.id)}
+                        className="text-xs font-medium px-2 py-1 rounded"
+                        style={{ color: 'var(--color-danger, #dc2626)' }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>
@@ -184,7 +253,7 @@ export function DishesManager({ restaurantId, dishes, onAdd, onUpdate }) {
       {dishes.length === 0 && !showForm && (
         <div className="text-center py-8">
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            No dishes yet. Add your first one!
+            No dishes yet. Import your menu or add one manually!
           </p>
         </div>
       )}

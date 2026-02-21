@@ -244,11 +244,12 @@ export const restaurantManagerApi = {
    * @param {Object} updates
    * @returns {Promise<Object>}
    */
-  async updateDish(dishId, { name, price, photoUrl }) {
+  async updateDish(dishId, { name, price, photoUrl, category }) {
     const updates = {}
     if (name !== undefined) updates.name = name.trim()
     if (price !== undefined) updates.price = price ? parseFloat(price) : null
     if (photoUrl !== undefined) updates.photo_url = photoUrl?.trim() || null
+    if (category !== undefined) updates.category = category.toLowerCase()
 
     const { data, error } = await supabase
       .from('dishes')
@@ -451,5 +452,67 @@ export const restaurantManagerApi = {
    */
   async deactivateEvent(id) {
     return this.updateEvent(id, { is_active: false })
+  },
+
+  /**
+   * Parse menu text using AI Edge Function
+   * @param {string} text - Raw menu text (pasted or extracted from PDF)
+   * @param {string} restaurantName - Restaurant name for context
+   * @returns {Promise<Array<{name: string, category: string, price: number|null}>>}
+   */
+  async parseMenuText(text, restaurantName) {
+    const { data, error } = await supabase.functions.invoke('parse-menu', {
+      body: { text, restaurant_name: restaurantName },
+    })
+
+    if (error) {
+      logger.error('Error parsing menu:', error)
+      throw createClassifiedError(error)
+    }
+
+    return data?.dishes || []
+  },
+
+  /**
+   * Bulk add dishes to a restaurant (single batch insert)
+   * @param {string} restaurantId
+   * @param {Array<{name: string, category: string, price: number|null}>} dishes
+   * @returns {Promise<Array>}
+   */
+  async bulkAddDishes(restaurantId, dishes) {
+    const rows = dishes.map(d => ({
+      restaurant_id: restaurantId,
+      name: d.name.trim(),
+      category: d.category.toLowerCase(),
+      price: d.price ? parseFloat(d.price) : null,
+    }))
+
+    const { data, error } = await supabase
+      .from('dishes')
+      .insert(rows)
+      .select()
+
+    if (error) {
+      logger.error('Error bulk adding dishes:', error)
+      throw createClassifiedError(error)
+    }
+
+    return data || []
+  },
+
+  /**
+   * Delete a dish (hard delete, RLS protects non-managers)
+   * @param {string} dishId
+   */
+  async deleteDish(dishId) {
+    const { error } = await supabase
+      .from('dishes')
+      .delete()
+      .eq('id', dishId)
+
+    if (error) {
+      logger.error('Error deleting dish:', error)
+      throw createClassifiedError(error)
+    }
   },
 }

@@ -1,4 +1,41 @@
 import { useState } from 'react'
+import { validateUserContent } from '../../lib/reviewBlocklist'
+
+/**
+ * Parse a natural language special into structured fields.
+ * Zero API cost — pure client-side regex extraction.
+ * e.g., "Half-price oysters until 6pm" → { dealName, price, expiresAt }
+ */
+function parseQuickSpecial(text) {
+  const result = { dealName: text.trim(), price: null, expiresAt: null }
+
+  // Extract price: $X or $X.XX
+  const priceMatch = text.match(/\$(\d+(?:\.\d{1,2})?)/)
+  if (priceMatch) {
+    result.price = parseFloat(priceMatch[1])
+  }
+
+  // Extract time: "until Xpm", "til Xam", "through X:XX pm", "before X pm"
+  const timeMatch = text.match(/(?:until|til|'til|through|before|by)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i)
+  if (timeMatch) {
+    let hours = parseInt(timeMatch[1], 10)
+    const minutes = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0
+    const period = timeMatch[3].toLowerCase()
+    if (period === 'pm' && hours < 12) hours += 12
+    if (period === 'am' && hours === 12) hours = 0
+
+    // Set expiry to today at that time
+    const now = new Date()
+    const expires = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
+    // If time already passed today, set to tomorrow
+    if (expires <= now) {
+      expires.setDate(expires.getDate() + 1)
+    }
+    result.expiresAt = expires.toISOString().slice(0, 16) // datetime-local format
+  }
+
+  return result
+}
 
 export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDeactivate }) {
   const [showForm, setShowForm] = useState(false)
@@ -8,6 +45,11 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
   const [price, setPrice] = useState('')
   const [expiresAt, setExpiresAt] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // Quick-add state
+  const [quickText, setQuickText] = useState('')
+  const [quickSubmitting, setQuickSubmitting] = useState(false)
+  const [quickError, setQuickError] = useState(null)
 
   function resetForm() {
     setDealName('')
@@ -57,21 +99,83 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
     }
   }
 
+  async function handleQuickPost() {
+    if (!quickText.trim()) return
+
+    const contentError = validateUserContent(quickText, 'Special')
+    if (contentError) {
+      setQuickError(contentError)
+      return
+    }
+
+    setQuickSubmitting(true)
+    setQuickError(null)
+    try {
+      const parsed = parseQuickSpecial(quickText)
+      await onAdd({
+        restaurantId,
+        dealName: parsed.dealName,
+        description: null,
+        price: parsed.price,
+        expiresAt: parsed.expiresAt,
+      })
+      setQuickText('')
+    } catch {
+      // Parent handles error display
+    } finally {
+      setQuickSubmitting(false)
+    }
+  }
+
+  function handleQuickKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleQuickPost()
+    }
+  }
+
   const activeSpecials = specials.filter(s => s.is_active)
   const inactiveSpecials = specials.filter(s => !s.is_active)
 
   return (
     <div>
-      {/* Add/Edit Form Toggle */}
-      {!showForm ? (
-        <button
-          onClick={() => setShowForm(true)}
-          className="w-full py-3 rounded-xl border-2 border-dashed transition-all mb-4"
-          style={{ borderColor: 'var(--color-divider)', color: 'var(--color-primary)' }}
-        >
-          <span className="font-semibold text-sm">+ Add Special</span>
-        </button>
-      ) : (
+      {/* Quick-Add Bar */}
+      {!showForm && (
+        <div className="mb-3">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={quickText}
+              onChange={(e) => { setQuickText(e.target.value); setQuickError(null) }}
+              onKeyDown={handleQuickKeyDown}
+              placeholder="Half-price oysters until 6pm"
+              className="flex-1 px-3 py-2.5 border rounded-xl text-sm"
+              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
+            />
+            <button
+              onClick={handleQuickPost}
+              disabled={!quickText.trim() || quickSubmitting}
+              className="px-4 py-2.5 rounded-xl font-semibold text-sm disabled:opacity-40"
+              style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+            >
+              {quickSubmitting ? '...' : 'Post'}
+            </button>
+          </div>
+          {quickError && (
+            <p className="text-xs mt-1 font-medium" style={{ color: 'var(--color-danger)' }}>{quickError}</p>
+          )}
+          <button
+            onClick={() => setShowForm(true)}
+            className="text-xs mt-1.5 font-medium"
+            style={{ color: 'var(--color-text-tertiary)' }}
+          >
+            or use full form
+          </button>
+        </div>
+      )}
+
+      {/* Full Add/Edit Form */}
+      {showForm && (
         <form onSubmit={handleSubmit} className="mb-4 p-4 rounded-xl border" style={{ background: 'var(--color-bg)', borderColor: 'var(--color-divider)' }}>
           <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--color-text-primary)' }}>
             {editingId ? 'Edit Special' : 'New Special'}
@@ -84,7 +188,7 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
               placeholder="Deal name (e.g., Half-Price Wings)"
               required
               className="w-full px-3 py-2 border rounded-lg text-sm"
-              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
             />
             <input
               type="text"
@@ -92,7 +196,7 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description (optional)"
               className="w-full px-3 py-2 border rounded-lg text-sm"
-              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
             />
             <div className="flex gap-3">
               <input
@@ -103,14 +207,14 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
                 step="0.01"
                 min="0"
                 className="flex-1 px-3 py-2 border rounded-lg text-sm"
-                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
               />
               <input
                 type="datetime-local"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
                 className="flex-1 px-3 py-2 border rounded-lg text-sm"
-                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+                style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
               />
             </div>
             <div className="flex gap-2">
@@ -224,7 +328,7 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
       {specials.length === 0 && !showForm && (
         <div className="text-center py-8">
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            No specials yet. Add your first one!
+            No specials yet. Type one above or use the full form!
           </p>
         </div>
       )}
