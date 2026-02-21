@@ -1,6 +1,5 @@
 import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
@@ -14,8 +13,6 @@ import { getRatingColor } from '../utils/ranking'
 
 export function Home() {
   const navigate = useNavigate()
-  const { user } = useAuth()
-
   const { location, radius, town, setTown } = useLocationContext()
 
   // Town picker
@@ -149,7 +146,7 @@ export function Home() {
             <button
               onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 text-sm font-medium rounded-lg"
-              style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
+              style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
             >
               Retry
             </button>
@@ -237,14 +234,14 @@ function CategoryNav({ selectedCategory, onCategoryChange }) {
             <CategoryIcon
               categoryId={cat.id}
               size={48}
-              color={isActive ? '#FFFFFF' : 'var(--color-primary)'}
+              color={isActive ? 'var(--color-text-on-primary)' : 'var(--color-primary)'}
             />
             <span
               style={{
                 fontSize: '10px',
                 fontWeight: 700,
                 letterSpacing: '0.02em',
-                color: isActive ? '#FFFFFF' : 'var(--color-text-primary)',
+                color: isActive ? 'var(--color-text-on-primary)' : 'var(--color-text-primary)',
                 marginTop: '4px',
                 lineHeight: 1.1,
                 textAlign: 'center',
@@ -292,7 +289,7 @@ function NumberOneHero({ dish, town, onClick }) {
             fontWeight: 800,
             letterSpacing: '0.10em',
             textTransform: 'uppercase',
-            color: '#FFFFFF',
+            color: 'var(--color-text-on-primary)',
           }}
         >
           #1 {town ? `in ${town}` : 'on the Vineyard'}
@@ -338,12 +335,14 @@ function NumberOneHero({ dish, town, onClick }) {
                 </span>
                 <p style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>avg rating</p>
               </div>
+              {dish.percent_worth_it != null && (
               <div style={{ paddingLeft: '16px', paddingRight: '16px', borderLeft: '1px solid var(--color-divider)' }}>
                 <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: '28px', lineHeight: 1, color: getRatingColor(dish.percent_worth_it / 10) }}>
                   {dish.percent_worth_it}%
                 </span>
                 <p style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>would reorder</p>
               </div>
+              )}
               <div style={{ paddingLeft: '16px', borderLeft: '1px solid var(--color-divider)' }}>
                 <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: '28px', lineHeight: 1, color: 'var(--color-text-primary)' }}>
                   {total_votes}
@@ -365,26 +364,26 @@ function NumberOneHero({ dish, town, onClick }) {
 function Top10Skeleton() {
   return (
     <div className="max-w-lg mx-auto animate-pulse">
-      <div className="h-5 w-32 rounded mb-4" style={{ background: '#F0F0F0' }} />
+      <div className="h-5 w-32 rounded mb-4" style={{ background: 'var(--color-divider)' }} />
       <div className="space-y-1">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-center gap-3 py-3 px-3 rounded-xl mb-1.5" style={{ background: '#F5F5F5' }}>
-            <div className="w-6 h-6 rounded-full" style={{ background: '#E8E8E8' }} />
+          <div key={i} className="flex items-center gap-3 py-3 px-3 rounded-xl mb-1.5" style={{ background: 'var(--color-surface)' }}>
+            <div className="w-6 h-6 rounded-full" style={{ background: 'var(--color-divider)' }} />
             <div className="flex-1">
-              <div className="h-4 w-32 rounded mb-1" style={{ background: '#E8E8E8' }} />
-              <div className="h-3 w-24 rounded" style={{ background: '#E8E8E8' }} />
+              <div className="h-4 w-32 rounded mb-1" style={{ background: 'var(--color-divider)' }} />
+              <div className="h-3 w-24 rounded" style={{ background: 'var(--color-divider)' }} />
             </div>
-            <div className="h-5 w-8 rounded" style={{ background: '#E8E8E8' }} />
+            <div className="h-5 w-8 rounded" style={{ background: 'var(--color-divider)' }} />
           </div>
         ))}
         {[...Array(7)].map((_, i) => (
           <div key={i + 3} className="flex items-center gap-3 py-2.5 px-2" style={{ opacity: 0.6 }}>
-            <div className="w-6 h-4 rounded" style={{ background: '#F0F0F0' }} />
+            <div className="w-6 h-4 rounded" style={{ background: 'var(--color-divider)' }} />
             <div className="flex-1">
-              <div className="h-3.5 w-28 rounded mb-1" style={{ background: '#F0F0F0' }} />
-              <div className="h-3 w-20 rounded" style={{ background: '#F0F0F0' }} />
+              <div className="h-3.5 w-28 rounded mb-1" style={{ background: 'var(--color-divider)' }} />
+              <div className="h-3 w-20 rounded" style={{ background: 'var(--color-divider)' }} />
             </div>
-            <div className="h-4 w-7 rounded" style={{ background: '#F0F0F0' }} />
+            <div className="h-4 w-7 rounded" style={{ background: 'var(--color-divider)' }} />
           </div>
         ))}
       </div>
@@ -405,7 +404,7 @@ function EmptyState({ onBrowse }) {
       <button
         onClick={onBrowse}
         className="mt-4 px-6 py-2 rounded-full text-sm font-bold transition-opacity hover:opacity-90"
-        style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
+        style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
       >
         Browse All Dishes
       </button>
