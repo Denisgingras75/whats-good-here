@@ -48,7 +48,8 @@ INSERT INTO restaurants (name, address, lat, lng, town, cuisine) VALUES
 ('Dock Street', '1 Circuit Ave Extension, Oak Bluffs, MA 02557', 41.4551, -70.5616, 'Oak Bluffs', 'American'),
 ('Catboat', '1 Main St, Oak Bluffs, MA 02557', 41.4557, -70.5608, 'Oak Bluffs', 'Seafood'),
 ('Wolf''s Den Pizzeria', '15 State Rd, Oak Bluffs, MA 02557', 41.4516, -70.5667, 'Oak Bluffs', 'Pizza'),
-('Nat''s Nook', '76 Circuit Ave, Oak Bluffs, MA 02557', 41.4556, -70.5629, 'Oak Bluffs', 'American')
+('Nat''s Nook', '76 Circuit Ave, Oak Bluffs, MA 02557', 41.4556, -70.5629, 'Oak Bluffs', 'American'),
+('Noman''s', '15 Island Inn Rd, Oak Bluffs, MA 02557', 41.4537, -70.5585, 'Oak Bluffs', 'American')
 ON CONFLICT (name) DO UPDATE SET
   address = EXCLUDED.address,
   lat = EXCLUDED.lat,
@@ -60,6 +61,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- EDGARTOWN
 -- ============================================
 INSERT INTO restaurants (name, address, lat, lng, town, cuisine) VALUES
+('Bad Martha Farmer''s Brewery', '270 Upper Main St, Edgartown, MA 02539', 41.3897, -70.5197, 'Edgartown', 'Brewery'),
 ('Atria', '137 Main St, Edgartown, MA 02539', 41.3890, -70.5133, 'Edgartown', 'Fine Dining'),
 ('Alchemy Bistro & Bar', '71 Main St, Edgartown, MA 02539', 41.3895, -70.5130, 'Edgartown', 'Bistro'),
 ('Among The Flowers Cafe', '17 Mayhew Ln, Edgartown, MA 02539', 41.3885, -70.5125, 'Edgartown', 'Cafe'),

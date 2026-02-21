@@ -53,6 +53,7 @@ export const MAIN_CATEGORIES = [
   { id: 'oysters', label: 'Oysters', emoji: '🦪' },
   { id: 'coffee', label: 'Coffee', emoji: '☕' },
   { id: 'cocktails', label: 'Cocktails', emoji: '🍸' },
+  { id: 'beer', label: 'Beer', emoji: '🍺' },
   { id: 'ice cream', label: 'Ice Cream', emoji: '🍦' },
 ]
 
