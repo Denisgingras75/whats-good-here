@@ -548,10 +548,8 @@ export function Profile() {
                   {tab.id === 'saved' ? <HearingIcon size={40} active={activeTab === tab.id} /> : tab.id === 'worth-it' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.id === 'avoid' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : tab.id === 'unrated' ? <CameraIcon size={40} active={activeTab === tab.id} /> : tab.id === 'reviews' ? <ReviewsIcon size={40} active={activeTab === tab.id} /> : <span>{tab.emoji}</span>}
                   <span>{tab.label}</span>
                   <span
-                    className={`ml-0.5 px-1.5 py-0.5 rounded-full font-semibold ${
-                      activeTab === tab.id ? 'bg-white/20' : 'bg-black/20'
-                    }`}
-                    style={{ fontSize: '11px' }}
+                    className="ml-0.5 px-1.5 py-0.5 rounded-full font-semibold"
+                    style={{ fontSize: '11px', background: activeTab === tab.id ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }}
                   >
                     {tab.id === 'unrated' ? unratedCount :
                      tab.id === 'worth-it' ? worthItDishes.length :

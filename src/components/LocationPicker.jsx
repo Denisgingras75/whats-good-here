@@ -26,7 +26,8 @@ export function RadiusSheet({ isOpen, onClose, radius, onRadiusChange }) {
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 backdrop-blur-sm"
+        style={{ background: 'rgba(0,0,0,0.5)' }}
         aria-hidden="true"
       />
 

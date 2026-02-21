@@ -67,7 +67,7 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
         )}
 
         {/* Subtle gradient for badge contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.3), transparent)' }} />
 
         {/* Rating badge - bottom left (only show if 10+ votes) */}
         {totalVotes >= 10 && (

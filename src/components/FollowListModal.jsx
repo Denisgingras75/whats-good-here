@@ -79,7 +79,7 @@ export function FollowListModal({ userId, type, onClose }) {
       role="presentation"
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
+      <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.6)' }} aria-hidden="true" />
 
       {/* Modal */}
       <div
