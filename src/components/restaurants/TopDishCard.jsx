@@ -65,9 +65,9 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
     <div
       className="rounded-xl card-press"
       style={{
-        background: '#FFFFFF',
-        border: '2px solid #1A1A1A',
-        boxShadow: '2px 2px 0px #1A1A1A',
+        background: 'var(--color-surface-elevated)',
+        border: '2px solid var(--color-text-primary)',
+        boxShadow: '2px 2px 0px var(--color-text-primary)',
       }}
     >
       <div
@@ -85,7 +85,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
             style={{
               fontFamily: "'aglet-sans', sans-serif",
               fontWeight: 800,
-              color: rank <= 3 && isRanked ? '#E4440A' : '#BBBBBB',
+              color: rank <= 3 && isRanked ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
               fontSize: '16px',
               minWidth: '20px',
               textAlign: 'center',
@@ -99,8 +99,8 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
         <div
           className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
           style={{
-            background: photo_url ? '#F5F5F5' : '#FFF0EB',
-            border: '1px solid #E0E0E0',
+            background: photo_url ? 'var(--color-surface)' : 'var(--color-category-strip)',
+            border: '1px solid var(--color-divider)',
           }}
         >
           {photo_url ? (
@@ -111,7 +111,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
               className="w-full h-full object-cover"
             />
           ) : (
-            <CategoryIcon categoryId={category} dishName={dish_name} size={40} color="#E4440A" />
+            <CategoryIcon categoryId={category} dishName={dish_name} size={40} color="var(--color-primary)" />
           )}
         </div>
 
@@ -123,7 +123,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
                 <h4
                   className="font-bold truncate"
                   style={{
-                    color: '#1A1A1A',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px',
                     letterSpacing: '-0.01em',
                   }}
@@ -149,7 +149,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
               </div>
               <div className="flex items-center gap-2 mt-0.5">
                 {price && (
-                  <span className="font-bold" style={{ color: '#999999', fontSize: '12px' }}>
+                  <span className="font-bold" style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>
                     ${Number(price).toFixed(0)}
                   </span>
                 )}
@@ -173,7 +173,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
                   onToggleFavorite(dish_id)
                 }}
                 className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
-                style={{ background: '#F5F5F5' }}
+                style={{ background: 'var(--color-surface)' }}
                 aria-label={isFavorite ? 'Remove from heard list' : 'Mark as heard it was good'}
               >
                 <HearingIcon size={22} active={isFavorite} />
@@ -197,22 +197,22 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
                   >
                     {displayRating}
                   </span>
-                  <span className="font-medium" style={{ color: '#BBBBBB', fontSize: '10px' }}>
+                  <span className="font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '10px' }}>
                     &middot; {votes} votes
                   </span>
                 </div>
                 {/* Right: Would Order Again % */}
                 <div className="flex items-center gap-1">
-                  <span className="font-bold" style={{ color: '#16A34A', fontSize: '14px' }}>
+                  <span className="font-bold" style={{ color: 'var(--color-rating)', fontSize: '14px' }}>
                     {Math.round(percent_worth_it)}%
                   </span>
-                  <span className="font-medium" style={{ color: '#BBBBBB', fontSize: '10px' }}>
+                  <span className="font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '10px' }}>
                     would order again
                   </span>
                 </div>
               </>
             ) : (
-              <span className="font-medium" style={{ color: '#BBBBBB', fontSize: '12px' }}>
+              <span className="font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
                 {votes > 0 ? `Early \u00B7 ${votes} vote${votes === 1 ? '' : 's'} so far` : 'Be first to vote'}
               </span>
             )}
@@ -227,13 +227,13 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
                     <div
                       key={fv.user_id}
                       className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ring-1"
-                      style={{ background: '#E4440A', color: '#FFFFFF', ringColor: '#FFFFFF' }}
+                      style={{ background: 'var(--color-primary)', color: 'var(--color-surface-elevated)', ringColor: 'var(--color-surface-elevated)' }}
                     >
                       {fv.display_name?.charAt(0).toUpperCase() || '?'}
                     </div>
                   ))}
                 </div>
-                <span className="font-medium truncate" style={{ color: '#BBBBBB', fontSize: '11px' }}>
+                <span className="font-medium truncate" style={{ color: 'var(--color-text-tertiary)', fontSize: '11px' }}>
                   {friendVotes.slice(0, 2).map(fv => {
                     const name = fv.display_name?.split(' ')[0] || 'Friend'
                     return `${name}: ${fv.rating_10}`
