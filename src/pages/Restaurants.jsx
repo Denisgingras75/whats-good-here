@@ -8,6 +8,7 @@ import { useNearbyPlaces } from '../hooks/useNearbyPlaces'
 import { useMapDishes } from '../hooks/useMapDishes'
 import { DishSearch } from '../components/DishSearch'
 import { RestaurantCard, TopDishesNearYou } from '../components/restaurants'
+import { BROWSE_CATEGORIES } from '../constants/categories'
 import { RadiusSheet } from '../components/LocationPicker'
 import { LocationBanner } from '../components/LocationBanner'
 import { AddRestaurantModal } from '../components/AddRestaurantModal'
@@ -25,6 +26,7 @@ export function Restaurants() {
   const { location, radius, setRadius, permissionState, requestLocation, town } = useLocationContext()
 
   const [restaurantTab, setRestaurantTab] = useState('open')
+  const [mapCategory, setMapCategory] = useState(null)
   const [showRadiusSheet, setShowRadiusSheet] = useState(false)
   const [addRestaurantModalOpen, setAddRestaurantModalOpen] = useState(false)
   const [addRestaurantInitialQuery, setAddRestaurantInitialQuery] = useState('')
@@ -40,8 +42,8 @@ export function Restaurants() {
     [restaurants]
   )
 
-  // Fetch dishes for map (always — map is always visible)
-  const { dishes: mapDishes } = useMapDishes(town)
+  // Fetch dishes for map — distance-filtered, category-filterable
+  const { dishes: mapDishes } = useMapDishes({ location, radius, town, category: mapCategory })
 
   // Discover nearby restaurants from Google Places (auth only, radius + 5mi buffer)
   const { places: nearbyPlaces, loading: nearbyLoading, error: nearbyError } = useNearbyPlaces({
@@ -135,6 +137,41 @@ export function Restaurants() {
       </div>
 
       <div className="p-4 pt-5">
+        {/* Category filter chips for map + top dishes */}
+        <div
+          className="flex gap-2 overflow-x-auto pb-3 mb-3"
+          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+        >
+          <button
+            onClick={() => setMapCategory(null)}
+            className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+            style={{
+              scrollSnapAlign: 'start',
+              background: mapCategory === null ? 'var(--color-text-primary)' : 'var(--color-surface-elevated)',
+              color: mapCategory === null ? 'var(--color-surface)' : 'var(--color-text-secondary)',
+              border: mapCategory === null ? 'none' : '1px solid var(--color-divider)',
+            }}
+          >
+            All
+          </button>
+          {BROWSE_CATEGORIES.slice(0, 12).map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setMapCategory(mapCategory === cat.id ? null : cat.id)}
+              className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              style={{
+                scrollSnapAlign: 'start',
+                background: mapCategory === cat.id ? 'var(--color-text-primary)' : 'var(--color-surface-elevated)',
+                color: mapCategory === cat.id ? 'var(--color-surface)' : 'var(--color-text-secondary)',
+                border: mapCategory === cat.id ? 'none' : '1px solid var(--color-divider)',
+              }}
+            >
+              <span>{cat.emoji}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+
         {/* Top Dishes Near You — the answer layer */}
         <TopDishesNearYou
           dishes={mapDishes}

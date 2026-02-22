@@ -434,11 +434,13 @@ export const dishesApi = {
 
   /**
    * Get dishes with restaurant coordinates for map display
+   * Fetches ALL dishes (open or closed), client filters by distance
    * @param {Object} params
    * @param {string|null} params.town - Optional town filter
+   * @param {string|null} params.category - Optional category filter
    * @returns {Promise<Array>} Dishes with restaurant lat/lng
    */
-  async getMapDishes({ town = null } = {}) {
+  async getMapDishes({ town = null, category = null } = {}) {
     try {
       let query = supabase
         .from('dishes')
@@ -448,12 +450,15 @@ export const dishesApi = {
             id, name, lat, lng, town, address, is_open
           )
         `)
-        .eq('restaurants.is_open', true)
         .order('avg_rating', { ascending: false, nullsFirst: false })
         .limit(500)
 
       if (town) {
         query = query.eq('restaurants.town', town)
+      }
+
+      if (category) {
+        query = query.ilike('category', category)
       }
 
       const { data, error } = await query
@@ -476,6 +481,7 @@ export const dishesApi = {
           restaurant_lng: d.restaurants.lng,
           restaurant_town: d.restaurants.town,
           restaurant_address: d.restaurants.address,
+          restaurant_is_open: d.restaurants.is_open,
         }))
     } catch (error) {
       logger.error('Error fetching map dishes:', error)
