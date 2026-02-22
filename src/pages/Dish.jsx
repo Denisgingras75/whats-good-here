@@ -415,7 +415,7 @@ export function Dish() {
     <div className="min-h-screen pb-20" style={{ background: 'var(--color-surface-elevated)' }}>
       {/* Header */}
       <header
-        className="sticky top-0 z-30 px-4 py-3 flex items-center gap-3 top-bar"
+        className="sticky top-0 z-30 px-3 py-2 flex items-center gap-2 top-bar"
         style={{
           background: 'var(--color-surface-elevated)',
         }}
@@ -423,14 +423,14 @@ export function Dish() {
         <button
           onClick={handleBack}
           aria-label="Go back"
-          className="w-10 h-10 rounded-full flex items-center justify-center"
+          className="w-9 h-9 rounded-full flex items-center justify-center"
           style={{ color: 'var(--color-text-primary)' }}
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
+        <span className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
           {dish.dish_name}
         </span>
 
@@ -439,10 +439,10 @@ export function Dish() {
           <button
             onClick={handleShare}
             aria-label="Share dish"
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
             style={{ color: 'var(--color-text-primary)' }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
               <polyline points="16 6 12 2 8 6" />
               <line x1="12" y1="2" x2="12" y2="15" />
@@ -457,10 +457,10 @@ export function Dish() {
                 handleToggleSave(e)
               }}
               aria-label={isFavorite?.(dishId) ? 'Remove from heard list' : 'Mark as heard it was good'}
-              className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
               style={{ background: 'var(--color-surface-elevated)' }}
             >
-              <HearingIcon size={28} active={isFavorite?.(dishId)} />
+              <HearingIcon size={24} active={isFavorite?.(dishId)} />
             </button>
             <EarIconTooltip visible={showEarTooltip} onDismiss={dismissEarTooltip} />
           </div>
@@ -482,25 +482,30 @@ export function Dish() {
         <>
           {/* Hero Image — full photo when available, compact strip when not */}
           {heroImage ? (
-            <div className="relative aspect-[4/3] overflow-hidden">
+            <div className="relative aspect-[3/2] overflow-hidden">
               <img
                 src={heroImage}
                 alt={dish.dish_name}
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
+              {/* Bottom gradient for stats card readability */}
+              <div
+                className="absolute inset-x-0 bottom-0 h-20"
+                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.15), transparent)' }}
+              />
 
               {/* Official badge if featured from restaurant */}
               {featuredPhoto?.source_type === 'restaurant' && (
                 <div
-                  className="absolute top-4 right-4 px-2.5 py-1 rounded-lg"
+                  className="absolute top-3 right-3 px-2 py-0.5 rounded-md"
                   style={{
-                    background: 'var(--color-surface-elevated)',
-                    border: '1px solid var(--color-divider)',
+                    background: 'rgba(255,255,255,0.9)',
+                    backdropFilter: 'blur(8px)',
                   }}
                 >
-                  <span className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>
-                    Official Photo
+                  <span className="text-[10px] font-bold" style={{ color: 'var(--color-primary)' }}>
+                    Official
                   </span>
                 </div>
               )}
@@ -516,11 +521,11 @@ export function Dish() {
 
           {/* Stats Card — overlapping hero when photo exists, flush when no photo */}
           <div
-            className="mx-4 rounded-xl px-5 py-3"
+            className="mx-3 rounded-xl px-4 py-3"
             style={{
               background: 'var(--color-surface-elevated)',
-              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-              marginTop: heroImage ? '-20px' : '0',
+              boxShadow: '0 2px 16px rgba(0, 0, 0, 0.1)',
+              marginTop: heroImage ? '-32px' : '0',
               position: 'relative',
               zIndex: 5,
             }}
@@ -588,22 +593,25 @@ export function Dish() {
 
             {/* Rating + votes row — only show when ranked */}
             {isRanked && dish.avg_rating ? (
-              <div className="flex items-end justify-between mt-3">
-                <div className="flex-shrink-0">
+              <div className="flex items-end justify-between mt-2">
+                <div className="flex items-baseline gap-1.5">
                   <span
                     style={{
                       fontFamily: "'aglet-sans', sans-serif",
                       fontWeight: 800,
-                      fontSize: '44px',
+                      fontSize: '36px',
                       lineHeight: 1,
                       color: getRatingColor(dish.avg_rating),
                     }}
                   >
                     {formatScore10(dish.avg_rating)}
                   </span>
+                  <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                    / 10
+                  </span>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                  <p className="text-xs font-bold" style={{ color: 'var(--color-text-secondary)' }}>
                     {dish.total_votes} vote{dish.total_votes === 1 ? '' : 's'}
                   </p>
                   <ValueBadge valuePercentile={dish.value_percentile} />
@@ -614,7 +622,7 @@ export function Dish() {
           </div>
 
           {/* Content */}
-          <div className="p-4">
+          <div className="px-3 pt-3 pb-4">
             {/* Order CTA — link to restaurant's website */}
             {dish.website_url && (
               <a
@@ -730,7 +738,7 @@ export function Dish() {
 
             {/* Review Flow */}
             <div
-              className="p-4 rounded-xl mb-4"
+              className="p-3 rounded-xl mb-4"
               style={{
                 background: 'var(--color-surface-elevated)',
                 boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
