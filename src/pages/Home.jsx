@@ -5,13 +5,15 @@ import { useDishes } from '../hooks/useDishes'
 import { useMapDishes } from '../hooks/useMapDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
-import { BROWSE_CATEGORIES, getCategoryEmoji } from '../constants/categories'
+import { BROWSE_CATEGORIES } from '../constants/categories'
 import { BottomSheet } from '../components/BottomSheet'
 import { DishSearch } from '../components/DishSearch'
 import { TownPicker } from '../components/TownPicker'
 import { RadiusSheet } from '../components/LocationPicker'
 import { ErrorBoundary } from '../components/ErrorBoundary'
-import { getRatingColor } from '../utils/ranking'
+import { DishListItem } from '../components/DishListItem'
+import { CategoryChips } from '../components/CategoryChips'
+import { SectionHeader } from '../components/SectionHeader'
 import { logger } from '../utils/logger'
 
 var RestaurantMap = lazy(function () {
@@ -181,79 +183,27 @@ export function Home() {
         </div>
 
         {/* Category chips — sticky */}
-        <div
-          className="sticky top-0 z-10 pb-2"
-          style={{
-            background: 'var(--color-surface-elevated)',
-          }}
-        >
-          <div
-            className="flex gap-2 px-4 overflow-x-auto"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            {/* "All" chip */}
-            <button
-              onClick={function () { setSelectedCategory(null) }}
-              className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-semibold"
-              style={{
-                padding: '10px 16px',
-                minHeight: '44px',
-                fontSize: '14px',
-                background: selectedCategory === null ? 'var(--color-text-primary)' : 'var(--color-surface)',
-                color: selectedCategory === null ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
-                border: selectedCategory === null ? 'none' : '1px solid var(--color-divider)',
-              }}
-            >
-              All
-            </button>
-            {BROWSE_CATEGORIES.slice(0, 12).map(function (cat) {
-              var isActive = selectedCategory === cat.id
-              return (
-                <button
-                  key={cat.id}
-                  onClick={function () { setSelectedCategory(isActive ? null : cat.id) }}
-                  className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-semibold"
-                  style={{
-                    padding: '10px 14px',
-                    minHeight: '44px',
-                    fontSize: '14px',
-                    background: isActive ? 'var(--color-text-primary)' : 'var(--color-surface)',
-                    color: isActive ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
-                    border: isActive ? 'none' : '1px solid var(--color-divider)',
-                  }}
-                >
-                  <span style={{ fontSize: '16px' }}>{cat.emoji}</span>
-                  <span>{cat.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
+        <CategoryChips
+          selected={selectedCategory}
+          onSelect={setSelectedCategory}
+          sticky
+        />
 
         {/* Section header */}
-        <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-          <h2
-            className="font-bold"
-            style={{
-              fontSize: '18px',
-              color: 'var(--color-text-primary)',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            {selectedCategoryLabel
+        <div className="px-4 pt-3 pb-2">
+          <SectionHeader
+            title={selectedCategoryLabel
               ? (town ? 'Best ' + selectedCategoryLabel.label + ' in ' + town : 'Best ' + selectedCategoryLabel.label)
               : (town ? 'Top Rated in ' + town : 'Top Rated Nearby')
             }
-          </h2>
-          <TownPicker
-            town={town}
-            onTownChange={setTown}
-            isOpen={townPickerOpen}
-            onToggle={setTownPickerOpen}
+            action={
+              <TownPicker
+                town={town}
+                onTownChange={setTown}
+                isOpen={townPickerOpen}
+                onToggle={setTownPickerOpen}
+              />
+            }
           />
         </div>
 
@@ -267,11 +217,12 @@ export function Home() {
               <div className="flex flex-col" style={{ gap: '2px' }}>
                 {searchResults.map(function (dish, i) {
                   return (
-                    <DishRow
+                    <DishListItem
                       key={dish.dish_id}
                       dish={dish}
                       rank={i + 1}
                       highlighted={highlightedDishId === dish.dish_id}
+                      showDistance
                       onClick={function () { navigate('/dish/' + dish.dish_id) }}
                     />
                   )
@@ -324,98 +275,6 @@ export function Home() {
         onRadiusChange={setRadius}
       />
     </div>
-  )
-}
-
-/* --- DishRow -- clean ranked row for the list ----------------------------- */
-function DishRow({ dish, rank, highlighted, onClick }) {
-  var isRanked = (dish.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-  var emoji = getCategoryEmoji(dish.category)
-
-  return (
-    <button
-      data-dish-id={dish.dish_id}
-      onClick={onClick}
-      className="w-full flex items-center gap-3 py-3 px-3 rounded-xl active:scale-[0.98]"
-      style={{
-        background: highlighted
-          ? 'var(--color-accent-gold-muted)'
-          : rank <= 3
-            ? 'var(--color-surface)'
-            : 'transparent',
-        textAlign: 'left',
-        minHeight: '48px',
-        cursor: 'pointer',
-        transition: 'background 1s ease-out',
-      }}
-    >
-      {/* Rank */}
-      <span
-        className="flex-shrink-0 font-bold"
-        style={{
-          width: '28px',
-          textAlign: 'center',
-          fontSize: rank <= 3 ? '18px' : '14px',
-          color: rank === 1 ? 'var(--color-accent-gold)' : rank <= 3 ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
-          fontWeight: 800,
-        }}
-      >
-        {rank}
-      </span>
-
-      {/* Emoji */}
-      <span className="flex-shrink-0" style={{ fontSize: '24px' }}>{emoji}</span>
-
-      {/* Name + restaurant */}
-      <div className="flex-1 min-w-0">
-        <p
-          className="font-bold truncate"
-          style={{
-            fontSize: '15px',
-            color: 'var(--color-text-primary)',
-            lineHeight: 1.3,
-          }}
-        >
-          {dish.dish_name}
-        </p>
-        <p
-          className="truncate"
-          style={{
-            fontSize: '12px',
-            color: 'var(--color-text-tertiary)',
-            marginTop: '1px',
-          }}
-        >
-          {dish.restaurant_name}
-          {dish.distance_miles != null ? ' \u00b7 ' + Number(dish.distance_miles).toFixed(1) + ' mi' : ''}
-        </p>
-      </div>
-
-      {/* Rating */}
-      <div className="flex-shrink-0 text-right">
-        {isRanked ? (
-          <span
-            className="font-bold"
-            style={{
-              fontSize: '17px',
-              color: getRatingColor(dish.avg_rating),
-            }}
-          >
-            {dish.avg_rating}
-          </span>
-        ) : (
-          <span
-            style={{
-              fontSize: '12px',
-              color: 'var(--color-text-tertiary)',
-              fontWeight: 500,
-            }}
-          >
-            {dish.total_votes ? dish.total_votes + ' vote' + (dish.total_votes === 1 ? '' : 's') : 'New'}
-          </span>
-        )}
-      </div>
-    </button>
   )
 }
 
