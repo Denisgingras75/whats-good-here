@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { useLocationContext } from '../context/LocationContext'
 import { useRestaurants } from '../hooks/useRestaurants'
 import { useNearbyPlaces } from '../hooks/useNearbyPlaces'
+import { useMapDishes } from '../hooks/useMapDishes'
 import { DishSearch } from '../components/DishSearch'
 import { RestaurantCard } from '../components/restaurants'
 import { RadiusSheet } from '../components/LocationPicker'
@@ -21,7 +22,7 @@ const RestaurantMap = lazy(() =>
 export function Restaurants() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { location, radius, setRadius, permissionState, requestLocation } = useLocationContext()
+  const { location, radius, setRadius, permissionState, requestLocation, town } = useLocationContext()
 
   const [restaurantTab, setRestaurantTab] = useState('open')
   const [viewMode, setViewMode] = useState('list')
@@ -39,6 +40,9 @@ export function Restaurants() {
     restaurants.filter(r => r.google_place_id).map(r => r.google_place_id),
     [restaurants]
   )
+
+  // Fetch dishes for map view (only when map is visible)
+  const { dishes: mapDishes, loading: mapLoading } = useMapDishes(town, viewMode === 'map')
 
   // Discover nearby restaurants from Google Places (auth only, radius + 5mi buffer)
   const { places: nearbyPlaces, loading: nearbyLoading, error: nearbyError } = useNearbyPlaces({
@@ -209,7 +213,7 @@ export function Restaurants() {
         </div>
 
         {/* Map View — wrapped in ErrorBoundary to prevent Leaflet crashes */}
-        {viewMode === 'map' && !fetchError && !loading && (
+        {viewMode === 'map' && !fetchError && !loading && !mapLoading && (
           <div className="mt-4">
             <ErrorBoundary>
               <Suspense fallback={
@@ -218,9 +222,13 @@ export function Restaurants() {
                 </div>
               }>
                 <RestaurantMap
+                  mode="dish"
                   restaurants={filteredRestaurants}
+                  dishes={mapDishes}
                   userLocation={location}
+                  town={town}
                   onSelectRestaurant={handleRestaurantSelect}
+                  onSelectDish={(dishId) => navigate(`/dish/${dishId}`)}
                   onAddPlace={(placeName) => {
                     setAddRestaurantInitialQuery(placeName)
                     setAddRestaurantModalOpen(true)
@@ -228,6 +236,7 @@ export function Restaurants() {
                   isAuthenticated={!!user}
                   existingPlaceIds={existingPlaceIds}
                   radiusMi={radius}
+                  permissionGranted={permissionState === 'granted'}
                 />
               </Suspense>
             </ErrorBoundary>
@@ -235,7 +244,7 @@ export function Restaurants() {
         )}
 
         {/* List View */}
-        {viewMode === 'map' && !fetchError && !loading ? null : fetchError ? (
+        {viewMode === 'map' && !fetchError && !loading && !mapLoading ? null : fetchError ? (
           <div className="text-center py-12">
             <p role="alert" className="text-sm mb-4" style={{ color: 'var(--color-danger)' }}>{fetchError.message}</p>
             <button

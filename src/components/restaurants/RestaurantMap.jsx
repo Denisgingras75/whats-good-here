@@ -1,41 +1,42 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import L from 'leaflet'
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { placesApi } from '../../api/placesApi'
 import { logger } from '../../utils/logger'
+import { getCategoryEmoji } from '../../constants/categories'
+import { calculateDistance } from '../../utils/distance'
 
 const MILES_TO_METERS = 1609.34
 const EXTRA_RADIUS_MI = 5
+const PROXIMITY_THRESHOLD_MI = 0.062 // ~100m
 
-// Auto-fit bounds on first render only
-function FitBounds({ restaurants, userLocation }) {
+// ─── Shared: Auto-fit bounds on first render ─────────────────────────────────
+function FitBounds({ points }) {
   const map = useMap()
   const fittedRef = useRef(false)
 
   useEffect(() => {
-    if (fittedRef.current) return
-
-    const points = restaurants
-      .filter(r => r.lat && r.lng)
-      .map(r => [r.lat, r.lng])
-
-    if (userLocation?.lat && userLocation?.lng) {
-      points.push([userLocation.lat, userLocation.lng])
-    }
-
-    if (points.length === 0) return
-
+    if (fittedRef.current || points.length === 0) return
     const bounds = L.latLngBounds(points)
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
     fittedRef.current = true
-  }, [restaurants, userLocation, map])
+  }, [points, map])
 
   return null
 }
 
-// Fetches Google Places within the user's radius + 5mi
-// Triggers on initial load and when map stops moving (if center shifted enough)
+// ─── Shared: Click handler to dismiss dish mini-card ─────────────────────────
+function MapClickHandler({ onMapClick }) {
+  useMapEvents({
+    click: () => {
+      if (onMapClick) onMapClick()
+    },
+  })
+  return null
+}
+
+// ─── Restaurant Mode: Google Places loader ───────────────────────────────────
 function MapPlacesLoader({ onPlacesLoaded, existingPlaceIds, userLocation, radiusMi }) {
   const map = useMap()
   const timerRef = useRef(null)
@@ -44,15 +45,11 @@ function MapPlacesLoader({ onPlacesLoaded, existingPlaceIds, userLocation, radiu
 
   const fetchPlaces = useCallback(async (center) => {
     if (!center) return
-
-    // Skip if we fetched from a very similar center recently (< 500m)
     if (lastFetchRef.current) {
       const dist = map.distance(center, lastFetchRef.current)
       if (dist < 500) return
     }
     lastFetchRef.current = center
-
-    // Cap at 40km (~25mi) to match edge function limit
     const clampedRadius = Math.min(discoveryRadiusMeters, 40234)
 
     try {
@@ -67,14 +64,12 @@ function MapPlacesLoader({ onPlacesLoaded, existingPlaceIds, userLocation, radiu
 
   useMapEvents({
     moveend: () => {
-      // Debounce: wait 800ms after map stops moving
       if (timerRef.current) clearTimeout(timerRef.current)
       const center = map.getCenter()
       timerRef.current = setTimeout(() => fetchPlaces(center), 800)
     },
   })
 
-  // Fetch on initial mount using user location or map center
   useEffect(() => {
     const center = userLocation?.lat && userLocation?.lng
       ? L.latLng(userLocation.lat, userLocation.lng)
@@ -86,7 +81,7 @@ function MapPlacesLoader({ onPlacesLoaded, existingPlaceIds, userLocation, radiu
   return null
 }
 
-// Search bar overlay — geocodes and flies to location, then triggers Places fetch
+// ─── Restaurant Mode: Search bar ─────────────────────────────────────────────
 function MapSearchBar({ onSearch }) {
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
@@ -103,7 +98,6 @@ function MapSearchBar({ onSearch }) {
       const data = await res.json()
       if (data.length > 0) {
         const { lat, lon } = data[0]
-        // flyTo triggers moveend which triggers MapPlacesLoader
         map.flyTo([parseFloat(lat), parseFloat(lon)], 14, { duration: 1.5 })
         if (onSearch) onSearch(query.trim())
       }
@@ -166,7 +160,7 @@ function MapSearchBar({ onSearch }) {
   )
 }
 
-// Popup content for a discovered Google Place — fetches details on mount
+// ─── Restaurant Mode: Place popup content ────────────────────────────────────
 function PlacePopupContent({ place, onAddPlace }) {
   const [details, setDetails] = useState(null)
   const [loadingDetails, setLoadingDetails] = useState(false)
@@ -186,7 +180,6 @@ function PlacePopupContent({ place, onAddPlace }) {
     }
   }, [place.placeId])
 
-  // Fetch details when popup opens (component mounts)
   useEffect(() => {
     fetchDetails()
   }, [fetchDetails])
@@ -207,14 +200,11 @@ function PlacePopupContent({ place, onAddPlace }) {
       <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginBottom: '6px', fontStyle: 'italic' }}>
         Not on WGH yet
       </div>
-
       {loadingDetails && (
         <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginBottom: '6px' }}>
           Loading details...
         </div>
       )}
-
-      {/* Links row */}
       {(googleMapsUrl || websiteUrl) && (
         <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
           {googleMapsUrl && (
@@ -262,8 +252,6 @@ function PlacePopupContent({ place, onAddPlace }) {
           )}
         </div>
       )}
-
-      {/* Add to WGH button */}
       {onAddPlace && (
         <button
           onClick={() => onAddPlace(place.name)}
@@ -291,13 +279,172 @@ function PlacePopupContent({ place, onAddPlace }) {
   )
 }
 
-export function RestaurantMap({ restaurants, userLocation, onSelectRestaurant, onAddPlace, isAuthenticated, existingPlaceIds, radiusMi }) {
-  const defaultCenter = [41.43, -70.56] // Fallback center
+// ─── Dish Mode: Build emoji divIcon ──────────────────────────────────────────
+function buildEmojiIcon(emoji, dishCount, hasHighRating) {
+  const badge = dishCount >= 2
+    ? `<span style="
+        position:absolute;top:-4px;right:-4px;
+        background:var(--color-accent-gold);color:var(--color-bg);
+        font-size:10px;font-weight:700;
+        min-width:16px;height:16px;line-height:16px;
+        border-radius:8px;text-align:center;
+        padding:0 3px;
+        box-shadow:0 1px 3px rgba(0,0,0,0.3);
+      ">${dishCount}</span>`
+    : ''
+
+  const glow = hasHighRating
+    ? 'box-shadow:0 0 8px 3px rgba(217,167,101,0.5);'
+    : ''
+
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      position:relative;width:44px;height:44px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:26px;cursor:pointer;
+      border-radius:50%;
+      background:var(--color-surface-elevated);
+      border:2px solid var(--color-divider);
+      ${glow}
+    ">${emoji}${badge}</div>`,
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+  })
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────
+export function RestaurantMap({
+  mode = 'dish',
+  restaurants = [],
+  dishes = [],
+  userLocation,
+  town,
+  onSelectRestaurant,
+  onSelectDish,
+  onAddPlace,
+  isAuthenticated,
+  existingPlaceIds,
+  radiusMi,
+  permissionGranted,
+}) {
+  const defaultCenter = [41.43, -70.56]
   const center = userLocation?.lat && userLocation?.lng
     ? [userLocation.lat, userLocation.lng]
     : defaultCenter
 
+  // ─── Restaurant mode state ───
   const [discoveredPlaces, setDiscoveredPlaces] = useState([])
+
+  // ─── Dish mode state ───
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState(null)
+  const [dismissedProximity, setDismissedProximity] = useState({})
+
+  // ─── Dish mode: group dishes by restaurant ───
+  const restaurantGroups = useMemo(() => {
+    if (mode !== 'dish' || !dishes || dishes.length === 0) return []
+
+    const groupMap = {}
+    for (let i = 0; i < dishes.length; i++) {
+      const d = dishes[i]
+      const rid = d.restaurant_id
+      if (!rid) continue
+      if (!groupMap[rid]) {
+        groupMap[rid] = {
+          restaurant_id: rid,
+          restaurant_name: d.restaurant_name,
+          restaurant_lat: d.restaurant_lat,
+          restaurant_lng: d.restaurant_lng,
+          restaurant_address: d.restaurant_address,
+          dishes: [],
+        }
+      }
+      groupMap[rid].dishes.push(d)
+    }
+
+    // Sort dishes within each group by avg_rating desc
+    const groups = Object.values(groupMap)
+    for (let i = 0; i < groups.length; i++) {
+      groups[i].dishes = groups[i].dishes.slice().sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0))
+    }
+
+    return groups
+  }, [mode, dishes])
+
+  // ─── Dish mode: selected group for mini card ───
+  const selectedGroup = useMemo(() => {
+    if (!selectedRestaurantId) return null
+    for (let i = 0; i < restaurantGroups.length; i++) {
+      if (restaurantGroups[i].restaurant_id === selectedRestaurantId) {
+        return restaurantGroups[i]
+      }
+    }
+    return null
+  }, [selectedRestaurantId, restaurantGroups])
+
+  // ─── Dish mode: proximity detection ───
+  const nearbyRestaurant = useMemo(() => {
+    if (mode !== 'dish' || !permissionGranted || !userLocation?.lat || !userLocation?.lng) return null
+
+    for (let i = 0; i < restaurantGroups.length; i++) {
+      const g = restaurantGroups[i]
+      if (dismissedProximity[g.restaurant_id]) continue
+      const dist = calculateDistance(
+        userLocation.lat, userLocation.lng,
+        g.restaurant_lat, g.restaurant_lng
+      )
+      if (dist <= PROXIMITY_THRESHOLD_MI) return g
+    }
+    return null
+  }, [mode, permissionGranted, userLocation, restaurantGroups, dismissedProximity])
+
+  // ─── Dish mode: compute distance for selected group ───
+  const selectedGroupDistance = useMemo(() => {
+    if (!selectedGroup || !userLocation?.lat || !userLocation?.lng) return null
+    const dist = calculateDistance(
+      userLocation.lat, userLocation.lng,
+      selectedGroup.restaurant_lat, selectedGroup.restaurant_lng
+    )
+    return dist.toFixed(1)
+  }, [selectedGroup, userLocation])
+
+  // ─── Fit bounds points ───
+  const fitBoundsPoints = useMemo(() => {
+    const pts = []
+    if (userLocation?.lat && userLocation?.lng) {
+      pts.push([userLocation.lat, userLocation.lng])
+    }
+
+    if (mode === 'dish') {
+      for (let i = 0; i < restaurantGroups.length; i++) {
+        const g = restaurantGroups[i]
+        if (g.restaurant_lat && g.restaurant_lng) {
+          pts.push([g.restaurant_lat, g.restaurant_lng])
+        }
+      }
+    } else {
+      for (let i = 0; i < restaurants.length; i++) {
+        const r = restaurants[i]
+        if (r.lat && r.lng) pts.push([r.lat, r.lng])
+      }
+    }
+
+    return pts
+  }, [mode, restaurantGroups, restaurants, userLocation])
+
+  // ─── Dish mode: total votes for selected group ───
+  const selectedGroupVotes = useMemo(() => {
+    if (!selectedGroup) return 0
+    let total = 0
+    for (let i = 0; i < selectedGroup.dishes.length; i++) {
+      total += selectedGroup.dishes[i].total_votes || 0
+    }
+    return total
+  }, [selectedGroup])
+
+  // ────────────────────── RENDER ──────────────────────
+
+  const isDishMode = mode === 'dish'
 
   return (
     <div
@@ -317,18 +464,30 @@ export function RestaurantMap({ restaurants, userLocation, onSelectRestaurant, o
         attributionControl={true}
         zoomControl={true}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        {/* Tiles */}
+        {isDishMode ? (
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          />
+        ) : (
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+        )}
 
-        <FitBounds restaurants={restaurants} userLocation={userLocation} />
+        {/* Fit bounds */}
+        <FitBounds points={fitBoundsPoints} />
 
-        {/* Search bar — geocodes and flies to location, moveend then triggers Places fetch */}
-        <MapSearchBar />
+        {/* Click handler — dismisses dish mini-card */}
+        {isDishMode && (
+          <MapClickHandler onMapClick={() => setSelectedRestaurantId(null)} />
+        )}
 
-        {/* Dynamic Google Places loader — uses radius setting + 5mi */}
-        {isAuthenticated && (
+        {/* ─── Restaurant mode internals ─── */}
+        {!isDishMode && <MapSearchBar />}
+        {!isDishMode && isAuthenticated && (
           <MapPlacesLoader
             onPlacesLoaded={setDiscoveredPlaces}
             existingPlaceIds={existingPlaceIds}
@@ -337,7 +496,7 @@ export function RestaurantMap({ restaurants, userLocation, onSelectRestaurant, o
           />
         )}
 
-        {/* User location — blue pulsing dot */}
+        {/* User location — blue pulsing dot (both modes) */}
         {userLocation?.lat && userLocation?.lng && (
           <>
             <CircleMarker
@@ -368,8 +527,28 @@ export function RestaurantMap({ restaurants, userLocation, onSelectRestaurant, o
           </>
         )}
 
-        {/* DB restaurant pins — gold solid */}
-        {restaurants
+        {/* ─── Dish mode: emoji pins ─── */}
+        {isDishMode && restaurantGroups.map(group => {
+          const topDish = group.dishes[0]
+          if (!topDish) return null
+          const emoji = getCategoryEmoji(topDish.category)
+          const hasHighRating = group.dishes.some(d => (d.avg_rating || 0) >= 9)
+          const icon = buildEmojiIcon(emoji, group.dishes.length, hasHighRating)
+
+          return (
+            <Marker
+              key={group.restaurant_id}
+              position={[group.restaurant_lat, group.restaurant_lng]}
+              icon={icon}
+              eventHandlers={{
+                click: () => setSelectedRestaurantId(group.restaurant_id),
+              }}
+            />
+          )
+        })}
+
+        {/* ─── Restaurant mode: gold pins ─── */}
+        {!isDishMode && restaurants
           .filter(r => r.lat && r.lng)
           .map(restaurant => {
             const isOpen = restaurant.is_open !== false
@@ -427,8 +606,8 @@ export function RestaurantMap({ restaurants, userLocation, onSelectRestaurant, o
             )
           })}
 
-        {/* Google Places pins — green dashed, discovered dynamically */}
-        {discoveredPlaces.map(place => (
+        {/* ─── Restaurant mode: Google Places pins ─── */}
+        {!isDishMode && discoveredPlaces.map(place => (
           <CircleMarker
             key={place.placeId}
             center={[place.lat, place.lng]}
@@ -449,14 +628,233 @@ export function RestaurantMap({ restaurants, userLocation, onSelectRestaurant, o
         ))}
       </MapContainer>
 
-      {/* Legend */}
+      {/* ─── Dish mode: Proximity banner ─── */}
+      {isDishMode && nearbyRestaurant && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            right: '10px',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 14px',
+            borderRadius: '10px',
+            background: 'var(--color-surface-elevated)',
+            border: '1px solid var(--color-accent-gold)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+              You're at {nearbyRestaurant.restaurant_name}
+            </div>
+            <button
+              onClick={() => {
+                if (onSelectRestaurant) {
+                  onSelectRestaurant({ id: nearbyRestaurant.restaurant_id, name: nearbyRestaurant.restaurant_name })
+                }
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--color-accent-gold)',
+                cursor: 'pointer',
+                marginTop: '2px',
+              }}
+            >
+              See their menu &rarr;
+            </button>
+          </div>
+          <button
+            onClick={() => setDismissedProximity(prev => ({ ...prev, [nearbyRestaurant.restaurant_id]: true }))}
+            aria-label="Dismiss"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '18px',
+              lineHeight: 1,
+              color: 'var(--color-text-tertiary)',
+              padding: '2px',
+              flexShrink: 0,
+            }}
+          >
+            &#10005;
+          </button>
+        </div>
+      )}
+
+      {/* ─── Dish mode: Mini card overlay ─── */}
+      {isDishMode && selectedGroup && (() => {
+        const topDish = selectedGroup.dishes[0]
+        const emoji = getCategoryEmoji(topDish.category)
+        const moreDishes = selectedGroup.dishes.length - 1
+
+        return (
+          <div
+            style={{
+              position: 'absolute',
+              top: '10px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1000,
+              width: 'calc(100% - 20px)',
+              maxWidth: '320px',
+              borderRadius: '12px',
+              background: 'var(--color-surface-elevated)',
+              border: '1px solid var(--color-divider)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+              padding: '12px 14px',
+            }}
+          >
+            {/* Top dish row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '6px',
+                }}>
+                  <span style={{
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: 'var(--color-text-primary)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {emoji} {topDish.dish_name}
+                  </span>
+                  <span style={{
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: 'var(--color-rating)',
+                    flexShrink: 0,
+                  }}>
+                    {topDish.avg_rating != null ? Number(topDish.avg_rating).toFixed(1) : '--'}
+                  </span>
+                </div>
+
+                {/* Restaurant name */}
+                <div style={{
+                  fontSize: '12px',
+                  color: 'var(--color-text-secondary)',
+                  marginTop: '2px',
+                }}>
+                  {selectedGroup.restaurant_name}
+                </div>
+
+                {/* Meta line */}
+                <div style={{
+                  fontSize: '11px',
+                  color: 'var(--color-text-tertiary)',
+                  marginTop: '2px',
+                }}>
+                  {selectedGroupDistance != null ? `${selectedGroupDistance} mi` : ''}
+                  {selectedGroupDistance != null && selectedGroupVotes > 0 ? ' \u00b7 ' : ''}
+                  {selectedGroupVotes > 0 ? `${selectedGroupVotes} vote${selectedGroupVotes !== 1 ? 's' : ''}` : ''}
+                </div>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              marginTop: '10px',
+            }}>
+              <a
+                href={`geo:${selectedGroup.restaurant_lat},${selectedGroup.restaurant_lng}`}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  padding: '7px 0',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  background: 'var(--color-surface)',
+                  color: 'var(--color-text-primary)',
+                  border: '1px solid var(--color-divider)',
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                </svg>
+                Directions
+              </a>
+              <button
+                onClick={() => {
+                  if (onSelectDish) onSelectDish(topDish.dish_id)
+                }}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  padding: '7px 0',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: 'var(--color-primary)',
+                  color: 'white',
+                  border: 'none',
+                }}
+              >
+                View Dish
+              </button>
+            </div>
+
+            {/* More dishes link */}
+            {moreDishes > 0 && (
+              <button
+                onClick={() => {
+                  if (onSelectRestaurant) {
+                    onSelectRestaurant({ id: selectedGroup.restaurant_id, name: selectedGroup.restaurant_name })
+                  }
+                }}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  textAlign: 'center',
+                  marginTop: '8px',
+                  padding: 0,
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--color-accent-gold)',
+                  cursor: 'pointer',
+                }}
+              >
+                +{moreDishes} more dish{moreDishes !== 1 ? 'es' : ''}
+              </button>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* ─── Legend ─── */}
       <div
         style={{
           position: 'absolute',
           bottom: '10px',
           left: '10px',
           zIndex: 1000,
-          background: 'rgba(255,255,255,0.95)',
+          background: isDishMode ? 'rgba(13,27,34,0.9)' : 'rgba(255,255,255,0.95)',
           borderRadius: '8px',
           padding: '8px 12px',
           fontSize: '11px',
@@ -466,14 +864,51 @@ export function RestaurantMap({ restaurants, userLocation, onSelectRestaurant, o
           gap: '4px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#D9A765', display: 'inline-block' }} />
-          <span style={{ color: '#555' }}>On WGH</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#6BB384', opacity: 0.5, border: '1px dashed #6BB384', display: 'inline-block' }} />
-          <span style={{ color: '#555' }}>Google Places</span>
-        </div>
+        {isDishMode ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '14px' }}>🍕</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>Dish category</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '16px',
+                height: '16px',
+                borderRadius: '8px',
+                background: 'var(--color-accent-gold)',
+                color: 'var(--color-bg)',
+                fontSize: '9px',
+                fontWeight: 700,
+              }}>3</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>Dish count</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{
+                display: 'inline-block',
+                width: '14px',
+                height: '14px',
+                borderRadius: '50%',
+                boxShadow: '0 0 6px 2px rgba(217,167,101,0.5)',
+                border: '2px solid var(--color-divider)',
+              }} />
+              <span style={{ color: 'var(--color-text-secondary)' }}>Rated 9+</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#D9A765', display: 'inline-block' }} />
+              <span style={{ color: '#555' }}>On WGH</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#6BB384', opacity: 0.5, border: '1px dashed #6BB384', display: 'inline-block' }} />
+              <span style={{ color: '#555' }}>Google Places</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

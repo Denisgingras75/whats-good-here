@@ -433,6 +433,58 @@ export const dishesApi = {
   },
 
   /**
+   * Get dishes with restaurant coordinates for map display
+   * @param {Object} params
+   * @param {string|null} params.town - Optional town filter
+   * @returns {Promise<Array>} Dishes with restaurant lat/lng
+   */
+  async getMapDishes({ town = null } = {}) {
+    try {
+      let query = supabase
+        .from('dishes')
+        .select(`
+          id, name, category, avg_rating, total_votes, price, photo_url,
+          restaurants!inner (
+            id, name, lat, lng, town, address, is_open
+          )
+        `)
+        .eq('restaurants.is_open', true)
+        .gt('total_votes', 0)
+        .order('avg_rating', { ascending: false, nullsFirst: false })
+        .limit(500)
+
+      if (town) {
+        query = query.eq('restaurants.town', town)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw createClassifiedError(error)
+
+      return (data || [])
+        .filter(d => d.restaurants?.lat && d.restaurants?.lng)
+        .map(d => ({
+          dish_id: d.id,
+          dish_name: d.name,
+          category: d.category,
+          avg_rating: d.avg_rating,
+          total_votes: d.total_votes || 0,
+          price: d.price,
+          photo_url: d.photo_url,
+          restaurant_id: d.restaurants.id,
+          restaurant_name: d.restaurants.name,
+          restaurant_lat: d.restaurants.lat,
+          restaurant_lng: d.restaurants.lng,
+          restaurant_town: d.restaurants.town,
+          restaurant_address: d.restaurants.address,
+        }))
+    } catch (error) {
+      logger.error('Error fetching map dishes:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
+
+  /**
    * Get variants for a parent dish
    * @param {string} parentDishId - Parent dish ID
    * @returns {Promise<Array>} Array of variant dishes with vote stats
