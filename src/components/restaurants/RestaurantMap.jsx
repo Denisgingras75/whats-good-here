@@ -327,6 +327,7 @@ export function RestaurantMap({
   existingPlaceIds,
   radiusMi,
   permissionGranted,
+  compact = false,
 }) {
   const defaultCenter = [41.43, -70.56]
   const center = userLocation?.lat && userLocation?.lng
@@ -449,7 +450,7 @@ export function RestaurantMap({
   return (
     <div
       style={{
-        height: 'calc(100dvh - 160px)',
+        height: compact ? '260px' : 'calc(100dvh - 160px)',
         width: '100%',
         borderRadius: '12px',
         overflow: 'hidden',

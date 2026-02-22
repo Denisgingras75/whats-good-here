@@ -449,7 +449,6 @@ export const dishesApi = {
           )
         `)
         .eq('restaurants.is_open', true)
-        .gt('total_votes', 0)
         .order('avg_rating', { ascending: false, nullsFirst: false })
         .limit(500)
 

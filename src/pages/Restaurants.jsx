@@ -25,7 +25,6 @@ export function Restaurants() {
   const { location, radius, setRadius, permissionState, requestLocation, town } = useLocationContext()
 
   const [restaurantTab, setRestaurantTab] = useState('open')
-  const [viewMode, setViewMode] = useState('list')
   const [showRadiusSheet, setShowRadiusSheet] = useState(false)
   const [addRestaurantModalOpen, setAddRestaurantModalOpen] = useState(false)
   const [addRestaurantInitialQuery, setAddRestaurantInitialQuery] = useState('')
@@ -41,8 +40,8 @@ export function Restaurants() {
     [restaurants]
   )
 
-  // Fetch dishes for map view (only when map is visible)
-  const { dishes: mapDishes, loading: mapLoading } = useMapDishes(town, viewMode === 'map')
+  // Fetch dishes for map (always — map is always visible)
+  const { dishes: mapDishes, loading: mapLoading } = useMapDishes(town)
 
   // Discover nearby restaurants from Google Places (auth only, radius + 5mi buffer)
   const { places: nearbyPlaces, loading: nearbyLoading, error: nearbyError } = useNearbyPlaces({
@@ -98,6 +97,43 @@ export function Restaurants() {
         <DishSearch placeholder="Search dishes, restaurants..." />
       </header>
 
+      {/* Dish Map — always visible hero */}
+      <div className="px-4 pt-4">
+        <ErrorBoundary>
+          <Suspense fallback={
+            <div
+              className="flex items-center justify-center rounded-xl"
+              style={{
+                height: '260px',
+                background: 'var(--color-card)',
+                border: '1px solid var(--color-divider)',
+              }}
+            >
+              <div className="animate-spin w-6 h-6 border-2 rounded-full" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-accent-gold)' }} />
+            </div>
+          }>
+            <RestaurantMap
+              mode="dish"
+              restaurants={filteredRestaurants}
+              dishes={mapDishes}
+              userLocation={location}
+              town={town}
+              onSelectRestaurant={handleRestaurantSelect}
+              onSelectDish={(dishId) => navigate(`/dish/${dishId}`)}
+              onAddPlace={(placeName) => {
+                setAddRestaurantInitialQuery(placeName)
+                setAddRestaurantModalOpen(true)
+              }}
+              isAuthenticated={!!user}
+              existingPlaceIds={existingPlaceIds}
+              radiusMi={radius}
+              permissionGranted={permissionState === 'granted'}
+              compact
+            />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+
       <div className="p-4 pt-5">
         {/* Section Header with controls */}
         <div className="mb-4 flex items-center justify-between">
@@ -118,53 +154,29 @@ export function Restaurants() {
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Map/List toggle */}
-            <button
-              onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
-              aria-label={viewMode === 'list' ? 'Switch to map view' : 'Switch to list view'}
-              className="flex items-center justify-center w-8 h-8 rounded-full border transition-all active:scale-95"
-              style={{
-                background: viewMode === 'map' ? 'rgba(200, 90, 84, 0.15)' : 'var(--color-surface-elevated)',
-                borderColor: viewMode === 'map' ? 'rgba(200, 90, 84, 0.3)' : 'var(--color-divider)',
-                color: viewMode === 'map' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-              }}
+          {/* Radius chip */}
+          <button
+            onClick={() => setShowRadiusSheet(true)}
+            aria-label={`Search radius: ${radius} miles. Tap to change`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
+            style={{
+              background: 'var(--color-surface-elevated)',
+              borderColor: 'var(--color-divider)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            <span>{radius} mi</span>
+            <svg
+              aria-hidden="true"
+              className="w-3 h-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              style={{ color: 'var(--color-text-tertiary)' }}
             >
-              {viewMode === 'list' ? (
-                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
-                </svg>
-              ) : (
-                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                </svg>
-              )}
-            </button>
-
-            {/* Radius chip */}
-            <button
-              onClick={() => setShowRadiusSheet(true)}
-              aria-label={`Search radius: ${radius} miles. Tap to change`}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-              style={{
-                background: 'var(--color-surface-elevated)',
-                borderColor: 'var(--color-divider)',
-                color: 'var(--color-text-secondary)',
-              }}
-            >
-              <span>{radius} mi</span>
-              <svg
-                aria-hidden="true"
-                className="w-3 h-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                style={{ color: 'var(--color-text-tertiary)' }}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
 
         {/* Location permission banner */}
@@ -212,39 +224,8 @@ export function Restaurants() {
           </button>
         </div>
 
-        {/* Map View — wrapped in ErrorBoundary to prevent Leaflet crashes */}
-        {viewMode === 'map' && !fetchError && !loading && !mapLoading && (
-          <div className="mt-4">
-            <ErrorBoundary>
-              <Suspense fallback={
-                <div className="flex justify-center py-12">
-                  <div className="animate-spin w-6 h-6 border-2 rounded-full" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-accent-gold)' }} />
-                </div>
-              }>
-                <RestaurantMap
-                  mode="dish"
-                  restaurants={filteredRestaurants}
-                  dishes={mapDishes}
-                  userLocation={location}
-                  town={town}
-                  onSelectRestaurant={handleRestaurantSelect}
-                  onSelectDish={(dishId) => navigate(`/dish/${dishId}`)}
-                  onAddPlace={(placeName) => {
-                    setAddRestaurantInitialQuery(placeName)
-                    setAddRestaurantModalOpen(true)
-                  }}
-                  isAuthenticated={!!user}
-                  existingPlaceIds={existingPlaceIds}
-                  radiusMi={radius}
-                  permissionGranted={permissionState === 'granted'}
-                />
-              </Suspense>
-            </ErrorBoundary>
-          </div>
-        )}
-
-        {/* List View */}
-        {viewMode === 'map' && !fetchError && !loading && !mapLoading ? null : fetchError ? (
+        {/* Restaurant List */}
+        {fetchError ? (
           <div className="text-center py-12">
             <p role="alert" className="text-sm mb-4" style={{ color: 'var(--color-danger)' }}>{fetchError.message}</p>
             <button
