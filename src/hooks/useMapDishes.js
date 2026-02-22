@@ -21,33 +21,35 @@ export function useMapDishes({ location, radius, town, category } = {}) {
   }
 
   // Client-side distance filter + sort by rating
+  // Falls back to all dishes (sorted by rating) if nothing is within radius
   const dishes = useMemo(() => {
     if (!data || data.length === 0) return []
 
-    let filtered = data
-
-    // Apply distance filter if we have user location
-    if (location?.lat && location?.lng && radius) {
-      filtered = data.filter(d => {
-        const dist = calculateDistance(
-          location.lat, location.lng,
-          d.restaurant_lat, d.restaurant_lng
-        )
-        return dist <= radius
+    // Add distance to every dish if we have user location
+    var withDistance = data
+    if (location?.lat && location?.lng) {
+      withDistance = data.map(function(d) {
+        return Object.assign({}, d, {
+          distance_miles: calculateDistance(
+            location.lat, location.lng,
+            d.restaurant_lat, d.restaurant_lng
+          ),
+        })
       })
+    }
 
-      // Add distance to each dish
-      filtered = filtered.map(d => ({
-        ...d,
-        distance_miles: calculateDistance(
-          location.lat, location.lng,
-          d.restaurant_lat, d.restaurant_lng
-        ),
-      }))
+    // Apply distance filter if we have radius
+    var filtered = withDistance
+    if (radius && withDistance[0] && withDistance[0].distance_miles != null) {
+      var nearby = withDistance.filter(function(d) { return d.distance_miles <= radius })
+      if (nearby.length > 0) {
+        filtered = nearby
+      }
+      // If nothing nearby, show all (fallback so page always has content)
     }
 
     // Sort by rating desc
-    return filtered.slice().sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0))
+    return filtered.slice().sort(function(a, b) { return (b.avg_rating || 0) - (a.avg_rating || 0) })
   }, [data, location, radius])
 
   return {

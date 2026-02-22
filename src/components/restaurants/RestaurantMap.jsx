@@ -328,6 +328,7 @@ export function RestaurantMap({
   radiusMi,
   permissionGranted,
   compact = false,
+  fullScreen = false,
 }) {
   const defaultCenter = [41.43, -70.56]
   const center = userLocation?.lat && userLocation?.lng
@@ -447,14 +448,16 @@ export function RestaurantMap({
 
   const isDishMode = mode === 'dish'
 
+  var mapHeight = fullScreen ? '100vh' : compact ? '260px' : 'calc(100dvh - 160px)'
+
   return (
     <div
       style={{
-        height: compact ? '260px' : 'calc(100dvh - 160px)',
+        height: mapHeight,
         width: '100%',
-        borderRadius: '12px',
+        borderRadius: fullScreen ? '0' : '12px',
         overflow: 'hidden',
-        border: '1px solid var(--color-divider)',
+        border: fullScreen ? 'none' : '1px solid var(--color-divider)',
         position: 'relative',
       }}
     >
@@ -486,9 +489,9 @@ export function RestaurantMap({
           <MapClickHandler onMapClick={() => setSelectedRestaurantId(null)} />
         )}
 
-        {/* ─── Restaurant mode internals ─── */}
-        {!isDishMode && <MapSearchBar />}
-        {!isDishMode && isAuthenticated && (
+        {/* ─── Restaurant mode internals (disabled in fullScreen) ─── */}
+        {!isDishMode && !fullScreen && <MapSearchBar />}
+        {!isDishMode && !fullScreen && isAuthenticated && (
           <MapPlacesLoader
             onPlacesLoaded={setDiscoveredPlaces}
             existingPlaceIds={existingPlaceIds}
@@ -542,7 +545,15 @@ export function RestaurantMap({
               position={[group.restaurant_lat, group.restaurant_lng]}
               icon={icon}
               eventHandlers={{
-                click: () => setSelectedRestaurantId(group.restaurant_id),
+                click: () => {
+                  if (fullScreen && onSelectDish) {
+                    // In fullScreen (Home page): signal dish selection to parent
+                    onSelectDish(topDish.dish_id)
+                  } else {
+                    // In non-fullScreen (Restaurants page): show mini-card
+                    setSelectedRestaurantId(group.restaurant_id)
+                  }
+                },
               }}
             />
           )
