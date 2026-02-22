@@ -575,7 +575,8 @@ export const dishesApi = {
             lat,
             lng,
             cuisine,
-            town
+            town,
+            website_url
           )
         `)
         .eq('id', dishId)

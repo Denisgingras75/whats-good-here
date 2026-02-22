@@ -52,6 +52,7 @@ function transformDish(data) {
     parent_dish_id: data.parent_dish_id,
     has_variants: data.has_variants,
     value_percentile: data.value_percentile,
+    website_url: data.restaurants?.website_url,
   }
 }
 
@@ -614,6 +615,31 @@ export function Dish() {
 
           {/* Content */}
           <div className="p-4">
+            {/* Order CTA — link to restaurant's website */}
+            {dish.website_url && (
+              <a
+                href={dish.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => capture('order_link_clicked', {
+                  dish_id: dish.dish_id,
+                  dish_name: dish.dish_name,
+                  restaurant_id: dish.restaurant_id,
+                  restaurant_name: dish.restaurant_name,
+                })}
+                className="flex items-center justify-center gap-2 mb-4 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95"
+                style={{
+                  background: 'var(--color-primary)',
+                  color: 'var(--color-text-on-primary)',
+                }}
+              >
+                Order from {dish.restaurant_name}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            )}
+
             {/* Smart Snippet — pull quote from best review */}
             {smartSnippet && smartSnippet.review_text && (
               <div
