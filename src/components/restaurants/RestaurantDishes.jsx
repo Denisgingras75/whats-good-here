@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
 import { TopDishCard } from './TopDishCard'
+import { SectionHeader } from '../SectionHeader'
 
 const TOP_DISHES_COUNT = 5
 
@@ -99,30 +100,21 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
     <div className="px-4 py-5">
       {/* Section Header */}
       <div className="mb-5">
-        <h3
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontWeight: 800,
-            color: '#1A1A1A',
-            fontSize: '18px',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          {sortedDishes.filtered
+        <SectionHeader
+          title={sortedDishes.filtered
             ? `Results for "${searchQuery}"`
             : rankedCount > 0
               ? "What's Good Here"
               : 'Help decide what to order here'
           }
-        </h3>
-        <p className="mt-1 font-medium" style={{ color: '#BBBBBB', fontSize: '12px' }}>
-          {sortedDishes.filtered
+          subtitle={sortedDishes.filtered
             ? `${sortedDishes.totalMatches} ${sortedDishes.totalMatches === 1 ? 'dish' : 'dishes'} found`
             : rankedCount > 0
               ? `Top picks based on ${rankedCount} rated ${rankedCount === 1 ? 'dish' : 'dishes'}`
               : 'Vote on dishes to shape the rankings'
           }
-        </p>
+          level="h3"
+        />
       </div>
 
       {/* Friends banner */}

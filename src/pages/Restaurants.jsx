@@ -8,7 +8,7 @@ import { useNearbyPlaces } from '../hooks/useNearbyPlaces'
 import { useMapDishes } from '../hooks/useMapDishes'
 import { DishSearch } from '../components/DishSearch'
 import { RestaurantCard, TopDishesNearYou } from '../components/restaurants'
-import { BROWSE_CATEGORIES } from '../constants/categories'
+import { CategoryChips } from '../components/CategoryChips'
 import { RadiusSheet } from '../components/LocationPicker'
 import { LocationBanner } from '../components/LocationBanner'
 import { AddRestaurantModal } from '../components/AddRestaurantModal'
@@ -138,38 +138,11 @@ export function Restaurants() {
 
       <div className="p-4 pt-5">
         {/* Category filter chips for map + top dishes */}
-        <div
-          className="flex gap-2 overflow-x-auto pb-3 mb-3"
-          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
-        >
-          <button
-            onClick={() => setMapCategory(null)}
-            className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-            style={{
-              scrollSnapAlign: 'start',
-              background: mapCategory === null ? 'var(--color-text-primary)' : 'var(--color-surface-elevated)',
-              color: mapCategory === null ? 'var(--color-surface)' : 'var(--color-text-secondary)',
-              border: mapCategory === null ? 'none' : '1px solid var(--color-divider)',
-            }}
-          >
-            All
-          </button>
-          {BROWSE_CATEGORIES.slice(0, 12).map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setMapCategory(mapCategory === cat.id ? null : cat.id)}
-              className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-              style={{
-                scrollSnapAlign: 'start',
-                background: mapCategory === cat.id ? 'var(--color-text-primary)' : 'var(--color-surface-elevated)',
-                color: mapCategory === cat.id ? 'var(--color-surface)' : 'var(--color-text-secondary)',
-                border: mapCategory === cat.id ? 'none' : '1px solid var(--color-divider)',
-              }}
-            >
-              <span>{cat.emoji}</span>
-              <span>{cat.label}</span>
-            </button>
-          ))}
+        <div className="mb-3">
+          <CategoryChips
+            selected={mapCategory}
+            onSelect={setMapCategory}
+          />
         </div>
 
         {/* Top Dishes Near You — the answer layer */}
