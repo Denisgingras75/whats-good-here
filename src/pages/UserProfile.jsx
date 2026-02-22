@@ -10,7 +10,8 @@ import { followsApi } from '../api/followsApi'
 import { votesApi } from '../api/votesApi'
 import { FollowListModal } from '../components/FollowListModal'
 import { ProfileSkeleton } from '../components/Skeleton'
-import { VotedDishCard, ReviewCard, ReviewDetailModal, FoodMap } from '../components/profile'
+import { ReviewCard, ReviewDetailModal, FoodMap } from '../components/profile'
+import { DishListItem } from '../components/DishListItem'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 import { ReviewsIcon } from '../components/ReviewsIcon'
@@ -712,7 +713,7 @@ export function UserProfile() {
                 ))
               ) : (
                 visibleDishes.map((vote, index) => (
-                  <VotedDishCard
+                  <DishListItem
                     key={vote.dish?.id || index}
                     dish={{
                       dish_id: vote.dish?.id,
@@ -722,10 +723,12 @@ export function UserProfile() {
                       restaurant_name: vote.dish?.restaurant_name,
                       avg_rating: vote.dish?.avg_rating,
                     }}
-                    variant="other-profile"
+                    variant="voted"
+                    voteVariant="other-profile"
                     theirRating={vote.rating}
                     myRating={myRatings[vote.dish?.id]}
                     wouldOrderAgain={vote.would_order_again}
+                    showPhoto
                   />
                 ))
               )}

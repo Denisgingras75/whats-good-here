@@ -26,7 +26,6 @@ import { HearingIcon } from '../components/HearingIcon'
 import { CameraIcon } from '../components/CameraIcon'
 import { ReviewsIcon } from '../components/ReviewsIcon'
 import {
-  VotedDishCard,
   ReviewCard,
   EmptyState,
   UnratedDishCard,
@@ -35,6 +34,7 @@ import {
   PhotosInfoSection,
   MissionSection,
 } from '../components/profile'
+import { DishListItem } from '../components/DishListItem'
 import { TrustBadge } from '../components/TrustBadge'
 import { SimilarTasteUsers } from '../components/SimilarTasteUsers'
 
@@ -596,13 +596,15 @@ export function Profile() {
                     // Find review for this dish (for Good Here and Not Good Here tabs)
                     const review = userReviews.find(r => r.dish_id === dish.dish_id)
                     return (
-                      <VotedDishCard
+                      <DishListItem
                         key={dish.dish_id}
                         dish={dish}
-                        variant="own-profile"
+                        variant="voted"
+                        voteVariant="own-profile"
                         tab={activeTab}
                         onUnsave={activeTab === 'saved' ? () => removeFavorite(dish.dish_id) : null}
                         reviewText={review?.review_text}
+                        showPhoto
                       />
                     )
                   })
