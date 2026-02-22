@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import { useEvents } from '../hooks/useEvents'
 import { useSpecials } from '../hooks/useSpecials'
+import { useLocationContext } from '../context/LocationContext'
+import { useGuides } from '../hooks/useGuides'
 import { EventCard } from '../components/EventCard'
 import { SpecialCard } from '../components/SpecialCard'
+import { GuideCard } from '../components/hub/GuideCard'
 import { getEventTypeLabel } from '../constants/eventTypes'
 
 var FILTERS = [
@@ -13,6 +15,16 @@ var FILTERS = [
 ]
 
 var DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+var GUIDES = [
+  { id: 'must-try', title: 'Must-Try on MV', subtitle: 'The island\'s best dishes', category: null, emoji: '\u2B50' },
+  { id: 'lobster-roll', title: 'Best Lobster Rolls', subtitle: 'Ranked by the crowd', category: 'lobster roll', emoji: '\uD83E\uDD9E' },
+  { id: 'seafood', title: 'Best Seafood', subtitle: 'Fresh catch, top picks', category: 'seafood', emoji: '\uD83E\uDD90' },
+  { id: 'pizza', title: 'Best Pizza', subtitle: 'Slice by slice', category: 'pizza', emoji: '\uD83C\uDF55' },
+  { id: 'breakfast', title: 'Best Breakfast', subtitle: 'Morning favorites', category: 'breakfast', emoji: '\uD83C\uDF73' },
+  { id: 'burger', title: 'Best Burgers', subtitle: 'Stacked and ranked', category: 'burger', emoji: '\uD83C\uDF54' },
+  { id: 'chowder', title: 'Best Chowder', subtitle: 'Island comfort', category: 'chowder', emoji: '\uD83C\uDF72' },
+]
 
 function getSmartHeading() {
   var now = new Date()
@@ -78,6 +90,11 @@ export function Hub() {
   var specials = specialsData.specials
   var specialsLoading = specialsData.loading
   var specialsError = specialsData.error
+
+  var locationCtx = useLocationContext()
+  var guidesResult = useGuides(locationCtx.location, locationCtx.radius)
+  var guideData = guidesResult.guideData
+  var guidesLoading = guidesResult.loading
 
   var loading = eventsLoading || specialsLoading
   var error = eventsError || specialsError
@@ -201,52 +218,38 @@ export function Hub() {
         </div>
       )}
 
-      {/* Empty state */}
-      {isEmpty && (
-        <div className="text-center py-16 mx-4 mt-6 rounded-2xl" style={{
-          background: 'var(--color-card)',
-          border: '1px solid var(--color-divider)',
-        }}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1}
-            stroke="currentColor"
-            className="w-16 h-16 mx-auto mb-4"
-            style={{ color: 'var(--color-text-tertiary)' }}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
-          </svg>
+      {/* Guides — always show, powered by dish data */}
+      {!guidesLoading && (
+        <div className="px-4 py-4">
           <h3
-            className="font-semibold text-lg"
-            style={{ color: 'var(--color-text-primary)' }}
-          >
-            Nothing happening yet
-          </h3>
-          <p
-            className="text-sm mt-1 mb-5 px-6"
+            className="text-xs font-semibold uppercase tracking-wider mb-3"
             style={{ color: 'var(--color-text-tertiary)' }}
           >
-            The island's waking up — events and specials will show up here.
-          </p>
-          <div className="flex justify-center gap-3">
-            <Link
-              to="/restaurants"
-              className="px-4 py-2 rounded-full text-sm font-semibold transition-all active:scale-95"
-              style={{ background: 'var(--color-primary)', color: 'var(--color-surface)' }}
-            >
-              Browse Restaurants
-            </Link>
-            <Link
-              to="/"
-              className="px-4 py-2 rounded-full text-sm font-semibold transition-all active:scale-95"
-              style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-divider)' }}
-            >
-              Top Dishes
-            </Link>
+            Food Guides
+          </h3>
+          <div className="space-y-3">
+            {GUIDES.map(function(guide) {
+              var key = guide.category === null ? 'null' : guide.category
+              return (
+                <GuideCard
+                  key={guide.id}
+                  guide={guide}
+                  dishes={guideData[key] || []}
+                />
+              )
+            })}
           </div>
         </div>
+      )}
+
+      {/* Soft note when no events */}
+      {isEmpty && !guidesLoading && (
+        <p
+          className="text-center text-xs py-4 mx-4"
+          style={{ color: 'var(--color-text-tertiary)' }}
+        >
+          No events this week — check back when summer heats up
+        </p>
       )}
 
       {/* Content */}

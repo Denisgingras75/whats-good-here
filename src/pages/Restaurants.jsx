@@ -7,7 +7,7 @@ import { useRestaurants } from '../hooks/useRestaurants'
 import { useNearbyPlaces } from '../hooks/useNearbyPlaces'
 import { useMapDishes } from '../hooks/useMapDishes'
 import { DishSearch } from '../components/DishSearch'
-import { RestaurantCard } from '../components/restaurants'
+import { RestaurantCard, TopDishesNearYou } from '../components/restaurants'
 import { RadiusSheet } from '../components/LocationPicker'
 import { LocationBanner } from '../components/LocationBanner'
 import { AddRestaurantModal } from '../components/AddRestaurantModal'
@@ -41,7 +41,7 @@ export function Restaurants() {
   )
 
   // Fetch dishes for map (always — map is always visible)
-  const { dishes: mapDishes, loading: mapLoading } = useMapDishes(town)
+  const { dishes: mapDishes } = useMapDishes(town)
 
   // Discover nearby restaurants from Google Places (auth only, radius + 5mi buffer)
   const { places: nearbyPlaces, loading: nearbyLoading, error: nearbyError } = useNearbyPlaces({
@@ -135,6 +135,13 @@ export function Restaurants() {
       </div>
 
       <div className="p-4 pt-5">
+        {/* Top Dishes Near You — the answer layer */}
+        <TopDishesNearYou
+          dishes={mapDishes}
+          userLocation={location}
+          onSelectDish={(dishId) => navigate(`/dish/${dishId}`)}
+        />
+
         {/* Section Header with controls */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
