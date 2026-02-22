@@ -1,22 +1,26 @@
 import { NotificationBell } from './NotificationBell'
 import { SettingsDropdown } from './SettingsDropdown'
+import { useTheme } from '../context/ThemeContext'
 
 /**
- * TopBar - Brand anchor with MV island silhouette, settings gear, and notification bell
+ * TopBar - Brand anchor with WGH wordmark, settings gear, and notification bell
  */
 export function TopBar() {
+  const { theme } = useTheme()
+  const wordmark = theme === 'dark' ? '/logo-wordmark-light.svg' : '/logo-wordmark.svg'
+
   return (
     <div className="top-bar">
       <div className="top-bar-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 12px' }}>
         {/* Spacer for symmetry */}
         <div style={{ width: '28px' }} />
 
-        {/* Martha's Vineyard island silhouette — centered */}
+        {/* WGH wordmark — centered */}
         <img
-          src="/mv-outline.png"
-          alt="Martha's Vineyard"
+          src={wordmark}
+          alt="What's Good Here"
           className="top-bar-icon"
-          style={{ height: '28px', width: 'auto', opacity: 0.9 }}
+          style={{ height: '22px', width: 'auto' }}
         />
 
         {/* Settings + Notifications grouped right */}
