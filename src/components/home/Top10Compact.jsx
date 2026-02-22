@@ -177,19 +177,19 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
             {isRanked ? (
               <div className="flex items-start gap-0 mt-3">
                 <div style={{ paddingRight: '12px' }}>
-                  <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: getRatingColor(avg_rating) }}>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: getRatingColor(avg_rating) }}>
                     {avg_rating}
                   </span>
                   <p style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '1px' }}>avg rating</p>
                 </div>
                 <div style={{ paddingLeft: '12px', paddingRight: '12px', borderLeft: '1px solid var(--color-divider)' }}>
-                  <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: getRatingColor(dish.percent_worth_it / 10) }}>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: getRatingColor(dish.percent_worth_it / 10) }}>
                     {dish.percent_worth_it}%
                   </span>
                   <p style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '1px' }}>would reorder</p>
                 </div>
                 <div style={{ paddingLeft: '12px', borderLeft: '1px solid var(--color-divider)' }}>
-                  <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: 'var(--color-text-primary)' }}>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: rank === 2 ? '20px' : '17px', lineHeight: 1, color: 'var(--color-text-primary)' }}>
                     {total_votes}
                   </span>
                   <p style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '1px' }}>votes</p>
@@ -225,7 +225,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
         <span
           className="font-bold flex-shrink-0"
           style={{
-            fontFamily: "'aglet-sans', sans-serif",
+            fontFamily: "'DM Sans', sans-serif",
             fontWeight: 800,
             color: 'var(--color-text-primary)',
             fontSize: '14px',
@@ -267,7 +267,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
       <div className="flex items-baseline gap-2 mt-1 pl-8">
         {isRanked ? (
           <>
-            <span style={{ fontFamily: "'aglet-sans', sans-serif", fontWeight: 800, fontSize: '18px', color: getRatingColor(avg_rating) }}>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: '18px', color: getRatingColor(avg_rating) }}>
               {avg_rating}
             </span>
             {dish.percent_worth_it > 0 && (

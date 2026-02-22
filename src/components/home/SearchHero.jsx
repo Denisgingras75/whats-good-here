@@ -13,7 +13,7 @@ export function SearchHero({ town, loading, onSearchChange, townPicker }) {
       <div className="px-4 mb-4 stagger-item text-center">
         <h1
           style={{
-            fontFamily: "'aglet-sans', sans-serif",
+            fontFamily: "'DM Sans', sans-serif",
             fontWeight: 700,
             color: 'var(--color-text-primary)',
             fontSize: '36px',

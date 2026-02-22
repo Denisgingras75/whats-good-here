@@ -101,7 +101,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
       <div className="mb-5">
         <h3
           style={{
-            fontFamily: "'aglet-sans', sans-serif",
+            fontFamily: "'DM Sans', sans-serif",
             fontWeight: 800,
             color: '#1A1A1A',
             fontSize: '18px',

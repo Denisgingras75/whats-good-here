@@ -83,7 +83,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
           <span
             className="font-bold flex-shrink-0 mt-1"
             style={{
-              fontFamily: "'aglet-sans', sans-serif",
+              fontFamily: "'DM Sans', sans-serif",
               fontWeight: 800,
               color: rank <= 3 && isRanked ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
               fontSize: '16px',
@@ -190,7 +190,7 @@ export function TopDishCard({ dish, rank, onVote, onLoginRequired, isFavorite, o
                   <span
                     className="font-bold"
                     style={{
-                      fontFamily: "'aglet-sans', sans-serif",
+                      fontFamily: "'DM Sans', sans-serif",
                       color: getRatingColor(displayRating),
                       fontSize: '18px',
                     }}
