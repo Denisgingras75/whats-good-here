@@ -62,6 +62,7 @@ const Discover = lazyWithRetry(() => import('./pages/Discover'), 'Discover')
 const ResetPassword = lazyWithRetry(() => import('./pages/ResetPassword'), 'ResetPassword')
 const AcceptInvite = lazyWithRetry(() => import('./pages/AcceptInvite'), 'AcceptInvite')
 const ManageRestaurant = lazyWithRetry(() => import('./pages/ManageRestaurant'), 'ManageRestaurant')
+const Hub = lazyWithRetry(() => import('./pages/Hub'), 'Hub')
 const HowReviewsWork = lazyWithRetry(() => import('./pages/HowReviewsWork'), 'HowReviewsWork')
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound')
 
@@ -73,6 +74,7 @@ export const prefetchRoutes = {
   restaurants: () => import('./pages/Restaurants'),
   restaurantDetail: () => import('./pages/RestaurantDetail'),
   discover: () => import('./pages/Discover'),
+  hub: () => import('./pages/Hub'),
   profile: () => import('./pages/Profile'),
 }
 
@@ -127,6 +129,7 @@ function App() {
               <Route path="/dish/:dishId" element={<Layout><Dish /></Layout>} />
               <Route path="/restaurants" element={<Layout><Restaurants /></Layout>} />
               <Route path="/restaurants/:restaurantId" element={<Layout><RestaurantDetail /></Layout>} />
+              <Route path="/hub" element={<Layout><Hub /></Layout>} />
               <Route path="/discover" element={<Layout><Discover /></Layout>} />
               <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
               <Route path="/user/:userId" element={<Layout><UserProfile /></Layout>} />
