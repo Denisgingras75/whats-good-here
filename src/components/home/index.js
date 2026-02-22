@@ -1,4 +1,3 @@
-export { RankedDishRow } from './RankedDishRow'
 export { Top10Compact } from './Top10Compact'
 export { CategorySkeleton } from './CategorySkeleton'
 export { SearchHero } from './SearchHero'

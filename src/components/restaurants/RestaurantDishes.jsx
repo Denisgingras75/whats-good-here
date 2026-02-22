@@ -71,7 +71,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
             <div
               key={i}
               className="h-24 rounded-xl animate-pulse"
-              style={{ background: '#F5F5F5', border: '2px solid #E0E0E0' }}
+              style={{ background: 'var(--color-surface)', border: '2px solid var(--color-divider)' }}
               aria-hidden="true"
             />
           ))}
@@ -83,7 +83,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
   if (error) {
     return (
       <div className="px-4 py-12 text-center">
-        <p className="text-sm" style={{ color: '#E4440A' }}>{error?.message || error}</p>
+        <p className="text-sm" style={{ color: 'var(--color-primary)' }}>{error?.message || error}</p>
       </div>
     )
   }
@@ -122,8 +122,8 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
         <div
           className="mb-4 px-3.5 py-3 rounded-xl flex items-center gap-3"
           style={{
-            background: '#FFFFFF',
-            border: '1.5px solid #E4440A',
+            background: 'var(--color-surface-elevated)',
+            border: '1.5px solid var(--color-primary)',
           }}
         >
           {/* Stacked avatars */}
@@ -145,9 +145,9 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
                   to={`/user/${friend.user_id}`}
                   className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ring-2"
                   style={{
-                    background: '#E4440A',
-                    color: '#FFFFFF',
-                    ringColor: '#FFFFFF',
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-text-on-primary)',
+                    ringColor: 'var(--color-surface-elevated)',
                     zIndex: 3 - i,
                   }}
                 >
@@ -156,7 +156,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
               ))
             })()}
           </div>
-          <p className="text-sm font-bold" style={{ color: '#1A1A1A' }}>
+          <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {uniqueFriends} {uniqueFriends === 1 ? 'friend has' : 'friends have'} been here
           </p>
         </div>
@@ -184,23 +184,23 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
         <div
           className="py-10 text-center rounded-xl"
           style={{
-            background: '#FFFFFF',
-            border: '1px solid #E0E0E0',
+            background: 'var(--color-surface-elevated)',
+            border: '1px solid var(--color-divider)',
           }}
         >
-          <p className="font-bold" style={{ color: '#999999', fontSize: '14px' }}>
+          <p className="font-bold" style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
             {sortedDishes.filtered
               ? `No dishes matching "${searchQuery}"`
               : 'No dishes at this restaurant yet'
             }
           </p>
           {sortedDishes.filtered ? (
-            <p className="mt-1.5 font-medium" style={{ color: '#BBBBBB', fontSize: '12px' }}>
+            <p className="mt-1.5 font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
               Try a different search term
             </p>
           ) : (
             <>
-              <p className="mt-1 font-medium" style={{ color: '#BBBBBB', fontSize: '12px' }}>
+              <p className="mt-1 font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
                 Be the first to add one and help others decide what to order
               </p>
               {onAddDish && (
@@ -209,7 +209,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
                   className="mt-4 px-5 py-2.5 rounded-full font-semibold text-sm transition-all active:scale-[0.97]"
                   style={{
                     background: 'var(--color-primary)',
-                    color: '#FFFFFF',
+                    color: 'var(--color-text-on-primary)',
                   }}
                 >
                   + Add a dish
@@ -227,9 +227,9 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
             onClick={() => setShowAllDishes(!showAllDishes)}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-lg font-bold card-press"
             style={{
-              background: '#FFFFFF',
-              color: '#E4440A',
-              border: '1px solid #1A1A1A',
+              background: 'var(--color-surface-elevated)',
+              color: 'var(--color-primary)',
+              border: '1px solid var(--color-card-border)',
               fontSize: '13px',
             }}
           >

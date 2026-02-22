@@ -72,7 +72,7 @@ export const DishCard = memo(function DishCard({ dish, onVote, onLoginRequired, 
         {/* Rating badge - bottom left (only show if 10+ votes) */}
         {totalVotes >= 10 && (
           <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg backdrop-blur-sm" style={{ background: 'rgba(0,0,0,0.6)' }}>
-            <span className="text-sm font-semibold flex items-center gap-1" style={{ color: '#FFFFFF' }}>
+            <span className="text-sm font-semibold flex items-center gap-1" style={{ color: 'var(--color-text-on-primary)' }}>
               <ThumbsUpIcon size={24} /> {Math.round(percent_worth_it)}%
             </span>
           </div>

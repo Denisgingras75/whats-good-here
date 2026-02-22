@@ -1,5 +1,4 @@
 // Profile components - extracted from Profile.jsx and UserProfile.jsx
-export { VotedDishCard } from './VotedDishCard'
 export { ReviewCard } from './ReviewCard'
 export { ReviewDetailModal } from './ReviewDetailModal'
 export { EmptyState } from './EmptyState'
