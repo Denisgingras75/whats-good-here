@@ -1843,12 +1843,19 @@ DROP TRIGGER IF EXISTS consensus_check_trigger ON votes;
 CREATE TRIGGER consensus_check_trigger AFTER INSERT ON votes FOR EACH ROW EXECUTE FUNCTION check_consensus_after_vote();
 
 -- 13e. Update dish avg_rating on vote changes
+-- Source weighting: ai_estimated votes count 0.5x (matches get_ranked_dishes RPC)
 CREATE OR REPLACE FUNCTION update_dish_avg_rating()
 RETURNS TRIGGER AS $$
 BEGIN
   UPDATE dishes SET avg_rating = sub.avg_r, total_votes = sub.cnt
   FROM (
-    SELECT ROUND(AVG(rating_10), 1) AS avg_r, COUNT(*) AS cnt
+    SELECT
+      ROUND(
+        (SUM(rating_10 * CASE WHEN source = 'ai_estimated' THEN 0.5 ELSE 1.0 END) /
+         NULLIF(SUM(CASE WHEN source = 'ai_estimated' THEN 0.5 ELSE 1.0 END), 0)
+        )::NUMERIC, 1
+      ) AS avg_r,
+      SUM(CASE WHEN source = 'ai_estimated' THEN 0.5 ELSE 1.0 END)::BIGINT AS cnt
     FROM votes WHERE dish_id = COALESCE(NEW.dish_id, OLD.dish_id) AND rating_10 IS NOT NULL
   ) sub
   WHERE dishes.id = COALESCE(NEW.dish_id, OLD.dish_id);
