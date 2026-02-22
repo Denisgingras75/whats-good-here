@@ -8,15 +8,19 @@ import { BROWSE_CATEGORIES } from '../constants/categories'
 import { SearchHero, Top10Compact, DishPhotoFade, NearbyDiscovery } from '../components/home'
 import { CategoryIcon } from '../components/home/CategoryIcons'
 import { TownPicker } from '../components/TownPicker'
+import { RadiusSheet } from '../components/LocationPicker'
 import { NearbyNudge } from '../components/NearbyNudge'
 import { getRatingColor } from '../utils/ranking'
 
 export function Home() {
   const navigate = useNavigate()
-  const { location, radius, town, setTown } = useLocationContext()
+  const { location, radius, setRadius, town, setTown } = useLocationContext()
 
   // Town picker
   const [townPickerOpen, setTownPickerOpen] = useState(false)
+
+  // Radius sheet
+  const [radiusSheetOpen, setRadiusSheetOpen] = useState(false)
 
   // Inline category filtering
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -72,12 +76,49 @@ export function Home() {
         loading={loading}
         onSearchChange={handleSearchChange}
         townPicker={
-          <TownPicker
-            town={town}
-            onTownChange={setTown}
-            isOpen={townPickerOpen}
-            onToggle={setTownPickerOpen}
-          />
+          <div className="flex items-center gap-2">
+            <TownPicker
+              town={town}
+              onTownChange={setTown}
+              isOpen={townPickerOpen}
+              onToggle={setTownPickerOpen}
+            />
+            {!townPickerOpen && (
+              <>
+                <button
+                  onClick={() => setRadiusSheetOpen(true)}
+                  aria-label={`Search radius: ${radius} miles. Tap to change`}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg card-press"
+                  style={{
+                    background: 'var(--color-surface-elevated)',
+                    border: '3px solid var(--color-card-border)',
+                    boxShadow: '3px 3px 0px var(--color-card-border)',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      color: 'var(--color-text-primary)',
+                      letterSpacing: '0.02em',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {radius} mi
+                  </span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-primary)" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <RadiusSheet
+                  isOpen={radiusSheetOpen}
+                  onClose={() => setRadiusSheetOpen(false)}
+                  radius={radius}
+                  onRadiusChange={setRadius}
+                />
+              </>
+            )}
+          </div>
         }
       />
 
