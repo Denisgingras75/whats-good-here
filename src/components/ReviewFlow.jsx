@@ -43,19 +43,15 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
   const [reviewText, setReviewText] = useState('')
   const [reviewError, setReviewError] = useState(null)
 
-  const [showConfirmation, setShowConfirmation] = useState(false)
-  const [confirmationType, setConfirmationType] = useState(null)
   const [awaitingLogin, setAwaitingLogin] = useState(false)
   const [announcement, setAnnouncement] = useState('') // For screen reader announcements
   const [photoAdded, setPhotoAdded] = useState(false)
-  const [reviewExpanded, setReviewExpanded] = useState(false)
   const reviewTextareaRef = useRef(null)
   // Combined ref: partner's focus ref + Denis's purity tracker ref
   const combinedTextareaRef = (el) => {
     reviewTextareaRef.current = el
     attachToTextarea(el)
   }
-  const confirmationTimerRef = useRef(null)
 
   const noVotes = localTotalVotes - localYesVotes
   const yesPercent = localTotalVotes > 0 ? Math.round((localYesVotes / localTotalVotes) * 100) : 0
@@ -122,15 +118,6 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     }
   }, [step, user, onLoginRequired])
 
-  // Cleanup confirmation timer on unmount to prevent memory leak
-  useEffect(() => {
-    return () => {
-      if (confirmationTimerRef.current) {
-        clearTimeout(confirmationTimerRef.current)
-      }
-    }
-  }, [])
-
   const handleVoteClick = (wouldOrderAgain) => {
     setPendingVote(wouldOrderAgain)
     hapticLight() // Tactile feedback on selection
@@ -145,14 +132,8 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
       return
     }
 
-    // User is authenticated - show confirmation then proceed to rating
-    setConfirmationType(wouldOrderAgain ? 'yes' : 'no')
-    setShowConfirmation(true)
-
-    confirmationTimerRef.current = setTimeout(() => {
-      setShowConfirmation(false)
-      setStep(2)
-    }, 350)
+    // User is authenticated — expand rating UI immediately
+    setStep(2)
   }
 
   const handleSubmit = async () => {
@@ -224,7 +205,6 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     setReviewText('')
     setReviewError(null)
     setPhotoAdded(false)
-    setReviewExpanded(false)
     resetPurity()
 
     // Haptic success feedback
@@ -309,7 +289,6 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             setSliderValue(userRating)
             if (userReviewText) {
               setReviewText(userReviewText)
-              setReviewExpanded(true)
             }
             setUserVote(null)
             setUserRating(null)
@@ -328,7 +307,6 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             onClick={() => {
               setPendingVote(userVote)
               setSliderValue(userRating)
-              setReviewExpanded(true)
               setStep(2)
               setTimeout(() => {
                 const el = document.getElementById('review-text')
@@ -355,190 +333,158 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     )
   }
 
-  // Step 1: Yes/No
-  if (step === 1) {
-    // Show pending selection state when awaiting login
-    const showPendingYes = awaitingLogin && pendingVote === true
-    const showPendingNo = awaitingLogin && pendingVote === false
+  // Show pending selection state when awaiting login
+  const showPendingYes = awaitingLogin && pendingVote === true
+  const showPendingNo = awaitingLogin && pendingVote === false
+  const isYesSelected = step === 2 && pendingVote === true
+  const isNoSelected = step === 2 && pendingVote === false
 
-    return (
-      <div className="space-y-3">
-        {/* Screen reader announcement region */}
-        <div aria-live="polite" aria-atomic="true" className="sr-only">
-          {announcement}
-        </div>
-        <p className="text-sm font-medium text-center" style={{ color: 'var(--color-text-tertiary)' }}>Worth ordering again?</p>
-
-        {/* Show "sign in to continue" note when awaiting login */}
-        {awaitingLogin && pendingVote !== null && (
-          <div className="p-3 rounded-xl text-center" style={{ background: 'var(--color-primary-muted)' }}>
-            <p className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
-              {pendingVote ? <ThumbsUpIcon size={22} /> : <ThumbsDownIcon size={22} />} Vote selected — sign in to save it
-            </p>
-          </div>
-        )}
-
-        {isRanked && !awaitingLogin ? (
-          <div>
-            <div
-              className="w-full overflow-hidden"
-              style={{ height: '6px', borderRadius: '3px', background: 'var(--color-surface)' }}
-            >
-              <div style={{ width: `${yesPercent}%`, height: '100%', borderRadius: '3px', background: 'var(--color-success)' }} />
-            </div>
-            <div className="flex items-baseline gap-1.5 mt-1.5">
-              <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-success)' }}>{yesPercent}%</span>
-              <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)' }}>would order again</span>
-            </div>
-          </div>
-        ) : !awaitingLogin ? (
-          <p className="text-xs text-center" style={{ color: 'var(--color-text-tertiary)' }}>
-            {localTotalVotes === 0
-              ? 'Be the first to rank this dish!'
-              : `${localTotalVotes} vote${localTotalVotes === 1 ? '' : 's'} so far \u00B7 ${5 - localTotalVotes} more to rank`
-            }
-          </p>
-        ) : null}
-
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => handleVoteClick(true)}
-            disabled={showConfirmation}
-            className="relative overflow-hidden flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95"
-            style={(showConfirmation && confirmationType === 'yes') || showPendingYes
-              ? { background: `linear-gradient(to bottom right, var(--color-success), var(--color-green-deep))`, color: 'var(--color-text-on-primary)', boxShadow: '0 10px 15px -3px var(--color-success-border)', transform: 'scale(1.05)' }
-              : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', border: '1.5px solid var(--color-divider)' }}
-          >
-            {showConfirmation && confirmationType === 'yes' ? (
-              <span className="text-2xl animate-pulse" style={{ color: 'var(--color-text-on-primary)' }}>✓</span>
-            ) : (
-              <><ThumbsUpIcon size={30} /><span>Yes</span></>
-            )}
-          </button>
-          <button
-            onClick={() => handleVoteClick(false)}
-            disabled={showConfirmation}
-            className="relative overflow-hidden flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95"
-            style={(showConfirmation && confirmationType === 'no') || showPendingNo
-              ? { background: 'linear-gradient(to bottom right, var(--color-primary), var(--color-danger))', color: 'var(--color-text-on-primary)', boxShadow: '0 10px 15px -3px var(--color-primary-glow)', transform: 'scale(1.05)' }
-              : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', border: '1.5px solid var(--color-divider)' }}
-          >
-            {showConfirmation && confirmationType === 'no' ? (
-              <span className="text-2xl animate-pulse" style={{ color: 'var(--color-text-on-primary)' }}>✓</span>
-            ) : (
-              <><ThumbsDownIcon size={30} /><span>No</span></>
-            )}
-          </button>
-        </div>
-
-      </div>
-    )
-  }
-
-  // Step 2: Rate + extras (review + photo) — all on one screen
   return (
-    <div className="space-y-4 animate-fadeIn">
-      <div className="flex items-center justify-between">
-        <button onClick={() => setStep(1)} className="text-sm transition-colors flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
-          <span>←</span> Back
+    <div className="space-y-3">
+      {/* Screen reader announcement region */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </div>
+      <p className="text-sm font-medium text-center" style={{ color: 'var(--color-text-tertiary)' }}>Worth ordering again?</p>
+
+      {/* Show "sign in to continue" note when awaiting login */}
+      {awaitingLogin && pendingVote !== null && (
+        <div className="p-3 rounded-xl text-center" style={{ background: 'var(--color-primary-muted)' }}>
+          <p className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>
+            {pendingVote ? <ThumbsUpIcon size={22} /> : <ThumbsDownIcon size={22} />} Vote selected — sign in to save it
+          </p>
+        </div>
+      )}
+
+      {isRanked && !awaitingLogin && step === 1 ? (
+        <div>
+          <div
+            className="w-full overflow-hidden"
+            style={{ height: '6px', borderRadius: '3px', background: 'var(--color-surface)' }}
+          >
+            <div style={{ width: `${yesPercent}%`, height: '100%', borderRadius: '3px', background: 'var(--color-success)' }} />
+          </div>
+          <div className="flex items-baseline gap-1.5 mt-1.5">
+            <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-success)' }}>{yesPercent}%</span>
+            <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)' }}>would order again</span>
+          </div>
+        </div>
+      ) : !awaitingLogin && step === 1 ? (
+        <p className="text-xs text-center" style={{ color: 'var(--color-text-tertiary)' }}>
+          {localTotalVotes === 0
+            ? 'Be the first to rank this dish!'
+            : `${localTotalVotes} vote${localTotalVotes === 1 ? '' : 's'} so far \u00B7 ${5 - localTotalVotes} more to rank`
+          }
+        </p>
+      ) : null}
+
+      {/* Yes/No buttons — always visible, selected one stays highlighted */}
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          onClick={() => handleVoteClick(true)}
+          className="relative overflow-hidden flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95"
+          style={isYesSelected || showPendingYes
+            ? { background: 'linear-gradient(to bottom right, var(--color-success), var(--color-green-deep))', color: 'var(--color-text-on-primary)', boxShadow: '0 10px 15px -3px var(--color-success-border)', transform: 'scale(1.05)' }
+            : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', border: '1.5px solid var(--color-divider)' }}
+        >
+          <ThumbsUpIcon size={30} /><span>Yes</span>
         </button>
-        <p className="text-sm font-medium" style={{ color: 'var(--color-text-tertiary)' }}>How good was it?</p>
-        <div className="w-12" />
+        <button
+          onClick={() => handleVoteClick(false)}
+          className="relative overflow-hidden flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ease-out focus-ring active:scale-95"
+          style={isNoSelected || showPendingNo
+            ? { background: 'linear-gradient(to bottom right, var(--color-primary), var(--color-danger))', color: 'var(--color-text-on-primary)', boxShadow: '0 10px 15px -3px var(--color-primary-glow)', transform: 'scale(1.05)' }
+            : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', border: '1.5px solid var(--color-divider)' }}
+        >
+          <ThumbsDownIcon size={30} /><span>No</span>
+        </button>
       </div>
 
-      {/* Food Rating Slider */}
-      <FoodRatingSlider
-        value={sliderValue}
-        onChange={setSliderValue}
-        min={0}
-        max={10}
-        step={0.1}
-        category={category}
-      />
+      {/* Step 2: Rating + review + photo — expands inline below yes/no */}
+      {step === 2 && (
+        <div className="space-y-4 animate-fadeIn">
+          <p className="text-sm font-medium text-center" style={{ color: 'var(--color-text-tertiary)' }}>How good was it?</p>
 
-      {/* Review — tap to expand */}
-      {reviewExpanded ? (
-        <div className="relative">
-          <label htmlFor="review-text" className="sr-only">Your review</label>
-          <textarea
-            ref={combinedTextareaRef}
-            id="review-text"
-            value={reviewText}
-            onChange={(e) => {
-              setReviewText(e.target.value)
-              if (reviewError) setReviewError(null)
-            }}
-            placeholder="What stood out?"
-            aria-label="Write your review"
-            aria-describedby={reviewError ? 'review-error' : 'review-char-count'}
-            aria-invalid={!!reviewError}
-            maxLength={MAX_REVIEW_LENGTH + 50}
-            rows={3}
-            className="w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus-ring"
-            style={{
-              background: 'var(--color-surface-elevated)',
-              border: reviewError ? '2px solid var(--color-primary)' : '1px solid var(--color-divider)',
-              color: 'var(--color-text-primary)',
-            }}
+          {/* Food Rating Slider */}
+          <FoodRatingSlider
+            value={sliderValue}
+            onChange={setSliderValue}
+            min={0}
+            max={10}
+            step={0.1}
+            category={category}
           />
-          {reviewText.length > 0 && (
-            <div id="review-char-count" className="absolute bottom-2 right-3 text-xs" style={{ color: reviewText.length > MAX_REVIEW_LENGTH ? 'var(--color-primary)' : 'var(--color-text-tertiary)' }}>
-              {reviewText.length}/{MAX_REVIEW_LENGTH}
+
+          {/* Review textarea — always visible, starts compact */}
+          <div className="relative">
+            <label htmlFor="review-text" className="sr-only">Your review</label>
+            <textarea
+              ref={combinedTextareaRef}
+              id="review-text"
+              value={reviewText}
+              onChange={(e) => {
+                setReviewText(e.target.value)
+                if (reviewError) setReviewError(null)
+              }}
+              onFocus={(e) => {
+                e.target.rows = 3
+              }}
+              placeholder="What stood out?"
+              aria-label="Write your review"
+              aria-describedby={reviewError ? 'review-error' : 'review-char-count'}
+              aria-invalid={!!reviewError}
+              maxLength={MAX_REVIEW_LENGTH + 50}
+              rows={1}
+              className="w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus-ring"
+              style={{
+                background: 'var(--color-surface-elevated)',
+                border: reviewError ? '2px solid var(--color-primary)' : '1px solid var(--color-divider)',
+                color: 'var(--color-text-primary)',
+              }}
+            />
+            {reviewText.length > 0 && (
+              <div id="review-char-count" className="absolute bottom-2 right-3 text-xs" style={{ color: reviewText.length > MAX_REVIEW_LENGTH ? 'var(--color-primary)' : 'var(--color-text-tertiary)' }}>
+                {reviewText.length}/{MAX_REVIEW_LENGTH}
+              </div>
+            )}
+            {reviewError && (
+              <p id="review-error" role="alert" className="text-sm text-center mt-1" style={{ color: 'var(--color-primary)' }}>
+                {reviewError}
+              </p>
+            )}
+          </div>
+
+          {/* Photo upload — inline */}
+          {photoAdded ? (
+            <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background: 'var(--color-success-muted)', border: '1px solid var(--color-success-border)' }}>
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--color-success)' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-sm font-medium" style={{ color: 'var(--color-success)' }}>Photo added</span>
             </div>
+          ) : (
+            <PhotoUploadButton
+              dishId={dishId}
+              onPhotoUploaded={(photo) => {
+                setPhotoAdded(true)
+                onPhotoUploaded?.(photo)
+              }}
+              onLoginRequired={onLoginRequired}
+            />
           )}
-          {reviewError && (
-            <p id="review-error" role="alert" className="text-sm text-center mt-1" style={{ color: 'var(--color-primary)' }}>
-              {reviewError}
-            </p>
-          )}
-        </div>
-      ) : (
-        <button
-          onClick={() => {
-            setReviewExpanded(true)
-            // Focus the textarea after it renders
-            setTimeout(() => reviewTextareaRef.current?.focus(), 50)
-          }}
-          className="w-full p-4 rounded-xl text-sm text-left transition-colors"
-          style={{
-            background: 'var(--color-surface-elevated)',
-            border: '1px solid var(--color-divider)',
-            color: 'var(--color-text-tertiary)',
-          }}
-        >
-          What stood out?
-        </button>
-      )}
 
-      {/* Photo upload — inline */}
-      {photoAdded ? (
-        <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background: 'var(--color-success-muted)', border: '1px solid var(--color-success-border)' }}>
-          <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--color-success)' }}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-          <span className="text-sm font-medium" style={{ color: 'var(--color-success)' }}>Photo added</span>
+          {/* Submit button */}
+          <button
+            onClick={handleSubmit}
+            disabled={submitting || reviewText.length > MAX_REVIEW_LENGTH}
+            className={`w-full py-4 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 ease-out focus-ring
+              ${submitting || reviewText.length > MAX_REVIEW_LENGTH ? 'opacity-50 cursor-not-allowed' : 'active:scale-98 hover:shadow-xl'}`}
+            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+          >
+            {submitting ? 'Saving...' : (reviewText.trim() || photoAdded) ? 'Submit' : 'Submit Rating'}
+          </button>
         </div>
-      ) : (
-        <PhotoUploadButton
-          dishId={dishId}
-          onPhotoUploaded={(photo) => {
-            setPhotoAdded(true)
-            onPhotoUploaded?.(photo)
-          }}
-          onLoginRequired={onLoginRequired}
-        />
       )}
-
-      {/* Submit button */}
-      <button
-        onClick={handleSubmit}
-        disabled={submitting || reviewText.length > MAX_REVIEW_LENGTH}
-        className={`w-full py-4 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200 ease-out focus-ring
-          ${submitting || reviewText.length > MAX_REVIEW_LENGTH ? 'opacity-50 cursor-not-allowed' : 'active:scale-98 hover:shadow-xl'}`}
-        style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
-      >
-        {submitting ? 'Saving...' : (reviewText.trim() || photoAdded) ? 'Submit' : 'Submit Rating'}
-      </button>
     </div>
   )
 }

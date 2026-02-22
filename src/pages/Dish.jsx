@@ -80,6 +80,7 @@ export function Dish() {
   const [friendsCompat, setFriendsCompat] = useState({}) // { userId: compatibility_pct }
   const [reviews, setReviews] = useState([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [smartSnippet, setSmartSnippet] = useState(null)
 
   const { isFavorite, toggleFavorite } = useFavorites(user?.id)
 
@@ -193,7 +194,7 @@ export function Dish() {
       setReviewsLoading(true)
 
       // Run all independent fetches in parallel
-      const [photosResult, reviewsResult, friendsResult] = await Promise.allSettled([
+      const [photosResult, reviewsResult, friendsResult, snippetResult] = await Promise.allSettled([
         // Photos (3 calls, already parallelized internally)
         Promise.all([
           dishPhotosApi.getFeaturedPhoto(dishId),
@@ -204,6 +205,8 @@ export function Dish() {
         votesApi.getReviewsForDish(dishId, { limit: 20 }),
         // Friends' votes (only if user is logged in)
         user ? followsApi.getFriendsVotesForDish(dishId) : Promise.resolve([]),
+        // Smart snippet (best review pull quote)
+        votesApi.getSmartSnippetForDish(dishId),
       ])
 
       // Handle photos result
@@ -231,6 +234,13 @@ export function Dish() {
       } else {
         logger.error('Failed to fetch friends votes:', friendsResult.reason)
         setFriendsVotes([])
+      }
+
+      // Handle smart snippet result
+      if (snippetResult.status === 'fulfilled') {
+        setSmartSnippet(snippetResult.value)
+      } else {
+        logger.error('Failed to fetch smart snippet:', snippetResult.reason)
       }
 
     }
@@ -604,6 +614,134 @@ export function Dish() {
 
           {/* Content */}
           <div className="p-4">
+            {/* Smart Snippet — pull quote from best review */}
+            {smartSnippet && smartSnippet.review_text && (
+              <div
+                className="mb-4 p-4 rounded-xl"
+                style={{
+                  background: 'var(--color-surface)',
+                }}
+              >
+                <p
+                  className="text-sm italic"
+                  style={{ color: 'var(--color-text-primary)', lineHeight: 1.5 }}
+                >
+                  &ldquo;{smartSnippet.review_text}&rdquo;
+                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                    — @{smartSnippet.profiles?.display_name || 'Anonymous'}
+                  </span>
+                  {smartSnippet.rating_10 && (
+                    <span className="text-xs font-bold" style={{ color: getRatingColor(smartSnippet.rating_10) }}>
+                      {formatScore10(smartSnippet.rating_10)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Review Flow */}
+            <div
+              className="p-4 rounded-xl mb-4"
+              style={{
+                background: 'var(--color-surface-elevated)',
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+              }}
+            >
+              <ReviewFlow
+                dishId={dish.dish_id}
+                dishName={dish.dish_name}
+                restaurantId={dish.restaurant_id}
+                restaurantName={dish.restaurant_name}
+                category={dish.category}
+                price={dish.price}
+                totalVotes={dish.total_votes}
+                yesVotes={dish.yes_votes}
+                percentWorthIt={dish.percent_worth_it}
+                isRanked={isRanked}
+                hasPhotos={allPhotos.length > 0}
+                onVote={handleVote}
+                onLoginRequired={handleLoginRequired}
+                onPhotoUploaded={handlePhotoUploaded}
+                onToggleFavorite={handleToggleSave}
+                isFavorite={isFavorite?.(dishId)}
+              />
+            </div>
+
+            {/* Reviews Section — card-style list */}
+            {reviews.length > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                    Reviews ({reviews.length})
+                  </h3>
+                  <TrustSummary
+                    verifiedCount={reviews.filter(r => r.trust_badge === 'human_verified' || r.trust_badge === 'trusted_reviewer').length}
+                    aiCount={reviews.filter(r => r.trust_badge === 'ai_estimated').length}
+                  />
+                </div>
+                <div className="space-y-2">
+                  {reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className="p-3 rounded-xl"
+                      style={{ background: 'var(--color-surface)' }}
+                    >
+                      {/* Header: Avatar + name + timestamp | rating */}
+                      <div className="flex items-center justify-between mb-2">
+                        <Link
+                          to={`/user/${review.user_id}`}
+                          className="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity"
+                        >
+                          <div
+                            className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
+                            style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
+                          >
+                            {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <span className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                            @{review.profiles?.display_name || 'Anonymous'}
+                          </span>
+                          <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
+                            &middot; {formatRelativeTime(review.review_created_at)}
+                          </span>
+                        </Link>
+                        <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                          <span className="text-sm font-bold" style={{ color: getRatingColor(review.rating_10) }}>
+                            {review.rating_10 ? formatScore10(review.rating_10) : ''}
+                          </span>
+                          <span>{review.would_order_again ? <ThumbsUpIcon size={20} /> : <ThumbsDownIcon size={20} />}</span>
+                        </div>
+                      </div>
+
+                      {/* Review text — visual hero */}
+                      <p className="text-sm" style={{ color: 'var(--color-text-primary)', lineHeight: 1.5 }}>
+                        {review.review_text}
+                      </p>
+
+                      {/* Trust badge — subtle bottom */}
+                      <div className="mt-2">
+                        <TrustBadge type={review.trust_badge} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* No reviews message */}
+            {!reviewsLoading && reviews.length === 0 && dish.total_votes > 0 && (
+              <div
+                className="mb-6 p-4 rounded-xl text-center"
+                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
+              >
+                <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                  No written reviews yet — be the first to share your thoughts!
+                </p>
+              </div>
+            )}
+
             {/* Variant Selector */}
             {variants.length > 0 && (
               <div className="mb-6">
@@ -731,110 +869,6 @@ export function Dish() {
                     See all {allPhotos.length} photos
                   </button>
                 )}
-              </div>
-            )}
-
-            {/* Review Flow */}
-            <div
-              className="p-4 rounded-xl mb-4"
-              style={{
-                background: 'var(--color-surface-elevated)',
-                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
-              }}
-            >
-              <ReviewFlow
-                dishId={dish.dish_id}
-                dishName={dish.dish_name}
-                restaurantId={dish.restaurant_id}
-                restaurantName={dish.restaurant_name}
-                category={dish.category}
-                price={dish.price}
-                totalVotes={dish.total_votes}
-                yesVotes={dish.yes_votes}
-                percentWorthIt={dish.percent_worth_it}
-                isRanked={isRanked}
-                hasPhotos={allPhotos.length > 0}
-                onVote={handleVote}
-                onLoginRequired={handleLoginRequired}
-                onPhotoUploaded={handlePhotoUploaded}
-                onToggleFavorite={handleToggleSave}
-                isFavorite={isFavorite?.(dishId)}
-              />
-            </div>
-
-            {/* Reviews Section — flowing list with dividers */}
-            {reviews.length > 0 && (
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                    Reviews ({reviews.length})
-                  </h3>
-                  <TrustSummary
-                    verifiedCount={reviews.filter(r => r.trust_badge === 'human_verified' || r.trust_badge === 'trusted_reviewer').length}
-                    aiCount={reviews.filter(r => r.trust_badge === 'ai_estimated').length}
-                  />
-                </div>
-                <div>
-                  {reviews.map((review, index) => (
-                    <div
-                      key={review.id}
-                      className="py-4"
-                      style={index < reviews.length - 1 ? { borderBottom: '1px solid var(--color-divider)' } : undefined}
-                    >
-                      {/* Header: User info and rating */}
-                      <div className="flex items-center justify-between mb-2">
-                        <Link
-                          to={`/user/${review.user_id}`}
-                          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                        >
-                          {/* Avatar */}
-                          <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
-                            style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
-                          >
-                            {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                                @{review.profiles?.display_name || 'Anonymous'}
-                              </p>
-                              <TrustBadge type={review.trust_badge} />
-                            </div>
-                          </div>
-                        </Link>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{review.would_order_again ? <ThumbsUpIcon size={26} /> : <ThumbsDownIcon size={26} />}</span>
-                          <span className="text-lg font-bold" style={{ color: getRatingColor(review.rating_10) }}>
-                            {review.rating_10 ? formatScore10(review.rating_10) : ''}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Review text */}
-                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                        {review.review_text}
-                      </p>
-
-                      {/* Timestamp */}
-                      <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {formatRelativeTime(review.review_created_at)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* No reviews message */}
-            {!reviewsLoading && reviews.length === 0 && dish.total_votes > 0 && (
-              <div
-                className="mb-6 p-4 rounded-xl text-center"
-                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
-              >
-                <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                  No written reviews yet — be the first to share your thoughts!
-                </p>
               </div>
             )}
 
