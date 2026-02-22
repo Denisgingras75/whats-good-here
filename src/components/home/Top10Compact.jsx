@@ -137,7 +137,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
               color: podium.text,
             }}
           >
-            #{rank} {town ? `in ${town}` : 'on the Vineyard'}
+            #{rank} {town ? `in ${town}` : 'Nearby'}
           </span>
         </div>
 

@@ -1,5 +1,5 @@
 /**
- * WghLogo — Location pin with Martha's Vineyard silhouette inside.
+ * WghLogo — Location pin with island silhouette inside.
  * Uses the actual mv-outline.png image inside a pin shape.
  */
 export function WghLogo({ size = 64, color = 'var(--color-primary)', className = '', style = {} }) {

@@ -246,7 +246,7 @@ export function Home() {
           >
             {selectedCategoryLabel
               ? (town ? 'Best ' + selectedCategoryLabel.label + ' in ' + town : 'Best ' + selectedCategoryLabel.label)
-              : (town ? 'Top Rated in ' + town : 'Top Rated on the Vineyard')
+              : (town ? 'Top Rated in ' + town : 'Top Rated Nearby')
             }
           </h2>
           <TownPicker

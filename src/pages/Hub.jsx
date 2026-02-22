@@ -165,8 +165,8 @@ export function Hub() {
           style={{ color: 'var(--color-text-secondary)' }}
         >
           {thisWeekCount > 0
-            ? thisWeekCount + ' event' + (thisWeekCount === 1 ? '' : 's') + ' this week on Martha\'s Vineyard'
-            : 'on Martha\'s Vineyard'}
+            ? thisWeekCount + ' event' + (thisWeekCount === 1 ? '' : 's') + ' this week'
+            : 'Happening near you'}
         </p>
       </header>
 

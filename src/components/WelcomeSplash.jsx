@@ -100,7 +100,7 @@ export function WelcomeSplash({ onComplete }) {
             marginTop: '14px',
           }}
         >
-          Martha's Vineyard
+          Dish Discovery
         </p>
       </div>
 

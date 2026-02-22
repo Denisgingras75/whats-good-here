@@ -11,7 +11,7 @@ import { capture } from '../../lib/analytics'
 const STEPS = [
   {
     id: 'welcome',
-    title: 'Find the best dishes on Martha\'s Vineyard',
+    title: 'Find the best dishes near you',
     subtitle: 'Real ratings from locals & visitors like you',
     description: 'No more guessing. See what\'s actually worth ordering.',
   },
@@ -175,7 +175,7 @@ export function WelcomeModal() {
               marginTop: '14px',
             }}
           >
-            Martha's Vineyard
+            Dish Discovery
           </p>
         </div>
       </div>
