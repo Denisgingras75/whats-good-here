@@ -14,6 +14,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary'
 import { DishListItem } from '../components/DishListItem'
 import { CategoryChips } from '../components/CategoryChips'
 import { SectionHeader } from '../components/SectionHeader'
+import { EmptyState } from '../components/EmptyState'
 import { logger } from '../utils/logger'
 
 var RestaurantMap = lazy(function () {
@@ -229,11 +230,10 @@ export function Home() {
                 })}
               </div>
             ) : (
-              <div className="py-8 text-center">
-                <p className="font-medium" style={{ fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
-                  No dishes found for &ldquo;{searchQuery}&rdquo;
-                </p>
-              </div>
+              <EmptyState
+                emoji="🔍"
+                title={'No dishes found for \u201c' + searchQuery + '\u201d'}
+              />
             )
           ) : loading ? (
             <ListSkeleton />
@@ -247,22 +247,22 @@ export function Home() {
             <div className="flex flex-col" style={{ gap: '2px' }}>
               {rankedDishes.map(function (dish, i) {
                 return (
-                  <DishRow
+                  <DishListItem
                     key={dish.dish_id}
                     dish={dish}
                     rank={i + 1}
                     highlighted={highlightedDishId === dish.dish_id}
+                    showDistance
                     onClick={function () { navigate('/dish/' + dish.dish_id) }}
                   />
                 )
               })}
             </div>
           ) : (
-            <div className="py-8 text-center">
-              <p className="font-medium" style={{ fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
-                {selectedCategory ? 'No ' + (selectedCategoryLabel ? selectedCategoryLabel.label : '') + ' rated yet' : 'No dishes found'}
-              </p>
-            </div>
+            <EmptyState
+              emoji="🍽️"
+              title={selectedCategory ? 'No ' + (selectedCategoryLabel ? selectedCategoryLabel.label : '') + ' rated yet' : 'No dishes found'}
+            />
           )}
         </div>
       </BottomSheet>
