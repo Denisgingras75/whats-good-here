@@ -13,7 +13,7 @@ import { getStorageItem, setStorageItem } from '../lib/storage'
 import { BROWSE_CATEGORIES, CATEGORY_INFO } from '../constants/categories'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRelatedSuggestions } from '../constants/searchSuggestions'
-import { RankedDishRow } from '../components/home/RankedDishRow'
+import { DishListItem } from '../components/DishListItem'
 import { getPendingVoteFromStorage } from '../lib/storage'
 import { LoginModal } from '../components/Auth/LoginModal'
 import { DishCardSkeleton } from '../components/Skeleton'
@@ -805,10 +805,11 @@ export function Browse() {
                 {/* Podium rows 1-3 */}
                 {filteredDishes.slice(0, 3).map((dish, index) => (
                   <div key={dish.dish_id} style={{ marginBottom: '6px' }}>
-                    <RankedDishRow
+                    <DishListItem
                       dish={dish}
                       rank={index + 1}
                       sortBy={sortBy}
+                      showDistance
                     />
                   </div>
                 ))}
@@ -819,11 +820,12 @@ export function Browse() {
                     className="mt-3 rounded-xl overflow-hidden"
                   >
                     {filteredDishes.slice(3, 10).map((dish, index) => (
-                      <RankedDishRow
+                      <DishListItem
                         key={dish.dish_id}
                         dish={dish}
                         rank={index + 4}
                         sortBy={sortBy}
+                        showDistance
                         isLast={index === Math.min(filteredDishes.length - 4, 6)}
                       />
                     ))}
@@ -847,11 +849,12 @@ export function Browse() {
                       className="mt-3 rounded-xl overflow-hidden"
                     >
                       {filteredDishes.slice(10).map((dish, index) => (
-                        <RankedDishRow
+                        <DishListItem
                           key={dish.dish_id}
                           dish={dish}
                           rank={index + 11}
                           sortBy={sortBy}
+                          showDistance
                           isLast={index === filteredDishes.length - 11}
                         />
                       ))}
