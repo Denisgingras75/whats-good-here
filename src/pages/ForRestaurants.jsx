@@ -176,7 +176,7 @@ export function ForRestaurants() {
           See Restaurants on WGH
         </button>
         <p className="mt-4" style={{ fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
-          Questions? Reach out — <a href="mailto:denis@whatsgoodhere.app" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>denis@whatsgoodhere.app</a>
+          Questions? Reach out — <a href="mailto:denisgingras75@gmail.com" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>denisgingras75@gmail.com</a>
         </p>
       </div>
     </div>
