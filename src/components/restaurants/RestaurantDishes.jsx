@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
-import { TopDishCard } from './TopDishCard'
+import { DishListItem } from '../DishListItem'
 import { SectionHeader } from '../SectionHeader'
 
 const TOP_DISHES_COUNT = 5
 
 // Restaurant dishes component - Job #2: "What should I order?"
-export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isFavorite, onToggleFavorite, user, searchQuery = '', friendsVotesByDish = {}, restaurantName, restaurantTown, onAddDish }) {
+export function RestaurantDishes({ dishes, loading, error, searchQuery = '', friendsVotesByDish = {}, onAddDish }) {
   const [showAllDishes, setShowAllDishes] = useState(false)
 
   // Filter and sort dishes
@@ -88,14 +88,6 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
     )
   }
 
-  const handleToggleSave = async (dishId) => {
-    if (!user) {
-      onLoginRequired()
-      return
-    }
-    await onToggleFavorite(dishId)
-  }
-
   return (
     <div className="px-4 py-5">
       {/* Section Header */}
@@ -164,19 +156,14 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
 
       {/* Top Dishes */}
       {sortedDishes.top.length > 0 ? (
-        <div className="space-y-3.5">
+        <div>
           {sortedDishes.top.map((dish, index) => (
-            <TopDishCard
+            <DishListItem
               key={dish.dish_id}
               dish={dish}
               rank={index + 1}
-              onVote={onVote}
-              onLoginRequired={onLoginRequired}
-              isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
-              onToggleFavorite={handleToggleSave}
-              friendVotes={friendsVotesByDish[dish.dish_id]}
-              restaurantName={restaurantName}
-              restaurantTown={restaurantTown}
+              showPhoto
+              isLast={index === sortedDishes.top.length - 1}
             />
           ))}
         </div>
@@ -246,19 +233,14 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
           </button>
 
           {showAllDishes && (
-            <div className="mt-4 space-y-3.5">
+            <div className="mt-4">
               {sortedDishes.rest.map((dish, index) => (
-                <TopDishCard
+                <DishListItem
                   key={dish.dish_id}
                   dish={dish}
                   rank={TOP_DISHES_COUNT + index + 1}
-                  onVote={onVote}
-                  onLoginRequired={onLoginRequired}
-                  isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
-                  onToggleFavorite={handleToggleSave}
-                  friendVotes={friendsVotesByDish[dish.dish_id]}
-                  restaurantName={restaurantName}
-                  restaurantTown={restaurantTown}
+                  showPhoto
+                  isLast={index === sortedDishes.rest.length - 1}
                 />
               ))}
             </div>
