@@ -163,67 +163,100 @@ export function Discover() {
       )}
 
       {/* Trending Now Section */}
-      {trending.length > 1 && (
-        <div className="pt-5">
-          <div className="px-4 mb-3 flex items-center gap-2">
-            <h3 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
-              Trending Now
-            </h3>
-            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Most voted this week
-            </span>
-          </div>
-          <div
-            className="flex gap-3 overflow-x-auto px-4 pb-2"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            {trending.slice(1).map((dish) => (
-              <button
-                key={dish.dish_id}
-                onClick={() => navigate(`/dish/${dish.dish_id}`)}
-                className="flex-shrink-0 w-36 rounded-xl overflow-hidden text-left transition-all active:scale-[0.97]"
+      {trending.length > 1 && (() => {
+        var trendingRest = trending.slice(1)
+        var withPhotos = trendingRest.filter((d) => d.photo_url)
+        var useCarousel = withPhotos.length >= 3
+
+        return (
+          <div className="pt-5">
+            <div className="px-4 mb-3 flex items-center gap-2">
+              <h3 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                Trending Now
+              </h3>
+              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                Most voted this week
+              </span>
+            </div>
+
+            {useCarousel ? (
+              <div
+                className="flex gap-3 overflow-x-auto px-4 pb-2"
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                {withPhotos.map((dish) => (
+                  <button
+                    key={dish.dish_id}
+                    onClick={() => navigate(`/dish/${dish.dish_id}`)}
+                    className="flex-shrink-0 w-36 rounded-xl overflow-hidden text-left transition-all active:scale-[0.97]"
+                    style={{
+                      background: 'var(--color-card)',
+                      border: '1px solid var(--color-divider)',
+                    }}
+                  >
+                    <img
+                      src={dish.photo_url}
+                      alt={dish.dish_name}
+                      className="w-full h-24 object-cover"
+                      loading="lazy"
+                    />
+                    <div className="p-2.5">
+                      <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {dish.dish_name}
+                      </p>
+                      <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                        {dish.restaurant_name}
+                      </p>
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
+                          {dish.recent_votes} votes
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              /* Compact list fallback when not enough photos */
+              <div
+                className="mx-4 rounded-xl overflow-hidden"
                 style={{
                   background: 'var(--color-card)',
                   border: '1px solid var(--color-divider)',
                 }}
               >
-                {dish.photo_url ? (
-                  <img
-                    src={dish.photo_url}
-                    alt={dish.dish_name}
-                    className="w-full h-24 object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div
-                    className="w-full h-24 flex items-center justify-center text-3xl"
-                    style={{ background: 'var(--color-surface-elevated)' }}
+                {trendingRest.map((dish, i) => (
+                  <button
+                    key={dish.dish_id}
+                    onClick={() => navigate(`/dish/${dish.dish_id}`)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors active:scale-[0.99]"
+                    style={{
+                      borderBottom: i < trendingRest.length - 1 ? '1px solid var(--color-divider)' : 'none',
+                    }}
                   >
-                    {getCategoryEmoji(dish.category)}
-                  </div>
-                )}
-                <div className="p-2.5">
-                  <p className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
-                    {dish.dish_name}
-                  </p>
-                  <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-                    {dish.restaurant_name}
-                  </p>
-                  <div className="flex items-center gap-1 mt-1.5">
-                    <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>
+                    <span className="text-lg flex-shrink-0">{getCategoryEmoji(dish.category)}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {dish.dish_name}
+                      </p>
+                      <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                        {dish.restaurant_name}
+                      </p>
+                    </div>
+                    <span className="text-xs font-medium flex-shrink-0" style={{ color: 'var(--color-primary)' }}>
                       {dish.recent_votes} votes
                     </span>
-                  </div>
-                </div>
-              </button>
-            ))}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* New on the Menu Section */}
       {recent.length > 0 && (
