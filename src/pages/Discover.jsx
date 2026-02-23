@@ -5,7 +5,7 @@ import { useEvents } from '../hooks/useEvents'
 import { useTrendingDishes, useRecentDishes } from '../hooks/useTrendingDishes'
 import { SpecialCard } from '../components/SpecialCard'
 import { EventCard } from '../components/EventCard'
-import { getCategoryEmoji } from '../constants/categories'
+import { CategoryIcon } from '../components/home/CategoryIcons'
 import { ScorePill } from '../components/ScorePill'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { logger } from '../utils/logger'
@@ -267,7 +267,7 @@ export function Discover() {
                   borderBottom: i < recent.length - 1 ? '2px solid var(--color-card-border)' : 'none',
                 }}
               >
-                <span className="text-lg flex-shrink-0">{getCategoryEmoji(dish.category)}</span>
+                <CategoryIcon categoryId={dish.category} dishName={dish.dish_name} size={28} color="var(--color-primary)" />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
                     {dish.dish_name}

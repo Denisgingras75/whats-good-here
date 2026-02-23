@@ -2,6 +2,7 @@ import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor, formatScore10, getScoreBg } from '../utils/ranking'
+import { CategoryIcon } from './home/CategoryIcons'
 
 /**
  * DishListItem — bold leaderboard row. Score is the visual hero.
@@ -153,6 +154,9 @@ export var DishListItem = memo(function DishListItem({ dish, rank, showDistance,
           {subtitleParts.join(' \u00b7 ')}
         </p>
       </div>
+
+      {/* Food icon — poster style */}
+      <CategoryIcon categoryId={dish.category} dishName={dish.dish_name} size={40} color="var(--color-primary)" />
     </button>
   )
 })

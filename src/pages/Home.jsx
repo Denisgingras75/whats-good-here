@@ -5,6 +5,7 @@ import { useDishes } from '../hooks/useDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { BROWSE_CATEGORIES } from '../constants/categories'
+import { CategoryIcon } from '../components/home/CategoryIcons'
 import { DishSearch } from '../components/DishSearch'
 import { DishListItem } from '../components/DishListItem'
 import { TownPicker } from '../components/TownPicker'
@@ -194,7 +195,7 @@ export function Home() {
                   border: isActive ? '2px solid var(--color-primary)' : '2px solid var(--color-card-border)',
                 }}
               >
-                <span style={{ fontSize: '16px' }}>{cat.emoji}</span>
+                <CategoryIcon categoryId={cat.id} size={20} color={isActive ? 'var(--color-text-on-primary)' : 'var(--color-primary)'} />
                 <span>{cat.label}</span>
               </button>
             )
