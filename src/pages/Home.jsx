@@ -373,7 +373,7 @@ function HeroCard({ dish }) {
             borderRadius: '8px',
             fontWeight: 800,
             fontSize: '13px',
-            color: '#FFFFFF',
+            color: 'var(--color-text-on-primary)',
             background: 'var(--color-accent-gold)',
           }}
         >

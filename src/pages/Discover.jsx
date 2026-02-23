@@ -326,7 +326,7 @@ export function Discover() {
               onClick={() => setFilter(chip.value)}
               className="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all"
               style={filter === chip.value
-                ? { background: 'var(--color-primary)', color: '#fff' }
+                ? { background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }
                 : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-secondary)' }
               }
             >
