@@ -172,7 +172,7 @@ export function Home() {
               minHeight: '44px',
               fontSize: '14px',
               background: selectedCategory === null ? 'var(--color-primary)' : 'transparent',
-              color: selectedCategory === null ? '#FFFFFF' : 'var(--color-text-primary)',
+              color: selectedCategory === null ? 'var(--color-text-on-primary)' : 'var(--color-text-primary)',
               border: selectedCategory === null ? '2px solid var(--color-primary)' : '2px solid var(--color-card-border)',
             }}
           >
@@ -190,7 +190,7 @@ export function Home() {
                   minHeight: '44px',
                   fontSize: '14px',
                   background: isActive ? 'var(--color-primary)' : 'transparent',
-                  color: isActive ? '#FFFFFF' : 'var(--color-text-primary)',
+                  color: isActive ? 'var(--color-text-on-primary)' : 'var(--color-text-primary)',
                   border: isActive ? '2px solid var(--color-primary)' : '2px solid var(--color-card-border)',
                 }}
               >

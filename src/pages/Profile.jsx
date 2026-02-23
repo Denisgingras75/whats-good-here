@@ -230,8 +230,6 @@ export function Profile() {
   // Get dishes for current tab
   const getTabDishes = () => {
     switch (activeTab) {
-      case 'unrated':
-        return unratedDishes
       case 'worth-it':
         return worthItDishes
       case 'avoid':
@@ -247,7 +245,6 @@ export function Profile() {
 
   const tabDishes = getTabDishes()
   const isLoading = activeTab === 'saved' ? favoritesLoading :
-                    activeTab === 'unrated' ? unratedLoading :
                     activeTab === 'reviews' ? reviewsLoading : votesLoading
 
   // Limit to 5 dishes unless expanded
@@ -488,17 +485,7 @@ export function Profile() {
               </div>
             ) : tabDishes.length > 0 ? (
               <div className="space-y-3.5">
-                {activeTab === 'unrated' ? (
-                  // Unrated dishes - clickable to rate
-                  visibleDishes.map((dish) => (
-                    <UnratedDishCard
-                      key={dish.dish_id}
-                      dish={dish}
-                      onClick={() => handleUnratedDishClick(dish)}
-                      onDelete={() => handleDeletePhoto(dish.photo_id)}
-                    />
-                  ))
-                ) : activeTab === 'reviews' ? (
+                {activeTab === 'reviews' ? (
                   // Reviews tab
                   visibleDishes.map((review) => (
                     <ReviewCard
