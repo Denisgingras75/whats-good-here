@@ -64,6 +64,7 @@ const AcceptInvite = lazyWithRetry(() => import('./pages/AcceptInvite'), 'Accept
 const ManageRestaurant = lazyWithRetry(() => import('./pages/ManageRestaurant'), 'ManageRestaurant')
 const Hub = lazyWithRetry(() => import('./pages/Hub'), 'Hub')
 const HowReviewsWork = lazyWithRetry(() => import('./pages/HowReviewsWork'), 'HowReviewsWork')
+const ForRestaurants = lazyWithRetry(() => import('./pages/ForRestaurants'), 'ForRestaurants')
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound')
 
 // Prefetch functions for smoother navigation - call on hover/focus
@@ -141,6 +142,7 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/how-reviews-work" element={<Layout><HowReviewsWork /></Layout>} />
+              <Route path="/for-restaurants" element={<ForRestaurants />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
