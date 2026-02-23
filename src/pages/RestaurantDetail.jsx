@@ -167,7 +167,7 @@ export function RestaurantDetail() {
           <button
             onClick={() => navigate('/restaurants')}
             className="px-4 py-2 text-sm font-medium rounded-lg"
-            style={{ background: 'var(--color-primary)', color: 'white' }}
+            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
           >
             Back to Restaurants
           </button>

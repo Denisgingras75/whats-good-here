@@ -79,7 +79,7 @@ export function NearbyDiscovery({ existingPlaceIds = [] }) {
             <button
               onClick={() => setLoginOpen(true)}
               className="mt-3 px-5 py-2 rounded-full text-sm font-semibold transition-all active:scale-[0.97]"
-              style={{ background: 'var(--color-primary)', color: 'white' }}
+              style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
             >
               Sign in
             </button>

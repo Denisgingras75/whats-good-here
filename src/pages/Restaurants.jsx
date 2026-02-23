@@ -275,7 +275,7 @@ export function Restaurants() {
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 text-sm font-medium rounded-lg"
-              style={{ background: 'var(--color-primary)', color: 'white' }}
+              style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
             >
               Try Again
             </button>

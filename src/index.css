@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap');
 
 /* ===========================
    NProgress Route Transition Bar
@@ -29,48 +29,47 @@
 }
 
 /* ===========================
-   What's Good Here — Warm Editorial (Default)
-   Coral primary, gold accents, quiet chrome, loud votes
+   Island Depths — Default (Dark)
+   Gold primary, editorial authority, content-first
    =========================== */
 :root {
-  /* Primary: Coral — brand color, CTAs, ratings */
-  --color-primary: #E4440A;
-  --color-primary-muted: rgba(228, 68, 10, 0.10);
-  --color-primary-glow: rgba(228, 68, 10, 0.20);
-  --color-rating: #E4440A;
-  /* Secondary: Gold — medals, accents, secondary links */
-  --color-accent-gold: #C48A12;
-  --color-accent-gold-muted: rgba(196, 138, 18, 0.12);
-  --color-link-secondary: #C48A12;
+  /* Primary: Gold — brand color, CTAs, accent */
+  --color-primary: #D9A765;
+  --color-primary-muted: rgba(217, 167, 101, 0.12);
+  --color-primary-glow: rgba(217, 167, 101, 0.25);
+  --color-rating: #6BB384;
+  /* Gold accents (same family as primary in dark) */
+  --color-accent-gold: #D9A765;
+  --color-accent-gold-muted: rgba(217, 167, 101, 0.15);
+  --color-link-secondary: #D9A765;
   --color-accent-orange: #E07856;
-  --color-accent-yellow: #C48A12;
-  /* Text — near-black on warm white */
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #555555;
-  --color-text-tertiary: #999999;
-  /* Surfaces — warm white */
-  --color-bg: #F0ECE8;
-  --color-surface: #F7F4F1;
-  --color-surface-elevated: #FFFFFF;
-  --color-divider: #E5E0DB;
+  --color-accent-yellow: #F5B731;
+  /* Text — warm cream on dark */
+  --color-text-primary: #F5F1E8;
+  --color-text-secondary: #B8A99A;
+  --color-text-tertiary: #7D7168;
+  /* Surfaces — deep navy */
+  --color-bg: #0F1720;
+  --color-surface: #1A2632;
+  --color-surface-elevated: #223040;
+  --color-divider: rgba(217, 167, 101, 0.10);
   /* Category strip */
-  --color-category-strip: #F2CDBC;
+  --color-category-strip: #1A2632;
   /* Cards */
-  --color-card: #FFFFFF;
-  --color-card-hover: #F9F7F5;
-  --color-card-border: #1A1A1A;
-  --color-medal-gold: #E8B820;
-  --color-medal-silver: #9EAAB2;
-  --color-medal-bronze: #B07340;
-  --color-danger: #DC2626;
-  --color-success: #16A34A;
-  --color-success-light: #F0FFF4;
-  --color-success-muted: rgba(22, 163, 74, 0.10);
-  --color-success-border: rgba(22, 163, 74, 0.30);
-  --color-muted: #999999;
-  /* Tagline — muted under headings */
-  --color-text-tagline: #999999;
-  --color-text-on-primary: #FFFFFF;
+  --color-card: #1A2632;
+  --color-card-hover: #223040;
+  --color-card-border: rgba(217, 167, 101, 0.2);
+  --color-medal-gold: #D9A765;
+  --color-medal-silver: #A8B5BF;
+  --color-medal-bronze: #C4855C;
+  --color-danger: #EF4444;
+  --color-success: #6BB384;
+  --color-success-light: #0D2818;
+  --color-success-muted: rgba(107, 179, 132, 0.10);
+  --color-success-border: rgba(107, 179, 132, 0.30);
+  --color-muted: #6B7680;
+  --color-text-tagline: #B8A99A;
+  --color-text-on-primary: #0F1720;
 
   /* Semantic status colors */
   --color-emerald: #10B981;
@@ -83,7 +82,7 @@
   --color-orange: #F97316;
   --color-lime: #84CC16;
   --color-yellow: #EAB308;
-  --color-green-deep: #1A7A42;
+  --color-green-deep: #5BA97A;
   --color-green-dark: #059669;
   --color-blue: #3B82F6;
   --color-blue-light: #60A5FA;
@@ -95,11 +94,11 @@
   --color-tier-hidden: #6B7280;
 
   /* Glow effects */
-  --glow-primary: 0 0 10px rgba(228, 68, 10, 0.15);
-  --glow-gold: 0 0 8px rgba(196, 138, 18, 0.20);
+  --glow-primary: 0 0 16px rgba(217, 167, 101, 0.20);
+  --glow-gold: 0 0 12px rgba(217, 167, 101, 0.25);
 
   /* Focus ring */
-  --focus-ring: 0 0 0 3px rgba(228, 68, 10, 0.25);
+  --focus-ring: 0 0 0 3px rgba(217, 167, 101, 0.25);
 
   /* Spacing rhythm */
   --space-section: 24px;
@@ -112,61 +111,61 @@
   --card-radius-lg: 20px;
 
   /* Score pill background tints */
-  --color-score-great-bg: rgba(22, 163, 74, 0.12);
-  --color-score-good-bg: rgba(22, 163, 74, 0.08);
-  --color-score-mid-bg: rgba(245, 158, 11, 0.10);
-  --color-score-low-bg: rgba(239, 68, 68, 0.08);
-}
-
-/* ===========================
-   Island Depths Theme (Dark Mode Toggle)
-   Dark mode with ocean island vibes
-   =========================== */
-[data-theme="dark"] {
-  --color-primary: #C85A54;
-  --color-primary-muted: rgba(200, 90, 84, 0.15);
-  --color-primary-glow: rgba(200, 90, 84, 0.3);
-  --color-rating: #6BB384;
-  --color-accent-gold: #D9A765;
-  --color-accent-gold-muted: rgba(217, 167, 101, 0.15);
-  --color-link-secondary: #D9A765;
-  --color-accent-yellow: #F5B731;
-  --color-accent-orange: #E07856;
-  /* Text — warm cream on dark */
-  --color-text-primary: #F5F1E8;
-  --color-text-secondary: #B8A99A;
-  --color-text-tertiary: #7D7168;
-  /* Surfaces — deep charcoal-navy */
-  --color-bg: #0D1B22;
-  --color-surface: #0F1F2B;
-  --color-surface-elevated: #162B35;
-  --color-divider: rgba(200, 90, 84, 0.10);
-  --color-category-strip: #162B35;
-  /* Cards — navy-teal */
-  --color-card: #1A3A42;
-  --color-card-hover: #243A43;
-  --color-card-border: rgba(200, 90, 84, 0.3);
-  --color-medal-gold: #D9A765;
-  --color-medal-silver: #A8B5BF;
-  --color-medal-bronze: #C4855C;
-  --color-green-deep: #5BA97A;
-  --color-danger: #C85A54;
-  --color-success: #6BB384;
-  --color-success-light: #0D2818;
-  --color-success-muted: rgba(107, 179, 132, 0.10);
-  --color-success-border: rgba(107, 179, 132, 0.30);
-  --color-muted: #6B7680;
-  --color-text-tagline: #C08B7A;
-  --color-text-on-primary: #F5F1E8;
-  --glow-primary: 0 0 20px rgba(200, 90, 84, 0.25), 0 0 40px rgba(200, 90, 84, 0.1);
-  --glow-gold: 0 0 15px rgba(217, 167, 101, 0.2);
-  --focus-ring: 0 0 0 3px rgba(200, 90, 84, 0.25);
-
-  /* Score pill background tints (dark) */
   --color-score-great-bg: rgba(107, 179, 132, 0.15);
   --color-score-good-bg: rgba(107, 179, 132, 0.10);
   --color-score-mid-bg: rgba(245, 158, 11, 0.12);
   --color-score-low-bg: rgba(239, 68, 68, 0.10);
+}
+
+/* ===========================
+   Appetite Theme (Light Mode Toggle)
+   Warm gold on off-white
+   =========================== */
+[data-theme="light"] {
+  --color-primary: #C48A12;
+  --color-primary-muted: rgba(196, 138, 18, 0.10);
+  --color-primary-glow: rgba(196, 138, 18, 0.20);
+  --color-rating: #16A34A;
+  --color-accent-gold: #C48A12;
+  --color-accent-gold-muted: rgba(196, 138, 18, 0.12);
+  --color-link-secondary: #C48A12;
+  --color-accent-yellow: #C48A12;
+  --color-accent-orange: #E07856;
+  /* Text — near-black on warm white */
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #555555;
+  --color-text-tertiary: #999999;
+  /* Surfaces — warm off-white */
+  --color-bg: #F5F2EE;
+  --color-surface: #FAF8F5;
+  --color-surface-elevated: #FFFFFF;
+  --color-divider: #E5E0DB;
+  --color-category-strip: #F2CDBC;
+  /* Cards */
+  --color-card: #FFFFFF;
+  --color-card-hover: #F9F7F5;
+  --color-card-border: #1A1A1A;
+  --color-medal-gold: #C48A12;
+  --color-medal-silver: #9EAAB2;
+  --color-medal-bronze: #B07340;
+  --color-green-deep: #1A7A42;
+  --color-danger: #DC2626;
+  --color-success: #16A34A;
+  --color-success-light: #F0FFF4;
+  --color-success-muted: rgba(22, 163, 74, 0.10);
+  --color-success-border: rgba(22, 163, 74, 0.30);
+  --color-muted: #999999;
+  --color-text-tagline: #999999;
+  --color-text-on-primary: #1A1A1A;
+  --glow-primary: 0 0 10px rgba(196, 138, 18, 0.15);
+  --glow-gold: 0 0 8px rgba(196, 138, 18, 0.20);
+  --focus-ring: 0 0 0 3px rgba(196, 138, 18, 0.25);
+
+  /* Score pill background tints (light) */
+  --color-score-great-bg: rgba(22, 163, 74, 0.12);
+  --color-score-good-bg: rgba(22, 163, 74, 0.08);
+  --color-score-mid-bg: rgba(245, 158, 11, 0.10);
+  --color-score-low-bg: rgba(239, 68, 68, 0.08);
 }
 
 @tailwind base;
@@ -197,7 +196,12 @@
     overscroll-behavior-y: none;
   }
 
-  h1, h2, h3 {
+  h1, h2 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+  }
+
+  h3 {
     font-weight: 700;
   }
 }
@@ -316,11 +320,11 @@
     border-radius: var(--card-radius-lg);
     overflow: hidden;
     background: var(--color-card);
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.4);
   }
 
-  [data-theme="dark"] .card-hero {
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.4);
+  [data-theme="light"] .card-hero {
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.12);
   }
 
   /* Standard card — bordered content container */
@@ -491,7 +495,7 @@
 
   .welcome-splash__btn--primary {
     background: var(--color-primary);
-    color: white;
+    color: var(--color-text-on-primary);
   }
 
   .welcome-splash__btn--primary:hover {
@@ -1045,7 +1049,7 @@
 
 .photo-upload-retry-btn:hover {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-on-primary);
 }
 
 /* Photo Upload Confirmation */
@@ -1108,7 +1112,7 @@
 .photo-upload-confirmation .btn-primary {
   padding: 10px 24px;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-on-primary);
   border: none;
   border-radius: 8px;
   font-size: 14px;

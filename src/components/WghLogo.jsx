@@ -9,7 +9,7 @@
  *   className - extra class
  *   style     - extra styles
  */
-export function WghLogo({ size = 40, color = 'var(--color-accent-gold)', textColor = 'var(--color-bg)', className = '', style = {} }) {
+export function WghLogo({ size = 40, color = 'var(--color-accent-gold)', textColor = 'var(--color-text-on-primary)', className = '', style = {} }) {
   var scale = size / 52
   var width = Math.round(156 * scale)
 

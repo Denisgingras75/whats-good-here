@@ -223,7 +223,7 @@ export function AddDishModal({ isOpen, onClose, restaurantId, restaurantName, on
             type="submit"
             disabled={submitting || !name.trim() || !category}
             className="w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50"
-            style={{ background: 'var(--color-primary)', color: 'white' }}
+            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
           >
             {submitting ? 'Adding...' : 'Add Dish'}
           </button>
