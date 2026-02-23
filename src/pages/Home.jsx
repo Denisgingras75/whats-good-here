@@ -1,18 +1,17 @@
-import { useState, useMemo, useCallback, useRef, useEffect, lazy, Suspense } from 'react'
+import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
-import { useMapDishes } from '../hooks/useMapDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
-import { BROWSE_CATEGORIES, getCategoryEmoji } from '../constants/categories'
-import { BottomSheet } from '../components/BottomSheet'
+import { BROWSE_CATEGORIES } from '../constants/categories'
 import { DishSearch } from '../components/DishSearch'
+import { DishListItem } from '../components/DishListItem'
 import { TownPicker } from '../components/TownPicker'
 import { RadiusSheet } from '../components/LocationPicker'
 import { ErrorBoundary } from '../components/ErrorBoundary'
-import { getRatingColor } from '../utils/ranking'
-import { logger } from '../utils/logger'
+import { ScorePill } from '../components/ScorePill'
+import { ConsensusBar } from '../components/ConsensusBar'
 
 var RestaurantMap = lazy(function () {
   return import('../components/restaurants/RestaurantMap').then(function (m) {
@@ -29,11 +28,7 @@ export function Home() {
   var [radiusSheetOpen, setRadiusSheetOpen] = useState(false)
   var [searchQuery, setSearchQuery] = useState('')
   var [searchLimit, setSearchLimit] = useState(10)
-  var [_sheetDetent, setSheetDetent] = useState('half')
-  var [highlightedDishId, setHighlightedDishId] = useState(null)
-
-  var sheetRef = useRef(null)
-  var highlightTimerRef = useRef(null)
+  var [showMap, setShowMap] = useState(false)
 
   var handleSearchChange = useCallback(function (q) {
     setSearchQuery(q)
@@ -46,15 +41,11 @@ export function Home() {
   var searchResults = searchData.results
   var searchLoading = searchData.loading
 
-  // Ranked dishes for the list
+  // Ranked dishes for the feed
   var dishData = useDishes(location, radius, null, null, town)
   var dishes = dishData.dishes
   var loading = dishData.loading
   var error = dishData.error
-
-  // Map dishes — filtered by category
-  var mapData = useMapDishes({ location: location, radius: radius, town: town, category: selectedCategory })
-  var mapDishes = mapData.dishes
 
   // Rank-sort function
   var rankSort = function (a, b) {
@@ -65,7 +56,7 @@ export function Home() {
     return (b.avg_rating || 0) - (a.avg_rating || 0)
   }
 
-  // Filtered + sorted dishes for the list
+  // Filtered + sorted dishes
   var rankedDishes = useMemo(function () {
     if (!dishes || dishes.length === 0) return []
     var filtered = dishes
@@ -81,227 +72,174 @@ export function Home() {
     ? BROWSE_CATEGORIES.find(function (c) { return c.id === selectedCategory })
     : null
 
-  // ─── Map pin tap handler: scroll to dish + highlight ─────────
-  var handlePinTap = useCallback(function (dishId) {
-    logger.debug('Pin tapped, dishId:', dishId)
-
-    // Open sheet to half if in peek
-    if (sheetRef.current) {
-      sheetRef.current.setDetent('half')
-    }
-
-    // Set highlighted dish (triggers gold flash)
-    setHighlightedDishId(dishId)
-
-    // Clear previous timer
-    if (highlightTimerRef.current) {
-      clearTimeout(highlightTimerRef.current)
-    }
-
-    // Clear highlight after 1.5s (the CSS transition handles the fade)
-    highlightTimerRef.current = setTimeout(function () {
-      setHighlightedDishId(null)
-    }, 1500)
-
-    // Scroll to the dish row after a brief delay (let sheet open first)
-    setTimeout(function () {
-      var contentEl = sheetRef.current && sheetRef.current.getContentEl()
-      if (!contentEl) return
-      var dishEl = contentEl.querySelector('[data-dish-id="' + dishId + '"]')
-      if (dishEl) {
-        dishEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
-    }, 350)
-  }, [])
-
-  // Cleanup highlight timer on unmount
-  useEffect(function () {
-    return function () {
-      if (highlightTimerRef.current) {
-        clearTimeout(highlightTimerRef.current)
-      }
-    }
-  }, [])
-
-  return (
-    <div className="min-h-screen relative" style={{ background: 'var(--color-bg)' }}>
-      <h1 className="sr-only">What's Good Here - Food Discovery Map</h1>
-
-      {/* Full-screen map — the background layer */}
-      <div className="fixed inset-0" style={{ zIndex: 1 }}>
-        <ErrorBoundary>
-          <Suspense fallback={
-            <div className="w-full h-full" style={{ background: 'var(--color-bg)' }} />
-          }>
-            <RestaurantMap
-              mode="dish"
-              dishes={mapDishes}
-              userLocation={location}
-              town={town}
-              onSelectDish={handlePinTap}
-              radiusMi={radius}
-              permissionGranted={permissionState === 'granted'}
-              fullScreen
-            />
-          </Suspense>
-        </ErrorBoundary>
-      </div>
-
-      {/* Bottom sheet — the content layer */}
-      <BottomSheet ref={sheetRef} initialDetent={0.50} onDetentChange={setSheetDetent}>
-        {/* Search + controls row */}
-        <div className="px-4 pb-3">
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
-              <DishSearch
-                loading={loading}
-                placeholder="What are you craving?"
+  // Map overlay mode
+  if (showMap) {
+    return (
+      <div className="min-h-screen relative" style={{ background: 'var(--color-bg)' }}>
+        <div className="fixed inset-0" style={{ zIndex: 1 }}>
+          <ErrorBoundary>
+            <Suspense fallback={
+              <div className="w-full h-full" style={{ background: 'var(--color-bg)' }} />
+            }>
+              <RestaurantMap
+                mode="dish"
+                dishes={dishes || []}
+                userLocation={location}
                 town={town}
-                onSearchChange={handleSearchChange}
+                onSelectDish={function (dishId) { navigate('/dish/' + dishId) }}
+                radiusMi={radius}
+                permissionGranted={permissionState === 'granted'}
+                fullScreen
               />
-            </div>
-            <button
-              onClick={function () { setRadiusSheetOpen(true) }}
-              aria-label={'Search radius: ' + radius + ' miles'}
-              className="flex-shrink-0 flex items-center gap-1 px-3 py-2.5 rounded-xl font-bold"
-              style={{
-                fontSize: '13px',
-                background: 'var(--color-surface)',
-                color: 'var(--color-text-primary)',
-                border: '1px solid var(--color-divider)',
-                minHeight: '44px',
-              }}
-            >
-              {radius} mi
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
+            </Suspense>
+          </ErrorBoundary>
         </div>
-
-        {/* Category chips — sticky */}
-        <div
-          className="sticky top-0 z-10 pb-2"
+        {/* List toggle — return to feed */}
+        <button
+          onClick={function () { setShowMap(false) }}
+          className="fixed z-50 flex items-center gap-2 px-4 py-3 rounded-full card-standard card-press"
           style={{
-            background: 'var(--color-surface-elevated)',
+            bottom: '96px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'var(--color-card)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            fontWeight: 700,
+            fontSize: '14px',
+            color: 'var(--color-text-primary)',
+            minHeight: '48px',
           }}
         >
-          <div
-            className="flex gap-2 px-4 overflow-x-auto"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            {/* "All" chip */}
-            <button
-              onClick={function () { setSelectedCategory(null) }}
-              className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-semibold"
-              style={{
-                padding: '10px 16px',
-                minHeight: '44px',
-                fontSize: '14px',
-                background: selectedCategory === null ? 'var(--color-text-primary)' : 'var(--color-surface)',
-                color: selectedCategory === null ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
-                border: selectedCategory === null ? 'none' : '1px solid var(--color-divider)',
-              }}
-            >
-              All
-            </button>
-            {BROWSE_CATEGORIES.slice(0, 12).map(function (cat) {
-              var isActive = selectedCategory === cat.id
-              return (
-                <button
-                  key={cat.id}
-                  onClick={function () { setSelectedCategory(isActive ? null : cat.id) }}
-                  className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-semibold"
-                  style={{
-                    padding: '10px 14px',
-                    minHeight: '44px',
-                    fontSize: '14px',
-                    background: isActive ? 'var(--color-text-primary)' : 'var(--color-surface)',
-                    color: isActive ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
-                    border: isActive ? 'none' : '1px solid var(--color-divider)',
-                  }}
-                >
-                  <span style={{ fontSize: '16px' }}>{cat.emoji}</span>
-                  <span>{cat.label}</span>
-                </button>
-              )
-            })}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          List
+        </button>
+      </div>
+    )
+  }
+
+  // Feed-first layout
+  return (
+    <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
+      <h1 className="sr-only">What's Good Here</h1>
+
+      {/* Search + radius row */}
+      <div className="px-4 pt-3 pb-2">
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <DishSearch
+              loading={loading}
+              placeholder="What are you craving?"
+              town={town}
+              onSearchChange={handleSearchChange}
+            />
           </div>
-        </div>
-
-        {/* Section header */}
-        <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-          <h2
-            className="font-bold"
+          <button
+            onClick={function () { setRadiusSheetOpen(true) }}
+            aria-label={'Search radius: ' + radius + ' miles'}
+            className="flex-shrink-0 flex items-center gap-1 px-3 py-2.5 rounded-xl font-bold"
             style={{
-              fontSize: '18px',
+              fontSize: '13px',
+              background: 'var(--color-surface)',
               color: 'var(--color-text-primary)',
-              letterSpacing: '-0.01em',
+              border: '1px solid var(--color-divider)',
+              minHeight: '44px',
             }}
           >
-            {selectedCategoryLabel
-              ? (town ? 'Best ' + selectedCategoryLabel.label + ' in ' + town : 'Best ' + selectedCategoryLabel.label)
-              : (town ? 'Top Rated in ' + town : 'Top Rated on the Vineyard')
-            }
-          </h2>
-          <TownPicker
-            town={town}
-            onTownChange={setTown}
-            isOpen={townPickerOpen}
-            onToggle={setTownPickerOpen}
-          />
+            {radius} mi
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
+      </div>
 
-        {/* Ranked dish list */}
-        <div className="px-4 pb-4">
-          {searchQuery ? (
-            /* Search results mode */
-            searchLoading ? (
-              <ListSkeleton />
-            ) : searchResults.length > 0 ? (
-              <div className="flex flex-col" style={{ gap: '2px' }}>
-                {searchResults.map(function (dish, i) {
-                  return (
-                    <DishRow
-                      key={dish.dish_id}
-                      dish={dish}
-                      rank={i + 1}
-                      highlighted={highlightedDishId === dish.dish_id}
-                      onClick={function () { navigate('/dish/' + dish.dish_id) }}
-                    />
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="py-8 text-center">
-                <p className="font-medium" style={{ fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
-                  No dishes found for &ldquo;{searchQuery}&rdquo;
-                </p>
-              </div>
+      {/* Category chips — sticky */}
+      <div
+        className="sticky top-0 z-10 pb-2"
+        style={{ background: 'var(--color-bg)' }}
+      >
+        <div
+          className="flex gap-2 px-4 overflow-x-auto scrollbar-hide"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          <button
+            onClick={function () { setSelectedCategory(null) }}
+            className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-semibold"
+            style={{
+              padding: '10px 16px',
+              minHeight: '44px',
+              fontSize: '14px',
+              background: selectedCategory === null ? 'var(--color-text-primary)' : 'var(--color-surface)',
+              color: selectedCategory === null ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
+              border: selectedCategory === null ? 'none' : '1px solid var(--color-divider)',
+            }}
+          >
+            All
+          </button>
+          {BROWSE_CATEGORIES.slice(0, 12).map(function (cat) {
+            var isActive = selectedCategory === cat.id
+            return (
+              <button
+                key={cat.id}
+                onClick={function () { setSelectedCategory(isActive ? null : cat.id) }}
+                className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-semibold"
+                style={{
+                  padding: '10px 14px',
+                  minHeight: '44px',
+                  fontSize: '14px',
+                  background: isActive ? 'var(--color-text-primary)' : 'var(--color-surface)',
+                  color: isActive ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
+                  border: isActive ? 'none' : '1px solid var(--color-divider)',
+                }}
+              >
+                <span style={{ fontSize: '16px' }}>{cat.emoji}</span>
+                <span>{cat.label}</span>
+              </button>
             )
-          ) : loading ? (
-            <ListSkeleton />
-          ) : error ? (
-            <div className="py-8 text-center">
-              <p role="alert" style={{ fontSize: '14px', color: 'var(--color-danger)' }}>
-                {error.message || error}
-              </p>
-            </div>
-          ) : rankedDishes.length > 0 ? (
+          })}
+        </div>
+      </div>
+
+      {/* Section header */}
+      <div className="px-4 pt-3 pb-2 flex items-center justify-between">
+        <h2
+          className="font-bold"
+          style={{
+            fontSize: '18px',
+            color: 'var(--color-text-primary)',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          {selectedCategoryLabel
+            ? (town ? 'Best ' + selectedCategoryLabel.label + ' in ' + town : 'Best ' + selectedCategoryLabel.label)
+            : (town ? 'Top Rated in ' + town : 'Top Rated on the Vineyard')
+          }
+        </h2>
+        <TownPicker
+          town={town}
+          onTownChange={setTown}
+          isOpen={townPickerOpen}
+          onToggle={setTownPickerOpen}
+        />
+      </div>
+
+      {/* Feed content */}
+      <div className="px-4 pb-24">
+        {searchQuery ? (
+          /* Search results mode */
+          searchLoading ? (
+            <FeedSkeleton />
+          ) : searchResults.length > 0 ? (
             <div className="flex flex-col" style={{ gap: '2px' }}>
-              {rankedDishes.map(function (dish, i) {
+              {searchResults.map(function (dish, i) {
                 return (
-                  <DishRow
+                  <DishListItem
                     key={dish.dish_id}
                     dish={dish}
                     rank={i + 1}
-                    highlighted={highlightedDishId === dish.dish_id}
-                    onClick={function () { navigate('/dish/' + dish.dish_id) }}
+                    showDistance
                   />
                 )
               })}
@@ -309,12 +247,65 @@ export function Home() {
           ) : (
             <div className="py-8 text-center">
               <p className="font-medium" style={{ fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
-                {selectedCategory ? 'No ' + (selectedCategoryLabel ? selectedCategoryLabel.label : '') + ' rated yet' : 'No dishes found'}
+                No dishes found for &ldquo;{searchQuery}&rdquo;
               </p>
             </div>
-          )}
-        </div>
-      </BottomSheet>
+          )
+        ) : loading ? (
+          <FeedSkeleton />
+        ) : error ? (
+          <div className="py-8 text-center">
+            <p role="alert" style={{ fontSize: '14px', color: 'var(--color-danger)' }}>
+              {error.message || error}
+            </p>
+          </div>
+        ) : rankedDishes.length > 0 ? (
+          <>
+            {/* Hero card for #1 dish */}
+            <HeroCard dish={rankedDishes[0]} />
+
+            {/* Ranked list #2+ */}
+            <div className="flex flex-col mt-2" style={{ gap: '2px' }}>
+              {rankedDishes.slice(1).map(function (dish, i) {
+                return (
+                  <DishListItem
+                    key={dish.dish_id}
+                    dish={dish}
+                    rank={i + 2}
+                    showDistance
+                    className="stagger-item"
+                  />
+                )
+              })}
+            </div>
+
+            {/* View all link */}
+            {rankedDishes.length >= 10 && (
+              <button
+                onClick={function () { navigate('/browse') }}
+                className="w-full mt-4 py-3 rounded-xl font-semibold card-press"
+                style={{
+                  fontSize: '14px',
+                  color: 'var(--color-primary)',
+                  background: 'var(--color-primary-muted)',
+                  border: 'none',
+                }}
+              >
+                View all dishes
+              </button>
+            )}
+          </>
+        ) : (
+          <div className="py-8 text-center">
+            <p className="font-medium" style={{ fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
+              {selectedCategory ? 'No ' + (selectedCategoryLabel ? selectedCategoryLabel.label : '') + ' rated yet' : 'No dishes found'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Floating map toggle — fixed bottom-right above BottomNav */}
+      <MapToggleButton onClick={function () { setShowMap(true) }} />
 
       {/* Radius Sheet */}
       <RadiusSheet
@@ -327,102 +318,145 @@ export function Home() {
   )
 }
 
-/* --- DishRow -- clean ranked row for the list ----------------------------- */
-function DishRow({ dish, rank, highlighted, onClick }) {
+/* --- HeroCard — #1 dish gets hero treatment -------------------------------- */
+function HeroCard({ dish }) {
+  var navigate = useNavigate()
   var isRanked = (dish.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-  var emoji = getCategoryEmoji(dish.category)
+  var hasPhoto = dish.photo_url
+
+  var handleClick = function () {
+    navigate('/dish/' + dish.dish_id)
+  }
+
+  // No photo — fall back to DishListItem with rank 1
+  if (!hasPhoto) {
+    return (
+      <DishListItem dish={dish} rank={1} showDistance className="stagger-item" />
+    )
+  }
 
   return (
     <button
-      data-dish-id={dish.dish_id}
-      onClick={onClick}
-      className="w-full flex items-center gap-3 py-3 px-3 rounded-xl active:scale-[0.98]"
-      style={{
-        background: highlighted
-          ? 'var(--color-accent-gold-muted)'
-          : rank <= 3
-            ? 'var(--color-surface)'
-            : 'transparent',
-        textAlign: 'left',
-        minHeight: '48px',
-        cursor: 'pointer',
-        transition: 'background 1s ease-out',
-      }}
+      onClick={handleClick}
+      className="w-full card-hero card-press stagger-item"
+      style={{ position: 'relative', textAlign: 'left' }}
     >
-      {/* Rank */}
-      <span
-        className="flex-shrink-0 font-bold"
-        style={{
-          width: '28px',
-          textAlign: 'center',
-          fontSize: rank <= 3 ? '18px' : '14px',
-          color: rank === 1 ? 'var(--color-accent-gold)' : rank <= 3 ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
-          fontWeight: 800,
-        }}
-      >
-        {rank}
-      </span>
-
-      {/* Emoji */}
-      <span className="flex-shrink-0" style={{ fontSize: '24px' }}>{emoji}</span>
-
-      {/* Name + restaurant */}
-      <div className="flex-1 min-w-0">
-        <p
-          className="font-bold truncate"
+      {/* Photo */}
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 10' }}>
+        <img
+          src={dish.photo_url}
+          alt={dish.dish_name}
+          loading="eager"
           style={{
-            fontSize: '15px',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
+        />
+        {/* Gradient overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)',
+          }}
+        />
+
+        {/* #1 badge */}
+        <span
+          style={{
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            padding: '4px 10px',
+            borderRadius: '8px',
+            fontWeight: 800,
+            fontSize: '13px',
+            color: '#FFFFFF',
+            background: 'var(--color-accent-gold)',
+          }}
+        >
+          #1
+        </span>
+
+        {/* Score pill top-right */}
+        {isRanked && (
+          <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
+            <ScorePill score={dish.avg_rating} size="md" />
+          </div>
+        )}
+      </div>
+
+      {/* Info bar */}
+      <div className="px-4 py-3">
+        <h3
+          className="font-bold"
+          style={{
+            fontSize: '18px',
             color: 'var(--color-text-primary)',
-            lineHeight: 1.3,
+            lineHeight: 1.2,
+            letterSpacing: '-0.01em',
           }}
         >
           {dish.dish_name}
-        </p>
+        </h3>
         <p
-          className="truncate"
           style={{
-            fontSize: '12px',
-            color: 'var(--color-text-tertiary)',
-            marginTop: '1px',
+            fontSize: '13px',
+            color: 'var(--color-text-secondary)',
+            marginTop: '2px',
           }}
         >
           {dish.restaurant_name}
           {dish.distance_miles != null ? ' \u00b7 ' + Number(dish.distance_miles).toFixed(1) + ' mi' : ''}
         </p>
-      </div>
-
-      {/* Rating */}
-      <div className="flex-shrink-0 text-right">
-        {isRanked ? (
-          <span
-            className="font-bold"
-            style={{
-              fontSize: '17px',
-              color: getRatingColor(dish.avg_rating),
-            }}
-          >
-            {dish.avg_rating}
-          </span>
-        ) : (
-          <span
-            style={{
-              fontSize: '12px',
-              color: 'var(--color-text-tertiary)',
-              fontWeight: 500,
-            }}
-          >
-            {dish.total_votes ? dish.total_votes + ' vote' + (dish.total_votes === 1 ? '' : 's') : 'New'}
-          </span>
-        )}
+        <div style={{ marginTop: '6px' }}>
+          <ConsensusBar
+            avgRating={dish.avg_rating}
+            totalVotes={dish.total_votes}
+            percentWorthIt={dish.percent_worth_it}
+            compact
+          />
+        </div>
       </div>
     </button>
   )
 }
 
-/* --- Loading skeleton ----------------------------------------------------- */
-function ListSkeleton() {
+/* --- MapToggleButton — floating pill, bottom-right above BottomNav --------- */
+function MapToggleButton({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Show map view"
+      className="fixed z-40 flex items-center gap-2 px-4 py-3 rounded-full card-standard card-press"
+      style={{
+        bottom: '96px',
+        right: '16px',
+        background: 'var(--color-card)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+        fontWeight: 700,
+        fontSize: '14px',
+        color: 'var(--color-text-primary)',
+        minHeight: '48px',
+      }}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+      </svg>
+      Map
+    </button>
+  )
+}
+
+/* --- Loading skeleton ------------------------------------------------------ */
+function FeedSkeleton() {
   return (
     <div className="animate-pulse">
+      {/* Hero skeleton */}
+      <div className="rounded-2xl overflow-hidden mb-4" style={{ background: 'var(--color-divider)', aspectRatio: '16 / 10' }} />
+      {/* Row skeletons */}
       {[0, 1, 2, 3, 4].map(function (i) {
         return (
           <div key={i} className="flex items-center gap-3 py-3 px-3">
