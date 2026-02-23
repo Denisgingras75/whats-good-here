@@ -608,7 +608,7 @@ export function Browse() {
                     className="flex items-center gap-3 px-4 py-4 rounded-xl card-press text-left"
                     style={{
                       background: 'var(--color-surface)',
-                      border: '1px solid var(--color-divider)',
+                      border: '2px solid var(--color-card-border)',
                     }}
                   >
                     <span style={{ fontSize: '32px' }}>{category.emoji}</span>
@@ -630,7 +630,7 @@ export function Browse() {
         /* ─── Dish list view ─────────────────────────────────────── */
         <>
           {/* Category/Search header */}
-          <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--color-divider)' }}>
+          <div className="px-4 py-3" style={{ borderBottom: '2px solid var(--color-card-border)' }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button
@@ -660,7 +660,7 @@ export function Browse() {
                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium"
                   style={{
                     background: 'var(--color-surface)',
-                    border: '1px solid var(--color-divider)',
+                    border: '2px solid var(--color-card-border)',
                     color: 'var(--color-text-secondary)',
                   }}
                 >
@@ -741,7 +741,7 @@ export function Browse() {
                           style={{
                             background: 'var(--color-surface)',
                             color: 'var(--color-text-primary)',
-                            border: '1px solid var(--color-divider)',
+                            border: '2px solid var(--color-card-border)',
                           }}
                         >
                           {suggestion.charAt(0).toUpperCase() + suggestion.slice(1)}
@@ -781,7 +781,7 @@ export function Browse() {
                       style={{
                         background: 'var(--color-surface)',
                         color: 'var(--color-text-secondary)',
-                        border: '1px solid var(--color-divider)',
+                        border: '2px solid var(--color-card-border)',
                       }}
                     >
                       Show {filteredDishes.length - 10} more dishes
@@ -805,7 +805,7 @@ export function Browse() {
 
             {/* Footer */}
             {!loading && filteredDishes.length > 0 && (
-              <div className="mt-8 pt-6 text-center" style={{ borderTop: '1px solid var(--color-divider)' }}>
+              <div className="mt-8 pt-6 text-center" style={{ borderTop: '2px solid var(--color-card-border)' }}>
                 <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                   {filteredDishes.length} {filteredDishes.length === 1 ? 'dish' : 'dishes'} found
                 </p>

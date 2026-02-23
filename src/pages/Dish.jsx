@@ -646,7 +646,7 @@ export function Dish() {
                       onClick={() => setLightboxPhoto(photo.photo_url)}
                       aria-label={`View photo of ${dish.dish_name}`}
                       className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                      style={{ border: '1px solid var(--color-divider)' }}
+                      style={{ border: '2px solid var(--color-card-border)' }}
                     >
                       <img
                         src={photo.photo_url}
@@ -880,7 +880,7 @@ export function Dish() {
             {!reviewsLoading && reviews.length === 0 && dish.total_votes > 0 && (
               <div
                 className="mb-6 p-4 rounded-xl text-center"
-                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
+                style={{ background: 'var(--color-surface)', border: '2px solid var(--color-card-border)' }}
               >
                 <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
                   No written reviews yet — be the first to share your thoughts!

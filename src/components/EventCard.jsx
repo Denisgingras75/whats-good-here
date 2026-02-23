@@ -58,8 +58,8 @@ export const EventCard = memo(function EventCard({ event, promoted }) {
       className="w-full rounded-xl p-4 text-left transition-all hover:shadow-lg active:scale-[0.99]"
       style={{
         background: 'var(--color-card)',
-        border: '1px solid var(--color-divider)',
-        borderLeft: promoted ? '3px solid var(--color-accent-gold)' : '1px solid var(--color-divider)',
+        border: '2px solid var(--color-card-border)',
+        borderLeft: promoted ? '3px solid var(--color-accent-gold)' : '2px solid var(--color-card-border)',
       }}
     >
       <div className="flex gap-3">

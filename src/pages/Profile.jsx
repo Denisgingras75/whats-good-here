@@ -439,7 +439,7 @@ export function Profile() {
             style={{
               background: 'var(--color-surface)',
               boxShadow: '0 4px 12px -4px rgba(0, 0, 0, 0.06)',
-              borderBottom: '1px solid var(--color-divider)',
+              borderBottom: '2px solid var(--color-card-border)',
             }}
           >
             <div className="flex gap-1.5 overflow-x-auto overflow-y-hidden px-4 pb-0.5 scrollbar-hide" style={{ touchAction: 'pan-x', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>

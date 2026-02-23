@@ -50,9 +50,9 @@ export function BottomNav() {
       aria-label="Main navigation"
       className="fixed bottom-0 left-0 right-0 z-50 shadow-lg"
       style={{
-        background: 'var(--color-surface)',
-        borderTop: '1px solid rgba(0, 0, 0, 0.06)',
-        boxShadow: '0 -4px 30px rgba(0, 0, 0, 0.08)'
+        background: 'var(--color-bg)',
+        borderTop: '2px solid var(--color-card-border)',
+        boxShadow: 'none'
       }}
     >
       <div className="flex justify-around items-center h-16 pb-safe">

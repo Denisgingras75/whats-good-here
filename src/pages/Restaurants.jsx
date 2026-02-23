@@ -108,7 +108,7 @@ export function Restaurants() {
               style={{
                 height: '260px',
                 background: 'var(--color-card)',
-                border: '1px solid var(--color-divider)',
+                border: '2px solid var(--color-card-border)',
               }}
             >
               <div className="animate-spin w-6 h-6 border-2 rounded-full" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-accent-gold)' }} />
@@ -149,7 +149,7 @@ export function Restaurants() {
               scrollSnapAlign: 'start',
               background: mapCategory === null ? 'var(--color-text-primary)' : 'var(--color-surface-elevated)',
               color: mapCategory === null ? 'var(--color-surface)' : 'var(--color-text-secondary)',
-              border: mapCategory === null ? 'none' : '1px solid var(--color-divider)',
+              border: mapCategory === null ? 'none' : '2px solid var(--color-card-border)',
             }}
           >
             All
@@ -163,7 +163,7 @@ export function Restaurants() {
                 scrollSnapAlign: 'start',
                 background: mapCategory === cat.id ? 'var(--color-text-primary)' : 'var(--color-surface-elevated)',
                 color: mapCategory === cat.id ? 'var(--color-surface)' : 'var(--color-text-secondary)',
-                border: mapCategory === cat.id ? 'none' : '1px solid var(--color-divider)',
+                border: mapCategory === cat.id ? 'none' : '2px solid var(--color-card-border)',
               }}
             >
               <span>{cat.emoji}</span>
@@ -235,7 +235,7 @@ export function Restaurants() {
           className="flex rounded-xl p-1 mb-5"
           style={{
             background: 'var(--color-surface-elevated)',
-            border: '1px solid var(--color-divider)',
+            border: '2px solid var(--color-card-border)',
           }}
           role="tablist"
           aria-label="Restaurant status filter"
@@ -302,7 +302,7 @@ export function Restaurants() {
                 style={{
                   color: 'var(--color-text-tertiary)',
                   background: 'var(--color-bg)',
-                  border: '1px solid var(--color-divider)',
+                  border: '2px solid var(--color-card-border)',
                 }}
               >
                 <p className="font-medium" style={{ fontSize: '14px' }}>
@@ -435,7 +435,7 @@ function NearbyPlaceCard({ place, onAdd }) {
       className="rounded-xl p-4"
       style={{
         background: 'var(--color-card)',
-        border: '1px solid var(--color-divider)',
+        border: '2px solid var(--color-card-border)',
       }}
     >
       <div className="flex items-center justify-between gap-3">

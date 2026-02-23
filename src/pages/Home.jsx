@@ -143,7 +143,7 @@ export function Home() {
               fontSize: '13px',
               background: 'var(--color-surface)',
               color: 'var(--color-text-primary)',
-              border: '1px solid var(--color-divider)',
+              border: '2px solid var(--color-card-border)',
               minHeight: '44px',
             }}
           >
@@ -166,14 +166,14 @@ export function Home() {
         >
           <button
             onClick={function () { setSelectedCategory(null) }}
-            className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-semibold"
+            className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-bold"
             style={{
               padding: '10px 16px',
               minHeight: '44px',
               fontSize: '14px',
-              background: selectedCategory === null ? 'var(--color-text-primary)' : 'var(--color-surface)',
-              color: selectedCategory === null ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
-              border: selectedCategory === null ? 'none' : '1px solid var(--color-divider)',
+              background: selectedCategory === null ? 'var(--color-primary)' : 'transparent',
+              color: selectedCategory === null ? '#FFFFFF' : 'var(--color-text-primary)',
+              border: selectedCategory === null ? '2px solid var(--color-primary)' : '2px solid var(--color-card-border)',
             }}
           >
             All
@@ -184,14 +184,14 @@ export function Home() {
               <button
                 key={cat.id}
                 onClick={function () { setSelectedCategory(isActive ? null : cat.id) }}
-                className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-semibold"
+                className="flex-shrink-0 flex items-center gap-1.5 rounded-full font-bold"
                 style={{
                   padding: '10px 14px',
                   minHeight: '44px',
                   fontSize: '14px',
-                  background: isActive ? 'var(--color-text-primary)' : 'var(--color-surface)',
-                  color: isActive ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
-                  border: isActive ? 'none' : '1px solid var(--color-divider)',
+                  background: isActive ? 'var(--color-primary)' : 'transparent',
+                  color: isActive ? '#FFFFFF' : 'var(--color-text-primary)',
+                  border: isActive ? '2px solid var(--color-primary)' : '2px solid var(--color-card-border)',
                 }}
               >
                 <span style={{ fontSize: '16px' }}>{cat.emoji}</span>
@@ -323,7 +323,7 @@ export function Home() {
                     />
                   </Suspense>
                 </ErrorBoundary>
-                <div className="px-3 py-2 flex items-center justify-between" style={{ borderTop: '1px solid var(--color-divider)' }}>
+                <div className="px-3 py-2 flex items-center justify-between" style={{ borderTop: '2px solid var(--color-card-border)' }}>
                   <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
                     Nearby dishes
                   </span>
@@ -374,8 +374,7 @@ function HeroCard({ dish, town }) {
       className="w-full card-hero card-press stagger-item"
       style={{
         textAlign: 'center',
-        border: '1.5px solid var(--color-accent-gold)',
-        boxShadow: 'var(--glow-gold)',
+        border: '3px solid var(--color-primary)',
       }}
     >
       <div className="px-5 pt-5 pb-5">

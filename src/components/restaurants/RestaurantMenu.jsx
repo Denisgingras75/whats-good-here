@@ -142,7 +142,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
           className="py-10 text-center rounded-xl"
           style={{
             background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232, 102, 60, 0.02) 0%, transparent 70%), var(--color-bg)',
-            border: '1px solid var(--color-divider)',
+            border: '2px solid var(--color-card-border)',
             boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.08)',
           }}
         >
@@ -167,7 +167,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
       className="flex mx-3 my-4 rounded-xl overflow-hidden"
       style={{
         background: 'var(--color-surface)',
-        border: '1px solid var(--color-divider)',
+        border: '2px solid var(--color-card-border)',
         minHeight: '420px',
       }}
     >
@@ -177,7 +177,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
         style={{
           width: '33%',
           background: 'var(--color-bg)',
-          borderRight: '1px solid var(--color-divider)',
+          borderRight: '2px solid var(--color-card-border)',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
@@ -241,7 +241,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
           className="sticky top-0 z-10 px-4 py-3"
           style={{
             background: 'linear-gradient(180deg, var(--color-surface) 85%, transparent)',
-            borderBottom: '1px solid var(--color-divider)',
+            borderBottom: '2px solid var(--color-card-border)',
           }}
         >
           <h3
@@ -272,7 +272,7 @@ export function RestaurantMenu({ dishes, loading, error, searchQuery = '', menuS
                 className="w-full text-left py-3 px-2 transition-all active:scale-[0.98] rounded-lg"
                 style={{
                   borderBottom: i < activeDishes.length - 1
-                    ? '1px solid var(--color-divider)'
+                    ? '2px solid var(--color-card-border)'
                     : 'none',
                 }}
               >

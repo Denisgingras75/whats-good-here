@@ -59,13 +59,15 @@ export var DishListItem = memo(function DishListItem({ dish, rank, showDistance,
       onClick={handleClick}
       className={'w-full flex items-center gap-3 py-3 text-left card-press' + (className ? ' ' + className : '')}
       style={{
-        background: isTop3 ? 'var(--color-surface)' : 'transparent',
+        background: isTop3 ? 'var(--color-surface-elevated)' : 'transparent',
         minHeight: '56px',
         cursor: 'pointer',
-        borderRadius: isTop3 ? '12px' : '0',
-        borderBottom: isTop3 ? 'none' : '1px solid var(--color-divider)',
-        borderLeft: isTop3 ? '3px solid ' + accentColor : 'none',
-        paddingLeft: isTop3 ? '12px' : '12px',
+        borderRadius: isTop3 ? '10px' : '0',
+        borderTop: isTop3 ? '2px solid var(--color-card-border)' : 'none',
+        borderRight: isTop3 ? '2px solid var(--color-card-border)' : 'none',
+        borderBottom: '2px solid var(--color-card-border)',
+        borderLeft: isTop3 ? '4px solid ' + accentColor : 'none',
+        paddingLeft: '12px',
         paddingRight: '12px',
       }}
     >

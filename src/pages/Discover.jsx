@@ -86,7 +86,7 @@ export function Discover() {
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--color-surface)' }}>
+    <div className="min-h-screen pb-24" style={{ background: 'var(--color-bg)' }}>
       <h1 className="sr-only">Discover</h1>
 
       {/* Header */}
@@ -174,7 +174,7 @@ export function Discover() {
                     className="flex-shrink-0 w-36 rounded-xl overflow-hidden text-left transition-all active:scale-[0.97]"
                     style={{
                       background: 'var(--color-card)',
-                      border: '1px solid var(--color-divider)',
+                      border: '2px solid var(--color-card-border)',
                     }}
                   >
                     <img
@@ -205,7 +205,7 @@ export function Discover() {
                 className="mx-4 rounded-xl overflow-hidden"
                 style={{
                   background: 'var(--color-card)',
-                  border: '1px solid var(--color-divider)',
+                  border: '2px solid var(--color-card-border)',
                 }}
               >
                 {trendingRest.map((dish, i) => (
@@ -214,7 +214,7 @@ export function Discover() {
                     onClick={() => navigate(`/dish/${dish.dish_id}`)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left card-press"
                     style={{
-                      borderBottom: i < trendingRest.length - 1 ? '1px solid var(--color-divider)' : 'none',
+                      borderBottom: i < trendingRest.length - 1 ? '2px solid var(--color-card-border)' : 'none',
                     }}
                   >
                     <span
@@ -255,7 +255,7 @@ export function Discover() {
             className="rounded-xl overflow-hidden"
             style={{
               background: 'var(--color-card)',
-              border: '1px solid var(--color-divider)',
+              border: '2px solid var(--color-card-border)',
             }}
           >
             {recent.map((dish, i) => (
@@ -264,7 +264,7 @@ export function Discover() {
                 onClick={() => navigate(`/dish/${dish.dish_id}`)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors active:scale-[0.99]"
                 style={{
-                  borderBottom: i < recent.length - 1 ? '1px solid var(--color-divider)' : 'none',
+                  borderBottom: i < recent.length - 1 ? '2px solid var(--color-card-border)' : 'none',
                 }}
               >
                 <span className="text-lg flex-shrink-0">{getCategoryEmoji(dish.category)}</span>
@@ -295,7 +295,7 @@ export function Discover() {
             className="rounded-xl overflow-hidden"
             style={{
               background: 'var(--color-card)',
-              border: '1px solid var(--color-divider)',
+              border: '2px solid var(--color-card-border)',
             }}
           >
             {newRestaurants.map((r, i) => (
@@ -304,7 +304,7 @@ export function Discover() {
                 onClick={() => navigate(`/restaurants/${r.id}`)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors active:scale-[0.99]"
                 style={{
-                  borderBottom: i < newRestaurants.length - 1 ? '1px solid var(--color-divider)' : 'none',
+                  borderBottom: i < newRestaurants.length - 1 ? '2px solid var(--color-card-border)' : 'none',
                 }}
               >
                 <div
@@ -333,7 +333,7 @@ export function Discover() {
       {/* Section Divider */}
       {(trending.length > 0 || recent.length > 0 || newRestaurants.length > 0) && (feed.length > 0 || !loading) && (
         <div className="px-4 pt-6 pb-1">
-          <div style={{ borderTop: '1px solid var(--color-divider)' }} />
+          <div style={{ borderTop: '2px solid var(--color-card-border)' }} />
         </div>
       )}
 
@@ -344,10 +344,10 @@ export function Discover() {
             <button
               key={chip.value}
               onClick={() => setFilter(chip.value)}
-              className="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all"
+              className="px-3 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all"
               style={filter === chip.value
-                ? { background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }
-                : { background: 'var(--color-surface-elevated)', color: 'var(--color-text-secondary)' }
+                ? { background: 'var(--color-primary)', color: '#FFFFFF', border: '2px solid var(--color-primary)' }
+                : { background: 'transparent', color: 'var(--color-text-primary)', border: '2px solid var(--color-card-border)' }
               }
             >
               {chip.label}
@@ -396,8 +396,8 @@ export function Discover() {
           <div
             className="text-center py-16 rounded-xl"
             style={{
-              background: 'var(--color-bg)',
-              border: '1px solid var(--color-divider)'
+              background: 'var(--color-card)',
+              border: '2px solid var(--color-card-border)'
             }}
           >
             <img src="/empty-plate.png" alt="" className="w-14 h-14 mx-auto mb-3 rounded-full object-cover" />

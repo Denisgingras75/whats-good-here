@@ -66,7 +66,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
               <div
                 key={i}
                 className="h-16 rounded-xl"
-                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
+                style={{ background: 'var(--color-surface)', border: '2px solid var(--color-card-border)' }}
               />
             )
           })}
@@ -178,7 +178,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
           className="py-10 text-center rounded-xl"
           style={{
             background: 'var(--color-card)',
-            border: '1px solid var(--color-divider)',
+            border: '2px solid var(--color-card-border)',
           }}
         >
           <p className="font-bold" style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
@@ -222,7 +222,7 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
             style={{
               background: 'var(--color-card)',
               color: 'var(--color-primary)',
-              border: '1px solid var(--color-divider)',
+              border: '2px solid var(--color-card-border)',
               fontSize: '13px',
             }}
           >

@@ -439,7 +439,7 @@ export function UserProfile() {
                 : 'var(--color-surface-elevated)',
               border: tasteCompat.compatibility_pct != null
                 ? `1px solid ${getCompatColor(tasteCompat.compatibility_pct)}26`
-                : '1px solid var(--color-divider)',
+                : '2px solid var(--color-card-border)',
             }}
           >
             {tasteCompat.compatibility_pct != null ? (
@@ -632,7 +632,7 @@ export function UserProfile() {
         style={{
           background: 'var(--color-surface)',
           boxShadow: '0 4px 12px -4px rgba(0, 0, 0, 0.08)',
-          borderBottom: '1px solid var(--color-divider)',
+          borderBottom: '2px solid var(--color-card-border)',
         }}
       >
         <div className="flex gap-1.5 overflow-x-auto px-4 pb-0.5 scrollbar-hide">

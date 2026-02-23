@@ -33,32 +33,32 @@
    Gold primary, editorial authority, content-first
    =========================== */
 :root {
-  /* Primary: Gold — brand color, CTAs, accent */
-  --color-primary: #D9A765;
-  --color-primary-muted: rgba(217, 167, 101, 0.12);
-  --color-primary-glow: rgba(217, 167, 101, 0.25);
+  /* Primary: Coral-Orange — bold accent, CTAs, active states */
+  --color-primary: #E45A35;
+  --color-primary-muted: rgba(228, 90, 53, 0.12);
+  --color-primary-glow: none;
   --color-rating: #6BB384;
-  /* Gold accents (same family as primary in dark) */
+  /* Gold accents — medals and ranks only */
   --color-accent-gold: #D9A765;
   --color-accent-gold-muted: rgba(217, 167, 101, 0.15);
-  --color-link-secondary: #D9A765;
-  --color-accent-orange: #E07856;
+  --color-link-secondary: #E45A35;
+  --color-accent-orange: #E45A35;
   --color-accent-yellow: #F5B731;
   /* Text — warm cream on dark */
   --color-text-primary: #F5F1E8;
   --color-text-secondary: #B8A99A;
   --color-text-tertiary: #7D7168;
-  /* Surfaces — deep navy */
-  --color-bg: #0F1720;
-  --color-surface: #1A2632;
-  --color-surface-elevated: #223040;
-  --color-divider: rgba(217, 167, 101, 0.10);
+  /* Surfaces — near-black, menu-board */
+  --color-bg: #080808;
+  --color-surface: #111111;
+  --color-surface-elevated: #1A1A1A;
+  --color-divider: rgba(245, 241, 232, 0.12);
   /* Category strip */
-  --color-category-strip: #1A2632;
+  --color-category-strip: #111111;
   /* Cards */
-  --color-card: #1A2632;
-  --color-card-hover: #223040;
-  --color-card-border: rgba(217, 167, 101, 0.2);
+  --color-card: #111111;
+  --color-card-hover: #1A1A1A;
+  --color-card-border: rgba(245, 241, 232, 0.30);
   --color-medal-gold: #D9A765;
   --color-medal-silver: #A8B5BF;
   --color-medal-bronze: #C4855C;
@@ -69,7 +69,7 @@
   --color-success-border: rgba(107, 179, 132, 0.30);
   --color-muted: #6B7680;
   --color-text-tagline: #B8A99A;
-  --color-text-on-primary: #0F1720;
+  --color-text-on-primary: #FFFFFF;
 
   /* Semantic status colors */
   --color-emerald: #10B981;
@@ -93,22 +93,22 @@
   --color-tier-community: #3B82F6;
   --color-tier-hidden: #6B7280;
 
-  /* Glow effects */
-  --glow-primary: 0 0 16px rgba(217, 167, 101, 0.20);
-  --glow-gold: 0 0 12px rgba(217, 167, 101, 0.25);
+  /* Glow effects — disabled for menu-board aesthetic */
+  --glow-primary: none;
+  --glow-gold: none;
 
   /* Focus ring */
-  --focus-ring: 0 0 0 3px rgba(217, 167, 101, 0.25);
+  --focus-ring: 0 0 0 3px rgba(228, 90, 53, 0.30);
 
   /* Spacing rhythm */
   --space-section: 24px;
   --space-card: 16px;
   --space-gap: 12px;
 
-  /* Card radii */
-  --card-radius-sm: 12px;
-  --card-radius-md: 16px;
-  --card-radius-lg: 20px;
+  /* Card radii — tight, menu-board feel */
+  --card-radius-sm: 8px;
+  --card-radius-md: 10px;
+  --card-radius-lg: 12px;
 
   /* Score pill background tints */
   --color-score-great-bg: rgba(107, 179, 132, 0.15);
@@ -122,28 +122,28 @@
    Warm gold on off-white
    =========================== */
 [data-theme="light"] {
-  --color-primary: #C48A12;
-  --color-primary-muted: rgba(196, 138, 18, 0.10);
-  --color-primary-glow: rgba(196, 138, 18, 0.20);
+  --color-primary: #E45A35;
+  --color-primary-muted: rgba(228, 90, 53, 0.10);
+  --color-primary-glow: none;
   --color-rating: #16A34A;
   --color-accent-gold: #C48A12;
   --color-accent-gold-muted: rgba(196, 138, 18, 0.12);
-  --color-link-secondary: #C48A12;
+  --color-link-secondary: #E45A35;
   --color-accent-yellow: #C48A12;
-  --color-accent-orange: #E07856;
-  /* Text — near-black on warm white */
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #555555;
-  --color-text-tertiary: #999999;
-  /* Surfaces — warm off-white */
-  --color-bg: #F5F2EE;
-  --color-surface: #FAF8F5;
+  --color-accent-orange: #E45A35;
+  /* Text — high contrast black on white */
+  --color-text-primary: #111111;
+  --color-text-secondary: #444444;
+  --color-text-tertiary: #888888;
+  /* Surfaces — pure white, flat */
+  --color-bg: #FFFFFF;
+  --color-surface: #FFFFFF;
   --color-surface-elevated: #FFFFFF;
-  --color-divider: #E5E0DB;
-  --color-category-strip: #F2CDBC;
+  --color-divider: #E0E0E0;
+  --color-category-strip: #FDE8E0;
   /* Cards */
   --color-card: #FFFFFF;
-  --color-card-hover: #F9F7F5;
+  --color-card-hover: #FAFAFA;
   --color-card-border: #1A1A1A;
   --color-medal-gold: #C48A12;
   --color-medal-silver: #9EAAB2;
@@ -154,12 +154,12 @@
   --color-success-light: #F0FFF4;
   --color-success-muted: rgba(22, 163, 74, 0.10);
   --color-success-border: rgba(22, 163, 74, 0.30);
-  --color-muted: #999999;
-  --color-text-tagline: #999999;
-  --color-text-on-primary: #1A1A1A;
-  --glow-primary: 0 0 10px rgba(196, 138, 18, 0.15);
-  --glow-gold: 0 0 8px rgba(196, 138, 18, 0.20);
-  --focus-ring: 0 0 0 3px rgba(196, 138, 18, 0.25);
+  --color-muted: #888888;
+  --color-text-tagline: #888888;
+  --color-text-on-primary: #FFFFFF;
+  --glow-primary: none;
+  --glow-gold: none;
+  --focus-ring: 0 0 0 3px rgba(228, 90, 53, 0.30);
 
   /* Score pill background tints (light) */
   --color-score-great-bg: rgba(22, 163, 74, 0.12);
@@ -221,37 +221,25 @@
   }
 
   .glass-header {
-    background: rgba(13, 27, 34, 0.95);
+    background: rgba(8, 8, 8, 0.95);
     backdrop-filter: blur(12px) saturate(180%);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
   }
 
   [data-theme="light"] .glass-header {
-    background: rgba(232, 212, 200, 0.95);
+    background: rgba(255, 255, 255, 0.95);
   }
 
   .card-elevated {
-    @apply rounded-2xl transition-all duration-300;
+    @apply rounded-xl transition-all duration-150;
     background: var(--color-card);
-    border: 1px solid rgba(217, 167, 101, 0.1);
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+    border: 2px solid var(--color-card-border);
+    box-shadow: none;
   }
 
   .card-elevated:hover {
     background: var(--color-card-hover);
-    border-color: rgba(224, 120, 86, 0.25);
-    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(217, 167, 101, 0.1);
-    transform: translateY(-2px);
-  }
-
-  [data-theme="light"] .card-elevated {
-    border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  [data-theme="light"] .card-elevated:hover {
-    border-color: transparent;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-color: var(--color-primary);
   }
 
   .card-subtle {
@@ -268,20 +256,14 @@
     transform: scale(1.05);
   }
 
-  /* TopBar - Subtle brand anchor in safe-area region */
+  /* TopBar - Bold brand anchor, menu-board border */
   .top-bar {
     position: relative;
     width: 100%;
-    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-bg));
+    background: var(--color-bg);
     padding-top: env(safe-area-inset-top, 0px);
-    border-bottom: 1px solid rgba(217, 167, 101, 0.12);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  }
-
-  [data-theme="light"] .top-bar {
-    background: #FFFFFF;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border-bottom: 2px solid var(--color-card-border);
+    box-shadow: none;
   }
 
   .top-bar-content {
@@ -316,24 +298,21 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Hero card — full-width featured content */
+  /* Hero card — thick-bordered menu-board frame */
   .card-hero {
     border-radius: var(--card-radius-lg);
     overflow: hidden;
     background: var(--color-card);
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.4);
+    border: 3px solid var(--color-card-border);
+    box-shadow: none;
   }
 
-  [data-theme="light"] .card-hero {
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.12);
-  }
-
-  /* Standard card — bordered content container */
+  /* Standard card — thick-bordered content container */
   .card-standard {
     border-radius: var(--card-radius-md);
     overflow: hidden;
     background: var(--color-card);
-    border: 1px solid var(--color-divider);
+    border: 2px solid var(--color-card-border);
   }
 
   /* Section label — uppercase category headers */

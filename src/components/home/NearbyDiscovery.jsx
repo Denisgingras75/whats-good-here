@@ -68,7 +68,7 @@ export function NearbyDiscovery({ existingPlaceIds = [] }) {
         {needsAuth && (
           <div
             className="rounded-xl p-4 text-center"
-            style={{ background: 'var(--color-card)', border: '1px solid var(--color-divider)' }}
+            style={{ background: 'var(--color-card)', border: '2px solid var(--color-card-border)' }}
           >
             <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
               Sign in to discover nearby restaurants
@@ -103,7 +103,7 @@ export function NearbyDiscovery({ existingPlaceIds = [] }) {
         {error && !needsAuth && !loading && (
           <div
             className="rounded-xl p-4 text-center"
-            style={{ background: 'var(--color-card)', border: '1px solid var(--color-divider)' }}
+            style={{ background: 'var(--color-card)', border: '2px solid var(--color-card-border)' }}
           >
             <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
               {error.message}
@@ -119,7 +119,7 @@ export function NearbyDiscovery({ existingPlaceIds = [] }) {
                 key={place.placeId}
                 onClick={() => handleAddPlace(place.name)}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors"
-                style={{ background: 'var(--color-card)', border: '1px solid var(--color-divider)' }}
+                style={{ background: 'var(--color-card)', border: '2px solid var(--color-card-border)' }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-accent-gold)'}
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-divider)'}
               >
@@ -175,7 +175,7 @@ export function NearbyDiscovery({ existingPlaceIds = [] }) {
         {!loading && !needsAuth && !error && places.length === 0 && user && (
           <div
             className="rounded-xl p-4 text-center"
-            style={{ background: 'var(--color-card)', border: '1px solid var(--color-divider)' }}
+            style={{ background: 'var(--color-card)', border: '2px solid var(--color-card-border)' }}
           >
             <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
               No restaurants discovered nearby

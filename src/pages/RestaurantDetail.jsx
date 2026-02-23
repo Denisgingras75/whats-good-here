@@ -188,7 +188,7 @@ export function RestaurantDetail() {
         style={{
           background: 'var(--color-bg)',
           boxShadow: '0 4px 12px -4px rgba(0, 0, 0, 0.2)',
-          borderBottom: '1px solid var(--color-divider)',
+          borderBottom: '2px solid var(--color-card-border)',
         }}
       >
         <div className="flex items-center gap-3">
@@ -373,7 +373,7 @@ export function RestaurantDetail() {
           className="flex rounded-xl p-1"
           style={{
             background: 'var(--color-surface-elevated)',
-            border: '1px solid var(--color-divider)',
+            border: '2px solid var(--color-card-border)',
           }}
           role="tablist"
           aria-label="Restaurant view"
