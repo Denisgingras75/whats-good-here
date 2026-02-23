@@ -379,11 +379,12 @@ export function Restaurants() {
             setAddRestaurantInitialQuery('')
             setAddRestaurantModalOpen(true)
           }}
-          className="fixed bottom-20 right-4 z-10 flex items-center gap-2 px-4 py-3 rounded-full font-semibold text-sm shadow-lg transition-all active:scale-95"
+          className="fixed bottom-20 right-4 z-10 flex items-center gap-2 px-4 py-3 rounded-full font-bold text-sm transition-all active:scale-95"
           style={{
-            background: 'var(--color-accent-gold)',
-            color: 'var(--color-bg)',
-            boxShadow: '0 4px 16px rgba(217, 167, 101, 0.4)',
+            background: 'var(--color-primary)',
+            color: 'var(--color-text-on-primary)',
+            border: '2px solid var(--color-card-border)',
+            boxShadow: 'none',
           }}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

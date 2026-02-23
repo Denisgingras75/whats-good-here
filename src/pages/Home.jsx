@@ -300,37 +300,50 @@ export function Home() {
               </button>
             )}
 
-            {/* Inline compact map preview */}
+            {/* Map card — bold menu-board style */}
             <div className="mt-4">
               <button
                 onClick={function () { setShowMap(true) }}
-                className="w-full card-standard card-press overflow-hidden"
-                style={{ textAlign: 'left' }}
+                className="w-full card-press"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '16px',
+                  background: 'var(--color-card)',
+                  border: '3px solid var(--color-card-border)',
+                  borderRadius: 'var(--card-radius-md)',
+                  textAlign: 'left',
+                }}
               >
-                <ErrorBoundary>
-                  <Suspense fallback={
-                    <div style={{ height: '180px', background: 'var(--color-surface)' }} className="animate-pulse" />
-                  }>
-                    <RestaurantMap
-                      mode="dish"
-                      dishes={(dishes || []).slice(0, 20)}
-                      userLocation={location}
-                      town={town}
-                      onSelectDish={function (dishId) { navigate('/dish/' + dishId) }}
-                      radiusMi={radius}
-                      permissionGranted={permissionState === 'granted'}
-                      compact
-                    />
-                  </Suspense>
-                </ErrorBoundary>
-                <div className="px-3 py-2 flex items-center justify-between" style={{ borderTop: '2px solid var(--color-card-border)' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
-                    Nearby dishes
-                  </span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-primary)' }}>
-                    Full map →
-                  </span>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '12px',
+                    background: 'var(--color-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-on-primary)" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                  </svg>
                 </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold" style={{ fontSize: '15px', color: 'var(--color-text-primary)', lineHeight: 1.2 }}>
+                    View Map
+                  </p>
+                  <p style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+                    {(dishes || []).length} dishes nearby · {radius} mi radius
+                  </p>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
               </button>
             </div>
           </>
