@@ -1,44 +1,39 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../../constants/app'
-import { TopDishCard } from './TopDishCard'
+import { DishListItem } from '../DishListItem'
 
-const TOP_DISHES_COUNT = 5
+var TOP_DISHES_COUNT = 5
 
 // Restaurant dishes component - Job #2: "What should I order?"
 export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequired, isFavorite, onToggleFavorite, user, searchQuery = '', friendsVotesByDish = {}, restaurantName, restaurantTown, onAddDish }) {
-  const [showAllDishes, setShowAllDishes] = useState(false)
+  var [showAllDishes, setShowAllDishes] = useState(false)
 
   // Filter and sort dishes
-  const sortedDishes = useMemo(() => {
-    if (!dishes?.length) return { top: [], rest: [], filtered: false }
+  var sortedDishes = useMemo(function () {
+    if (!dishes || !dishes.length) return { top: [], rest: [], filtered: false }
 
-    // Filter by search query if provided
-    let filteredDishes = dishes
-    const query = searchQuery.toLowerCase().trim()
+    var query = searchQuery.toLowerCase().trim()
+    var filteredDishes = dishes
     if (query) {
-      filteredDishes = dishes.filter(d =>
-        (d.dish_name || '').toLowerCase().includes(query) ||
-        (d.category || '').toLowerCase().includes(query)
-      )
+      filteredDishes = dishes.filter(function (d) {
+        return (d.dish_name || '').toLowerCase().indexOf(query) !== -1 ||
+          (d.category || '').toLowerCase().indexOf(query) !== -1
+      })
     }
 
-    const sorted = [...filteredDishes].sort((a, b) => {
-      const aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-      const bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-      // Ranked dishes first
+    var sorted = filteredDishes.slice().sort(function (a, b) {
+      var aRanked = (a.total_votes || 0) >= MIN_VOTES_FOR_RANKING
+      var bRanked = (b.total_votes || 0) >= MIN_VOTES_FOR_RANKING
       if (aRanked && !bRanked) return -1
       if (!aRanked && bRanked) return 1
-      // Then by granular rating score (avg_rating)
-      const aRating = a.avg_rating || 0
-      const bRating = b.avg_rating || 0
+      var aRating = a.avg_rating || 0
+      var bRating = b.avg_rating || 0
       if (bRating !== aRating) return bRating - aRating
-      // Tie-breaker: percent_worth_it
-      const aPct = a.percent_worth_it || 0
-      const bPct = b.percent_worth_it || 0
+      var aPct = a.percent_worth_it || 0
+      var bPct = b.percent_worth_it || 0
       if (bPct !== aPct) return bPct - aPct
-      // Final tie-breaker: vote count, then alphabetical
-      const voteDiff = (b.total_votes || 0) - (a.total_votes || 0)
+      var voteDiff = (b.total_votes || 0) - (a.total_votes || 0)
       if (voteDiff !== 0) return voteDiff
       return (a.dish_name || '').localeCompare(b.dish_name || '')
     })
@@ -51,13 +46,13 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
     }
   }, [dishes, searchQuery])
 
-  const rankedCount = dishes?.filter(d => (d.total_votes || 0) >= MIN_VOTES_FOR_RANKING).length || 0
+  var rankedCount = dishes ? dishes.filter(function (d) { return (d.total_votes || 0) >= MIN_VOTES_FOR_RANKING }).length : 0
 
   // Count unique friends who rated dishes here
-  const uniqueFriends = useMemo(() => {
-    const friendIds = new Set()
-    Object.values(friendsVotesByDish).forEach(votes => {
-      votes.forEach(v => friendIds.add(v.user_id))
+  var uniqueFriends = useMemo(function () {
+    var friendIds = new Set()
+    Object.values(friendsVotesByDish).forEach(function (votes) {
+      votes.forEach(function (v) { friendIds.add(v.user_id) })
     })
     return friendIds.size
   }, [friendsVotesByDish])
@@ -65,15 +60,16 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
   if (loading) {
     return (
       <div className="px-4 py-6" role="status" aria-label="Loading dishes">
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="h-24 rounded-xl animate-pulse"
-              style={{ background: '#F5F5F5', border: '2px solid #E0E0E0' }}
-              aria-hidden="true"
-            />
-          ))}
+        <div className="space-y-3 animate-pulse">
+          {[0, 1, 2].map(function (i) {
+            return (
+              <div
+                key={i}
+                className="h-16 rounded-xl"
+                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
+              />
+            )
+          })}
         </div>
       </div>
     )
@@ -82,44 +78,35 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
   if (error) {
     return (
       <div className="px-4 py-12 text-center">
-        <p className="text-sm" style={{ color: '#E4440A' }}>{error?.message || error}</p>
+        <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error && error.message ? error.message : error}</p>
       </div>
     )
-  }
-
-  const handleToggleSave = async (dishId) => {
-    if (!user) {
-      onLoginRequired()
-      return
-    }
-    await onToggleFavorite(dishId)
   }
 
   return (
     <div className="px-4 py-5">
       {/* Section Header */}
-      <div className="mb-5">
+      <div className="mb-4">
         <h3
+          className="font-bold"
           style={{
-            fontFamily: "'aglet-sans', sans-serif",
-            fontWeight: 800,
-            color: '#1A1A1A',
+            color: 'var(--color-text-primary)',
             fontSize: '18px',
             letterSpacing: '-0.01em',
           }}
         >
           {sortedDishes.filtered
-            ? `Results for "${searchQuery}"`
+            ? 'Results for "' + searchQuery + '"'
             : rankedCount > 0
               ? "What's Good Here"
               : 'Help decide what to order here'
           }
         </h3>
-        <p className="mt-1 font-medium" style={{ color: '#BBBBBB', fontSize: '12px' }}>
+        <p className="mt-1 font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
           {sortedDishes.filtered
-            ? `${sortedDishes.totalMatches} ${sortedDishes.totalMatches === 1 ? 'dish' : 'dishes'} found`
+            ? sortedDishes.totalMatches + ' ' + (sortedDishes.totalMatches === 1 ? 'dish' : 'dishes') + ' found'
             : rankedCount > 0
-              ? `Top picks based on ${rankedCount} rated ${rankedCount === 1 ? 'dish' : 'dishes'}`
+              ? 'Top picks based on ' + rankedCount + ' rated ' + (rankedCount === 1 ? 'dish' : 'dishes')
               : 'Vote on dishes to shape the rankings'
           }
         </p>
@@ -130,94 +117,92 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
         <div
           className="mb-4 px-3.5 py-3 rounded-xl flex items-center gap-3"
           style={{
-            background: '#FFFFFF',
-            border: '1.5px solid #E4440A',
+            background: 'var(--color-card)',
+            border: '1.5px solid var(--color-primary)',
           }}
         >
-          {/* Stacked avatars */}
           <div className="flex -space-x-2 flex-shrink-0">
-            {(() => {
-              const seen = new Set()
-              const friendList = []
-              Object.values(friendsVotesByDish).forEach(votes => {
-                votes.forEach(v => {
+            {(function () {
+              var seen = new Set()
+              var friendList = []
+              Object.values(friendsVotesByDish).forEach(function (votes) {
+                votes.forEach(function (v) {
                   if (!seen.has(v.user_id)) {
                     seen.add(v.user_id)
                     friendList.push(v)
                   }
                 })
               })
-              return friendList.slice(0, 3).map((friend, i) => (
-                <Link
-                  key={friend.user_id}
-                  to={`/user/${friend.user_id}`}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ring-2"
-                  style={{
-                    background: '#E4440A',
-                    color: '#FFFFFF',
-                    ringColor: '#FFFFFF',
-                    zIndex: 3 - i,
-                  }}
-                >
-                  {friend.display_name?.charAt(0).toUpperCase() || '?'}
-                </Link>
-              ))
+              return friendList.slice(0, 3).map(function (friend, i) {
+                return (
+                  <Link
+                    key={friend.user_id}
+                    to={'/user/' + friend.user_id}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ring-2"
+                    style={{
+                      background: 'var(--color-primary)',
+                      color: 'var(--color-text-on-primary)',
+                      ringColor: 'var(--color-card)',
+                      zIndex: 3 - i,
+                    }}
+                  >
+                    {friend.display_name ? friend.display_name.charAt(0).toUpperCase() : '?'}
+                  </Link>
+                )
+              })
             })()}
           </div>
-          <p className="text-sm font-bold" style={{ color: '#1A1A1A' }}>
+          <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {uniqueFriends} {uniqueFriends === 1 ? 'friend has' : 'friends have'} been here
           </p>
         </div>
       )}
 
-      {/* Top Dishes */}
+      {/* Dish List */}
       {sortedDishes.top.length > 0 ? (
-        <div className="space-y-3.5">
-          {sortedDishes.top.map((dish, index) => (
-            <TopDishCard
-              key={dish.dish_id}
-              dish={dish}
-              rank={index + 1}
-              onVote={onVote}
-              onLoginRequired={onLoginRequired}
-              isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
-              onToggleFavorite={handleToggleSave}
-              friendVotes={friendsVotesByDish[dish.dish_id]}
-              restaurantName={restaurantName}
-              restaurantTown={restaurantTown}
-            />
-          ))}
+        <div className="flex flex-col" style={{ gap: '2px' }}>
+          {sortedDishes.top.map(function (dish, index) {
+            return (
+              <DishListItem
+                key={dish.dish_id}
+                dish={dish}
+                rank={index + 1}
+                variant="restaurant"
+                className="stagger-item"
+              />
+            )
+          })}
         </div>
       ) : (
         <div
           className="py-10 text-center rounded-xl"
           style={{
-            background: '#FFFFFF',
-            border: '1px solid #E0E0E0',
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-divider)',
           }}
         >
-          <p className="font-bold" style={{ color: '#999999', fontSize: '14px' }}>
+          <p className="font-bold" style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
             {sortedDishes.filtered
-              ? `No dishes matching "${searchQuery}"`
+              ? 'No dishes matching "' + searchQuery + '"'
               : 'No dishes at this restaurant yet'
             }
           </p>
           {sortedDishes.filtered ? (
-            <p className="mt-1.5 font-medium" style={{ color: '#BBBBBB', fontSize: '12px' }}>
+            <p className="mt-1.5 font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
               Try a different search term
             </p>
           ) : (
             <>
-              <p className="mt-1 font-medium" style={{ color: '#BBBBBB', fontSize: '12px' }}>
+              <p className="mt-1 font-medium" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>
                 Be the first to add one and help others decide what to order
               </p>
               {onAddDish && (
                 <button
                   onClick={onAddDish}
-                  className="mt-4 px-5 py-2.5 rounded-full font-semibold text-sm transition-all active:scale-[0.97]"
+                  className="mt-4 px-5 py-2.5 rounded-full font-semibold text-sm card-press"
                   style={{
                     background: 'var(--color-primary)',
-                    color: '#FFFFFF',
+                    color: 'var(--color-text-on-primary)',
                   }}
                 >
                   + Add a dish
@@ -230,20 +215,20 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
 
       {/* More Dishes */}
       {sortedDishes.rest.length > 0 && (
-        <div className="mt-6">
+        <div className="mt-4">
           <button
-            onClick={() => setShowAllDishes(!showAllDishes)}
+            onClick={function () { setShowAllDishes(!showAllDishes) }}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-lg font-bold card-press"
             style={{
-              background: '#FFFFFF',
-              color: '#E4440A',
-              border: '1px solid #1A1A1A',
+              background: 'var(--color-card)',
+              color: 'var(--color-primary)',
+              border: '1px solid var(--color-divider)',
               fontSize: '13px',
             }}
           >
-            {showAllDishes ? 'Show less' : `See ${sortedDishes.rest.length} more dishes`}
+            {showAllDishes ? 'Show less' : 'See ' + sortedDishes.rest.length + ' more dishes'}
             <svg
-              className={`w-4 h-4 transition-transform ${showAllDishes ? 'rotate-180' : ''}`}
+              className={'w-4 h-4 transition-transform' + (showAllDishes ? ' rotate-180' : '')}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -254,21 +239,17 @@ export function RestaurantDishes({ dishes, loading, error, onVote, onLoginRequir
           </button>
 
           {showAllDishes && (
-            <div className="mt-4 space-y-3.5">
-              {sortedDishes.rest.map((dish, index) => (
-                <TopDishCard
-                  key={dish.dish_id}
-                  dish={dish}
-                  rank={TOP_DISHES_COUNT + index + 1}
-                  onVote={onVote}
-                  onLoginRequired={onLoginRequired}
-                  isFavorite={isFavorite ? isFavorite(dish.dish_id) : false}
-                  onToggleFavorite={handleToggleSave}
-                  friendVotes={friendsVotesByDish[dish.dish_id]}
-                  restaurantName={restaurantName}
-                  restaurantTown={restaurantTown}
-                />
-              ))}
+            <div className="mt-3 flex flex-col" style={{ gap: '2px' }}>
+              {sortedDishes.rest.map(function (dish, index) {
+                return (
+                  <DishListItem
+                    key={dish.dish_id}
+                    dish={dish}
+                    rank={TOP_DISHES_COUNT + index + 1}
+                    variant="restaurant"
+                  />
+                )
+              })}
             </div>
           )}
         </div>
