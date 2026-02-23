@@ -22,6 +22,7 @@ import { ValueBadge } from '../components/browse/ValueBadge'
 import { CATEGORY_INFO } from '../constants/categories'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor, formatScore10 } from '../utils/ranking'
+import { ConsensusBar } from '../components/ConsensusBar'
 import { formatRelativeTime } from '../utils/formatters'
 import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
@@ -399,7 +400,7 @@ export function Dish() {
             className="mt-4 px-5 py-2.5 text-sm font-bold rounded-lg card-press"
             style={{
               background: 'var(--color-primary)',
-              color: '#FFFFFF',
+              color: 'var(--color-text-on-primary)',
             }}
           >
             Go Home
@@ -591,64 +592,21 @@ export function Dish() {
               </svg>
             </button>
 
-            {/* Rating + votes row — only show when ranked */}
-            {isRanked && dish.avg_rating ? (
-              <div className="flex items-end justify-between mt-2">
-                <div className="flex items-baseline gap-1.5">
-                  <span
-                    style={{
-                      fontFamily: "'aglet-sans', sans-serif",
-                      fontWeight: 800,
-                      fontSize: '36px',
-                      lineHeight: 1,
-                      color: getRatingColor(dish.avg_rating),
-                    }}
-                  >
-                    {formatScore10(dish.avg_rating)}
-                  </span>
-                  <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
-                    / 10
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold" style={{ color: 'var(--color-text-secondary)' }}>
-                    {dish.total_votes} vote{dish.total_votes === 1 ? '' : 's'}
-                  </p>
-                  <ValueBadge valuePercentile={dish.value_percentile} />
-                </div>
-              </div>
-            ) : null}
+            {/* Rating + votes — ConsensusBar */}
+            <div className="mt-3 flex items-end justify-between gap-3">
+              <ConsensusBar
+                avgRating={dish.avg_rating}
+                totalVotes={dish.total_votes}
+                percentWorthIt={dish.percent_worth_it}
+              />
+              <ValueBadge valuePercentile={dish.value_percentile} />
+            </div>
 
           </div>
 
           {/* Content */}
           <div className="px-3 pt-3 pb-4">
-            {/* Order CTA — link to restaurant's website */}
-            {dish.website_url && (
-              <a
-                href={dish.website_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => capture('order_link_clicked', {
-                  dish_id: dish.dish_id,
-                  dish_name: dish.dish_name,
-                  restaurant_id: dish.restaurant_id,
-                  restaurant_name: dish.restaurant_name,
-                })}
-                className="flex items-center justify-center gap-2 mb-4 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95"
-                style={{
-                  background: 'var(--color-primary)',
-                  color: 'var(--color-text-on-primary)',
-                }}
-              >
-                Order from {dish.restaurant_name}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </a>
-            )}
-
-            {/* Smart Snippet — pull quote from best review */}
+            {/* Smart Snippet — pull quote from best review (social proof, hero zone) */}
             {smartSnippet && smartSnippet.review_text && (
               <div
                 className="mb-4 p-4 rounded-xl"
@@ -675,68 +633,71 @@ export function Dish() {
               </div>
             )}
 
-            {/* Reviews Section — card-style list */}
-            {reviews.length > 0 && (
+            {/* Community Photos — visual engagement before voting */}
+            {displayPhotos.length > 0 && (
               <div className="mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                    Reviews ({reviews.length})
-                  </h3>
-                  <TrustSummary
-                    verifiedCount={reviews.filter(r => r.trust_badge === 'human_verified' || r.trust_badge === 'trusted_reviewer').length}
-                    aiCount={reviews.filter(r => r.trust_badge === 'ai_estimated').length}
-                  />
-                </div>
-                <div className="space-y-2">
-                  {reviews.map((review) => (
-                    <div
-                      key={review.id}
-                      className="p-3 rounded-xl"
-                      style={{ background: 'var(--color-surface)' }}
+                <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+                  Photos ({displayPhotos.length})
+                </h3>
+                <div className="grid grid-cols-4 gap-2">
+                  {displayPhotos.map((photo) => (
+                    <button
+                      key={photo.id}
+                      onClick={() => setLightboxPhoto(photo.photo_url)}
+                      aria-label={`View photo of ${dish.dish_name}`}
+                      className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                      style={{ border: '1px solid var(--color-divider)' }}
                     >
-                      {/* Header: Avatar + name + timestamp | rating */}
-                      <div className="flex items-center justify-between mb-2">
-                        <Link
-                          to={`/user/${review.user_id}`}
-                          className="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity"
-                        >
-                          <div
-                            className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
-                            style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
-                          >
-                            {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
-                          </div>
-                          <span className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
-                            @{review.profiles?.display_name || 'Anonymous'}
-                          </span>
-                          <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
-                            &middot; {formatRelativeTime(review.review_created_at)}
-                          </span>
-                        </Link>
-                        <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                          <span className="text-sm font-bold" style={{ color: getRatingColor(review.rating_10) }}>
-                            {review.rating_10 ? formatScore10(review.rating_10) : ''}
-                          </span>
-                          <span>{review.would_order_again ? <ThumbsUpIcon size={20} /> : <ThumbsDownIcon size={20} />}</span>
-                        </div>
-                      </div>
-
-                      {/* Review text — visual hero */}
-                      <p className="text-sm" style={{ color: 'var(--color-text-primary)', lineHeight: 1.5 }}>
-                        {review.review_text}
-                      </p>
-
-                      {/* Trust badge — subtle bottom */}
-                      <div className="mt-2">
-                        <TrustBadge type={review.trust_badge} />
-                      </div>
-                    </div>
+                      <img
+                        src={photo.photo_url}
+                        alt={dish.dish_name}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.parentElement.style.display = 'none'
+                        }}
+                      />
+                    </button>
                   ))}
                 </div>
+                {hasMorePhotos && (
+                  <button
+                    onClick={() => setShowAllPhotos(true)}
+                    className="mt-3 text-sm font-bold"
+                    style={{ color: 'var(--color-primary)' }}
+                  >
+                    See all {allPhotos.length} photos
+                  </button>
+                )}
               </div>
             )}
 
-            {/* Review Flow */}
+            {/* Order CTA — link to restaurant's website */}
+            {dish.website_url && (
+              <a
+                href={dish.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => capture('order_link_clicked', {
+                  dish_id: dish.dish_id,
+                  dish_name: dish.dish_name,
+                  restaurant_id: dish.restaurant_id,
+                  restaurant_name: dish.restaurant_name,
+                })}
+                className="flex items-center justify-center gap-2 mb-4 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95"
+                style={{
+                  background: 'var(--color-primary)',
+                  color: 'var(--color-text-on-primary)',
+                }}
+              >
+                Order from {dish.restaurant_name}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            )}
+
+            {/* Review Flow / Vote CTA */}
             <div
               className="p-3 rounded-xl mb-4"
               style={{
@@ -763,18 +724,6 @@ export function Dish() {
                 isFavorite={isFavorite?.(dishId)}
               />
             </div>
-
-            {/* No reviews message */}
-            {!reviewsLoading && reviews.length === 0 && dish.total_votes > 0 && (
-              <div
-                className="mb-6 p-4 rounded-xl text-center"
-                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
-              >
-                <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                  No written reviews yet — be the first to share your thoughts!
-                </p>
-              </div>
-            )}
 
             {/* Variant Selector */}
             {variants.length > 0 && (
@@ -820,7 +769,7 @@ export function Dish() {
                         {/* Avatar */}
                         <div
                           className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                          style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
+                          style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
                         >
                           {vote.display_name?.charAt(0).toUpperCase() || '?'}
                         </div>
@@ -836,7 +785,7 @@ export function Dish() {
                                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
                                 style={{
                                   background: vote.category_expertise === 'authority' ? 'rgba(147, 51, 234, 0.12)' : 'rgba(59, 130, 246, 0.12)',
-                                  color: vote.category_expertise === 'authority' ? '#9333EA' : '#3B82F6',
+                                  color: vote.category_expertise === 'authority' ? 'var(--color-text-primary)' : 'var(--color-text-primary)',
                                 }}
                               >
                                 {expertiseLabel}
@@ -866,43 +815,76 @@ export function Dish() {
               </div>
             )}
 
-            {/* Community Photos */}
-            {displayPhotos.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
-                  Photos ({displayPhotos.length})
-                </h3>
-                <div className="grid grid-cols-4 gap-2">
-                  {displayPhotos.map((photo) => (
-                    <button
-                      key={photo.id}
-                      onClick={() => setLightboxPhoto(photo.photo_url)}
-                      aria-label={`View photo of ${dish.dish_name}`}
-                      className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                      style={{ border: '1px solid var(--color-divider)' }}
+            {/* Reviews Section */}
+            {reviews.length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                    Reviews ({reviews.length})
+                  </h3>
+                  <TrustSummary
+                    verifiedCount={reviews.filter(r => r.trust_badge === 'human_verified' || r.trust_badge === 'trusted_reviewer').length}
+                    aiCount={reviews.filter(r => r.trust_badge === 'ai_estimated').length}
+                  />
+                </div>
+                <div className="space-y-2">
+                  {reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className="p-3 rounded-xl"
+                      style={{ background: 'var(--color-surface)' }}
                     >
-                      <img
-                        src={photo.photo_url}
-                        alt={dish.dish_name}
-                        loading="lazy"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Hide broken images
-                          e.target.parentElement.style.display = 'none'
-                        }}
-                      />
-                    </button>
+                      {/* Header: Avatar + name + timestamp | rating */}
+                      <div className="flex items-center justify-between mb-2">
+                        <Link
+                          to={`/user/${review.user_id}`}
+                          className="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity"
+                        >
+                          <div
+                            className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
+                            style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+                          >
+                            {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <span className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                            @{review.profiles?.display_name || 'Anonymous'}
+                          </span>
+                          <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
+                            &middot; {formatRelativeTime(review.review_created_at)}
+                          </span>
+                        </Link>
+                        <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                          <span className="text-sm font-bold" style={{ color: getRatingColor(review.rating_10) }}>
+                            {review.rating_10 ? formatScore10(review.rating_10) : ''}
+                          </span>
+                          <span>{review.would_order_again ? <ThumbsUpIcon size={20} /> : <ThumbsDownIcon size={20} />}</span>
+                        </div>
+                      </div>
+
+                      {/* Review text */}
+                      <p className="text-sm" style={{ color: 'var(--color-text-primary)', lineHeight: 1.5 }}>
+                        {review.review_text}
+                      </p>
+
+                      {/* Trust badge */}
+                      <div className="mt-2">
+                        <TrustBadge type={review.trust_badge} />
+                      </div>
+                    </div>
                   ))}
                 </div>
-                {hasMorePhotos && (
-                  <button
-                    onClick={() => setShowAllPhotos(true)}
-                    className="mt-3 text-sm font-bold"
-                    style={{ color: 'var(--color-primary)' }}
-                  >
-                    See all {allPhotos.length} photos
-                  </button>
-                )}
+              </div>
+            )}
+
+            {/* No reviews message */}
+            {!reviewsLoading && reviews.length === 0 && dish.total_votes > 0 && (
+              <div
+                className="mb-6 p-4 rounded-xl text-center"
+                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
+              >
+                <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                  No written reviews yet — be the first to share your thoughts!
+                </p>
               </div>
             )}
 
@@ -928,7 +910,7 @@ export function Dish() {
         >
           <button
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-2xl"
-            style={{ background: 'rgba(255, 255, 255, 0.2)', color: '#FFFFFF' }}
+            style={{ background: 'rgba(255, 255, 255, 0.2)', color: '#FFF' }}
             onClick={() => setLightboxPhoto(null)}
             aria-label="Close lightbox"
           >
