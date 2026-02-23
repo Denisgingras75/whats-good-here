@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { capture } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
@@ -90,6 +90,26 @@ export function Dish() {
 
   const { isFavorite, toggleFavorite } = useFavorites(user?.id)
 
+  // Lazy-load evidence section — only fetch when user scrolls near it
+  const [shouldLoadEvidence, setShouldLoadEvidence] = useState(false)
+  const evidenceSentinelRef = useRef(null)
+
+  const observerCallback = useCallback(function (entries) {
+    if (entries[0].isIntersecting) {
+      setShouldLoadEvidence(true)
+    }
+  }, [])
+
+  useEffect(function () {
+    var el = evidenceSentinelRef.current
+    if (!el || shouldLoadEvidence) return
+    var observer = new IntersectionObserver(observerCallback, {
+      rootMargin: '200px',
+    })
+    observer.observe(el)
+    return function () { observer.disconnect() }
+  }, [dish, shouldLoadEvidence, observerCallback])
+
   // Ear icon tooltip — show once per device
   const [showEarTooltip, setShowEarTooltip] = useState(false)
   const tooltipChecked = useRef(false)
@@ -116,6 +136,7 @@ export function Dish() {
       try {
         setLoading(true)
         setError(null)
+        setShouldLoadEvidence(false)
 
         const data = await dishesApi.getDishById(dishId)
         const transformedDish = transformDish(data)
@@ -192,9 +213,9 @@ export function Dish() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only re-run on specific dish properties
   }, [dish?.dish_id, dish?.id, dish?.has_variants, dish?.parent_dish_id])
 
-  // Fetch photos, reviews, and friends' votes in parallel (all independent of each other)
+  // Fetch photos, reviews, and friends' votes — deferred until user scrolls near evidence section
   useEffect(() => {
-    if (!dishId) return
+    if (!dishId || !shouldLoadEvidence) return
 
     const fetchSecondaryData = async () => {
       setReviewsLoading(true)
@@ -253,7 +274,7 @@ export function Dish() {
 
     fetchSecondaryData()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dishId, user, dish?.category])
+  }, [dishId, user, dish?.category, shouldLoadEvidence])
 
   // Fetch taste compatibility for each friend who voted
   useEffect(() => {
@@ -713,8 +734,21 @@ export function Dish() {
           {/* ═══════════════════════════════════════════
               LAYER 3: THE EVIDENCE
               Photos, reviews, voting. For Pioneers.
+              Lazy-loaded when user scrolls near.
               ═══════════════════════════════════════════ */}
+          <div ref={evidenceSentinelRef} aria-hidden="true" />
           <div className="px-3 pt-4 pb-4">
+
+            {/* Evidence skeleton while secondary data loads */}
+            {!shouldLoadEvidence && (
+              <div className="space-y-3 animate-pulse" role="status" aria-label="Loading details">
+                <div className="h-20 rounded-xl" style={{ background: 'var(--color-divider)' }} />
+                <div className="grid grid-cols-4 gap-2">
+                  {[0, 1, 2, 3].map(function (i) { return <div key={i} className="aspect-square rounded-lg" style={{ background: 'var(--color-divider)' }} /> })}
+                </div>
+                <div className="h-16 rounded-xl" style={{ background: 'var(--color-divider)' }} />
+              </div>
+            )}
 
             {/* Smart Snippet — the one-liner social proof */}
             {smartSnippet && smartSnippet.review_text && (
