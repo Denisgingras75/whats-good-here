@@ -100,6 +100,22 @@
 
   /* Focus ring */
   --focus-ring: 0 0 0 3px rgba(228, 68, 10, 0.25);
+
+  /* Spacing rhythm */
+  --space-section: 24px;
+  --space-card: 16px;
+  --space-gap: 12px;
+
+  /* Card radii */
+  --card-radius-sm: 12px;
+  --card-radius-md: 16px;
+  --card-radius-lg: 20px;
+
+  /* Score pill background tints */
+  --color-score-great-bg: rgba(22, 163, 74, 0.12);
+  --color-score-good-bg: rgba(22, 163, 74, 0.08);
+  --color-score-mid-bg: rgba(245, 158, 11, 0.10);
+  --color-score-low-bg: rgba(239, 68, 68, 0.08);
 }
 
 /* ===========================
@@ -145,6 +161,12 @@
   --glow-primary: 0 0 20px rgba(200, 90, 84, 0.25), 0 0 40px rgba(200, 90, 84, 0.1);
   --glow-gold: 0 0 15px rgba(217, 167, 101, 0.2);
   --focus-ring: 0 0 0 3px rgba(200, 90, 84, 0.25);
+
+  /* Score pill background tints (dark) */
+  --color-score-great-bg: rgba(107, 179, 132, 0.15);
+  --color-score-good-bg: rgba(107, 179, 132, 0.10);
+  --color-score-mid-bg: rgba(245, 158, 11, 0.12);
+  --color-score-low-bg: rgba(239, 68, 68, 0.10);
 }
 
 @tailwind base;
@@ -274,6 +296,48 @@
     height: 18px;
     color: var(--color-primary);
     opacity: 0.7;
+  }
+
+  /* Score pill — consistent rating display */
+  .score-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    min-width: 44px;
+  }
+
+  /* Hero card — full-width featured content */
+  .card-hero {
+    border-radius: var(--card-radius-lg);
+    overflow: hidden;
+    background: var(--color-card);
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.12);
+  }
+
+  [data-theme="dark"] .card-hero {
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Standard card — bordered content container */
+  .card-standard {
+    border-radius: var(--card-radius-md);
+    overflow: hidden;
+    background: var(--color-card);
+    border: 1px solid var(--color-divider);
+  }
+
+  /* Section label — uppercase category headers */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
   }
 
   /* WelcomeSplash - Multi-step onboarding for first-time visitors */
