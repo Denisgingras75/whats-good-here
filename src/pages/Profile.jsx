@@ -39,11 +39,10 @@ import { TrustBadge } from '../components/TrustBadge'
 import { SimilarTasteUsers } from '../components/SimilarTasteUsers'
 
 const TABS = [
-  { id: 'worth-it', label: "Good Here", emoji: null, icon: 'thumbsUp' },
-  { id: 'avoid', label: "Not Good Here", emoji: null, icon: 'thumbsDown' },
-  { id: 'saved', label: 'Heard it was Good Here', emoji: null, icon: 'hearing' },
+  { id: 'worth-it', label: 'Worth It', emoji: null, icon: 'thumbsUp' },
+  { id: 'avoid', label: 'Skip', emoji: null, icon: 'thumbsDown' },
+  { id: 'saved', label: 'Saved', emoji: null, icon: 'hearing' },
   { id: 'reviews', label: 'Reviews', emoji: null, icon: 'reviews' },
-  { id: 'unrated', label: 'Unrated', emoji: null, icon: 'camera' },
 ]
 
 // SECURITY: Email is NOT persisted to storage to prevent XSS exposure of PII
@@ -306,7 +305,7 @@ export function Profile() {
 
       {user ? (
         <>
-          {/* Hero Identity Card */}
+          {/* Hero Identity Card — with consolidated stats */}
           <HeroIdentityCard
             user={user}
             profile={profile}
@@ -320,92 +319,10 @@ export function Profile() {
             setNameStatus={setNameStatus}
             handleSaveName={handleSaveName}
             setFollowListModal={setFollowListModal}
+            ratingStyle={stats.ratingStyle}
+            ratingBias={ratingBias}
+            trustBadgeType={jitterApi.getTrustBadgeType(jitterProfile)}
           />
-
-          {/* Rating Style + Deviation Score */}
-          {(stats.ratingStyle || (ratingBias && ratingBias.votesWithConsensus > 0)) && (
-            <div className="px-4 pt-4 flex gap-2.5">
-              {stats.ratingStyle && (
-                <div
-                  className="flex-1 rounded-2xl border px-4 py-3.5"
-                  style={{
-                    background: 'var(--color-card)',
-                    borderColor: 'var(--color-divider)',
-                    boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
-                  }}
-                >
-                  <p
-                    className="text-sm font-bold"
-                    style={{
-                      color: stats.ratingStyle.level === 'generous' || stats.ratingStyle.level === 'easy'
-                        ? 'var(--color-emerald)'
-                        : stats.ratingStyle.level === 'tough'
-                        ? 'var(--color-red)'
-                        : 'var(--color-orange)',
-                    }}
-                  >
-                    {stats.ratingStyle.label}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                    avg {stats.avgRating.toFixed(1)}/10
-                  </p>
-                </div>
-              )}
-              {ratingBias && ratingBias.votesWithConsensus > 0 && (
-                <div
-                  className="flex-1 rounded-2xl border px-4 py-3.5"
-                  style={{
-                    background: 'var(--color-card)',
-                    borderColor: 'var(--color-divider)',
-                    boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
-                  }}
-                >
-                  <p className="text-sm font-bold" style={{
-                    color: (() => {
-                      const isAbove = stats.ratingStyle?.level === 'generous' || stats.ratingStyle?.level === 'easy'
-                      if (isAbove) {
-                        return ratingBias.ratingBias < 1.0 ? 'var(--color-emerald)' : 'var(--color-emerald-light)'
-                      }
-                      const isBelow = stats.ratingStyle?.level === 'tough'
-                      if (isBelow) {
-                        return ratingBias.ratingBias < 1.0 ? 'var(--color-red-light)' : 'var(--color-red)'
-                      }
-                      return 'var(--color-orange)' // fair judge
-                    })(),
-                  }}>
-                    {ratingBias.biasLabel}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {ratingBias.ratingBias.toFixed(1)} pts from crowd
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Review Trust */}
-          {jitterApi.getTrustBadgeType(jitterProfile) && (
-            <div className="px-4 pt-3">
-              <div
-                className="rounded-2xl border px-4 py-3.5 flex items-center justify-between"
-                style={{
-                  background: 'var(--color-card)',
-                  borderColor: 'var(--color-divider)',
-                  boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
-                }}
-              >
-                <div>
-                  <p className="text-xs font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>
-                    Review Trust
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {jitterProfile.review_count} review{jitterProfile.review_count !== 1 ? 's' : ''} analyzed
-                  </p>
-                </div>
-                <TrustBadge type={jitterApi.getTrustBadgeType(jitterProfile)} size="md" />
-              </div>
-            </div>
-          )}
 
           {/* Standout Picks */}
           {stats.totalVotes >= 3 && Object.keys(stats.standoutPicks).length > 0 && (
@@ -545,14 +462,13 @@ export function Profile() {
                       : { background: 'var(--color-surface-elevated)' }),
                   }}
                 >
-                  {tab.id === 'saved' ? <HearingIcon size={40} active={activeTab === tab.id} /> : tab.id === 'worth-it' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.id === 'avoid' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : tab.id === 'unrated' ? <CameraIcon size={40} active={activeTab === tab.id} /> : tab.id === 'reviews' ? <ReviewsIcon size={40} active={activeTab === tab.id} /> : <span>{tab.emoji}</span>}
+                  {tab.id === 'saved' ? <HearingIcon size={40} active={activeTab === tab.id} /> : tab.id === 'worth-it' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.id === 'avoid' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : tab.id === 'reviews' ? <ReviewsIcon size={40} active={activeTab === tab.id} /> : <span>{tab.emoji}</span>}
                   <span>{tab.label}</span>
                   <span
                     className="ml-0.5 px-1.5 py-0.5 rounded-full font-semibold"
                     style={{ fontSize: '11px', background: activeTab === tab.id ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }}
                   >
-                    {tab.id === 'unrated' ? unratedCount :
-                     tab.id === 'worth-it' ? worthItDishes.length :
+                    {tab.id === 'worth-it' ? worthItDishes.length :
                      tab.id === 'avoid' ? avoidDishes.length :
                      tab.id === 'reviews' ? userReviews.length :
                      favorites.length}

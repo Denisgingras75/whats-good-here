@@ -15,6 +15,9 @@ export function HeroIdentityCard({
   setNameStatus,
   handleSaveName,
   setFollowListModal,
+  ratingStyle,
+  ratingBias,
+  trustBadgeType,
 }) {
   return (
     <div
@@ -149,11 +152,58 @@ export function HeroIdentityCard({
         </div>
       </div>
 
-      {/* Stats Line */}
+      {/* Compact stats row — rating style, deviation, trust inline */}
       {stats.totalVotes > 0 && (
-        <p className="mt-4 text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-          {stats.totalVotes} {stats.totalVotes === 1 ? 'dish' : 'dishes'}{stats.uniqueRestaurants > 0 ? ` \u00B7 ${stats.uniqueRestaurants} restaurants` : ''}
-        </p>
+        <div className="mt-4 flex items-center gap-3 flex-wrap" style={{ fontSize: '13px' }}>
+          <span className="font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            {stats.totalVotes} {stats.totalVotes === 1 ? 'dish' : 'dishes'}
+            {stats.uniqueRestaurants > 0 ? ` \u00B7 ${stats.uniqueRestaurants} spots` : ''}
+          </span>
+          {ratingStyle && (
+            <span
+              className="font-bold px-2 py-0.5 rounded-full"
+              style={{
+                fontSize: '11px',
+                background: ratingStyle.level === 'generous' || ratingStyle.level === 'easy'
+                  ? 'var(--color-success-muted)'
+                  : ratingStyle.level === 'tough'
+                  ? 'var(--color-score-low-bg)'
+                  : 'var(--color-score-mid-bg)',
+                color: ratingStyle.level === 'generous' || ratingStyle.level === 'easy'
+                  ? 'var(--color-emerald)'
+                  : ratingStyle.level === 'tough'
+                  ? 'var(--color-red)'
+                  : 'var(--color-orange)',
+              }}
+            >
+              {ratingStyle.label}
+            </span>
+          )}
+          {ratingBias && ratingBias.votesWithConsensus > 0 && (
+            <span
+              className="font-bold px-2 py-0.5 rounded-full"
+              style={{
+                fontSize: '11px',
+                background: 'var(--color-score-mid-bg)',
+                color: 'var(--color-text-secondary)',
+              }}
+            >
+              {ratingBias.biasLabel}
+            </span>
+          )}
+          {trustBadgeType && (
+            <span
+              className="font-bold px-2 py-0.5 rounded-full"
+              style={{
+                fontSize: '11px',
+                background: 'var(--color-success-muted)',
+                color: 'var(--color-success)',
+              }}
+            >
+              Trusted
+            </span>
+          )}
+        </div>
       )}
     </div>
   )
