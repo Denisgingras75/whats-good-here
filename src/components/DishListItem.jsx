@@ -141,11 +141,13 @@ export var DishListItem = memo(function DishListItem({ dish, rank, showDistance,
           {dish.dish_name}
         </p>
         <p
-          className="truncate"
+          className="truncate font-medium"
           style={{
-            fontSize: '12px',
+            fontSize: '11px',
             color: 'var(--color-text-tertiary)',
-            marginTop: '2px',
+            marginTop: '3px',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
           }}
         >
           {subtitleParts.join(' \u00b7 ')}

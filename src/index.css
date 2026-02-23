@@ -33,16 +33,16 @@
    Gold primary, editorial authority, content-first
    =========================== */
 :root {
-  /* Primary: Coral-Orange — bold accent, CTAs, active states */
-  --color-primary: #E45A35;
-  --color-primary-muted: rgba(228, 90, 53, 0.12);
+  /* Primary: Burnt Orange — bold accent, CTAs, active states */
+  --color-primary: #E4440A;
+  --color-primary-muted: rgba(228, 68, 10, 0.12);
   --color-primary-glow: none;
   --color-rating: #6BB384;
   /* Gold accents — medals and ranks only */
   --color-accent-gold: #D9A765;
   --color-accent-gold-muted: rgba(217, 167, 101, 0.15);
-  --color-link-secondary: #E45A35;
-  --color-accent-orange: #E45A35;
+  --color-link-secondary: #E4440A;
+  --color-accent-orange: #E4440A;
   --color-accent-yellow: #F5B731;
   /* Text — warm cream on dark */
   --color-text-primary: #F5F1E8;
@@ -98,7 +98,7 @@
   --glow-gold: none;
 
   /* Focus ring */
-  --focus-ring: 0 0 0 3px rgba(228, 90, 53, 0.30);
+  --focus-ring: 0 0 0 3px rgba(228, 68, 10, 0.30);
 
   /* Spacing rhythm */
   --space-section: 24px;
@@ -122,15 +122,15 @@
    Warm gold on off-white
    =========================== */
 [data-theme="light"] {
-  --color-primary: #E45A35;
+  --color-primary: #E4440A;
   --color-primary-muted: rgba(228, 90, 53, 0.10);
   --color-primary-glow: none;
   --color-rating: #16A34A;
   --color-accent-gold: #C48A12;
   --color-accent-gold-muted: rgba(196, 138, 18, 0.12);
-  --color-link-secondary: #E45A35;
+  --color-link-secondary: #E4440A;
   --color-accent-yellow: #C48A12;
-  --color-accent-orange: #E45A35;
+  --color-accent-orange: #E4440A;
   /* Text — high contrast black on white */
   --color-text-primary: #111111;
   --color-text-secondary: #444444;
@@ -159,7 +159,7 @@
   --color-text-on-primary: #FFFFFF;
   --glow-primary: none;
   --glow-gold: none;
-  --focus-ring: 0 0 0 3px rgba(228, 90, 53, 0.30);
+  --focus-ring: 0 0 0 3px rgba(228, 68, 10, 0.30);
 
   /* Score pill background tints (light) */
   --color-score-great-bg: rgba(22, 163, 74, 0.12);
