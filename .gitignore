@@ -39,3 +39,9 @@ presentation-style-3-friendly.html
 stats.html
 .env
 supabase/.temp/
+
+# Playwright
+e2e/.auth/
+playwright-report/
+test-results/
+blob-report/
