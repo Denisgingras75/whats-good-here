@@ -313,6 +313,7 @@
     font-size: 15px;
     letter-spacing: -0.02em;
     min-width: 44px;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Hero card — full-width featured content */

@@ -372,7 +372,11 @@ function HeroCard({ dish, town }) {
     <button
       onClick={handleClick}
       className="w-full card-hero card-press stagger-item"
-      style={{ textAlign: 'center' }}
+      style={{
+        textAlign: 'center',
+        border: '1.5px solid var(--color-accent-gold)',
+        boxShadow: 'var(--glow-gold)',
+      }}
     >
       <div className="px-5 pt-5 pb-5">
         {/* Section label */}

@@ -6,7 +6,8 @@ import { getRatingColor, formatScore10, getScoreBg } from '../utils/ranking'
 /**
  * DishListItem — bold leaderboard row. Score is the visual hero.
  *
- * Layout: [Rank] [Score Block] [Name + Restaurant + Context]
+ * Layout: [Rank Circle] [Score Block] [Name + Restaurant + Context]
+ * Top 3 get filled medal circles + left accent bar + surface bg.
  *
  * Props:
  *   dish        - dish object
@@ -26,11 +27,19 @@ export var DishListItem = memo(function DishListItem({ dish, rank, showDistance,
     navigate('/dish/' + dish.dish_id)
   }
 
-  // Rank colors: gold, silver, bronze, then subtle
-  var rankColor = rank === 1 ? 'var(--color-medal-gold)'
+  // Medal colors for top 3, subtle for rest
+  var rankBg = rank === 1 ? 'var(--color-medal-gold)'
     : rank === 2 ? 'var(--color-medal-silver)'
     : rank === 3 ? 'var(--color-medal-bronze)'
-    : 'var(--color-text-tertiary)'
+    : 'transparent'
+
+  var rankText = isTop3 ? 'var(--color-bg)' : 'var(--color-text-tertiary)'
+
+  // Left accent bar color for top 3
+  var accentColor = rank === 1 ? 'var(--color-medal-gold)'
+    : rank === 2 ? 'var(--color-medal-silver)'
+    : rank === 3 ? 'var(--color-medal-bronze)'
+    : 'transparent'
 
   // Build subtitle parts
   var subtitleParts = [dish.restaurant_name]
@@ -48,24 +57,29 @@ export var DishListItem = memo(function DishListItem({ dish, rank, showDistance,
     <button
       data-dish-id={dish.dish_id}
       onClick={handleClick}
-      className={'w-full flex items-center gap-3 py-3 px-3 text-left card-press' + (className ? ' ' + className : '')}
+      className={'w-full flex items-center gap-3 py-3 text-left card-press' + (className ? ' ' + className : '')}
       style={{
         background: isTop3 ? 'var(--color-surface)' : 'transparent',
         minHeight: '56px',
         cursor: 'pointer',
         borderRadius: isTop3 ? '12px' : '0',
         borderBottom: isTop3 ? 'none' : '1px solid var(--color-divider)',
+        borderLeft: isTop3 ? '3px solid ' + accentColor : 'none',
+        paddingLeft: isTop3 ? '12px' : '12px',
+        paddingRight: '12px',
       }}
     >
-      {/* Rank — structural position number */}
+      {/* Rank — filled circle for top 3, plain number for rest */}
       {rank != null && (
         <span
-          className="flex-shrink-0"
+          className="flex-shrink-0 flex items-center justify-center"
           style={{
-            width: '28px',
-            textAlign: 'center',
-            fontSize: isTop3 ? '20px' : '15px',
-            color: rankColor,
+            width: isTop3 ? '30px' : '28px',
+            height: isTop3 ? '30px' : '28px',
+            borderRadius: isTop3 ? '50%' : '0',
+            background: rankBg,
+            fontSize: isTop3 ? '14px' : '15px',
+            color: rankText,
             fontWeight: 800,
             letterSpacing: '-0.02em',
           }}
@@ -92,6 +106,7 @@ export var DishListItem = memo(function DishListItem({ dish, rank, showDistance,
               color: getRatingColor(dish.avg_rating),
               letterSpacing: '-0.03em',
               lineHeight: 1,
+              fontVariantNumeric: 'tabular-nums',
             }}
           >
             {formatScore10(dish.avg_rating)}
