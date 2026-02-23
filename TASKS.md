@@ -559,3 +559,28 @@
 - Social share rewrites for rich previews
 
 **Files:** Multiple — see `docs/plans/2026-02-21-memorial-day-launch-design.md`
+
+---
+
+## ~~T39: Fix source weighting inconsistency~~ DONE
+
+**Why:** `update_dish_avg_rating` trigger used `AVG(rating_10)` treating all votes equally, but RPCs (`get_ranked_dishes`, `get_restaurant_dishes`) weight `ai_estimated` at 0.5x. Dish detail pages showed different ratings than Browse listings.
+
+**What was done:**
+- Fixed trigger to apply `0.5x` weighting for `ai_estimated` source votes
+- Migration includes one-time recompute of all dish ratings
+- `variant_stats` CTE was already correct (inherits from `dish_stats` which applies weighting)
+
+**Files:** `supabase/schema.sql:1846`, `supabase/migrations/fix-avg-rating-source-weighting.sql`
+
+---
+
+## ~~T40: Convert TopDishCard hardcoded hex to CSS variables~~ DONE
+
+**Why:** 16 hardcoded hex colors in TopDishCard.jsx breaking dark mode (Island Depths theme).
+
+**What was done:**
+- All `#FFFFFF`, `#1A1A1A`, `#BBBBBB`, `#E4440A`, `#16A34A`, `#999999`, `#F5F5F5`, `#FFF0EB`, `#E0E0E0` converted to CSS variables
+- Dark mode now works correctly for restaurant dish cards
+
+**Files:** `src/components/restaurants/TopDishCard.jsx`

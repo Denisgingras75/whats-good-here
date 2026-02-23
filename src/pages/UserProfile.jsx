@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { logger } from '../utils/logger'
 import { getCompatColor } from '../utils/formatters'
@@ -10,14 +10,14 @@ import { followsApi } from '../api/followsApi'
 import { votesApi } from '../api/votesApi'
 import { FollowListModal } from '../components/FollowListModal'
 import { ProfileSkeleton } from '../components/Skeleton'
-import { ReviewCard, ReviewDetailModal, FoodMap } from '../components/profile'
-import { DishListItem } from '../components/DishListItem'
-import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
-import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
-import { ReviewsIcon } from '../components/ReviewsIcon'
+import { FoodMap, ShelfFilter, JournalFeed } from '../components/profile'
 import { profileApi } from '../api/profileApi'
 
-const MAX_VISIBLE_DISHES = 5
+const PUBLIC_SHELVES = [
+  { id: 'all', label: 'All' },
+  { id: 'good-here', label: 'Good Here' },
+  { id: 'not-good-here', label: "Wasn't Good Here" },
+]
 
 /**
  * Compute rating style from average rating and variance
@@ -50,7 +50,9 @@ function computeRatingStyle(avgRating, ratingVariance) {
 export function UserProfile() {
   const { userId } = useParams()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { user: currentUser } = useAuth()
+  const locationFilter = searchParams.get('location')
 
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -62,8 +64,7 @@ export function UserProfile() {
   const [userReviews, setUserReviews] = useState([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
   const [selectedReview, setSelectedReview] = useState(null)
-  const [activeTab, setActiveTab] = useState('worth-it') // 'worth-it' | 'avoid' | 'reviews'
-  const [expandedTabs, setExpandedTabs] = useState({})
+  const [activeShelf, setActiveShelf] = useState('all')
   const [tasteCompat, setTasteCompat] = useState(null)
   const [ratingBias, setRatingBias] = useState(null)
   const [standoutPicks, setStandoutPicks] = useState({})
@@ -324,6 +325,53 @@ export function UserProfile() {
       ratingStyle: style,
     }
   }, [profile?.recent_votes])
+
+  // Transform votes into JournalFeed shape
+  var journalWorthIt = worthItVotes.map(function (vote) {
+    var review = userReviews.find(function (r) { return r.dish_id === (vote.dish && vote.dish.id) })
+    return {
+      dish_id: vote.dish && vote.dish.id,
+      dish_name: vote.dish && vote.dish.name,
+      restaurant_name: vote.dish && vote.dish.restaurant_name,
+      restaurant_town: vote.dish && vote.dish.restaurant_town,
+      category: vote.dish && vote.dish.category,
+      photo_url: vote.dish && vote.dish.photo_url,
+      rating_10: vote.rating,
+      community_avg: vote.dish && vote.dish.avg_rating,
+      voted_at: vote.voted_at,
+      review_text: review && review.review_text,
+      would_order_again: true,
+    }
+  })
+  var journalAvoid = avoidVotes.map(function (vote) {
+    var review = userReviews.find(function (r) { return r.dish_id === (vote.dish && vote.dish.id) })
+    return {
+      dish_id: vote.dish && vote.dish.id,
+      dish_name: vote.dish && vote.dish.name,
+      restaurant_name: vote.dish && vote.dish.restaurant_name,
+      restaurant_town: vote.dish && vote.dish.restaurant_town,
+      category: vote.dish && vote.dish.category,
+      photo_url: vote.dish && vote.dish.photo_url,
+      rating_10: vote.rating,
+      community_avg: vote.dish && vote.dish.avg_rating,
+      voted_at: vote.voted_at,
+      review_text: review && review.review_text,
+      would_order_again: false,
+    }
+  })
+
+  // Apply location filter if present in URL
+  if (locationFilter) {
+    var locLower = locationFilter.toLowerCase().replace(/-/g, ' ')
+    journalWorthIt = journalWorthIt.filter(function (d) {
+      var town = (d.restaurant_town || '').toLowerCase()
+      return town.indexOf(locLower) !== -1 || locLower.indexOf(town) !== -1
+    })
+    journalAvoid = journalAvoid.filter(function (d) {
+      var town = (d.restaurant_town || '').toLowerCase()
+      return town.indexOf(locLower) !== -1 || locLower.indexOf(town) !== -1
+    })
+  }
 
   if (loading) {
     return <ProfileSkeleton />
@@ -623,131 +671,43 @@ export function UserProfile() {
         </div>
       )}
 
-      {/* Tabs */}
-      <div
-        className="sticky top-0 z-10 py-2.5"
-        style={{
-          background: 'var(--color-surface)',
-          boxShadow: 'none',
-          borderBottom: '1px solid var(--color-divider)',
-        }}
-      >
-        <div className="flex gap-1.5 overflow-x-auto px-4 pb-0.5 scrollbar-hide">
-          {[
-            { id: 'worth-it', label: 'Good Here', icon: 'thumbsUp', count: worthItVotes.length },
-            { id: 'avoid', label: 'Not Good Here', icon: 'thumbsDown', count: avoidVotes.length },
-            { id: 'reviews', label: 'Reviews', icon: 'reviews', count: userReviews.length },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="flex-shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all whitespace-nowrap active:scale-[0.97]"
-              style={{
-                fontSize: '13px',
-                color: activeTab === tab.id ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
-                ...(activeTab === tab.id
-                  ? {
-                      background: 'var(--color-primary)',
-                      boxShadow: 'none',
-                    }
-                  : { background: 'var(--color-surface-elevated)' }),
-              }}
-            >
-              {tab.icon === 'thumbsUp' ? <ThumbsUpIcon size={28} active={activeTab === tab.id} /> : tab.icon === 'thumbsDown' ? <ThumbsDownIcon size={28} active={activeTab === tab.id} /> : <ReviewsIcon size={40} active={activeTab === tab.id} />}
-              <span>{tab.label}</span>
-              <span
-                className="ml-0.5 px-1.5 py-0.5 rounded-full font-semibold"
-                style={{ background: activeTab === tab.id ? 'var(--color-text-on-primary-muted, rgba(255,255,255,0.2))' : 'var(--color-surface-elevated-muted, rgba(0,0,0,0.08))', fontSize: '11px' }}
-              >
-                {tab.count}
-              </span>
-            </button>
-          ))}
+      {/* Location Filter Banner */}
+      {locationFilter && (
+        <div
+          className="mx-4 mt-3 px-4 py-2.5 rounded-xl flex items-center justify-between"
+          style={{
+            background: 'var(--color-surface-elevated)',
+            border: '1px solid var(--color-divider)',
+          }}
+        >
+          <span style={{ color: 'var(--color-text-secondary)', fontSize: '13px' }}>
+            Showing picks in <strong style={{ color: 'var(--color-text-primary)' }}>{locationFilter.replace(/-/g, ' ')}</strong>
+          </span>
+          <button
+            onClick={function () { setSearchParams({}) }}
+            className="font-semibold"
+            style={{ color: 'var(--color-primary)', fontSize: '13px' }}
+          >
+            Show all
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* Tab Content */}
-      <div className="p-4 pt-5">
-        {(() => {
-          const tabDishes = activeTab === 'worth-it' ? worthItVotes
-            : activeTab === 'avoid' ? avoidVotes
-            : userReviews
-          const isLoading = activeTab === 'reviews' ? reviewsLoading : false
-          const isTabExpanded = expandedTabs[activeTab] || false
-          const visibleDishes = isTabExpanded ? tabDishes : tabDishes.slice(0, MAX_VISIBLE_DISHES)
-          const hiddenCount = tabDishes.length - MAX_VISIBLE_DISHES
-          const hasMoreDishes = hiddenCount > 0
+      {/* Shelf Filters */}
+      <ShelfFilter
+        shelves={PUBLIC_SHELVES}
+        active={activeShelf}
+        onSelect={setActiveShelf}
+      />
 
-          if (isLoading) {
-            return (
-              <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--color-surface-elevated)' }} />
-                ))}
-              </div>
-            )
-          }
-
-          if (tabDishes.length === 0) {
-            return (
-              <div className="py-8 text-center">
-                <img src="/empty-plate.png" alt="" className="w-14 h-14 mx-auto mb-2 rounded-full object-cover" />
-                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  {activeTab === 'worth-it' ? 'No dishes rated good here yet'
-                    : activeTab === 'avoid' ? 'No dishes rated not good here yet'
-                    : 'No reviews yet'}
-                </p>
-              </div>
-            )
-          }
-
-          return (
-            <div className="space-y-3.5">
-              {activeTab === 'reviews' ? (
-                visibleDishes.map((review) => (
-                  <ReviewCard key={review.id} review={review} onClick={() => setSelectedReview(review)} />
-                ))
-              ) : (
-                visibleDishes.map((vote, index) => (
-                  <DishListItem
-                    key={vote.dish?.id || index}
-                    dish={{
-                      dish_id: vote.dish?.id,
-                      dish_name: vote.dish?.name,
-                      photo_url: vote.dish?.photo_url,
-                      category: vote.dish?.category,
-                      restaurant_name: vote.dish?.restaurant_name,
-                      avg_rating: vote.dish?.avg_rating,
-                    }}
-                    variant="voted"
-                    voteVariant="other-profile"
-                    theirRating={vote.rating}
-                    myRating={myRatings[vote.dish?.id]}
-                    wouldOrderAgain={vote.would_order_again}
-                    showPhoto
-                  />
-                ))
-              )}
-
-              {/* View more / View less button */}
-              {hasMoreDishes && (
-                <button
-                  onClick={() => setExpandedTabs(prev => ({ ...prev, [activeTab]: !isTabExpanded }))}
-                  className="w-full py-3 text-center rounded-xl border-2 border-dashed transition-all hover:bg-[color:var(--color-surface-elevated)] hover:border-[color:var(--color-primary)] active:scale-[0.99]"
-                  style={{ borderColor: 'var(--color-divider)' }}
-                >
-                  <span className="font-semibold" style={{ color: 'var(--color-primary)', fontSize: '13px' }}>
-                    {isTabExpanded
-                      ? 'Show less'
-                      : `View ${hiddenCount} more ${activeTab === 'reviews' ? (hiddenCount === 1 ? 'review' : 'reviews') : (hiddenCount === 1 ? 'dish' : 'dishes')}`
-                    }
-                  </span>
-                </button>
-              )}
-            </div>
-          )
-        })()}
-      </div>
+      {/* Journal Feed */}
+      <JournalFeed
+        worthIt={journalWorthIt}
+        avoid={journalAvoid}
+        heard={[]}
+        activeShelf={activeShelf}
+        loading={reviewsLoading}
+      />
 
       {/* Follow List Modal */}
       {followListModal && (

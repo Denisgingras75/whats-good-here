@@ -1,6 +1,2 @@
-export { Top10Compact } from './Top10Compact'
-export { CategorySkeleton } from './CategorySkeleton'
-export { SearchHero } from './SearchHero'
 export { CategoryIcon, hasCategoryIcon } from './CategoryIcons'
 export { DishPhotoFade } from './DishPhotoFade'
-export { NearbyDiscovery } from './NearbyDiscovery'

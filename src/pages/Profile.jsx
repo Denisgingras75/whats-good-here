@@ -28,6 +28,7 @@ import {
   MissionSection,
   ShelfFilter,
   JournalFeed,
+  SharePicksButton,
 } from '../components/profile'
 import { TrustBadge } from '../components/TrustBadge'
 import { SimilarTasteUsers } from '../components/SimilarTasteUsers'
@@ -310,6 +311,14 @@ export function Profile() {
             handleSaveName={handleSaveName}
             setFollowListModal={setFollowListModal}
           />
+
+          {/* Share My Picks */}
+          <div className="px-4 pt-3">
+            <SharePicksButton
+              userId={user.id}
+              userName={profile?.display_name}
+            />
+          </div>
 
           {/* Rating Style + Deviation Score */}
           {(stats.ratingStyle || (ratingBias && ratingBias.votesWithConsensus > 0)) && (
