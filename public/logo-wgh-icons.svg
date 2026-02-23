@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 52" width="156" height="52">
+  <!-- WGH Food Icon Logo: Cup (W) + Pizza Box (G) + Fry Box (H) -->
+
+  <!-- === SOFT DRINK CUP — W === -->
+  <g transform="translate(0,0)">
+    <!-- Cup body (tapered) -->
+    <path d="M10 18 L8 46 C8 48 10 50 14 50 L30 50 C34 50 36 48 36 46 L34 18 Z" fill="#D9A765" rx="2"/>
+    <!-- Dome lid -->
+    <path d="M7 16 C7 12 14 9 22 9 C30 9 37 12 37 16 L37 18 L7 18 Z" fill="#D9A765"/>
+    <!-- Straw -->
+    <rect x="24" y="2" width="3" height="16" rx="1.5" fill="#D9A765" transform="rotate(8, 25.5, 10)"/>
+    <!-- Letter W -->
+    <text x="22" y="40" text-anchor="middle" font-family="'DM Sans', sans-serif" font-weight="700" font-size="18" fill="#0F1720" letter-spacing="-0.5">W</text>
+  </g>
+
+  <!-- === PIZZA BOX — G === -->
+  <g transform="translate(52,0)">
+    <!-- Box bottom -->
+    <rect x="4" y="26" width="44" height="24" rx="3" fill="#D9A765"/>
+    <!-- Box lid (slightly open, angled) -->
+    <path d="M4 26 L4 20 C4 18 6 16 8 16 L44 16 C46 16 48 18 48 20 L48 26 Z" fill="#D9A765"/>
+    <!-- Lid opening line -->
+    <line x1="4" y1="26" x2="48" y2="26" stroke="#0F1720" stroke-width="1.5" opacity="0.3"/>
+    <!-- Pizza peek (triangle/circle showing through the crack) -->
+    <circle cx="26" cy="23" r="4" fill="#0F1720" opacity="0.15"/>
+    <!-- Letter G -->
+    <text x="26" y="45" text-anchor="middle" font-family="'DM Sans', sans-serif" font-weight="700" font-size="18" fill="#0F1720" letter-spacing="-0.5">G</text>
+  </g>
+
+  <!-- === FRENCH FRY BOX — H === -->
+  <g transform="translate(108,0)">
+    <!-- Fry box body (tapered, wider at top) -->
+    <path d="M10 20 L6 46 C6 48 8 50 12 50 L36 50 C40 50 42 48 42 46 L38 20 Z" fill="#D9A765" rx="2"/>
+    <!-- Fry box top fold -->
+    <path d="M10 20 L10 16 C10 15 11 14 12 14 L36 14 C37 14 38 15 38 16 L38 20 Z" fill="#D9A765"/>
+    <!-- French fries sticking out -->
+    <rect x="14" y="4" width="4" height="16" rx="2" fill="#D9A765" transform="rotate(-8, 16, 12)"/>
+    <rect x="22" y="2" width="4" height="18" rx="2" fill="#D9A765" transform="rotate(3, 24, 11)"/>
+    <rect x="30" y="5" width="4" height="15" rx="2" fill="#D9A765" transform="rotate(10, 32, 12)"/>
+    <!-- Fry shadows for depth -->
+    <rect x="14" y="4" width="4" height="16" rx="2" fill="#0F1720" opacity="0.1" transform="rotate(-8, 16, 12)"/>
+    <rect x="22" y="2" width="4" height="18" rx="2" fill="#0F1720" opacity="0.1" transform="rotate(3, 24, 11)"/>
+    <rect x="30" y="5" width="4" height="15" rx="2" fill="#0F1720" opacity="0.1" transform="rotate(10, 32, 12)"/>
+    <!-- Letter H -->
+    <text x="24" y="42" text-anchor="middle" font-family="'DM Sans', sans-serif" font-weight="700" font-size="18" fill="#0F1720" letter-spacing="-0.5">H</text>
+  </g>
+</svg>

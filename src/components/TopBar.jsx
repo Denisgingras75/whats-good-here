@@ -1,8 +1,9 @@
 import { NotificationBell } from './NotificationBell'
 import { SettingsDropdown } from './SettingsDropdown'
+import { WghLogo } from './WghLogo'
 
 /**
- * TopBar - Brand anchor with MV island silhouette, settings gear, and notification bell
+ * TopBar - Brand anchor with WGH food icon logo, settings gear, and notification bell
  */
 export function TopBar() {
   return (
@@ -11,13 +12,8 @@ export function TopBar() {
         {/* Spacer for symmetry */}
         <div style={{ width: '28px' }} />
 
-        {/* Martha's Vineyard island silhouette — centered */}
-        <img
-          src="/mv-outline.png"
-          alt="Martha's Vineyard"
-          className="top-bar-icon"
-          style={{ height: '28px', width: 'auto', opacity: 0.9 }}
-        />
+        {/* WGH food icon logo — centered */}
+        <WghLogo size={32} />
 
         {/* Settings + Notifications grouped right */}
         <div className="flex items-center">
