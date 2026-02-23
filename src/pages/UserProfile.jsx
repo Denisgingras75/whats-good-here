@@ -13,6 +13,19 @@ import { ProfileSkeleton } from '../components/Skeleton'
 import { FoodMap, ShelfFilter, JournalFeed } from '../components/profile'
 import { profileApi } from '../api/profileApi'
 
+// Known location display names for URL slugs
+var LOCATION_NAMES = {
+  'marthas-vineyard': "Martha's Vineyard",
+  'nantucket': 'Nantucket',
+  'cape-cod': 'Cape Cod',
+}
+
+function formatLocationName(slug) {
+  if (LOCATION_NAMES[slug]) return LOCATION_NAMES[slug]
+  // Title-case fallback: "oak-bluffs" → "Oak Bluffs"
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase() })
+}
+
 const PUBLIC_SHELVES = [
   { id: 'all', label: 'All' },
   { id: 'good-here', label: 'Good Here' },
@@ -576,22 +589,13 @@ export function UserProfile() {
         {/* Action Buttons */}
         <div className="flex gap-3 mt-4">
           {isOwnProfile ? (
-            <>
-              <Link
-                to="/profile"
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-center transition-colors"
-                style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)' }}
-              >
-                Edit Profile
-              </Link>
-              <button
-                onClick={handleShare}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)' }}
-              >
-                Share
-              </button>
-            </>
+            <Link
+              to="/profile"
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-center transition-colors"
+              style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)' }}
+            >
+              Edit Profile
+            </Link>
           ) : (
             <button
               onClick={handleFollowToggle}
@@ -605,6 +609,13 @@ export function UserProfile() {
               {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
             </button>
           )}
+          <button
+            onClick={handleShare}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+            style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)' }}
+          >
+            Share
+          </button>
         </div>
 
       </div>
@@ -681,7 +692,7 @@ export function UserProfile() {
           }}
         >
           <span style={{ color: 'var(--color-text-secondary)', fontSize: '13px' }}>
-            Showing picks in <strong style={{ color: 'var(--color-text-primary)' }}>{locationFilter.replace(/-/g, ' ')}</strong>
+            Showing picks in <strong style={{ color: 'var(--color-text-primary)' }}>{formatLocationName(locationFilter)}</strong>
           </span>
           <button
             onClick={function () { setSearchParams({}) }}
@@ -708,6 +719,49 @@ export function UserProfile() {
         activeShelf={activeShelf}
         loading={reviewsLoading}
       />
+
+      {/* Signup CTA for visitors */}
+      {!currentUser && (
+        <div
+          className="mx-4 mt-6 mb-4 rounded-2xl px-5 py-5 text-center"
+          style={{
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-divider)',
+          }}
+        >
+          <p className="font-bold" style={{ color: 'var(--color-text-primary)', fontSize: '16px' }}>
+            Find the best dishes on Martha's Vineyard
+          </p>
+          <p className="mt-1" style={{ color: 'var(--color-text-secondary)', fontSize: '13px' }}>
+            Save your favorites, rate dishes, and see how your taste compares.
+          </p>
+          <div className="flex gap-3 mt-4 justify-center">
+            <Link
+              to="/browse"
+              className="px-5 py-2.5 rounded-xl font-semibold"
+              style={{
+                background: 'var(--color-primary)',
+                color: 'var(--color-text-on-primary)',
+                fontSize: '14px',
+              }}
+            >
+              Browse Dishes
+            </Link>
+            <Link
+              to="/login"
+              className="px-5 py-2.5 rounded-xl font-semibold"
+              style={{
+                background: 'var(--color-surface-elevated)',
+                color: 'var(--color-text-primary)',
+                border: '1px solid var(--color-divider)',
+                fontSize: '14px',
+              }}
+            >
+              Sign Up Free
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Follow List Modal */}
       {followListModal && (
