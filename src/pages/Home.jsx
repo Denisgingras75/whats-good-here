@@ -294,6 +294,40 @@ export function Home() {
                 View all dishes
               </button>
             )}
+
+            {/* Inline compact map preview */}
+            <div className="mt-4">
+              <button
+                onClick={function () { setShowMap(true) }}
+                className="w-full card-standard card-press overflow-hidden"
+                style={{ textAlign: 'left' }}
+              >
+                <ErrorBoundary>
+                  <Suspense fallback={
+                    <div style={{ height: '180px', background: 'var(--color-surface)' }} className="animate-pulse" />
+                  }>
+                    <RestaurantMap
+                      mode="dish"
+                      dishes={(dishes || []).slice(0, 20)}
+                      userLocation={location}
+                      town={town}
+                      onSelectDish={function (dishId) { navigate('/dish/' + dishId) }}
+                      radiusMi={radius}
+                      permissionGranted={permissionState === 'granted'}
+                      compact
+                    />
+                  </Suspense>
+                </ErrorBoundary>
+                <div className="px-3 py-2 flex items-center justify-between" style={{ borderTop: '1px solid var(--color-divider)' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+                    Nearby dishes
+                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-primary)' }}>
+                    Full map →
+                  </span>
+                </div>
+              </button>
+            </div>
           </>
         ) : (
           <div className="py-8 text-center">
