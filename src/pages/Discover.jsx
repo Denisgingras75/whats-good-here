@@ -6,6 +6,7 @@ import { useTrendingDishes, useRecentDishes } from '../hooks/useTrendingDishes'
 import { SpecialCard } from '../components/SpecialCard'
 import { EventCard } from '../components/EventCard'
 import { getCategoryEmoji } from '../constants/categories'
+import { ScorePill } from '../components/ScorePill'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { logger } from '../utils/logger'
 
@@ -98,65 +99,42 @@ export function Discover() {
         </p>
       </header>
 
-      {/* #1 This Week Hero Card */}
+      {/* #1 This Week — scoreboard hero */}
       {topDish && (
         <div className="px-4 pt-4">
           <button
             onClick={() => navigate(`/dish/${topDish.dish_id}`)}
-            className="w-full rounded-2xl p-4 text-left transition-all active:scale-[0.99]"
-            style={{
-              background: 'var(--color-card)',
-              border: '2px solid var(--color-accent-gold)',
-              boxShadow: 'var(--glow-gold)',
-            }}
+            className="w-full card-hero card-press text-left"
           >
-            <div className="flex items-center gap-1 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-accent-gold)' }}>
-                #1 This Week
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              {topDish.photo_url ? (
-                <img
-                  src={topDish.photo_url}
-                  alt={topDish.dish_name}
-                  className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-                />
-              ) : (
-                <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
-                  style={{ background: 'var(--color-surface-elevated)' }}
-                >
-                  {getCategoryEmoji(topDish.category)}
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-lg truncate" style={{ color: 'var(--color-text-primary)' }}>
-                  {topDish.dish_name}
-                </h3>
-                <p className="text-sm truncate" style={{ color: 'var(--color-accent-gold)' }}>
-                  {topDish.restaurant_name}
-                </p>
+            <div className="px-5 pt-4 pb-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="section-label" style={{ color: 'var(--color-accent-gold)' }}>
+                  TRENDING THIS WEEK
+                </span>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--color-medal-gold)' }}>
+                  #1
+                </span>
               </div>
-              {topDish.avg_rating && (
-                <div
-                  className="flex-shrink-0 px-3 py-1.5 rounded-lg font-bold text-lg"
-                  style={{
-                    background: 'var(--color-accent-gold-muted)',
-                    color: 'var(--color-accent-gold)',
-                  }}
-                >
-                  {topDish.avg_rating}
+              <div className="flex items-center gap-4">
+                <ScorePill score={topDish.avg_rating} size="lg" />
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className="font-bold truncate"
+                    style={{ fontSize: '18px', color: 'var(--color-text-primary)', lineHeight: 1.2 }}
+                  >
+                    {topDish.dish_name}
+                  </h3>
+                  <p
+                    className="truncate"
+                    style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '2px' }}
+                  >
+                    {topDish.restaurant_name}
+                  </p>
+                  <p style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+                    {topDish.recent_votes} votes this week · {topDish.total_votes} total
+                  </p>
                 </div>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                {topDish.recent_votes} votes this week
-              </span>
-              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                · {topDish.total_votes} total
-              </span>
+              </div>
             </div>
           </button>
         </div>
@@ -170,13 +148,14 @@ export function Discover() {
 
         return (
           <div className="pt-5">
-            <div className="px-4 mb-3 flex items-center gap-2">
-              <h3 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                Trending Now
+            <div className="px-4 mb-3">
+              <span className="section-label">TRENDING NOW</span>
+              <h3
+                className="font-bold"
+                style={{ fontSize: '16px', color: 'var(--color-text-primary)', marginTop: '2px' }}
+              >
+                Most Voted This Week
               </h3>
-              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                Most voted this week
-              </span>
             </div>
 
             {useCarousel ? (
@@ -221,7 +200,7 @@ export function Discover() {
                 ))}
               </div>
             ) : (
-              /* Compact list fallback when not enough photos */
+              /* Compact leaderboard fallback when not enough photos */
               <div
                 className="mx-4 rounded-xl overflow-hidden"
                 style={{
@@ -233,23 +212,31 @@ export function Discover() {
                   <button
                     key={dish.dish_id}
                     onClick={() => navigate(`/dish/${dish.dish_id}`)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors active:scale-[0.99]"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left card-press"
                     style={{
                       borderBottom: i < trendingRest.length - 1 ? '1px solid var(--color-divider)' : 'none',
                     }}
                   >
-                    <span className="text-lg flex-shrink-0">{getCategoryEmoji(dish.category)}</span>
+                    <span
+                      style={{
+                        width: '24px',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: 800,
+                        color: 'var(--color-text-tertiary)',
+                      }}
+                    >
+                      {i + 2}
+                    </span>
+                    {dish.avg_rating && <ScorePill score={dish.avg_rating} size="sm" />}
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      <p className="font-bold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
                         {dish.dish_name}
                       </p>
                       <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                        {dish.restaurant_name}
+                        {dish.restaurant_name} · {dish.recent_votes} votes
                       </p>
                     </div>
-                    <span className="text-xs font-medium flex-shrink-0" style={{ color: 'var(--color-primary)' }}>
-                      {dish.recent_votes} votes
-                    </span>
                   </button>
                 ))}
               </div>
