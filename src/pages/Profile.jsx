@@ -331,7 +331,7 @@ export function Profile() {
                   style={{
                     background: 'var(--color-card)',
                     borderColor: 'var(--color-divider)',
-                    boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                    boxShadow: 'none',
                   }}
                 >
                   <p
@@ -357,7 +357,7 @@ export function Profile() {
                   style={{
                     background: 'var(--color-card)',
                     borderColor: 'var(--color-divider)',
-                    boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                    boxShadow: 'none',
                   }}
                 >
                   <p className="text-sm font-bold" style={{
@@ -391,7 +391,7 @@ export function Profile() {
                 style={{
                   background: 'var(--color-card)',
                   borderColor: 'var(--color-divider)',
-                  boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                  boxShadow: 'none',
                 }}
               >
                 <div>
@@ -440,7 +440,7 @@ export function Profile() {
                   className="rounded-xl border px-3.5 py-3 flex items-center gap-3"
                   style={{
                     background: 'var(--color-card)',
-                    borderColor: 'rgba(239, 68, 68, 0.2)',
+                    borderColor: 'var(--color-red-muted, rgba(239, 68, 68, 0.2))',
                   }}
                 >
                   <span className="text-lg flex-shrink-0" style={{ color: 'var(--color-red)' }}>
@@ -495,7 +495,7 @@ export function Profile() {
                 className="w-full rounded-2xl p-4 flex items-center gap-4 transition-all hover:scale-[0.99] active:scale-[0.98]"
                 style={{
                   background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-orange) 100%)',
-                  boxShadow: '0 4px 20px -4px rgba(232, 102, 60, 0.25), 0 2px 8px -2px rgba(0, 0, 0, 0.1)',
+                  boxShadow: 'none',
                 }}
               >
                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
@@ -505,11 +505,11 @@ export function Profile() {
                   <h3 className="font-bold" style={{ fontSize: '17px', letterSpacing: '-0.01em', color: 'var(--color-text-on-primary)' }}>
                     {unratedCount} photo{unratedCount === 1 ? '' : 's'} to rate
                   </h3>
-                  <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-on-primary-muted, rgba(255, 255, 255, 0.7))' }}>
                     Tap to rate your dishes
                   </p>
                 </div>
-                <svg className="w-5 h-5 flex-shrink-0" style={{ color: 'rgba(255, 255, 255, 0.6)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--color-text-on-primary-muted, rgba(255, 255, 255, 0.6))' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -521,7 +521,7 @@ export function Profile() {
             className="sticky top-0 z-10 py-2.5"
             style={{
               background: 'var(--color-surface)',
-              boxShadow: '0 4px 12px -4px rgba(0, 0, 0, 0.06)',
+              boxShadow: 'none',
               borderBottom: '1px solid var(--color-divider)',
             }}
           >
@@ -540,7 +540,7 @@ export function Profile() {
                     ...(activeTab === tab.id
                       ? {
                           background: 'var(--color-primary)',
-                          boxShadow: '0 2px 8px -2px rgba(232, 102, 60, 0.25)',
+                          boxShadow: 'none',
                         }
                       : { background: 'var(--color-surface-elevated)' }),
                   }}
@@ -549,7 +549,7 @@ export function Profile() {
                   <span>{tab.label}</span>
                   <span
                     className="ml-0.5 px-1.5 py-0.5 rounded-full font-semibold"
-                    style={{ fontSize: '11px', background: activeTab === tab.id ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }}
+                    style={{ fontSize: '11px', background: activeTab === tab.id ? 'var(--color-text-on-primary-muted, rgba(255,255,255,0.2))' : 'var(--color-surface-elevated-muted, rgba(0,0,0,0.08))' }}
                   >
                     {tab.id === 'unrated' ? unratedCount :
                      tab.id === 'worth-it' ? worthItDishes.length :
@@ -666,7 +666,7 @@ export function Profile() {
               style={{
                 background: 'var(--color-card)',
                 borderColor: 'var(--color-divider)',
-                boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                boxShadow: 'none',
               }}
             >
               <div className="px-4 py-3.5 border-b" style={{ borderColor: 'var(--color-divider)' }}>
@@ -782,12 +782,9 @@ export function Profile() {
           <div
             className="rounded-2xl border p-7"
             style={{
-              background: `
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(232, 102, 60, 0.05) 0%, transparent 70%),
-                var(--color-card)
-              `,
+              background: 'var(--color-card)',
               borderColor: 'var(--color-divider)',
-              boxShadow: '0 4px 24px -8px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+              boxShadow: 'none',
             }}
           >
             <div className="text-center mb-7">
@@ -825,7 +822,7 @@ export function Profile() {
                   : ''
               }`}
                 style={{
-                  background: message.type === 'error' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                  background: message.type === 'error' ? 'var(--color-danger-muted, rgba(239, 68, 68, 0.1))' : 'var(--color-success-muted, rgba(16, 185, 129, 0.1))',
                   color: message.type === 'error' ? 'var(--color-red)' : 'var(--color-emerald)',
                 }}
               >
@@ -843,7 +840,7 @@ export function Profile() {
                   background: 'var(--color-surface-elevated)',
                   borderColor: 'var(--color-divider)',
                   fontSize: '14px',
-                  boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.06)',
+                  boxShadow: 'none',
                 }}
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

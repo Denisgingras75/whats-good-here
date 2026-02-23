@@ -524,7 +524,7 @@ export function Dish() {
             className="mx-3 rounded-xl px-4 py-3"
             style={{
               background: 'var(--color-surface-elevated)',
-              boxShadow: '0 2px 16px rgba(0, 0, 0, 0.1)',
+              border: '1.5px solid var(--color-divider)',
               marginTop: heroImage ? '-32px' : '0',
               position: 'relative',
               zIndex: 5,
@@ -654,6 +654,7 @@ export function Dish() {
                 className="mb-4 p-4 rounded-xl"
                 style={{
                   background: 'var(--color-surface)',
+                  borderLeft: '3px solid var(--color-accent-gold)',
                 }}
               >
                 <p
@@ -675,201 +676,48 @@ export function Dish() {
               </div>
             )}
 
-            {/* Reviews Section — card-style list */}
-            {reviews.length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                    Reviews ({reviews.length})
-                  </h3>
-                  <TrustSummary
-                    verifiedCount={reviews.filter(r => r.trust_badge === 'human_verified' || r.trust_badge === 'trusted_reviewer').length}
-                    aiCount={reviews.filter(r => r.trust_badge === 'ai_estimated').length}
-                  />
-                </div>
-                <div className="space-y-2">
-                  {reviews.map((review) => (
-                    <div
-                      key={review.id}
-                      className="p-3 rounded-xl"
-                      style={{ background: 'var(--color-surface)' }}
-                    >
-                      {/* Header: Avatar + name + timestamp | rating */}
-                      <div className="flex items-center justify-between mb-2">
-                        <Link
-                          to={`/user/${review.user_id}`}
-                          className="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity"
-                        >
-                          <div
-                            className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
-                            style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
-                          >
-                            {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
-                          </div>
-                          <span className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
-                            @{review.profiles?.display_name || 'Anonymous'}
-                          </span>
-                          <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
-                            &middot; {formatRelativeTime(review.review_created_at)}
-                          </span>
-                        </Link>
-                        <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                          <span className="text-sm font-bold" style={{ color: getRatingColor(review.rating_10) }}>
-                            {review.rating_10 ? formatScore10(review.rating_10) : ''}
-                          </span>
-                          <span>{review.would_order_again ? <ThumbsUpIcon size={20} /> : <ThumbsDownIcon size={20} />}</span>
-                        </div>
-                      </div>
-
-                      {/* Review text — visual hero */}
-                      <p className="text-sm" style={{ color: 'var(--color-text-primary)', lineHeight: 1.5 }}>
-                        {review.review_text}
-                      </p>
-
-                      {/* Trust badge — subtle bottom */}
-                      <div className="mt-2">
-                        <TrustBadge type={review.trust_badge} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Review Flow */}
+            {/* ── RATE THIS DISH ── primary action, above everything else */}
             <div
-              className="p-3 rounded-xl mb-4"
+              className="rounded-xl mb-4 overflow-hidden"
               style={{
                 background: 'var(--color-surface-elevated)',
-                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+                border: '2px solid var(--color-primary)',
               }}
             >
-              <ReviewFlow
-                dishId={dish.dish_id}
-                dishName={dish.dish_name}
-                restaurantId={dish.restaurant_id}
-                restaurantName={dish.restaurant_name}
-                category={dish.category}
-                price={dish.price}
-                totalVotes={dish.total_votes}
-                yesVotes={dish.yes_votes}
-                percentWorthIt={dish.percent_worth_it}
-                isRanked={isRanked}
-                hasPhotos={allPhotos.length > 0}
-                onVote={handleVote}
-                onLoginRequired={handleLoginRequired}
-                onPhotoUploaded={handlePhotoUploaded}
-                onToggleFavorite={handleToggleSave}
-                isFavorite={isFavorite?.(dishId)}
-              />
-            </div>
-
-            {/* No reviews message */}
-            {!reviewsLoading && reviews.length === 0 && dish.total_votes > 0 && (
               <div
-                className="mb-6 p-4 rounded-xl text-center"
-                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
+                className="px-4 py-2"
+                style={{ background: 'var(--color-primary-muted)' }}
               >
-                <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                  No written reviews yet — be the first to share your thoughts!
-                </p>
+                <h3 className="text-xs font-bold" style={{ color: 'var(--color-primary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Rate this dish
+                </h3>
               </div>
-            )}
-
-            {/* Variant Selector */}
-            {variants.length > 0 && (
-              <div className="mb-6">
-                <p className="text-xs font-bold mb-2" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                  {isVariant ? 'Other flavors' : 'Available flavors'}
-                </p>
-                <VariantSelector
-                  variants={variants}
-                  currentDishId={dish.dish_id}
-                  onSelect={(variant) => navigate(`/dish/${variant.dish_id}`)}
+              <div className="p-3">
+                <ReviewFlow
+                  dishId={dish.dish_id}
+                  dishName={dish.dish_name}
+                  restaurantId={dish.restaurant_id}
+                  restaurantName={dish.restaurant_name}
+                  category={dish.category}
+                  price={dish.price}
+                  totalVotes={dish.total_votes}
+                  yesVotes={dish.yes_votes}
+                  percentWorthIt={dish.percent_worth_it}
+                  isRanked={isRanked}
+                  hasPhotos={allPhotos.length > 0}
+                  onVote={handleVote}
+                  onLoginRequired={handleLoginRequired}
+                  onPhotoUploaded={handlePhotoUploaded}
+                  onToggleFavorite={handleToggleSave}
+                  isFavorite={isFavorite?.(dishId)}
                 />
               </div>
-            )}
+            </div>
 
-            {/* Friends who rated this */}
-            {friendsVotes.length > 0 && (
-              <div
-                className="mb-6 p-4 rounded-xl"
-                style={{
-                  background: 'var(--color-surface-elevated)',
-                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
-                }}
-              >
-                <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
-                  Friends who rated this
-                </h3>
-                <div className="space-y-3">
-                  {friendsVotes.map((vote) => {
-                    const categoryLabel = CATEGORY_INFO[dish.category]?.label || dish.category
-                    const expertiseLabel = vote.category_expertise === 'authority'
-                      ? `${categoryLabel} Authority`
-                      : vote.category_expertise === 'specialist'
-                        ? `${categoryLabel} Specialist`
-                        : null
-
-                    return (
-                      <Link
-                        key={vote.user_id}
-                        to={`/user/${vote.user_id}`}
-                        className="flex items-center gap-3 p-2 -mx-2 rounded-lg"
-                      >
-                        {/* Avatar */}
-                        <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                          style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
-                        >
-                          {vote.display_name?.charAt(0).toUpperCase() || '?'}
-                        </div>
-
-                        {/* Name, expertise, and verdict */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-bold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                              {vote.display_name || 'Anonymous'}
-                            </p>
-                            {expertiseLabel && (
-                              <span
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
-                                style={{
-                                  background: vote.category_expertise === 'authority' ? 'rgba(147, 51, 234, 0.12)' : 'rgba(59, 130, 246, 0.12)',
-                                  color: vote.category_expertise === 'authority' ? '#9333EA' : '#3B82F6',
-                                }}
-                              >
-                                {expertiseLabel}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                            {vote.would_order_again ? <><ThumbsUpIcon size={20} /> Would order again</> : <><ThumbsDownIcon size={20} /> Would skip</>}
-                            {friendsCompat[vote.user_id] != null && (
-                              <span className="ml-1.5 font-medium" style={{ color: getCompatColor(friendsCompat[vote.user_id]) }}>
-                                &middot; {friendsCompat[vote.user_id]}% match
-                              </span>
-                            )}
-                          </p>
-                        </div>
-
-                        {/* Rating */}
-                        <div className="text-right">
-                          <span className="text-lg font-bold" style={{ color: getRatingColor(vote.rating_10) }}>
-                            {formatScore10(vote.rating_10)}
-                          </span>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Community Photos */}
+            {/* ── PHOTOS ── visual content before text reviews */}
             {displayPhotos.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+              <div className="mb-4">
+                <h3 className="text-xs font-bold mb-3" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                   Photos ({displayPhotos.length})
                 </h3>
                 <div className="grid grid-cols-4 gap-2">
@@ -877,17 +725,16 @@ export function Dish() {
                     <button
                       key={photo.id}
                       onClick={() => setLightboxPhoto(photo.photo_url)}
-                      aria-label={`View photo of ${dish.dish_name}`}
-                      className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                      style={{ border: '1px solid var(--color-divider)' }}
+                      aria-label={'View photo of ' + dish.dish_name}
+                      className="aspect-square rounded-lg overflow-hidden active:scale-95 transition-transform"
+                      style={{ border: '1.5px solid var(--color-divider)' }}
                     >
                       <img
                         src={photo.photo_url}
                         alt={dish.dish_name}
                         loading="lazy"
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Hide broken images
+                        onError={function (e) {
                           e.target.parentElement.style.display = 'none'
                         }}
                       />
@@ -896,7 +743,7 @@ export function Dish() {
                 </div>
                 {hasMorePhotos && (
                   <button
-                    onClick={() => setShowAllPhotos(true)}
+                    onClick={function () { setShowAllPhotos(true) }}
                     className="mt-3 text-sm font-bold"
                     style={{ color: 'var(--color-primary)' }}
                   >
@@ -912,6 +759,173 @@ export function Dish() {
               onPhotoUploaded={handlePhotoUploaded}
               onLoginRequired={handleLoginRequired}
             />
+
+            {/* ── FRIENDS ── social context before community reviews */}
+            {friendsVotes.length > 0 && (
+              <div
+                className="mb-4 p-4 rounded-xl"
+                style={{
+                  background: 'var(--color-surface)',
+                  border: '1.5px solid var(--color-divider)',
+                }}
+              >
+                <h3 className="text-xs font-bold mb-3" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Friends who rated this
+                </h3>
+                <div className="space-y-3">
+                  {friendsVotes.map(function (vote) {
+                    var categoryLabel = CATEGORY_INFO[dish.category]?.label || dish.category
+                    var expertiseLabel = vote.category_expertise === 'authority'
+                      ? categoryLabel + ' Authority'
+                      : vote.category_expertise === 'specialist'
+                        ? categoryLabel + ' Specialist'
+                        : null
+
+                    return (
+                      <Link
+                        key={vote.user_id}
+                        to={'/user/' + vote.user_id}
+                        className="flex items-center gap-3 p-2 -mx-2 rounded-lg"
+                      >
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+                          style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+                        >
+                          {vote.display_name?.charAt(0).toUpperCase() || '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                              {vote.display_name || 'Anonymous'}
+                            </p>
+                            {expertiseLabel && (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
+                                style={{
+                                  background: vote.category_expertise === 'authority' ? 'var(--color-primary-muted)' : 'var(--color-success-muted)',
+                                  color: vote.category_expertise === 'authority' ? 'var(--color-purple)' : 'var(--color-blue)',
+                                }}
+                              >
+                                {expertiseLabel}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                            {vote.would_order_again ? <><ThumbsUpIcon size={20} /> Would order again</> : <><ThumbsDownIcon size={20} /> Would skip</>}
+                            {friendsCompat[vote.user_id] != null && (
+                              <span className="ml-1.5 font-medium" style={{ color: getCompatColor(friendsCompat[vote.user_id]) }}>
+                                &middot; {friendsCompat[vote.user_id]}% match
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-lg font-bold" style={{ color: getRatingColor(vote.rating_10) }}>
+                            {formatScore10(vote.rating_10)}
+                          </span>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── REVIEWS ── community feedback */}
+            {reviews.length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-bold" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Reviews ({reviews.length})
+                  </h3>
+                  <TrustSummary
+                    verifiedCount={reviews.filter(function (r) { return r.trust_badge === 'human_verified' || r.trust_badge === 'trusted_reviewer' }).length}
+                    aiCount={reviews.filter(function (r) { return r.trust_badge === 'ai_estimated' }).length}
+                  />
+                </div>
+                <div className="space-y-2">
+                  {reviews.map(function (review) {
+                    return (
+                      <div
+                        key={review.id}
+                        className="p-4 rounded-xl"
+                        style={{
+                          background: 'var(--color-surface)',
+                          border: '1.5px solid var(--color-divider)',
+                        }}
+                      >
+                        {/* Header row: avatar + name + time | score + thumb */}
+                        <div className="flex items-center justify-between mb-2">
+                          <Link
+                            to={'/user/' + review.user_id}
+                            className="flex items-center gap-2 min-w-0"
+                          >
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
+                              style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
+                            >
+                              {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-bold block truncate" style={{ color: 'var(--color-text-primary)' }}>
+                                @{review.profiles?.display_name || 'Anonymous'}
+                              </span>
+                              <span className="text-[11px] block" style={{ color: 'var(--color-text-tertiary)' }}>
+                                {formatRelativeTime(review.review_created_at)}
+                              </span>
+                            </div>
+                          </Link>
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                            <span className="font-bold" style={{ fontSize: '18px', color: getRatingColor(review.rating_10) }}>
+                              {review.rating_10 ? formatScore10(review.rating_10) : ''}
+                            </span>
+                            <span>{review.would_order_again ? <ThumbsUpIcon size={22} /> : <ThumbsDownIcon size={22} />}</span>
+                          </div>
+                        </div>
+
+                        {/* Review text */}
+                        {review.review_text && (
+                          <p className="text-sm" style={{ color: 'var(--color-text-primary)', lineHeight: 1.6 }}>
+                            {review.review_text}
+                          </p>
+                        )}
+
+                        {/* Trust badge */}
+                        <div className="mt-2">
+                          <TrustBadge type={review.trust_badge} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* No reviews message */}
+            {!reviewsLoading && reviews.length === 0 && dish.total_votes > 0 && (
+              <div
+                className="mb-4 p-4 rounded-xl text-center"
+                style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-divider)' }}
+              >
+                <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                  No written reviews yet — be the first to share your thoughts!
+                </p>
+              </div>
+            )}
+
+            {/* Variant Selector */}
+            {variants.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs font-bold mb-2" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  {isVariant ? 'Other flavors' : 'Available flavors'}
+                </p>
+                <VariantSelector
+                  variants={variants}
+                  currentDishId={dish.dish_id}
+                  onSelect={function (variant) { navigate('/dish/' + variant.dish_id) }}
+                />
+              </div>
+            )}
 
           </div>
         </>

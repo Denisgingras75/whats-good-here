@@ -91,8 +91,8 @@ export function FollowListModal({ userId, type, onClose }) {
         style={{
           background: 'var(--color-surface-elevated)',
           maxHeight: 'calc(100vh - 120px)',
-          borderColor: 'rgba(0, 0, 0, 0.06)',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.12)'
+          borderColor: 'var(--color-divider)',
+          boxShadow: 'none'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -100,8 +100,8 @@ export function FollowListModal({ userId, type, onClose }) {
         <div
           className="flex items-center justify-between px-4 py-4 border-b"
           style={{
-            borderColor: 'rgba(0, 0, 0, 0.06)',
-            background: 'rgba(232, 102, 60, 0.04)'
+            borderColor: 'var(--color-divider)',
+            background: 'var(--color-primary-muted)'
           }}
         >
           <h2 id="follow-list-title" className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
@@ -148,7 +148,7 @@ export function FollowListModal({ userId, type, onClose }) {
             </div>
           ) : (
             <div>
-              <div className="divide-y" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+              <div className="divide-y" style={{ borderColor: 'var(--color-divider)' }}>
                 {users.map((user) => (
                   <button
                     key={user.id}
@@ -187,7 +187,7 @@ export function FollowListModal({ userId, type, onClose }) {
 
               {/* Load More Button */}
               {hasMore && (
-                <div className="p-4 border-t" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+                <div className="p-4 border-t" style={{ borderColor: 'var(--color-divider)' }}>
                   <button
                     onClick={handleLoadMore}
                     disabled={loadingMore}

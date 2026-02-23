@@ -149,13 +149,13 @@ export function AddDishModal({ isOpen, onClose, restaurantId, restaurantName, on
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {error && (
-            <div className="px-4 py-3 rounded-lg text-sm" style={{ background: 'rgba(200, 90, 84, 0.15)', color: 'var(--color-primary)' }}>
+            <div className="px-4 py-3 rounded-lg text-sm" style={{ background: 'var(--color-primary-muted)', color: 'var(--color-primary)' }}>
               {error}
             </div>
           )}
 
           {duplicateWarning && (
-            <div className="px-4 py-3 rounded-lg text-sm" style={{ background: 'rgba(217, 167, 101, 0.15)', color: 'var(--color-accent-gold)' }}>
+            <div className="px-4 py-3 rounded-lg text-sm" style={{ background: 'var(--color-accent-gold-muted)', color: 'var(--color-accent-gold)' }}>
               {duplicateWarning}
               <div className="mt-2 flex gap-2">
                 <button

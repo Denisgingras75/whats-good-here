@@ -181,8 +181,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
         className="relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
         style={{
           background: 'var(--color-surface-elevated)',
-          border: `1.5px solid ${isFocused ? 'var(--color-primary)' : 'var(--color-divider)'}`,
-          boxShadow: isFocused ? '0 4px 16px rgba(228, 68, 10, 0.12)' : '0 2px 8px rgba(0, 0, 0, 0.06)',
+          border: isFocused ? '2px solid var(--color-primary)' : '1.5px solid var(--color-divider)',
           minHeight: '48px',
         }}
       >
@@ -252,8 +251,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
           className="absolute top-full left-0 right-0 mt-2 rounded-xl overflow-hidden z-50"
           style={{
             background: 'var(--color-surface)',
-            border: '1.5px solid rgba(0, 0, 0, 0.06)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            border: '1.5px solid var(--color-divider)',
           }}
         >
           {isLoading ? (

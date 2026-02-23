@@ -187,7 +187,7 @@ export function RestaurantDetail() {
         className="sticky top-0 z-20 px-4 py-3"
         style={{
           background: 'var(--color-bg)',
-          boxShadow: '0 4px 12px -4px rgba(0, 0, 0, 0.2)',
+          boxShadow: 'none',
           borderBottom: '1px solid var(--color-divider)',
         }}
       >
@@ -353,9 +353,9 @@ export function RestaurantDetail() {
               onClick={() => setAddDishModalOpen(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all active:scale-[0.98]"
               style={{
-                background: 'rgba(217, 167, 101, 0.1)',
+                background: 'var(--color-accent-gold-muted)',
                 color: 'var(--color-accent-gold)',
-                border: '1px solid rgba(217, 167, 101, 0.2)',
+                border: '1px solid var(--color-accent-gold)',
               }}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -386,7 +386,7 @@ export function RestaurantDetail() {
             style={{
               background: activeTab === 'top' ? 'var(--color-primary)' : 'transparent',
               color: activeTab === 'top' ? 'white' : 'var(--color-text-secondary)',
-              boxShadow: activeTab === 'top' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+              boxShadow: 'none',
             }}
           >
             Top Rated

@@ -83,10 +83,7 @@ export function Restaurants() {
       <header
         className="px-4 pt-4 pb-3 relative"
         style={{
-          background: `
-            radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200, 90, 84, 0.04) 0%, transparent 70%),
-            var(--color-bg)
-          `,
+          background: 'var(--color-bg)',
         }}
       >
         <div
@@ -108,7 +105,7 @@ export function Restaurants() {
               style={{
                 height: '260px',
                 background: 'var(--color-card)',
-                border: '1px solid var(--color-divider)',
+                border: '1.5px solid var(--color-divider)',
               }}
             >
               <div className="animate-spin w-6 h-6 border-2 rounded-full" style={{ borderColor: 'var(--color-divider)', borderTopColor: 'var(--color-accent-gold)' }} />
@@ -208,7 +205,7 @@ export function Restaurants() {
           className="flex rounded-xl p-1 mb-5"
           style={{
             background: 'var(--color-surface-elevated)',
-            border: '1px solid var(--color-divider)',
+            border: '1.5px solid var(--color-divider)',
           }}
           role="tablist"
           aria-label="Restaurant status filter"
@@ -221,7 +218,7 @@ export function Restaurants() {
             style={{
               background: restaurantTab === 'open' ? 'var(--color-primary)' : 'transparent',
               color: restaurantTab === 'open' ? 'white' : 'var(--color-text-secondary)',
-              boxShadow: restaurantTab === 'open' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+              boxShadow: 'none',
             }}
           >
             Open
@@ -234,7 +231,7 @@ export function Restaurants() {
             style={{
               background: restaurantTab === 'closed' ? 'var(--color-primary)' : 'transparent',
               color: restaurantTab === 'closed' ? 'white' : 'var(--color-text-secondary)',
-              boxShadow: restaurantTab === 'closed' ? '0 2px 8px -2px rgba(200, 90, 84, 0.4)' : 'none',
+              boxShadow: 'none',
             }}
           >
             Closed
@@ -275,7 +272,7 @@ export function Restaurants() {
                 style={{
                   color: 'var(--color-text-tertiary)',
                   background: 'var(--color-bg)',
-                  border: '1px solid var(--color-divider)',
+                  border: '1.5px solid var(--color-divider)',
                 }}
               >
                 <p className="font-medium" style={{ fontSize: '14px' }}>

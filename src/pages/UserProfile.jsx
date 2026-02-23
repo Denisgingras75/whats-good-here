@@ -359,11 +359,7 @@ export function UserProfile() {
       <div
         className="relative px-4 pt-8 pb-6 overflow-hidden"
         style={{
-          background: `
-            radial-gradient(ellipse 90% 50% at 20% 0%, rgba(232, 102, 60, 0.03) 0%, transparent 70%),
-            radial-gradient(ellipse 70% 60% at 80% 100%, rgba(232, 102, 60, 0.02) 0%, transparent 70%),
-            var(--color-bg)
-          `,
+          background: 'var(--color-bg)',
         }}
       >
         {/* Bottom divider */}
@@ -384,7 +380,7 @@ export function UserProfile() {
               style={{
                 background: 'var(--color-primary)',
                 color: 'var(--color-text-on-primary)',
-                boxShadow: '0 4px 20px -4px rgba(232, 102, 60, 0.3), 0 0 0 3px rgba(232, 102, 60, 0.15)',
+                boxShadow: '0 0 0 3px var(--color-primary-muted)',
               }}
             >
               {profile.display_name?.charAt(0).toUpperCase() || '?'}
@@ -477,7 +473,7 @@ export function UserProfile() {
                 style={{
                   background: 'var(--color-card)',
                   borderColor: 'var(--color-divider)',
-                  boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03)',
+                  boxShadow: 'none',
                 }}
               >
                 <p
@@ -503,7 +499,7 @@ export function UserProfile() {
                 style={{
                   background: 'var(--color-card)',
                   borderColor: 'var(--color-divider)',
-                  boxShadow: '0 2px 12px -4px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03)',
+                  boxShadow: 'none',
                 }}
               >
                 <p className="text-sm font-bold" style={{
@@ -605,7 +601,7 @@ export function UserProfile() {
               className="rounded-xl border px-3.5 py-3 flex items-center gap-3"
               style={{
                 background: 'var(--color-card)',
-                borderColor: 'rgba(239, 68, 68, 0.2)',
+                borderColor: 'var(--color-red-muted, rgba(239, 68, 68, 0.2))',
               }}
             >
               <span className="text-lg flex-shrink-0" style={{ color: 'var(--color-red)' }}>
@@ -632,7 +628,7 @@ export function UserProfile() {
         className="sticky top-0 z-10 py-2.5"
         style={{
           background: 'var(--color-surface)',
-          boxShadow: '0 4px 12px -4px rgba(0, 0, 0, 0.08)',
+          boxShadow: 'none',
           borderBottom: '1px solid var(--color-divider)',
         }}
       >
@@ -652,7 +648,7 @@ export function UserProfile() {
                 ...(activeTab === tab.id
                   ? {
                       background: 'var(--color-primary)',
-                      boxShadow: '0 2px 8px -2px rgba(232, 102, 60, 0.3)',
+                      boxShadow: 'none',
                     }
                   : { background: 'var(--color-surface-elevated)' }),
               }}
@@ -661,7 +657,7 @@ export function UserProfile() {
               <span>{tab.label}</span>
               <span
                 className="ml-0.5 px-1.5 py-0.5 rounded-full font-semibold"
-                style={{ background: activeTab === tab.id ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)', fontSize: '11px' }}
+                style={{ background: activeTab === tab.id ? 'var(--color-text-on-primary-muted, rgba(255,255,255,0.2))' : 'var(--color-surface-elevated-muted, rgba(0,0,0,0.08))', fontSize: '11px' }}
               >
                 {tab.count}
               </span>

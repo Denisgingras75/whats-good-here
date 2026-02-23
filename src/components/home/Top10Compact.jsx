@@ -116,7 +116,7 @@ const Top10Row = memo(function Top10Row({ dish, rank, town, onClick }) {
           position: 'relative',
           background: 'var(--color-surface-elevated)',
           border: 'none',
-          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+          boxShadow: 'none',
         }}
       >
         {/* Colored banner bar */}

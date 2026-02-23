@@ -20,11 +20,7 @@ export function HeroIdentityCard({
     <div
       className="relative px-4 pt-8 pb-6 overflow-hidden"
       style={{
-        background: `
-          radial-gradient(ellipse 90% 50% at 20% 0%, rgba(232, 102, 60, 0.03) 0%, transparent 70%),
-          radial-gradient(ellipse 70% 60% at 80% 100%, rgba(0, 0, 0, 0.02) 0%, transparent 70%),
-          var(--color-bg)
-        `,
+        background: 'var(--color-bg)',
       }}
     >
       {/* Bottom divider */}
@@ -45,7 +41,7 @@ export function HeroIdentityCard({
             style={{
               background: 'var(--color-primary)',
               color: 'var(--color-text-on-primary)',
-              boxShadow: '0 4px 20px -4px rgba(232, 102, 60, 0.4), 0 0 0 3px rgba(232, 102, 60, 0.2)',
+              boxShadow: '0 0 0 3px var(--color-primary-muted)',
             }}
           >
             {profile?.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}

@@ -45,7 +45,7 @@ export function CategoryChips({
               fontSize: '14px',
               background: selected === null ? 'var(--color-text-primary)' : 'var(--color-surface)',
               color: selected === null ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
-              border: selected === null ? 'none' : '1px solid var(--color-divider)',
+              border: selected === null ? '1.5px solid var(--color-text-primary)' : '1.5px solid var(--color-divider)',
             }}
           >
             All
@@ -65,7 +65,7 @@ export function CategoryChips({
                 fontSize: '14px',
                 background: isActive ? 'var(--color-text-primary)' : 'var(--color-surface)',
                 color: isActive ? 'var(--color-surface-elevated)' : 'var(--color-text-secondary)',
-                border: isActive ? 'none' : '1px solid var(--color-divider)',
+                border: isActive ? '1.5px solid var(--color-text-primary)' : '1.5px solid var(--color-divider)',
               }}
             >
               <span style={{ fontSize: '16px' }}>{cat.emoji}</span>

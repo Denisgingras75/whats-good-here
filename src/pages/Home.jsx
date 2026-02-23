@@ -171,7 +171,7 @@ export function Home() {
                 fontSize: '13px',
                 background: 'var(--color-surface)',
                 color: 'var(--color-text-primary)',
-                border: '1px solid var(--color-divider)',
+                border: '1.5px solid var(--color-divider)',
                 minHeight: '44px',
               }}
             >

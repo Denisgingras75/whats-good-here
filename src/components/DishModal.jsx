@@ -213,8 +213,8 @@ export function DishModal({ dish, onClose, onVote, onLoginRequired }) {
           backgroundColor: 'var(--color-surface-elevated)',
           borderRadius: '16px',
           padding: '20px',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
+          border: '1.5px solid var(--color-divider)',
+          boxShadow: 'none',
         }}
       >
         {/* Action buttons - top right */}

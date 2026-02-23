@@ -48,11 +48,12 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 z-50 shadow-lg"
+      className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: 'var(--color-surface)',
-        borderTop: '1px solid rgba(0, 0, 0, 0.06)',
-        boxShadow: '0 -4px 30px rgba(0, 0, 0, 0.08)'
+        background: 'color-mix(in srgb, var(--color-bg) 85%, transparent)',
+        backdropFilter: 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+        borderTop: '2px solid var(--color-divider)',
       }}
     >
       <div className="flex justify-around items-center h-16 pb-safe">
@@ -71,11 +72,12 @@ export function BottomNav() {
               }`
             }
             style={({ isActive }) => ({
-              color: isActive ? 'var(--color-primary)' : 'var(--color-text-tertiary)'
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
+              fontWeight: isActive ? 700 : 500,
             })}
           >
             {tab.icon}
-            <span className="text-xs font-medium mt-1">{tab.label}</span>
+            <span className="text-[11px] mt-1" style={{ fontWeight: 'inherit' }}>{tab.label}</span>
           </NavLink>
         ))}
       </div>

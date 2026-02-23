@@ -56,7 +56,7 @@ export function UserSearch({ onClose }) {
         style={{
           background: 'var(--color-bg)',
           border: `2px solid ${isFocused ? 'var(--color-accent-gold)' : 'var(--color-divider)'}`,
-          boxShadow: isFocused ? '0 0 20px rgba(232, 102, 60, 0.08)' : 'none',
+          boxShadow: 'none',
         }}
       >
         <svg

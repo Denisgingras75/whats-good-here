@@ -88,7 +88,7 @@ export const DishListItem = memo(function DishListItem({
         minHeight: '48px',
         cursor: 'pointer',
         transition: 'background 1s ease-out',
-        borderBottom: !isPodium && !isLast ? '1px solid var(--color-divider)' : 'none',
+        borderBottom: !isPodium && !isLast ? '1.5px solid var(--color-divider)' : 'none',
       }}
     >
       {/* Rank number */}
@@ -210,7 +210,6 @@ export const DishListItem = memo(function DishListItem({
         style={{
           background: 'var(--color-card)',
           borderColor: 'var(--color-divider)',
-          boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06)',
         }}
       >
         <div className="flex">

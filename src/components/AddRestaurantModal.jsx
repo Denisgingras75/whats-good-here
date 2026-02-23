@@ -280,7 +280,7 @@ export function AddRestaurantModal({ isOpen, onClose, initialQuery = '' }) {
 
           {/* Error display */}
           {error && (
-            <div className="mx-5 mt-4 px-4 py-3 rounded-lg text-sm" style={{ background: 'rgba(200, 90, 84, 0.15)', color: 'var(--color-primary)' }}>
+            <div className="mx-5 mt-4 px-4 py-3 rounded-lg text-sm" style={{ background: 'var(--color-primary-muted)', color: 'var(--color-primary)' }}>
               {error}
             </div>
           )}
@@ -376,10 +376,10 @@ export function AddRestaurantModal({ isOpen, onClose, initialQuery = '' }) {
                     onClick={handleManualAdd}
                     className="w-full flex items-center gap-3 px-3 py-3 mt-2 rounded-lg text-left border border-dashed transition-colors"
                     style={{ borderColor: 'var(--color-accent-gold)', color: 'var(--color-accent-gold)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(217, 167, 101, 0.08)'}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-accent-gold-muted)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(217, 167, 101, 0.15)' }}>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--color-accent-gold-muted)' }}>
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                       </svg>

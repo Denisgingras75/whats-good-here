@@ -498,11 +498,11 @@ export function Browse() {
             minHeight: 'calc(100vh - 80px)',
           }}
         >
-          {/* Table edge - top bevel/rim catching light */}
+          {/* Table edge */}
           <div
             className="absolute top-0 left-0 right-0 h-[2px]"
             style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.06) 50%, rgba(0, 0, 0, 0.04) 80%, transparent 100%)',
+              background: 'linear-gradient(90deg, transparent 0%, var(--color-divider) 20%, var(--color-divider) 80%, transparent 100%)',
             }}
           />
 
@@ -536,8 +536,7 @@ export function Browse() {
                 className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
                 style={{
                   background: 'var(--color-bg)',
-                  border: `2px solid ${searchFocused ? 'var(--color-accent-gold)' : 'var(--color-divider)'}`,
-                  boxShadow: searchFocused ? '0 0 20px rgba(232, 102, 60, 0.12)' : 'none',
+                  border: searchFocused ? '2px solid var(--color-primary)' : '2px solid var(--color-divider)',
                 }}
               >
                 <svg
@@ -606,8 +605,8 @@ export function Browse() {
             {autocompleteOpen && autocompleteSuggestions.length > 0 && (
               <div
                 ref={autocompleteRef}
-                className="absolute bottom-full left-0 right-0 mb-1 rounded-lg shadow-lg border overflow-hidden z-50"
-                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}
+                className="absolute bottom-full left-0 right-0 mb-1 rounded-lg border overflow-hidden z-50"
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)', border: '1.5px solid var(--color-divider)' }}
               >
                 {autocompleteSuggestions.map((suggestion, index) => (
                   <button
@@ -637,8 +636,8 @@ export function Browse() {
                         background: suggestion.type === 'dish'
                           ? 'var(--color-primary-muted)'
                           : suggestion.type === 'place'
-                          ? 'rgba(217, 167, 101, 0.15)'
-                          : 'rgba(59, 130, 246, 0.15)',
+                          ? 'var(--color-accent-gold-muted)'
+                          : 'var(--color-primary-muted)',
                         color: suggestion.type === 'dish'
                           ? 'var(--color-primary)'
                           : suggestion.type === 'place'
@@ -725,7 +724,7 @@ export function Browse() {
                   <div
                     key={i}
                     className="flex items-center gap-3 p-3 rounded-xl animate-pulse"
-                    style={{ background: 'var(--color-bg)', border: '1px solid var(--color-divider)' }}
+                    style={{ background: 'var(--color-bg)', border: '1.5px solid var(--color-divider)' }}
                   >
                     <div className="w-7 h-7 rounded-full" style={{ background: 'var(--color-surface)' }} />
                     <div className="w-12 h-12 rounded-lg" style={{ background: 'var(--color-surface)' }} />
@@ -840,7 +839,7 @@ export function Browse() {
                       style={{
                         background: 'var(--color-bg)',
                         color: 'var(--color-text-secondary)',
-                        border: '1px solid var(--color-divider)'
+                        border: '1.5px solid var(--color-divider)'
                       }}
                     >
                       Show {filteredDishes.length - 10} more dishes

@@ -11,12 +11,11 @@ export function RestaurantCard({ restaurant, onSelect }) {
   return (
     <button
       onClick={() => onSelect(restaurant)}
-      className="w-full rounded-xl p-4 text-left transition-all active:scale-[0.99] hover:border-[rgba(224,120,86,0.2)]"
+      className="w-full rounded-xl p-4 text-left transition-all active:scale-[0.99]"
       style={{
-        background: 'linear-gradient(135deg, var(--color-card) 0%, rgba(217, 167, 101, 0.03) 100%)',
-        border: '1px solid rgba(217, 167, 101, 0.1)',
+        background: 'var(--color-card)',
+        border: '1.5px solid var(--color-divider)',
         borderLeft: '3px solid var(--color-accent-gold)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(217, 167, 101, 0.04)',
         opacity: restaurant.is_open ? 1 : 0.6,
       }}
     >
@@ -40,9 +39,9 @@ export function RestaurantCard({ restaurant, onSelect }) {
                 className="flex-shrink-0 px-2 py-0.5 rounded-full font-semibold"
                 style={{
                   fontSize: '10px',
-                  background: 'rgba(107, 179, 132, 0.12)',
+                  background: 'var(--color-success-muted)',
                   color: 'var(--color-rating)',
-                  border: '1px solid rgba(107, 179, 132, 0.2)',
+                  border: '1px solid var(--color-success-border)',
                 }}
               >
                 {distanceMiles} mi
@@ -54,9 +53,9 @@ export function RestaurantCard({ restaurant, onSelect }) {
               className="inline-block mt-1 px-2 py-0.5 rounded-full font-semibold"
               style={{
                 fontSize: '10px',
-                background: 'rgba(200, 90, 84, 0.15)',
+                background: 'var(--color-primary-muted)',
                 color: 'var(--color-primary)',
-                border: '1px solid rgba(200, 90, 84, 0.25)',
+                border: '1px solid var(--color-primary-glow)',
               }}
             >
               Closed for Season

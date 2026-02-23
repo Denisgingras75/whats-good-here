@@ -103,7 +103,7 @@ export function SettingsDropdown() {
           role="menu"
           aria-label="Settings menu"
           className="fixed top-14 right-4 w-64 rounded-xl shadow-xl border z-50 overflow-hidden"
-          style={{ background: 'var(--color-surface-elevated)', borderColor: 'rgba(0,0,0,0.06)' }}
+          style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}
         >
           {/* Header */}
           <div
