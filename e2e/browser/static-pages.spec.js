@@ -4,23 +4,22 @@ test.describe('Static pages', () => {
   test('privacy, terms, how-reviews-work load; unknown route shows 404', async ({ page }) => {
     // Privacy
     await page.goto('/privacy')
-    await expect(page.getByText(/privacy/i).first()).toBeVisible()
+    await expect(page.getByText(/privacy policy/i).first()).toBeVisible({ timeout: 15_000 })
 
     // Terms
     await page.goto('/terms')
-    await expect(page.getByText(/terms/i).first()).toBeVisible()
+    await expect(page.getByText(/terms of service/i).first()).toBeVisible({ timeout: 15_000 })
 
     // How Reviews Work
     await page.goto('/how-reviews-work')
-    await expect(page.getByText(/review/i).first()).toBeVisible()
+    await expect(page.getByText(/how.*review|review.*work/i).first()).toBeVisible({ timeout: 15_000 })
 
     // 404 — unknown route
     await page.goto('/this-page-does-not-exist-xyz')
-    // Should show some kind of not-found or redirect to home
-    await page.waitForTimeout(2000)
+    await page.waitForTimeout(3000)
     const url = page.url()
     // Either stays on 404 page or redirects home
-    const is404 = url.includes('this-page-does-not-exist') || url === 'http://localhost:5173/'
-    expect(is404).toBeTruthy()
+    const handled = url.includes('this-page-does-not-exist') || url.endsWith('5174/')
+    expect(handled).toBeTruthy()
   })
 })

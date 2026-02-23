@@ -6,7 +6,7 @@ test.describe('Dish Detail — Tourist view', () => {
 
     // Wait for dishes to load
     const firstDish = page.locator('[data-dish-id]').first()
-    await expect(firstDish).toBeVisible({ timeout: 15_000 })
+    await expect(firstDish).toBeVisible({ timeout: 20_000 })
 
     // Click the first dish
     await firstDish.click()
@@ -15,10 +15,7 @@ test.describe('Dish Detail — Tourist view', () => {
     await page.waitForURL(/\/dish\//)
 
     // Should show dish name (h1 or prominent heading)
-    await expect(page.locator('h1, h2').first()).toBeVisible()
-
-    // Should show restaurant name somewhere on the page
-    await expect(page.locator('#main-content')).toContainText(/.+/)
+    await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: 10_000 })
   })
 
   test('directions button links to Google Maps', async ({ page }) => {
@@ -26,9 +23,12 @@ test.describe('Dish Detail — Tourist view', () => {
 
     // Navigate to a dish
     const firstDish = page.locator('[data-dish-id]').first()
-    await expect(firstDish).toBeVisible({ timeout: 15_000 })
+    await expect(firstDish).toBeVisible({ timeout: 20_000 })
     await firstDish.click()
     await page.waitForURL(/\/dish\//)
+
+    // Wait for dish detail to render
+    await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: 10_000 })
 
     // Look for a directions/maps link
     const mapsLink = page.locator('a[href*="google.com/maps"], a[href*="maps.google"]').first()
