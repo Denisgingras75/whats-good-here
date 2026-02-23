@@ -1,25 +1,16 @@
-import { getRatingColor, formatScore10 } from '../utils/ranking'
+import { getRatingColor, formatScore10, getScoreBg } from '../utils/ranking'
 
 /**
  * ScorePill — displays a rating score with semantic color.
  *
  * Props:
  *   score    - number (0-10)
- *   size     - 'sm' | 'md' | 'lg' (default: 'md')
+ *   size     - 'sm' | 'md' | 'lg' | 'xl' (default: 'md')
  *   showMax  - show "/10" suffix (default: false)
  *   variant  - 'filled' | 'text' (default: 'filled')
  */
 
-function getScoreBg(score) {
-  if (score === null || score === undefined) return 'transparent'
-  const n = Number(score)
-  if (n >= 8.0) return 'var(--color-score-great-bg)'
-  if (n >= 6.5) return 'var(--color-score-good-bg)'
-  if (n >= 5.0) return 'var(--color-score-mid-bg)'
-  return 'var(--color-score-low-bg)'
-}
-
-const SIZE_STYLES = {
+var SIZE_STYLES = {
   sm: {
     fontSize: '13px',
     padding: '0',
@@ -39,22 +30,36 @@ const SIZE_STYLES = {
     minWidth: '56px',
     borderRadius: '12px',
   },
+  xl: {
+    fontSize: '48px',
+    padding: '8px 18px',
+    minWidth: '72px',
+    borderRadius: '14px',
+  },
 }
 
-export function ScorePill({ score, size = 'md', showMax = false, variant = 'filled' }) {
-  const color = getRatingColor(score)
-  const formatted = formatScore10(score)
-  const sizeStyle = SIZE_STYLES[size] || SIZE_STYLES.md
-  const isText = variant === 'text' || size === 'sm'
+export function ScorePill({ score, size, showMax, variant }) {
+  size = size || 'md'
+  showMax = showMax || false
+  variant = variant || 'filled'
 
-  const style = {
-    ...sizeStyle,
-    color,
+  var color = getRatingColor(score)
+  var formatted = formatScore10(score)
+  var sizeStyle = SIZE_STYLES[size] || SIZE_STYLES.md
+  var isText = variant === 'text' || size === 'sm'
+
+  var style = {
+    fontSize: sizeStyle.fontSize,
+    padding: sizeStyle.padding,
+    minWidth: sizeStyle.minWidth,
+    borderRadius: sizeStyle.borderRadius,
+    color: color,
     fontWeight: 800,
     letterSpacing: '-0.02em',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
+    lineHeight: 1,
   }
 
   if (!isText) {
@@ -65,7 +70,7 @@ export function ScorePill({ score, size = 'md', showMax = false, variant = 'fill
     <span className="score-pill" style={style}>
       {formatted}
       {showMax && (
-        <span style={{ fontSize: '0.6em', fontWeight: 600, opacity: 0.6, marginLeft: '2px' }}>
+        <span style={{ fontSize: '0.5em', fontWeight: 600, opacity: 0.5, marginLeft: '3px' }}>
           /10
         </span>
       )}

@@ -83,6 +83,20 @@ export function getWorthItBadge(worthItScore10, totalVotes) {
 }
 
 /**
+ * Get score background tint color based on score
+ * @param {number} score - Rating on 0-10 scale
+ * @returns {string} CSS variable reference
+ */
+export function getScoreBg(score) {
+  if (score === null || score === undefined) return 'transparent'
+  var n = Number(score)
+  if (n >= 8.0) return 'var(--color-score-great-bg)'
+  if (n >= 6.5) return 'var(--color-score-good-bg)'
+  if (n >= 5.0) return 'var(--color-score-mid-bg)'
+  return 'var(--color-score-low-bg)'
+}
+
+/**
  * Get confidence level based on vote count
  * @param {number} totalVotes - Total number of votes
  * @returns {'none' | 'low' | 'medium' | 'high'}

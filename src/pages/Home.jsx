@@ -204,19 +204,24 @@ export function Home() {
 
       {/* Section header */}
       <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-        <h2
-          className="font-bold"
-          style={{
-            fontSize: '18px',
-            color: 'var(--color-text-primary)',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          {selectedCategoryLabel
-            ? (town ? 'Best ' + selectedCategoryLabel.label + ' in ' + town : 'Best ' + selectedCategoryLabel.label)
-            : (town ? 'Top Rated in ' + town : 'Top Rated on the Vineyard')
-          }
-        </h2>
+        <div>
+          <span className="section-label" style={{ color: 'var(--color-text-tertiary)' }}>
+            {selectedCategoryLabel ? 'RANKINGS' : 'LEADERBOARD'}
+          </span>
+          <h2
+            style={{
+              fontSize: '20px',
+              color: 'var(--color-text-primary)',
+              letterSpacing: '-0.02em',
+              marginTop: '2px',
+            }}
+          >
+            {selectedCategoryLabel
+              ? (town ? 'Best ' + selectedCategoryLabel.label + ' in ' + town : 'Best ' + selectedCategoryLabel.label)
+              : (town ? 'What\u2019s Good in ' + town : 'What\u2019s Good Here')
+            }
+          </h2>
+        </div>
         <TownPicker
           town={town}
           onTownChange={setTown}
@@ -261,8 +266,8 @@ export function Home() {
           </div>
         ) : rankedDishes.length > 0 ? (
           <>
-            {/* Hero card for #1 dish */}
-            <HeroCard dish={rankedDishes[0]} />
+            {/* Hero card for #1 dish — scoreboard treatment */}
+            <HeroCard dish={rankedDishes[0]} town={town} />
 
             {/* Ranked list #2+ */}
             <div className="flex flex-col mt-2" style={{ gap: '2px' }}>
@@ -352,82 +357,55 @@ export function Home() {
   )
 }
 
-/* --- HeroCard — #1 dish gets hero treatment -------------------------------- */
-function HeroCard({ dish }) {
+/* --- HeroCard — #1 dish gets typographic scoreboard treatment -------------- */
+function HeroCard({ dish, town }) {
   var navigate = useNavigate()
   var isRanked = (dish.total_votes || 0) >= MIN_VOTES_FOR_RANKING
-  var hasPhoto = dish.photo_url
 
   var handleClick = function () {
     navigate('/dish/' + dish.dish_id)
   }
 
-  // No photo — fall back to DishListItem with rank 1
-  if (!hasPhoto) {
-    return (
-      <DishListItem dish={dish} rank={1} showDistance className="stagger-item" />
-    )
-  }
+  var locationLabel = town ? 'IN ' + town.toUpperCase() : 'ON THE VINEYARD'
 
   return (
     <button
       onClick={handleClick}
       className="w-full card-hero card-press stagger-item"
-      style={{ position: 'relative', textAlign: 'left' }}
+      style={{ textAlign: 'center' }}
     >
-      {/* Photo */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 10' }}>
-        <img
-          src={dish.photo_url}
-          alt={dish.dish_name}
-          loading="eager"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-          }}
-        />
-        {/* Gradient overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)',
-          }}
-        />
+      <div className="px-5 pt-5 pb-5">
+        {/* Section label */}
+        <div className="flex items-center justify-between mb-4">
+          <span
+            className="section-label"
+            style={{ color: 'var(--color-accent-gold)' }}
+          >
+            TOP RATED {locationLabel}
+          </span>
+          <span
+            style={{
+              fontSize: '13px',
+              fontWeight: 800,
+              color: 'var(--color-medal-gold)',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            #1
+          </span>
+        </div>
 
-        {/* #1 badge */}
-        <span
-          style={{
-            position: 'absolute',
-            top: '12px',
-            left: '12px',
-            padding: '4px 10px',
-            borderRadius: '8px',
-            fontWeight: 800,
-            fontSize: '13px',
-            color: 'var(--color-text-on-primary)',
-            background: 'var(--color-accent-gold)',
-          }}
-        >
-          #1
-        </span>
+        {/* Giant score — THE HERO */}
+        <div className="flex justify-center mb-3">
+          <ScorePill score={dish.avg_rating} size="xl" showMax />
+        </div>
 
-        {/* Score pill top-right */}
-        {isRanked && (
-          <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
-            <ScorePill score={dish.avg_rating} size="md" />
-          </div>
-        )}
-      </div>
-
-      {/* Info bar */}
-      <div className="px-4 py-3">
+        {/* Dish name — serif, editorial weight */}
         <h3
-          className="font-bold"
           style={{
-            fontSize: '18px',
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontSize: '24px',
+            fontWeight: 400,
             color: 'var(--color-text-primary)',
             lineHeight: 1.2,
             letterSpacing: '-0.01em',
@@ -435,24 +413,32 @@ function HeroCard({ dish }) {
         >
           {dish.dish_name}
         </h3>
+
+        {/* Restaurant + distance */}
         <p
           style={{
-            fontSize: '13px',
+            fontSize: '14px',
             color: 'var(--color-text-secondary)',
-            marginTop: '2px',
+            marginTop: '6px',
           }}
         >
           {dish.restaurant_name}
-          {dish.distance_miles != null ? ' \u00b7 ' + Number(dish.distance_miles).toFixed(1) + ' mi' : ''}
+          {dish.distance_miles != null
+            ? ' \u00b7 ' + Number(dish.distance_miles).toFixed(1) + ' mi'
+            : ''}
         </p>
-        <div style={{ marginTop: '6px' }}>
-          <ConsensusBar
-            avgRating={dish.avg_rating}
-            totalVotes={dish.total_votes}
-            percentWorthIt={dish.percent_worth_it}
-            compact
-          />
-        </div>
+
+        {/* Vote context */}
+        {isRanked && (
+          <div className="flex justify-center mt-3">
+            <ConsensusBar
+              avgRating={dish.avg_rating}
+              totalVotes={dish.total_votes}
+              percentWorthIt={dish.percent_worth_it}
+              compact
+            />
+          </div>
+        )}
       </div>
     </button>
   )
