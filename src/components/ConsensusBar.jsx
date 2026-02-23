@@ -44,19 +44,17 @@ export function ConsensusBar({ avgRating, totalVotes = 0, percentWorthIt = 0, co
     )
   }
 
-  // Full mode — ScorePill large + stats row
+  // Full mode — ScorePill hero + stats column
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-3">
-        <ScorePill score={avgRating} size="lg" />
-        <div className="flex flex-col">
-          <span style={{ color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: 600 }}>
-            {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
-          </span>
-          <span style={{ color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
-            {Math.round(percentWorthIt)}% would order again
-          </span>
-        </div>
+    <div className="flex items-center gap-4">
+      <ScorePill score={avgRating} size="xl" showMax />
+      <div className="flex flex-col">
+        <span style={{ color: 'var(--color-text-secondary)', fontSize: '15px', fontWeight: 700 }}>
+          {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
+        </span>
+        <span style={{ color: 'var(--color-text-tertiary)', fontSize: '13px', marginTop: '2px' }}>
+          {Math.round(percentWorthIt)}% would order again
+        </span>
       </div>
     </div>
   )
