@@ -442,7 +442,7 @@ export function Dish() {
     ? calculateDistance(location.lat, location.lng, dish.restaurant_lat, dish.restaurant_lng)
     : null
   const distanceLabel = distanceMiles != null
-    ? distanceMiles < 0.2 ? 'Right here' : distanceMiles < 1 ? (distanceMiles * 5280 / 5280).toFixed(1) + ' mi walk' : distanceMiles.toFixed(1) + ' mi'
+    ? distanceMiles < 0.2 ? 'Right here' : distanceMiles < 1 ? distanceMiles.toFixed(1) + ' mi walk' : distanceMiles.toFixed(1) + ' mi'
     : null
   const mapsUrl = dish.restaurant_address
     ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dish.restaurant_address)
@@ -525,7 +525,6 @@ export function Dish() {
               <img
                 src={heroImage}
                 alt={dish.dish_name}
-                loading="lazy"
                 className="w-full h-full object-cover"
               />
               <div
@@ -732,8 +731,52 @@ export function Dish() {
           </div>
 
           {/* ═══════════════════════════════════════════
+              RATE THIS DISH — the interactive core
+              Right after action buttons, above the fold.
+              ═══════════════════════════════════════════ */}
+          <div className="px-3 pt-3">
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{ background: 'var(--color-card)', border: '2px solid var(--color-primary)' }}
+            >
+              <div className="px-4 py-2" style={{ background: 'var(--color-primary-muted)' }}>
+                <h3 className="text-xs font-bold" style={{ color: 'var(--color-primary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Rate this dish
+                </h3>
+              </div>
+              <div className="p-3">
+                <ReviewFlow
+                  dishId={dish.dish_id}
+                  dishName={dish.dish_name}
+                  restaurantId={dish.restaurant_id}
+                  restaurantName={dish.restaurant_name}
+                  category={dish.category}
+                  price={dish.price}
+                  totalVotes={dish.total_votes}
+                  yesVotes={dish.yes_votes}
+                  percentWorthIt={dish.percent_worth_it}
+                  isRanked={isRanked}
+                  hasPhotos={allPhotos.length > 0}
+                  onVote={handleVote}
+                  onLoginRequired={handleLoginRequired}
+                  onPhotoUploaded={handlePhotoUploaded}
+                  onToggleFavorite={handleToggleSave}
+                  isFavorite={isFavorite?.(dishId)}
+                />
+              </div>
+            </div>
+            <div className="mt-3">
+              <PhotoUploadButton
+                dishId={dish.dish_id}
+                onPhotoUploaded={handlePhotoUploaded}
+                onLoginRequired={handleLoginRequired}
+              />
+            </div>
+          </div>
+
+          {/* ═══════════════════════════════════════════
               LAYER 3: THE EVIDENCE
-              Photos, reviews, voting. For Pioneers.
+              Photos, reviews, social proof. For context.
               Lazy-loaded when user scrolls near.
               ═══════════════════════════════════════════ */}
           <div ref={evidenceSentinelRef} aria-hidden="true" />
@@ -950,45 +993,6 @@ export function Dish() {
                 </p>
               </div>
             )}
-
-            {/* Rate This Dish — bottom of evidence, for Pioneers */}
-            <div
-              className="rounded-xl mb-4 overflow-hidden"
-              style={{ background: 'var(--color-card)', border: '2px solid var(--color-primary)' }}
-            >
-              <div className="px-4 py-2" style={{ background: 'var(--color-primary-muted)' }}>
-                <h3 className="text-xs font-bold" style={{ color: 'var(--color-primary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  Rate this dish
-                </h3>
-              </div>
-              <div className="p-3">
-                <ReviewFlow
-                  dishId={dish.dish_id}
-                  dishName={dish.dish_name}
-                  restaurantId={dish.restaurant_id}
-                  restaurantName={dish.restaurant_name}
-                  category={dish.category}
-                  price={dish.price}
-                  totalVotes={dish.total_votes}
-                  yesVotes={dish.yes_votes}
-                  percentWorthIt={dish.percent_worth_it}
-                  isRanked={isRanked}
-                  hasPhotos={allPhotos.length > 0}
-                  onVote={handleVote}
-                  onLoginRequired={handleLoginRequired}
-                  onPhotoUploaded={handlePhotoUploaded}
-                  onToggleFavorite={handleToggleSave}
-                  isFavorite={isFavorite?.(dishId)}
-                />
-              </div>
-            </div>
-
-            {/* Photo Upload */}
-            <PhotoUploadButton
-              dishId={dish.dish_id}
-              onPhotoUploaded={handlePhotoUploaded}
-              onLoginRequired={handleLoginRequired}
-            />
 
             {/* Variant Selector */}
             {variants.length > 0 && (
