@@ -10,7 +10,13 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "npx playwright test",
+    "test:e2e:browser": "npx playwright test --project=browser-chromium",
+    "test:e2e:pioneer": "npx playwright test --project=pioneer-setup --project=pioneer-chromium",
+    "test:e2e:business": "npx playwright test --project=business-setup --project=business-chromium",
+    "test:e2e:report": "npx playwright show-report",
+    "test:e2e:ui": "npx playwright test --ui"
   },
   "dependencies": {
     "@sentry/react": "^10.34.0",
