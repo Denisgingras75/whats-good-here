@@ -28,6 +28,8 @@ import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 import { HearingIcon } from '../components/HearingIcon'
 import { EarIconTooltip } from '../components/EarIconTooltip'
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../lib/storage'
+import { useLocationContext } from '../context/LocationContext'
+import { calculateDistance } from '../utils/distance'
 
 /**
  * Transform raw dish data from API to component format
@@ -40,6 +42,8 @@ function transformDish(data) {
     restaurant_name: data.restaurants?.name || 'Unknown',
     restaurant_town: data.restaurants?.town,
     restaurant_address: data.restaurants?.address,
+    restaurant_lat: data.restaurants?.lat,
+    restaurant_lng: data.restaurants?.lng,
     category: data.category,
     price: data.price,
     photo_url: data.photo_url,
@@ -60,6 +64,7 @@ export function Dish() {
   const { dishId } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { location } = useLocationContext()
 
   const [dish, setDish] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -411,13 +416,25 @@ export function Dish() {
 
   const isRanked = dish.total_votes >= MIN_VOTES_FOR_RANKING
 
+  // Calculate distance from user to restaurant
+  const distanceMiles = (location?.lat && dish.restaurant_lat)
+    ? calculateDistance(location.lat, location.lng, dish.restaurant_lat, dish.restaurant_lng)
+    : null
+  const distanceLabel = distanceMiles != null
+    ? distanceMiles < 0.2 ? 'Right here' : distanceMiles < 1 ? (distanceMiles * 5280 / 5280).toFixed(1) + ' mi walk' : distanceMiles.toFixed(1) + ' mi'
+    : null
+  const mapsUrl = dish.restaurant_address
+    ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dish.restaurant_address)
+    : null
+
   return (
-    <div className="min-h-screen pb-20" style={{ background: 'var(--color-surface-elevated)' }}>
+    <div className="min-h-screen pb-20" style={{ background: 'var(--color-bg)' }}>
       {/* Header */}
       <header
         className="sticky top-0 z-30 px-3 py-2 flex items-center gap-2 top-bar"
         style={{
-          background: 'var(--color-surface-elevated)',
+          background: 'var(--color-bg)',
+          borderBottom: '1.5px solid var(--color-divider)',
         }}
       >
         <button
@@ -435,7 +452,6 @@ export function Dish() {
         </span>
 
         <div className="ml-auto flex items-center gap-1">
-          {/* Share button */}
           <button
             onClick={handleShare}
             aria-label="Share dish"
@@ -448,8 +464,6 @@ export function Dish() {
               <line x1="12" y1="2" x2="12" y2="15" />
             </svg>
           </button>
-
-          {/* Heard it was good here button */}
           <div className="relative">
             <button
               onClick={(e) => {
@@ -458,7 +472,6 @@ export function Dish() {
               }}
               aria-label={isFavorite?.(dishId) ? 'Remove from heard list' : 'Mark as heard it was good'}
               className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
-              style={{ background: 'var(--color-surface-elevated)' }}
             >
               <HearingIcon size={24} active={isFavorite?.(dishId)} />
             </button>
@@ -480,7 +493,12 @@ export function Dish() {
         </div>
       ) : (
         <>
-          {/* Hero Image — full photo when available, compact strip when not */}
+          {/* ═══════════════════════════════════════════
+              LAYER 1: THE VERDICT
+              Score, consensus, distance. 2 seconds.
+              ═══════════════════════════════════════════ */}
+
+          {/* Hero Image */}
           {heroImage ? (
             <div className="relative aspect-[3/2] overflow-hidden">
               <img
@@ -489,24 +507,16 @@ export function Dish() {
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
-              {/* Bottom gradient for stats card readability */}
               <div
-                className="absolute inset-x-0 bottom-0 h-20"
-                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.15), transparent)' }}
+                className="absolute inset-x-0 bottom-0 h-24"
+                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)' }}
               />
-
-              {/* Official badge if featured from restaurant */}
               {featuredPhoto?.source_type === 'restaurant' && (
                 <div
                   className="absolute top-3 right-3 px-2 py-0.5 rounded-md"
-                  style={{
-                    background: 'rgba(255,255,255,0.9)',
-                    backdropFilter: 'blur(8px)',
-                  }}
+                  style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)' }}
                 >
-                  <span className="text-[10px] font-bold" style={{ color: 'var(--color-primary)' }}>
-                    Official
-                  </span>
+                  <span className="text-[10px] font-bold" style={{ color: 'var(--color-primary)' }}>Official</span>
                 </div>
               )}
             </div>
@@ -519,21 +529,21 @@ export function Dish() {
             </div>
           )}
 
-          {/* Stats Card — overlapping hero when photo exists, flush when no photo */}
+          {/* Verdict Card */}
           <div
-            className="mx-3 rounded-xl px-4 py-3"
+            className="mx-3 rounded-xl px-4 py-4"
             style={{
-              background: 'var(--color-surface-elevated)',
+              background: 'var(--color-card)',
               border: '1.5px solid var(--color-divider)',
               marginTop: heroImage ? '-32px' : '0',
               position: 'relative',
               zIndex: 5,
             }}
           >
-            {/* Parent dish breadcrumb if this is a variant */}
+            {/* Variant breadcrumb */}
             {isVariant && parentDish && (
               <button
-                onClick={() => navigate(`/dish/${parentDish.id}`)}
+                onClick={() => navigate('/dish/' + parentDish.id)}
                 className="flex items-center gap-1 text-xs font-bold mb-3"
                 style={{ color: 'var(--color-primary)' }}
               >
@@ -544,111 +554,169 @@ export function Dish() {
               </button>
             )}
 
-            {/* Dish name + price */}
+            {/* Name + Price */}
             <div className="flex items-start justify-between gap-3">
               <h1
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
-                  fontWeight: 700,
-                  fontSize: '24px',
+                  fontWeight: 800,
+                  fontSize: '22px',
                   letterSpacing: '-0.02em',
                   color: 'var(--color-text-primary)',
-                  lineHeight: 1.1,
+                  lineHeight: 1.15,
                   margin: 0,
                 }}
               >
                 {dish.dish_name}
               </h1>
               {dish.price ? (
-                <span
-                  className="flex-shrink-0 font-bold"
-                  style={{ color: 'var(--color-text-primary)', fontSize: '18px' }}
-                >
+                <span className="flex-shrink-0 font-bold" style={{ color: 'var(--color-text-primary)', fontSize: '18px' }}>
                   ${Number(dish.price).toFixed(0)}
                 </span>
               ) : null}
             </div>
 
-            {/* Restaurant link */}
-            <button
-              onClick={() => navigate(`/restaurants/${dish.restaurant_id}`)}
-              className="flex items-center gap-1 mt-1.5"
-              style={{
-                fontSize: '12px',
-                fontWeight: 600,
-                color: 'var(--color-text-tertiary)',
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-              }}
-            >
-              {dish.restaurant_name}
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            {/* Restaurant + Distance row */}
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <button
+                onClick={() => navigate('/restaurants/' + dish.restaurant_id)}
+                className="flex items-center gap-1"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  color: 'var(--color-text-tertiary)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {dish.restaurant_name}
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              {distanceLabel && (
+                <>
+                  <span style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>&middot;</span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+                    {distanceLabel}
+                  </span>
+                </>
+              )}
+              {dish.restaurant_town && (
+                <>
+                  <span style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>&middot;</span>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
+                    {dish.restaurant_town}
+                  </span>
+                </>
+              )}
+            </div>
 
-            {/* Rating + votes row — only show when ranked */}
+            {/* Score Block — the whole point */}
             {isRanked && dish.avg_rating ? (
-              <div className="flex items-end justify-between mt-2">
-                <div className="flex items-baseline gap-1.5">
+              <div className="flex items-end justify-between mt-4 pt-3" style={{ borderTop: '1px solid var(--color-divider)' }}>
+                <div className="flex items-baseline gap-2">
                   <span
                     style={{
                       fontFamily: "'DM Sans', sans-serif",
                       fontWeight: 800,
-                      fontSize: '36px',
+                      fontSize: '40px',
                       lineHeight: 1,
                       color: getRatingColor(dish.avg_rating),
+                      fontVariantNumeric: 'tabular-nums',
                     }}
                   >
                     {formatScore10(dish.avg_rating)}
                   </span>
-                  <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
-                    / 10
-                  </span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-tertiary)' }}>/ 10</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold" style={{ color: 'var(--color-text-secondary)' }}>
+                <div className="text-right space-y-0.5">
+                  <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                    {dish.percent_worth_it}% would reorder
+                  </p>
+                  <p className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
                     {dish.total_votes} vote{dish.total_votes === 1 ? '' : 's'}
                   </p>
                   <ValueBadge valuePercentile={dish.value_percentile} />
                 </div>
               </div>
+            ) : dish.total_votes > 0 ? (
+              <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--color-divider)' }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                  {dish.total_votes} vote{dish.total_votes === 1 ? '' : 's'} — needs {MIN_VOTES_FOR_RANKING - dish.total_votes} more to rank
+                </p>
+              </div>
             ) : null}
-
           </div>
 
-          {/* Content */}
-          <div className="px-3 pt-3 pb-4">
-            {/* Order CTA — link to restaurant's website */}
-            {dish.website_url && (
-              <a
-                href={dish.website_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => capture('order_link_clicked', {
-                  dish_id: dish.dish_id,
-                  dish_name: dish.dish_name,
-                  restaurant_id: dish.restaurant_id,
-                  restaurant_name: dish.restaurant_name,
-                })}
-                className="flex items-center justify-center gap-2 mb-4 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95"
-                style={{
-                  background: 'var(--color-primary)',
-                  color: 'var(--color-text-on-primary)',
-                }}
-              >
-                Order from {dish.restaurant_name}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </a>
-            )}
+          {/* ═══════════════════════════════════════════
+              LAYER 2: THE ACTION
+              Get there or order online. 3 seconds.
+              ═══════════════════════════════════════════ */}
+          <div className="px-3 pt-3">
+            <div className="flex gap-2">
+              {/* Directions button */}
+              {mapsUrl && (
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => capture('directions_clicked', {
+                    dish_id: dish.dish_id,
+                    restaurant_id: dish.restaurant_id,
+                  })}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95"
+                  style={{
+                    background: 'var(--color-card)',
+                    color: 'var(--color-text-primary)',
+                    border: '1.5px solid var(--color-divider)',
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                  </svg>
+                  Directions
+                </a>
+              )}
+              {/* Order online button */}
+              {dish.website_url && (
+                <a
+                  href={dish.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => capture('order_link_clicked', {
+                    dish_id: dish.dish_id,
+                    dish_name: dish.dish_name,
+                    restaurant_id: dish.restaurant_id,
+                    restaurant_name: dish.restaurant_name,
+                  })}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95"
+                  style={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-text-on-primary)',
+                  }}
+                >
+                  Order Online
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              )}
+            </div>
+          </div>
 
-            {/* Smart Snippet — pull quote from best review */}
+          {/* ═══════════════════════════════════════════
+              LAYER 3: THE EVIDENCE
+              Photos, reviews, voting. For Pioneers.
+              ═══════════════════════════════════════════ */}
+          <div className="px-3 pt-4 pb-4">
+
+            {/* Smart Snippet — the one-liner social proof */}
             {smartSnippet && smartSnippet.review_text && (
               <div
                 className="mb-4 p-4 rounded-xl"
@@ -657,10 +725,7 @@ export function Dish() {
                   borderLeft: '3px solid var(--color-accent-gold)',
                 }}
               >
-                <p
-                  className="text-sm italic"
-                  style={{ color: 'var(--color-text-primary)', lineHeight: 1.5 }}
-                >
+                <p className="text-sm italic" style={{ color: 'var(--color-text-primary)', lineHeight: 1.5 }}>
                   &ldquo;{smartSnippet.review_text}&rdquo;
                 </p>
                 <div className="flex items-center justify-between mt-2">
@@ -676,45 +741,7 @@ export function Dish() {
               </div>
             )}
 
-            {/* ── RATE THIS DISH ── primary action, above everything else */}
-            <div
-              className="rounded-xl mb-4 overflow-hidden"
-              style={{
-                background: 'var(--color-surface-elevated)',
-                border: '2px solid var(--color-primary)',
-              }}
-            >
-              <div
-                className="px-4 py-2"
-                style={{ background: 'var(--color-primary-muted)' }}
-              >
-                <h3 className="text-xs font-bold" style={{ color: 'var(--color-primary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  Rate this dish
-                </h3>
-              </div>
-              <div className="p-3">
-                <ReviewFlow
-                  dishId={dish.dish_id}
-                  dishName={dish.dish_name}
-                  restaurantId={dish.restaurant_id}
-                  restaurantName={dish.restaurant_name}
-                  category={dish.category}
-                  price={dish.price}
-                  totalVotes={dish.total_votes}
-                  yesVotes={dish.yes_votes}
-                  percentWorthIt={dish.percent_worth_it}
-                  isRanked={isRanked}
-                  hasPhotos={allPhotos.length > 0}
-                  onVote={handleVote}
-                  onLoginRequired={handleLoginRequired}
-                  onPhotoUploaded={handlePhotoUploaded}
-                  onToggleFavorite={handleToggleSave}
-                  isFavorite={isFavorite?.(dishId)}
-                />
-              </div>
-            </div>
-
-            {/* ── PHOTOS ── visual content before text reviews */}
+            {/* Photos grid */}
             {displayPhotos.length > 0 && (
               <div className="mb-4">
                 <h3 className="text-xs font-bold mb-3" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
@@ -734,9 +761,7 @@ export function Dish() {
                         alt={dish.dish_name}
                         loading="lazy"
                         className="w-full h-full object-cover"
-                        onError={function (e) {
-                          e.target.parentElement.style.display = 'none'
-                        }}
+                        onError={function (e) { e.target.parentElement.style.display = 'none' }}
                       />
                     </button>
                   ))}
@@ -753,21 +778,11 @@ export function Dish() {
               </div>
             )}
 
-            {/* Photo Upload */}
-            <PhotoUploadButton
-              dishId={dish.dish_id}
-              onPhotoUploaded={handlePhotoUploaded}
-              onLoginRequired={handleLoginRequired}
-            />
-
-            {/* ── FRIENDS ── social context before community reviews */}
+            {/* Friends who rated this */}
             {friendsVotes.length > 0 && (
               <div
                 className="mb-4 p-4 rounded-xl"
-                style={{
-                  background: 'var(--color-surface)',
-                  border: '1.5px solid var(--color-divider)',
-                }}
+                style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-divider)' }}
               >
                 <h3 className="text-xs font-bold mb-3" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                   Friends who rated this
@@ -831,7 +846,7 @@ export function Dish() {
               </div>
             )}
 
-            {/* ── REVIEWS ── community feedback */}
+            {/* Reviews feed */}
             {reviews.length > 0 && (
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
@@ -849,17 +864,10 @@ export function Dish() {
                       <div
                         key={review.id}
                         className="p-4 rounded-xl"
-                        style={{
-                          background: 'var(--color-surface)',
-                          border: '1.5px solid var(--color-divider)',
-                        }}
+                        style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-divider)' }}
                       >
-                        {/* Header row: avatar + name + time | score + thumb */}
                         <div className="flex items-center justify-between mb-2">
-                          <Link
-                            to={'/user/' + review.user_id}
-                            className="flex items-center gap-2 min-w-0"
-                          >
+                          <Link to={'/user/' + review.user_id} className="flex items-center gap-2 min-w-0">
                             <div
                               className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
                               style={{ background: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
@@ -882,15 +890,11 @@ export function Dish() {
                             <span>{review.would_order_again ? <ThumbsUpIcon size={22} /> : <ThumbsDownIcon size={22} />}</span>
                           </div>
                         </div>
-
-                        {/* Review text */}
                         {review.review_text && (
                           <p className="text-sm" style={{ color: 'var(--color-text-primary)', lineHeight: 1.6 }}>
                             {review.review_text}
                           </p>
                         )}
-
-                        {/* Trust badge */}
                         <div className="mt-2">
                           <TrustBadge type={review.trust_badge} />
                         </div>
@@ -912,6 +916,45 @@ export function Dish() {
                 </p>
               </div>
             )}
+
+            {/* Rate This Dish — bottom of evidence, for Pioneers */}
+            <div
+              className="rounded-xl mb-4 overflow-hidden"
+              style={{ background: 'var(--color-card)', border: '2px solid var(--color-primary)' }}
+            >
+              <div className="px-4 py-2" style={{ background: 'var(--color-primary-muted)' }}>
+                <h3 className="text-xs font-bold" style={{ color: 'var(--color-primary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Rate this dish
+                </h3>
+              </div>
+              <div className="p-3">
+                <ReviewFlow
+                  dishId={dish.dish_id}
+                  dishName={dish.dish_name}
+                  restaurantId={dish.restaurant_id}
+                  restaurantName={dish.restaurant_name}
+                  category={dish.category}
+                  price={dish.price}
+                  totalVotes={dish.total_votes}
+                  yesVotes={dish.yes_votes}
+                  percentWorthIt={dish.percent_worth_it}
+                  isRanked={isRanked}
+                  hasPhotos={allPhotos.length > 0}
+                  onVote={handleVote}
+                  onLoginRequired={handleLoginRequired}
+                  onPhotoUploaded={handlePhotoUploaded}
+                  onToggleFavorite={handleToggleSave}
+                  isFavorite={isFavorite?.(dishId)}
+                />
+              </div>
+            </div>
+
+            {/* Photo Upload */}
+            <PhotoUploadButton
+              dishId={dish.dish_id}
+              onPhotoUploaded={handlePhotoUploaded}
+              onLoginRequired={handleLoginRequired}
+            />
 
             {/* Variant Selector */}
             {variants.length > 0 && (
