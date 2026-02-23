@@ -479,7 +479,7 @@ export function Profile() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-4 pt-5">
+          <div className="p-4 pt-5" style={{ transition: 'opacity 0.15s ease' }} key={activeTab}>
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
