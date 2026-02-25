@@ -17,6 +17,8 @@ import { useRestaurantSpecials } from '../hooks/useSpecials'
 import { useRestaurantEvents } from '../hooks/useEvents'
 import { SpecialCard } from '../components/SpecialCard'
 import { EventCard } from '../components/EventCard'
+import { restaurantClaimsApi } from '../api/restaurantClaimsApi'
+import { toast } from 'sonner'
 
 export function RestaurantDetail() {
   const { restaurantId } = useParams()
@@ -33,6 +35,8 @@ export function RestaurantDetail() {
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [addDishModalOpen, setAddDishModalOpen] = useState(false)
   const [friendsVotesByDish, setFriendsVotesByDish] = useState({})
+  const [existingClaim, setExistingClaim] = useState(null)
+  const [claimSubmitting, setClaimSubmitting] = useState(false)
 
   // Fetch restaurant by ID
   useEffect(() => {
@@ -88,6 +92,39 @@ export function RestaurantDetail() {
   // Fetch specials and events for this restaurant
   const { specials } = useRestaurantSpecials(restaurantId)
   const { events } = useRestaurantEvents(restaurantId)
+
+  // Check if user already has a claim on this restaurant
+  useEffect(() => {
+    if (!restaurantId || !user) {
+      setExistingClaim(null)
+      return
+    }
+    restaurantClaimsApi.getMyClaimForRestaurant(restaurantId)
+      .then(claim => setExistingClaim(claim))
+      .catch(() => setExistingClaim(null))
+  }, [restaurantId, user])
+
+  const handleClaimRestaurant = async () => {
+    if (!user) {
+      setLoginModalOpen(true)
+      return
+    }
+    setClaimSubmitting(true)
+    try {
+      const claim = await restaurantClaimsApi.submitClaim(restaurantId)
+      setExistingClaim(claim)
+      toast.success('Claim submitted! We\'ll review it shortly.')
+    } catch (err) {
+      const msg = err?.message || 'Failed to submit claim'
+      if (msg.includes('duplicate') || msg.includes('unique')) {
+        toast.error('You\'ve already claimed this restaurant.')
+      } else {
+        toast.error(msg)
+      }
+    } finally {
+      setClaimSubmitting(false)
+    }
+  }
 
   // Fetch friend votes
   useEffect(() => {
@@ -268,6 +305,25 @@ export function RestaurantDetail() {
             </a>
           )}
 
+          {/* Order button */}
+          {restaurant.order_url && (
+            <a
+              href={restaurant.order_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98]"
+              style={{
+                background: 'var(--color-primary)',
+                color: 'white',
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+              Order Online
+            </a>
+          )}
+
           {/* Contact info row */}
           {(restaurant.phone || restaurant.website_url || restaurant.facebook_url || restaurant.instagram_url) && (
             <div className="flex items-center gap-3 flex-wrap">
@@ -363,6 +419,36 @@ export function RestaurantDetail() {
               </svg>
               Add a dish
             </button>
+          )}
+
+          {/* Claim this restaurant */}
+          {!existingClaim && (
+            <button
+              onClick={handleClaimRestaurant}
+              disabled={claimSubmitting}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all active:scale-[0.98]"
+              style={{
+                background: 'transparent',
+                color: 'var(--color-text-tertiary)',
+                border: '1px dashed var(--color-divider)',
+                opacity: claimSubmitting ? 0.6 : 1,
+              }}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+              </svg>
+              {claimSubmitting ? 'Submitting...' : 'This is my restaurant'}
+            </button>
+          )}
+          {existingClaim && existingClaim.status === 'pending' && (
+            <p className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+              Claim pending review
+            </p>
+          )}
+          {existingClaim && existingClaim.status === 'approved' && (
+            <p className="text-xs font-medium" style={{ color: 'var(--color-rating)' }}>
+              You manage this restaurant
+            </p>
           )}
         </div>
       </div>

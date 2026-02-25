@@ -584,3 +584,36 @@
 - Dark mode now works correctly for restaurant dish cards
 
 **Files:** `src/components/restaurants/TopDishCard.jsx`
+
+---
+
+## ~~T41: Self-service restaurant claim flow~~ DONE
+
+**Why:** Restaurant owners had no way to discover or claim their page. The only path was admin-generated invite links, requiring manual coordination.
+
+**What was done:**
+- `restaurant_claims` table with pending/approved/denied status and RLS policies
+- "This is my restaurant" button on RestaurantDetail.jsx (dashed border, unobtrusive)
+- `restaurantClaimsApi` — submit, check existing, admin approve/deny
+- Admin panel "Pending Claims" section with approve/deny buttons
+- Approve auto-creates `restaurant_managers` row (manager access granted)
+- Users see claim status on restaurant page (pending/approved)
+
+**Files:** `supabase/schema.sql`, `src/api/restaurantClaimsApi.js`, `src/pages/RestaurantDetail.jsx`, `src/pages/Admin.jsx`, `supabase/migrations/add-order-url-and-claims.sql`
+
+---
+
+## ~~T42: Order button on dish cards~~ DONE
+
+**Why:** Bridge "what should I order" into "order it" — direct link to restaurant's online ordering.
+
+**What was done:**
+- `order_url` TEXT field added to restaurants table
+- `get_ranked_dishes` and `get_restaurant_dishes` RPCs return order_url
+- `dishesApi.search()` and `getDishById()` include order_url in results
+- `DishListItem` shows a small coral circle order button (external link icon) when order_url exists
+- `RestaurantDetail` shows a prominent "Order Online" button at the top when order_url exists
+- `RestaurantInfoEditor` (manager portal) has "Online Ordering URL" field so managers can set their own
+- `restaurantManagerApi.updateRestaurantInfo()` passes order_url through
+
+**Files:** `supabase/schema.sql`, `src/api/dishesApi.js`, `src/api/restaurantManagerApi.js`, `src/components/DishListItem.jsx`, `src/pages/RestaurantDetail.jsx`, `src/components/restaurant-admin/RestaurantInfoEditor.jsx`

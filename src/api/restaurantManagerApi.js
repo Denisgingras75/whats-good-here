@@ -141,6 +141,7 @@ export const restaurantManagerApi = {
     const allowed = {}
     if (updates.phone !== undefined) allowed.phone = updates.phone?.trim() || null
     if (updates.website_url !== undefined) allowed.website_url = updates.website_url?.trim() || null
+    if (updates.order_url !== undefined) allowed.order_url = updates.order_url?.trim() || null
     if (updates.facebook_url !== undefined) allowed.facebook_url = updates.facebook_url?.trim() || null
     if (updates.instagram_url !== undefined) allowed.instagram_url = updates.instagram_url?.trim() || null
 
@@ -148,7 +149,7 @@ export const restaurantManagerApi = {
       .from('restaurants')
       .update(allowed)
       .eq('id', restaurantId)
-      .select('id, name, phone, website_url, facebook_url, instagram_url')
+      .select('id, name, phone, website_url, order_url, facebook_url, instagram_url')
       .single()
 
     if (error) {

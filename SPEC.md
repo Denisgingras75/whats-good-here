@@ -22,7 +22,7 @@ Evidence: `supabase/schema.sql:24-259`
 
 | Table | PK | Key Columns | Relationships | Constraints | Status |
 |---|---|---|---|---|---|
-| **restaurants** | `id` UUID | name, address, lat/lng, is_open, cuisine, town, menu_section_order[], website_url, facebook_url, instagram_url, phone, google_place_id, menu_url, created_by | — | — | **VERIFIED** |
+| **restaurants** | `id` UUID | name, address, lat/lng, is_open, cuisine, town, menu_section_order[], website_url, facebook_url, instagram_url, phone, google_place_id, menu_url, order_url, created_by | — | — | **VERIFIED** |
 | **dishes** | `id` UUID | name, category, menu_section, price, avg_rating, total_votes, consensus_*, value_score, parent_dish_id, tags[] | FK → restaurants; self-ref parent_dish_id (variants) | — | **VERIFIED** |
 | **votes** | `id` UUID | dish_id, user_id, would_order_again (bool), rating_10 (decimal), review_text, vote_position, category_snapshot, purity_score, source, source_metadata | FK → dishes, auth.users; partial UNIQUE(dish_id, user_id) WHERE source='user' | review_text max 200 chars; source IN (user, ai_estimated) | **VERIFIED** |
 | **profiles** | `id` UUID = auth.users(id) | display_name, has_onboarded, preferred_categories[], follower_count, following_count | PK references auth.users | unique lowercase display_name | **VERIFIED** |
@@ -41,6 +41,7 @@ Evidence: `supabase/schema.sql:24-259`
 | **jitter_samples** | `id` UUID | user_id, sample_data (JSONB), collected_at | FK → auth.users | auto-pruned to 30 per user | **VERIFIED** |
 | **restaurant_managers** | `id` UUID | user_id, restaurant_id, role, invited_at, accepted_at, created_by | FK → auth.users, restaurants; UNIQUE(user_id, restaurant_id) | — | **VERIFIED** |
 | **restaurant_invites** | `id` UUID | token (unique hex), restaurant_id, created_by, expires_at, used_by, used_at | FK → restaurants, auth.users | expires after 7 days | **VERIFIED** |
+| **restaurant_claims** | `id` UUID | user_id, restaurant_id, status (pending/approved/denied), message, reviewed_by, reviewed_at | FK → auth.users, restaurants; UNIQUE(user_id, restaurant_id) | status CHECK | **VERIFIED** |
 | **rate_limits** | `id` UUID | user_id, action, created_at | FK → auth.users | pg_cron hourly cleanup | **VERIFIED** |
 
 ### Views (1)
@@ -87,6 +88,7 @@ Evidence: `schema.sql:351-461`
 | specials | active OR admin/manager | admin/manager | admin/manager | admin/manager |
 | restaurant_managers | admin OR own | — (via invite) | — | — |
 | restaurant_invites | admin only | — | — | — |
+| restaurant_claims | own + admin | own (auth.uid) | admin only | — |
 | rate_limits | own | — (via RPC) | — | — |
 
 **VERIFIED** — all policies read directly from schema.sql
@@ -431,7 +433,18 @@ Switching restaurants resets to "Top Rated" tab. Search filters work in both vie
 **API calls:** `restaurantManagerApi`, `get_invite_details` RPC, `accept_restaurant_invite` RPC
 **Data reads/writes:** restaurant_invites, restaurant_managers, dishes, specials
 
+**Self-service claims:** Users can tap "This is my restaurant" on any restaurant detail page. Submits a claim (stored in `restaurant_claims` table with status=pending). Admin sees pending claims in the Admin panel and can approve (auto-creates manager row) or deny. Users see their claim status on the restaurant page.
+
 **VERIFIED** — `src/pages/AcceptInvite.jsx`, `src/pages/ManageRestaurant.jsx`, `schema.sql:1482-1531`
+
+### Feature 18b: Online Ordering
+
+**User flow:** Dish cards show a small order button (coral circle with external link icon) when the restaurant has an `order_url`. Tapping opens the restaurant's online ordering page in a new tab. Restaurant detail page shows a prominent "Order Online" button at the top.
+**Data:** `restaurants.order_url` TEXT field. Set by restaurant managers via the manager portal (RestaurantInfoEditor) or by admin.
+**Components:** Order icon in `DishListItem`, "Order Online" button in `RestaurantDetail.jsx`
+**Auth gate:** None — ordering is public
+
+**VERIFIED** — `src/components/DishListItem.jsx`, `src/pages/RestaurantDetail.jsx`
 
 ### Feature 19: Admin Panel
 

@@ -6,6 +6,7 @@ import { useState } from 'react'
 export function RestaurantInfoEditor({ restaurant, onUpdate }) {
   const [phone, setPhone] = useState(restaurant?.phone || '')
   const [websiteUrl, setWebsiteUrl] = useState(restaurant?.website_url || '')
+  const [orderUrl, setOrderUrl] = useState(restaurant?.order_url || '')
   const [facebookUrl, setFacebookUrl] = useState(restaurant?.facebook_url || '')
   const [instagramUrl, setInstagramUrl] = useState(restaurant?.instagram_url || '')
   const [saving, setSaving] = useState(false)
@@ -16,6 +17,7 @@ export function RestaurantInfoEditor({ restaurant, onUpdate }) {
       await onUpdate({
         phone,
         website_url: websiteUrl,
+        order_url: orderUrl,
         facebook_url: facebookUrl,
         instagram_url: instagramUrl,
       })
@@ -58,6 +60,21 @@ export function RestaurantInfoEditor({ restaurant, onUpdate }) {
           className="w-full px-4 py-2.5 rounded-lg text-sm"
           style={inputStyle}
         />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Online Ordering URL</label>
+        <input
+          type="url"
+          value={orderUrl}
+          onChange={(e) => setOrderUrl(e.target.value)}
+          placeholder="https://order.toasttab.com/..."
+          className="w-full px-4 py-2.5 rounded-lg text-sm"
+          style={inputStyle}
+        />
+        <p className="mt-1 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+          Link to your online ordering page (Toast, Square, DoorDash, etc.)
+        </p>
       </div>
 
       <div>

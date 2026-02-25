@@ -63,6 +63,7 @@ export const DishListItem = memo(function DishListItem({
   const photoUrl = dish.photo_url
   const valuePercentile = dish.value_percentile
   const emoji = getCategoryEmoji(dish.category)
+  const orderUrl = dish.order_url || (dish.restaurants && dish.restaurants.order_url)
 
   var handleClick = onClick || function () { navigate('/dish/' + dishId) }
 
@@ -163,28 +164,50 @@ export const DishListItem = memo(function DishListItem({
         </div>
       </div>
 
-      {/* Rating */}
-      <div className="flex-shrink-0 text-right">
-        {isRanked ? (
-          <span
-            className="font-bold"
+      {/* Rating + Order */}
+      <div className="flex-shrink-0 flex items-center gap-2">
+        <div className="text-right">
+          {isRanked ? (
+            <span
+              className="font-bold"
+              style={{
+                fontSize: isPodium ? '17px' : '15px',
+                color: getRatingColor(avgRating),
+              }}
+            >
+              {avgRating}
+            </span>
+          ) : (
+            <span
+              style={{
+                fontSize: '12px',
+                color: 'var(--color-text-tertiary)',
+                fontWeight: 500,
+              }}
+            >
+              {totalVotes ? totalVotes + ' vote' + (totalVotes === 1 ? '' : 's') : 'New'}
+            </span>
+          )}
+        </div>
+        {orderUrl && (
+          <a
+            href={orderUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={function (e) { e.stopPropagation() }}
+            className="flex-shrink-0 flex items-center justify-center rounded-full transition-all active:scale-95"
             style={{
-              fontSize: isPodium ? '17px' : '15px',
-              color: getRatingColor(avgRating),
+              width: '32px',
+              height: '32px',
+              background: 'var(--color-primary)',
+              color: 'white',
             }}
+            aria-label={'Order ' + dishName}
           >
-            {avgRating}
-          </span>
-        ) : (
-          <span
-            style={{
-              fontSize: '12px',
-              color: 'var(--color-text-tertiary)',
-              fontWeight: 500,
-            }}
-          >
-            {totalVotes ? totalVotes + ' vote' + (totalVotes === 1 ? '' : 's') : 'New'}
-          </span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </a>
         )}
       </div>
     </button>

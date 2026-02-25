@@ -5,6 +5,7 @@ import { logger } from '../utils/logger'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { adminApi } from '../api/adminApi'
 import { restaurantManagerApi } from '../api/restaurantManagerApi'
+import { restaurantClaimsApi } from '../api/restaurantClaimsApi'
 import { ALL_CATEGORIES } from '../constants/categories'
 
 export function Admin() {
@@ -37,6 +38,10 @@ export function Admin() {
   const [inviteSearch, setInviteSearch] = useState('')
   const [inviteDropdownOpen, setInviteDropdownOpen] = useState(false)
   const inviteSearchRef = useRef(null)
+
+  // Claims state
+  const [pendingClaims, setPendingClaims] = useState([])
+  const [claimsLoading, setClaimsLoading] = useState(false)
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -78,6 +83,12 @@ export function Admin() {
     fetchRecentDishes()
   }, [])
 
+  // Fetch pending claims when admin check completes
+  useEffect(() => {
+    if (!isAdmin) return
+    fetchPendingClaims()
+  }, [isAdmin])
+
   async function fetchRestaurants() {
     try {
       const data = await restaurantsApi.getOpen()
@@ -96,6 +107,40 @@ export function Admin() {
       setRecentDishes(data)
     } catch (error) {
       logger.error('Error fetching recent dishes:', error)
+    }
+  }
+
+  async function fetchPendingClaims() {
+    setClaimsLoading(true)
+    try {
+      const data = await restaurantClaimsApi.getPendingClaims()
+      setPendingClaims(data)
+    } catch (error) {
+      logger.error('Error fetching pending claims:', error)
+    } finally {
+      setClaimsLoading(false)
+    }
+  }
+
+  async function handleApproveClaim(claimId) {
+    try {
+      await restaurantClaimsApi.approveClaim(claimId)
+      setPendingClaims(prev => prev.filter(c => c.id !== claimId))
+      setMessage({ type: 'success', text: 'Claim approved — manager access granted' })
+    } catch (error) {
+      logger.error('Error approving claim:', error)
+      setMessage({ type: 'error', text: 'Failed to approve claim: ' + (error?.message || error) })
+    }
+  }
+
+  async function handleDenyClaim(claimId) {
+    try {
+      await restaurantClaimsApi.denyClaim(claimId)
+      setPendingClaims(prev => prev.filter(c => c.id !== claimId))
+      setMessage({ type: 'success', text: 'Claim denied' })
+    } catch (error) {
+      logger.error('Error denying claim:', error)
+      setMessage({ type: 'error', text: 'Failed to deny claim: ' + (error?.message || error) })
     }
   }
 
@@ -592,6 +637,68 @@ export function Admin() {
             )}
           </div>
         </div>
+
+        {/* Restaurant Claims Section */}
+        {pendingClaims.length > 0 && (
+          <div className="mt-8 pt-8 border-t" style={{ borderColor: 'var(--color-divider)' }}>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+              Pending Claims
+              <span
+                className="px-2 py-0.5 rounded-full text-xs font-bold"
+                style={{ background: 'var(--color-primary)', color: 'white' }}
+              >
+                {pendingClaims.length}
+              </span>
+            </h2>
+            <div className="space-y-3">
+              {pendingClaims.map((claim) => (
+                <div
+                  key={claim.id}
+                  className="p-4 rounded-xl border"
+                  style={{ background: 'var(--color-surface-elevated)', borderColor: 'var(--color-divider)' }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                        {claim.restaurants?.name || 'Unknown restaurant'}
+                        <span className="ml-2 font-normal" style={{ color: 'var(--color-text-tertiary)' }}>
+                          ({claim.restaurants?.town || '?'})
+                        </span>
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                        Claimed by: {claim.profiles?.display_name || 'Unknown user'}
+                      </p>
+                      {claim.message && (
+                        <p className="text-xs mt-1 italic" style={{ color: 'var(--color-text-tertiary)' }}>
+                          &ldquo;{claim.message}&rdquo;
+                        </p>
+                      )}
+                      <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                        {new Date(claim.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0 ml-3">
+                      <button
+                        onClick={() => handleApproveClaim(claim.id)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95"
+                        style={{ background: 'var(--color-rating)', color: 'white' }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleDenyClaim(claim.id)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95"
+                        style={{ background: 'var(--color-surface)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-divider)' }}
+                      >
+                        Deny
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Restaurant Managers Section */}
         <div className="mt-8 pt-8 border-t" style={{ borderColor: 'var(--color-divider)' }}>

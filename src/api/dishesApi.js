@@ -124,7 +124,7 @@ export const dishesApi = {
     const selectFields = `
       id, name, category, tags, photo_url, price,
       value_score, value_percentile, total_votes, avg_rating,
-      restaurants!inner ( id, name, is_open, cuisine, town )
+      restaurants!inner ( id, name, is_open, cuisine, town, order_url )
     `
 
     const fetchLimit = town ? limit * 4 : limit
@@ -156,6 +156,7 @@ export const dishesApi = {
       restaurant_name: dish.restaurants?.name,
       restaurant_cuisine: dish.restaurants?.cuisine,
       restaurant_town: dish.restaurants?.town,
+      order_url: dish.restaurants?.order_url || null,
     })
 
     // Merge helper: adds new dishes to results, skipping duplicates
@@ -633,7 +634,8 @@ export const dishesApi = {
             lng,
             cuisine,
             town,
-            website_url
+            website_url,
+            order_url
           )
         `)
         .eq('id', dishId)

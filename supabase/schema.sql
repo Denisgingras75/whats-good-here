@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS restaurants (
   menu_last_checked TIMESTAMPTZ,
   menu_content_hash TEXT,
   menu_section_order TEXT[] DEFAULT '{}',
+  order_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -265,6 +266,19 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
+-- 1r2. restaurant_claims (self-service restaurant ownership claims)
+CREATE TABLE IF NOT EXISTS restaurant_claims (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'denied')),
+  message TEXT,
+  reviewed_by UUID REFERENCES auth.users(id),
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, restaurant_id)
+);
 
 -- 1s. jitter_profiles (Jitter Protocol: behavioral biometrics for human verification)
 CREATE TABLE IF NOT EXISTS jitter_profiles (
@@ -505,6 +519,13 @@ CREATE POLICY "Admins manage invites" ON restaurant_invites FOR ALL USING (is_ad
 -- rate_limits: users see own
 CREATE POLICY "Users can view own rate limits" ON rate_limits FOR SELECT USING ((select auth.uid()) = user_id);
 
+-- restaurant_claims: users create own, admins manage
+ALTER TABLE restaurant_claims ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own claims" ON restaurant_claims FOR SELECT USING ((select auth.uid()) = user_id);
+CREATE POLICY "Admins can view all claims" ON restaurant_claims FOR SELECT USING (is_admin());
+CREATE POLICY "Users can create claims" ON restaurant_claims FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
+CREATE POLICY "Admins can update claims" ON restaurant_claims FOR UPDATE USING (is_admin());
+
 -- events: conditional read, admin + manager write
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Read active events" ON events FOR SELECT USING (is_active = true OR is_admin() OR is_restaurant_manager(restaurant_id));
@@ -670,7 +691,8 @@ RETURNS TABLE (
   value_score DECIMAL,
   value_percentile DECIMAL,
   search_score DECIMAL,
-  featured_photo_url TEXT
+  featured_photo_url TEXT,
+  order_url TEXT
 ) AS $$
 DECLARE
   lat_delta DECIMAL := radius_miles / 69.0;
@@ -678,7 +700,7 @@ DECLARE
 BEGIN
   RETURN QUERY
   WITH nearby_restaurants AS (
-    SELECT r.id, r.name, r.town, r.lat, r.lng, r.cuisine
+    SELECT r.id, r.name, r.town, r.lat, r.lng, r.cuisine, r.order_url
     FROM restaurants r
     WHERE r.is_open = true
       AND r.lat BETWEEN (user_lat - lat_delta) AND (user_lat + lat_delta)
@@ -687,7 +709,7 @@ BEGIN
   ),
   restaurants_with_distance AS (
     SELECT
-      nr.id, nr.name, nr.town, nr.lat, nr.lng, nr.cuisine,
+      nr.id, nr.name, nr.town, nr.lat, nr.lng, nr.cuisine, nr.order_url,
       ROUND((
         3959 * ACOS(
           LEAST(1.0, GREATEST(-1.0,
@@ -812,7 +834,8 @@ BEGIN
       fr.distance,
       COALESCE(rvc.recent_votes, 0)
     ) AS search_score,
-    bp.photo_url AS featured_photo_url
+    bp.photo_url AS featured_photo_url,
+    fr.order_url
   FROM dishes d
   INNER JOIN filtered_restaurants fr ON d.restaurant_id = fr.id
   LEFT JOIN votes v ON d.id = v.dish_id
@@ -828,7 +851,8 @@ BEGIN
            bv.best_name, bv.best_rating,
            d.value_score, d.value_percentile,
            rvc.recent_votes,
-           bp.photo_url
+           bp.photo_url,
+           fr.order_url
   ORDER BY search_score DESC NULLS LAST, total_votes DESC;
 END;
 $$ LANGUAGE plpgsql STABLE SET search_path = public;
@@ -855,7 +879,8 @@ RETURNS TABLE (
   best_variant_id UUID,
   best_variant_name TEXT,
   best_variant_rating DECIMAL,
-  tags TEXT[]
+  tags TEXT[],
+  order_url TEXT
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -914,7 +939,8 @@ BEGIN
     (vs.child_count IS NOT NULL AND vs.child_count > 0) AS has_variants,
     COALESCE(vs.child_count, 0)::INT AS variant_count,
     bv.best_id AS best_variant_id, bv.best_name AS best_variant_name, bv.best_rating AS best_variant_rating,
-    d.tags
+    d.tags,
+    r.order_url
   FROM dishes d
   INNER JOIN restaurants r ON d.restaurant_id = r.id
   LEFT JOIN variant_stats vs ON vs.parent_dish_id = d.id
@@ -926,7 +952,8 @@ BEGIN
   GROUP BY d.id, d.name, r.id, r.name, d.category, d.menu_section, d.price, d.photo_url, d.tags,
            vs.total_child_votes, vs.total_child_yes, vs.combined_avg_rating, vs.child_count,
            dvs.direct_votes, dvs.direct_yes, dvs.direct_avg,
-           bv.best_id, bv.best_name, bv.best_rating
+           bv.best_id, bv.best_name, bv.best_rating,
+           r.order_url
   ORDER BY
     CASE WHEN COALESCE(vs.total_child_votes, dvs.direct_votes, 0) >= 5 THEN 0 ELSE 1 END,
     CASE
