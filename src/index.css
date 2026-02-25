@@ -1427,3 +1427,15 @@ input.outline-none:focus-visible {
   mask-image: linear-gradient(to right, transparent 0%, black 40%);
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 40%);
 }
+
+/* ===========================
+   Map Tile Styling
+   Warm coral land, blue ocean — Martha's Vineyard identity
+   =========================== */
+.wgh-map-tiles {
+  filter: saturate(1.3) brightness(1.03);
+}
+
+[data-theme="dark"] .wgh-map-tiles {
+  filter: sepia(0.2) saturate(0.8) hue-rotate(340deg) brightness(0.7) contrast(1.1);
+}

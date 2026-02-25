@@ -5,7 +5,7 @@ import { useEvents } from '../hooks/useEvents'
 import { useTrendingDishes, useRecentDishes } from '../hooks/useTrendingDishes'
 import { SpecialCard } from '../components/SpecialCard'
 import { EventCard } from '../components/EventCard'
-import { getCategoryEmoji } from '../constants/categories'
+import { CategoryIcon } from '../components/CategoryIcon'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { logger } from '../utils/logger'
 
@@ -124,10 +124,10 @@ export function Discover() {
                 />
               ) : (
                 <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
+                  className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: 'var(--color-surface-elevated)' }}
                 >
-                  {getCategoryEmoji(topDish.category)}
+                  <CategoryIcon category={topDish.category} size={36} />
                 </div>
               )}
               <div className="flex-1 min-w-0">
@@ -200,10 +200,10 @@ export function Discover() {
                   />
                 ) : (
                   <div
-                    className="w-full h-24 flex items-center justify-center text-3xl"
+                    className="w-full h-24 flex items-center justify-center"
                     style={{ background: 'var(--color-surface-elevated)' }}
                   >
-                    {getCategoryEmoji(dish.category)}
+                    <CategoryIcon category={dish.category} size={40} />
                   </div>
                 )}
                 <div className="p-2.5">
@@ -247,7 +247,7 @@ export function Discover() {
                   borderBottom: i < recent.length - 1 ? '1px solid var(--color-divider)' : 'none',
                 }}
               >
-                <span className="text-lg flex-shrink-0">{getCategoryEmoji(dish.category)}</span>
+                <span className="flex-shrink-0"><CategoryIcon category={dish.category} size={24} /></span>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
                     {dish.dish_name}

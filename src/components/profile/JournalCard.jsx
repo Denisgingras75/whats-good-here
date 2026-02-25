@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { getRatingColor, formatScore10 } from '../../utils/ranking'
-import { getCategoryEmoji } from '../../constants/categories'
+import { CategoryIcon } from '../CategoryIcon'
 
 /**
  * JournalCard — a single entry in the food journal feed.
@@ -15,7 +15,7 @@ export function JournalCard({ dish, variant = 'good-here', onTriedIt }) {
   var restaurantName = dish.restaurant_name
   var town = dish.restaurant_town
   var dishId = dish.dish_id || dish.id
-  var emoji = getCategoryEmoji(dish.category)
+  var categoryId = dish.category
   var photoUrl = dish.photo_url
 
   // Timestamp formatting
@@ -51,12 +51,12 @@ export function JournalCard({ dish, variant = 'good-here', onTriedIt }) {
         {/* Thumbnail */}
         <div
           className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center"
-          style={{ background: 'var(--color-category-strip)', fontSize: '20px' }}
+          style={{ background: 'var(--color-category-strip)' }}
         >
           {photoUrl ? (
             <img src={photoUrl} alt="" className="w-full h-full object-cover rounded-lg" />
           ) : (
-            emoji
+            <CategoryIcon category={categoryId} size={28} />
           )}
         </div>
 
@@ -120,12 +120,12 @@ export function JournalCard({ dish, variant = 'good-here', onTriedIt }) {
       {/* Thumbnail */}
       <div
         className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center"
-        style={{ background: 'var(--color-category-strip)', fontSize: '20px' }}
+        style={{ background: 'var(--color-category-strip)' }}
       >
         {photoUrl ? (
           <img src={photoUrl} alt="" className="w-full h-full object-cover rounded-lg" />
         ) : (
-          emoji
+          <CategoryIcon category={categoryId} size={28} />
         )}
       </div>
 

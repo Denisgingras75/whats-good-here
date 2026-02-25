@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { getCategoryEmoji } from '../../constants/categories'
+import { CategoryIcon } from '../CategoryIcon'
 import { calculateDistance } from '../../utils/distance'
 
 export function TopDishesNearYou({ dishes, userLocation, onSelectDish }) {
@@ -65,7 +65,7 @@ export function TopDishesNearYou({ dishes, userLocation, onSelectDish }) {
             }}
           >
             <div className="flex items-center justify-between mb-1">
-              <span style={{ fontSize: '24px' }}>{getCategoryEmoji(dish.category)}</span>
+              <CategoryIcon category={dish.category} size={28} />
               <span
                 className="font-bold"
                 style={{ fontSize: '15px', color: 'var(--color-rating)' }}
