@@ -652,12 +652,25 @@ export function Dish() {
                   >
                     {formatScore10(dish.avg_rating)}
                   </span>
-                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-tertiary)' }}>/ 10</span>
                 </div>
-                <div className="text-right space-y-0.5">
+                <div className="text-right space-y-1" style={{ minWidth: '120px' }}>
                   <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
                     {dish.percent_worth_it}% would reorder
                   </p>
+                  <div style={{
+                    height: '4px',
+                    borderRadius: '2px',
+                    background: 'var(--color-divider, #e5e7eb)',
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: dish.percent_worth_it + '%',
+                      borderRadius: '2px',
+                      background: getRatingColor(dish.avg_rating),
+                      transition: 'width 0.4s ease',
+                    }} />
+                  </div>
                   <p className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
                     {dish.total_votes} vote{dish.total_votes === 1 ? '' : 's'}
                   </p>
@@ -730,46 +743,32 @@ export function Dish() {
             </div>
           </div>
 
-          {/* ═══════════════════════════════════════════
-              RATE THIS DISH — the interactive core
-              Right after action buttons, above the fold.
-              ═══════════════════════════════════════════ */}
-          <div className="px-3 pt-3">
+          {/* Review Flow */}
+          <div className="p-4">
             <div
-              className="rounded-xl overflow-hidden"
-              style={{ background: 'var(--color-card)', border: '2px solid var(--color-primary)' }}
+              className="p-4 rounded-xl"
+              style={{
+                background: 'var(--color-surface-elevated)',
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+              }}
             >
-              <div className="px-4 py-2" style={{ background: 'var(--color-primary-muted)' }}>
-                <h3 className="text-xs font-bold" style={{ color: 'var(--color-primary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  Rate this dish
-                </h3>
-              </div>
-              <div className="p-3">
-                <ReviewFlow
-                  dishId={dish.dish_id}
-                  dishName={dish.dish_name}
-                  restaurantId={dish.restaurant_id}
-                  restaurantName={dish.restaurant_name}
-                  category={dish.category}
-                  price={dish.price}
-                  totalVotes={dish.total_votes}
-                  yesVotes={dish.yes_votes}
-                  percentWorthIt={dish.percent_worth_it}
-                  isRanked={isRanked}
-                  hasPhotos={allPhotos.length > 0}
-                  onVote={handleVote}
-                  onLoginRequired={handleLoginRequired}
-                  onPhotoUploaded={handlePhotoUploaded}
-                  onToggleFavorite={handleToggleSave}
-                  isFavorite={isFavorite?.(dishId)}
-                />
-              </div>
-            </div>
-            <div className="mt-3">
-              <PhotoUploadButton
+              <ReviewFlow
                 dishId={dish.dish_id}
-                onPhotoUploaded={handlePhotoUploaded}
+                dishName={dish.dish_name}
+                restaurantId={dish.restaurant_id}
+                restaurantName={dish.restaurant_name}
+                category={dish.category}
+                price={dish.price}
+                totalVotes={dish.total_votes}
+                yesVotes={dish.yes_votes}
+                percentWorthIt={dish.percent_worth_it}
+                isRanked={isRanked}
+                hasPhotos={allPhotos.length > 0}
+                onVote={handleVote}
                 onLoginRequired={handleLoginRequired}
+                onPhotoUploaded={handlePhotoUploaded}
+                onToggleFavorite={handleToggleSave}
+                isFavorite={isFavorite?.(dishId)}
               />
             </div>
           </div>

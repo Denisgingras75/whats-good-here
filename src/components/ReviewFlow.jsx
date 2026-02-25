@@ -356,20 +356,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
         </div>
       )}
 
-      {isRanked && !awaitingLogin && step === 1 ? (
-        <div>
-          <div
-            className="w-full overflow-hidden"
-            style={{ height: '6px', borderRadius: '3px', background: 'var(--color-surface)' }}
-          >
-            <div style={{ width: `${yesPercent}%`, height: '100%', borderRadius: '3px', background: 'var(--color-success)' }} />
-          </div>
-          <div className="flex items-baseline gap-1.5 mt-1.5">
-            <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-success)' }}>{yesPercent}%</span>
-            <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)' }}>would order again</span>
-          </div>
-        </div>
-      ) : !awaitingLogin && step === 1 ? (
+      {!isRanked && !awaitingLogin && step === 1 ? (
         <p className="text-xs text-center" style={{ color: 'var(--color-text-tertiary)' }}>
           {localTotalVotes === 0
             ? 'Be the first to rank this dish!'

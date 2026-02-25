@@ -26,7 +26,6 @@ export const restaurantsApi = {
           is_open,
           town,
           cuisine,
-          google_place_id,
           dishes (id, name, avg_rating, total_votes)
         `)
         .order('name')
@@ -201,7 +200,7 @@ export const restaurantsApi = {
           created_by: user.id,
           is_open: true,
         })
-        .select('id, name, address, lat, lng, town, google_place_id')
+        .select('id, name, address, lat, lng, town')
         .single()
 
       if (error) throw createClassifiedError(error)

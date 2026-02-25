@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import L from 'leaflet'
 import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { placesApi } from '../../api/placesApi'
 import { logger } from '../../utils/logger'
-import { getCategoryEmoji } from '../../constants/categories'
+import { getCategoryEmoji, getCategoryNeonImage } from '../../constants/categories'
 import { calculateDistance } from '../../utils/distance'
 
 const MILES_TO_METERS = 1609.34
@@ -279,35 +280,32 @@ function PlacePopupContent({ place, onAddPlace }) {
   )
 }
 
-// ─── Dish Mode: Build emoji divIcon ──────────────────────────────────────────
-function buildEmojiIcon(emoji, dishCount, hasHighRating) {
-  const badge = dishCount >= 2
-    ? `<span style="
-        position:absolute;top:-4px;right:-4px;
-        background:var(--color-accent-gold);color:var(--color-bg);
-        font-size:10px;font-weight:700;
-        min-width:16px;height:16px;line-height:16px;
-        border-radius:8px;text-align:center;
-        padding:0 3px;
-        box-shadow:0 1px 3px rgba(0,0,0,0.3);
-      ">${dishCount}</span>`
-    : ''
+// ─── Dish Mode: Build category icon divIcon ─────────────────────────────────
+function buildCategoryIcon(category, dishCount, hasHighRating) {
+  var neonImage = getCategoryNeonImage(category)
+  var emoji = getCategoryEmoji(category)
 
-  const glow = hasHighRating
+  var badge = ''
+
+  var glow = hasHighRating
     ? 'box-shadow:0 0 8px 3px rgba(217,167,101,0.5);'
     : ''
 
+  var innerContent = neonImage
+    ? '<img src="' + neonImage + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />'
+    : '<span style="font-size:26px;">' + emoji + '</span>'
+
   return L.divIcon({
     className: '',
-    html: `<div style="
-      position:relative;width:44px;height:44px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:26px;cursor:pointer;
-      border-radius:50%;
-      background:var(--color-surface-elevated);
-      border:2px solid var(--color-divider);
-      ${glow}
-    ">${emoji}${badge}</div>`,
+    html: '<div style="' +
+      'position:relative;width:44px;height:44px;' +
+      'display:flex;align-items:center;justify-content:center;' +
+      'cursor:pointer;' +
+      'border-radius:50%;' +
+      'background:var(--color-surface-elevated);' +
+      'border:2px solid var(--color-divider);' +
+      glow +
+    '">' + innerContent + badge + '</div>',
     iconSize: [44, 44],
     iconAnchor: [22, 22],
   })
@@ -330,6 +328,7 @@ export function RestaurantMap({
   compact = false,
   fullScreen = false,
 }) {
+  const nav = useNavigate()
   const defaultCenter = [41.43, -70.56]
   const center = userLocation?.lat && userLocation?.lng
     ? [userLocation.lat, userLocation.lng]
@@ -463,26 +462,20 @@ export function RestaurantMap({
     >
       <MapContainer
         center={center}
-        zoom={13}
+        zoom={fullScreen ? 15 : 13}
         style={{ height: '100%', width: '100%' }}
         attributionControl={true}
         zoomControl={true}
       >
-        {/* Tiles */}
-        {isDishMode ? (
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          />
-        ) : (
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-        )}
+        {/* Tiles — warm land, blue ocean */}
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          className="wgh-map-tiles"
+        />
 
-        {/* Fit bounds */}
-        <FitBounds points={fitBoundsPoints} />
+        {/* Fit bounds — skip on fullscreen map so it stays zoomed to user location */}
+        {!fullScreen && <FitBounds points={fitBoundsPoints} />}
 
         {/* Click handler — dismisses dish mini-card */}
         {isDishMode && (
@@ -535,9 +528,8 @@ export function RestaurantMap({
         {isDishMode && restaurantGroups.map(group => {
           const topDish = group.dishes[0]
           if (!topDish) return null
-          const emoji = getCategoryEmoji(topDish.category)
           const hasHighRating = group.dishes.some(d => (d.avg_rating || 0) >= 9)
-          const icon = buildEmojiIcon(emoji, group.dishes.length, hasHighRating)
+          const icon = buildCategoryIcon(topDish.category, group.dishes.length, hasHighRating)
 
           return (
             <Marker
@@ -546,12 +538,11 @@ export function RestaurantMap({
               icon={icon}
               eventHandlers={{
                 click: () => {
+                  // Always show mini-card overlay on pin tap
+                  setSelectedRestaurantId(group.restaurant_id)
+                  // In fullScreen (Home page): also signal to parent for sheet scroll
                   if (fullScreen && onSelectDish) {
-                    // In fullScreen (Home page): signal dish selection to parent
                     onSelectDish(topDish.dish_id)
-                  } else {
-                    // In non-fullScreen (Restaurants page): show mini-card
-                    setSelectedRestaurantId(group.restaurant_id)
                   }
                 },
               }}
@@ -705,6 +696,7 @@ export function RestaurantMap({
       {/* ─── Dish mode: Mini card overlay ─── */}
       {isDishMode && selectedGroup && (() => {
         const topDish = selectedGroup.dishes[0]
+        const neonImage = getCategoryNeonImage(topDish.category)
         const emoji = getCategoryEmoji(topDish.category)
         const moreDishes = selectedGroup.dishes.length - 1
 
@@ -742,7 +734,11 @@ export function RestaurantMap({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}>
-                    {emoji} {topDish.dish_name}
+                    {neonImage ? (
+                      <img src={neonImage} alt="" style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    ) : (
+                      <span>{emoji}</span>
+                    )} {topDish.dish_name}
                   </span>
                   <span style={{
                     fontSize: '14px',
@@ -776,85 +772,30 @@ export function RestaurantMap({
               </div>
             </div>
 
-            {/* Buttons */}
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              marginTop: '10px',
-            }}>
-              <a
-                href={`geo:${selectedGroup.restaurant_lat},${selectedGroup.restaurant_lng}`}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                  padding: '7px 0',
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  background: 'var(--color-surface)',
-                  color: 'var(--color-text-primary)',
-                  border: '1px solid var(--color-divider)',
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                </svg>
-                Directions
-              </a>
-              <button
-                onClick={() => {
-                  if (onSelectDish) onSelectDish(topDish.dish_id)
-                }}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                  padding: '7px 0',
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  background: 'var(--color-primary)',
-                  color: 'white',
-                  border: 'none',
-                }}
-              >
-                View Dish
-              </button>
-            </div>
+            {/* View Dish button */}
+            <button
+              onClick={() => {
+                nav('/dish/' + topDish.dish_id)
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '7px 0',
+                marginTop: '10px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: 'var(--color-primary)',
+                color: 'white',
+                border: 'none',
+              }}
+            >
+              View Dish
+            </button>
 
-            {/* More dishes link */}
-            {moreDishes > 0 && (
-              <button
-                onClick={() => {
-                  if (onSelectRestaurant) {
-                    onSelectRestaurant({ id: selectedGroup.restaurant_id, name: selectedGroup.restaurant_name })
-                  }
-                }}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'center',
-                  marginTop: '8px',
-                  padding: 0,
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--color-accent-gold)',
-                  cursor: 'pointer',
-                }}
-              >
-                +{moreDishes} more dish{moreDishes !== 1 ? 'es' : ''}
-              </button>
-            )}
           </div>
         )
       })()}

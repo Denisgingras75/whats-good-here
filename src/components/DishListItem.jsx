@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
-import { getCategoryEmoji } from '../constants/categories'
+import { CategoryIcon } from './CategoryIcon'
 import { RestaurantAvatar } from './RestaurantAvatar'
 import { ThumbsUpIcon } from './ThumbsUpIcon'
 import { ThumbsDownIcon } from './ThumbsDownIcon'
@@ -62,7 +62,7 @@ export const DishListItem = memo(function DishListItem({
   const price = dish.price
   const photoUrl = dish.photo_url
   const valuePercentile = dish.value_percentile
-  const emoji = getCategoryEmoji(dish.category)
+  const category = dish.category
 
   var handleClick = onClick || function () { navigate('/dish/' + dishId) }
 
@@ -111,9 +111,11 @@ export const DishListItem = memo(function DishListItem({
         </span>
       )}
 
-      {/* Category emoji */}
+      {/* Category icon */}
       {!showPhoto && (
-        <span className="flex-shrink-0" style={{ fontSize: '24px' }}>{emoji}</span>
+        <span className="flex-shrink-0">
+          <CategoryIcon category={category} size={28} />
+        </span>
       )}
 
       {/* Photo thumbnail */}
@@ -127,7 +129,7 @@ export const DishListItem = memo(function DishListItem({
       )}
       {showPhoto && !photoUrl && (
         <div
-          className="flex-shrink-0 rounded-lg overflow-hidden"
+          className="flex-shrink-0 rounded-lg overflow-hidden relative"
           style={{ width: '48px', height: '48px' }}
         >
           <RestaurantAvatar name={restaurantName} town={restaurantTown} fill />
@@ -221,7 +223,7 @@ export const DishListItem = memo(function DishListItem({
             {photoUrl ? (
               <img src={photoUrl} alt={dishName} loading="lazy" className="w-full h-full object-cover" />
             ) : (
-              <RestaurantAvatar name={restaurantName} town={restaurantTown} fill />
+              <RestaurantAvatar name={restaurantName} town={restaurantTown} fill className="absolute inset-0" />
             )}
           </div>
 
