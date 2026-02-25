@@ -6,6 +6,7 @@ import { LocationProvider } from './context/LocationContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Layout } from './components/Layout'
+import { BottomNav } from './components/BottomNav'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { WelcomeModal } from './components/Auth/WelcomeModal'
 import { RouteProgress } from './components/RouteProgress'
@@ -63,6 +64,7 @@ const ResetPassword = lazyWithRetry(() => import('./pages/ResetPassword'), 'Rese
 const AcceptInvite = lazyWithRetry(() => import('./pages/AcceptInvite'), 'AcceptInvite')
 const ManageRestaurant = lazyWithRetry(() => import('./pages/ManageRestaurant'), 'ManageRestaurant')
 const Hub = lazyWithRetry(() => import('./pages/Hub'), 'Hub')
+const MapPage = lazyWithRetry(() => import('./pages/Map'), 'Map')
 const HowReviewsWork = lazyWithRetry(() => import('./pages/HowReviewsWork'), 'HowReviewsWork')
 const ForRestaurants = lazyWithRetry(() => import('./pages/ForRestaurants'), 'ForRestaurants')
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound')
@@ -72,6 +74,7 @@ export const prefetchRoutes = {
   home: () => import('./pages/Home'),
   browse: () => import('./pages/Browse'),
   dish: () => import('./pages/Dish'),
+  map: () => import('./pages/Map'),
   restaurants: () => import('./pages/Restaurants'),
   restaurantDetail: () => import('./pages/RestaurantDetail'),
   discover: () => import('./pages/Discover'),
@@ -130,6 +133,7 @@ function App() {
               <Route path="/dish/:dishId" element={<Layout><Dish /></Layout>} />
               <Route path="/restaurants" element={<Layout><Restaurants /></Layout>} />
               <Route path="/restaurants/:restaurantId" element={<Layout><RestaurantDetail /></Layout>} />
+              <Route path="/map" element={<><MapPage /><BottomNav /></>} />
               <Route path="/hub" element={<Layout><Hub /></Layout>} />
               <Route path="/discover" element={<Layout><Discover /></Layout>} />
               <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
