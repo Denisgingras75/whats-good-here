@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { BROWSE_CATEGORIES } from '../constants/categories'
-import { CategoryIcon } from './CategoryIcon'
+import { CategoryIcon } from './home/CategoryIcons'
 
 /**
  * CategoryChips — horizontal scrollable category filter.
@@ -71,7 +71,7 @@ export function CategoryChips({
                 fontWeight: isActive ? 700 : 500,
               }}
             >
-              <CategoryIcon category={cat.id} size={46} />
+              <CategoryIcon categoryId={cat.id} size={46} />
               <span className="mt-1" style={{ lineHeight: 1.2 }}>{cat.label}</span>
             </button>
           )

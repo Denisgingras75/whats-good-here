@@ -737,7 +737,7 @@ export function UserProfile() {
           </p>
           <div className="flex gap-3 mt-4 justify-center">
             <Link
-              to="/browse"
+              to="/map"
               className="px-5 py-2.5 rounded-xl font-semibold"
               style={{
                 background: 'var(--color-primary)',
@@ -745,7 +745,7 @@ export function UserProfile() {
                 fontSize: '14px',
               }}
             >
-              Browse Dishes
+              Explore the Map
             </Link>
             <Link
               to="/login"

@@ -675,4 +675,57 @@ Simple bold food icon of a pork chop with bone on one side. Thick black outlines
 
 ---
 
-*Last updated: Feb 17, 2026*
+---
+
+## For Denis: Feb 25 Session Changes (Dan's side)
+
+Hey Denis — here's what changed today on Dan's branch. Sending this so your Claude can review and make sure nothing conflicts with your 67-commit merge.
+
+### What changed
+
+**1. Map page crash fix (CRITICAL)**
+- `lazyWithRetry(() => import('./pages/Map'), 'Map')` requires a **named export** (`export function Map()`), not a default export. We accidentally changed it and the whole page crashed with a cryptic React error. Every page file must match: `lazyWithRetry(..., 'Name')` expects `export function Name()`.
+
+**2. Icons swapped from neon to poster**
+- All `CategoryIcon` imports now point to `src/components/home/CategoryIcons.jsx` (the poster PNGs — thick black outlines, red-orange fill) instead of the neon `CategoryIcon.jsx`.
+- The poster system has ~50 dish-name-specific icons (fish sandwich, eggs benedict, calamari, etc.) via the `dishNameIcons` array. Dish name matching runs before category fallback.
+- Added: pizza, salmon, tuna, swordfish, roasted/rotisserie chicken overrides.
+- Map pins also use poster icons now via `getPosterIconSrc()`.
+
+**3. Map page list uses same ranking as Home**
+- Was using `useMapDishes` (raw `avg_rating` sort). Now uses `useDishes` (the `get_ranked_dishes` RPC) for the bottom sheet list. Same algorithm, same order on both pages.
+
+**4. Map list → pin interaction (new)**
+- Tapping a dish in the map's bottom sheet list now: collapses the sheet, flies the map to that restaurant's pin, enlarges the pin (44px → 60px) with a glowing coral border, shows the mini-card. Previously it just navigated to the dish page — no way to find the restaurant on the map.
+
+**5. Bottom nav reordered**
+- New order: Hub, Map, Home, Restaurants, You (Home in center)
+
+**6. Homepage cleanup**
+- Removed `TopDishesNearYou` horizontal row (redundant with Map page)
+- Town picker stays, radius picker stays on Map only
+
+**7. Dish icon sizes**
+- Home page dish list icons bumped to 50px
+- Map page category chip icons at 46px
+
+### Dan's reflection
+
+> "I like this flow now. More interactive. It's still janky but it's getting there. Simplicity is work. Learning that now."
+
+The map interaction pattern (tap list item → fly to pin → pin lights up) is the right direction. It makes the connection between the list and the physical place. Still rough around the edges — the pin coordinates are approximate (not geocoded), the transition could be smoother, and clustered restaurants are hard to distinguish. But the bones are there.
+
+### Files touched
+- `src/pages/Map.jsx` — list tap handler, focusDishId state, useDishes for ranking
+- `src/pages/Home.jsx` — removed TopDishesNearYou
+- `src/components/BottomNav.jsx` — reordered tabs
+- `src/components/CategoryChips.jsx` — poster icon import
+- `src/components/DishListItem.jsx` — poster icon import, size 50, dishName prop
+- `src/components/CategoryPicker.jsx` — poster icon import
+- `src/components/restaurants/TopDishesNearYou.jsx` — poster icon import
+- `src/components/restaurants/RestaurantMap.jsx` — poster icons, FlyToLocation, selected pin glow
+- `src/components/home/CategoryIcons.jsx` — added getPosterIconSrc export, new dish overrides
+- `src/components/profile/JournalCard.jsx` — poster icon import
+- `src/pages/Discover.jsx` — poster icon import
+
+*Last updated: Feb 25, 2026*

@@ -5,7 +5,7 @@ import { useEvents } from '../hooks/useEvents'
 import { useTrendingDishes, useRecentDishes } from '../hooks/useTrendingDishes'
 import { SpecialCard } from '../components/SpecialCard'
 import { EventCard } from '../components/EventCard'
-import { CategoryIcon } from '../components/CategoryIcon'
+import { CategoryIcon } from '../components/home/CategoryIcons'
 import { restaurantsApi } from '../api/restaurantsApi'
 import { logger } from '../utils/logger'
 
@@ -127,7 +127,7 @@ export function Discover() {
                   className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: 'var(--color-surface-elevated)' }}
                 >
-                  <CategoryIcon category={topDish.category} size={36} />
+                  <CategoryIcon categoryId={topDish.category} dishName={topDish.dish_name} size={36} />
                 </div>
               )}
               <div className="flex-1 min-w-0">
@@ -203,7 +203,7 @@ export function Discover() {
                     className="w-full h-24 flex items-center justify-center"
                     style={{ background: 'var(--color-surface-elevated)' }}
                   >
-                    <CategoryIcon category={dish.category} size={40} />
+                    <CategoryIcon categoryId={dish.category} dishName={dish.dish_name} size={40} />
                   </div>
                 )}
                 <div className="p-2.5">
@@ -247,7 +247,7 @@ export function Discover() {
                   borderBottom: i < recent.length - 1 ? '1px solid var(--color-divider)' : 'none',
                 }}
               >
-                <span className="flex-shrink-0"><CategoryIcon category={dish.category} size={24} /></span>
+                <span className="flex-shrink-0"><CategoryIcon categoryId={dish.category} dishName={dish.dish_name} size={24} /></span>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
                     {dish.dish_name}

@@ -33,7 +33,7 @@ export function NotFound() {
             Go to Home
           </Link>
           <Link
-            to="/browse"
+            to="/map"
             className="block w-full py-3 px-6 rounded-xl font-medium text-center border-2 transition-all"
             style={{
               background: 'var(--color-surface-elevated)',
@@ -41,7 +41,7 @@ export function NotFound() {
               color: 'var(--color-text-primary)',
             }}
           >
-            Browse Dishes
+            Explore the Map
           </Link>
         </div>
       </div>

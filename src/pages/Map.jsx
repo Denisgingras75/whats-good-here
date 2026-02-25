@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLocationContext } from '../context/LocationContext'
+import { useDishes } from '../hooks/useDishes'
 import { useMapDishes } from '../hooks/useMapDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { BROWSE_CATEGORIES } from '../constants/categories'
@@ -30,6 +31,7 @@ export function Map() {
   var [searchLimit, setSearchLimit] = useState(10)
   var [_sheetDetent, setSheetDetent] = useState('half')
   var [highlightedDishId, setHighlightedDishId] = useState(null)
+  var [focusDishId, setFocusDishId] = useState(null)
 
   var sheetRef = useRef(null)
   var highlightTimerRef = useRef(null)
@@ -45,13 +47,36 @@ export function Map() {
   var searchResults = searchData.results
   var searchLoading = searchData.loading
 
-  // Map dishes — filtered by category
+  // Ranked dishes for the list (same algorithm as Home page)
+  var rankedData = useDishes(location, radius, selectedCategory, null, town)
+  var rankedDishes = rankedData.dishes
+
+  // Map dishes with lat/lng for pins
   var mapData = useMapDishes({ location: location, radius: radius, town: town, category: selectedCategory })
   var mapDishes = mapData.dishes
 
   var selectedCategoryLabel = selectedCategory
     ? BROWSE_CATEGORIES.find(function (c) { return c.id === selectedCategory })
     : null
+
+  // ─── List item tap: collapse sheet + fly to pin ─────────
+  var handleListItemTap = useCallback(function (dishId) {
+    // Collapse the sheet to peek so the map is visible
+    if (sheetRef.current) {
+      sheetRef.current.setDetent('peek')
+    }
+    // Tell the map to fly to this dish's restaurant
+    setFocusDishId(null) // reset first so same dish can be re-tapped
+    setTimeout(function () { setFocusDishId(dishId) }, 0)
+    // Highlight the dish in the list
+    setHighlightedDishId(dishId)
+    if (highlightTimerRef.current) {
+      clearTimeout(highlightTimerRef.current)
+    }
+    highlightTimerRef.current = setTimeout(function () {
+      setHighlightedDishId(null)
+    }, 2000)
+  }, [])
 
   // ─── Map pin tap handler: scroll to dish + highlight ─────────
   var handlePinTap = useCallback(function (dishId) {
@@ -89,12 +114,8 @@ export function Map() {
     }
   }, [])
 
-  // Sorted dishes for the list
-  var sortedDishes = mapDishes
-    ? mapDishes.slice().sort(function (a, b) {
-        return (b.avg_rating || 0) - (a.avg_rating || 0)
-      }).slice(0, 20)
-    : []
+  // Use ranked dishes (same ranking as Home page), limit to 20
+  var sortedDishes = rankedDishes ? rankedDishes.slice(0, 20) : []
 
   // Show search results on map when searching, otherwise show category/default pins
   var displayedOnMap = (searchQuery && searchResults && searchResults.length > 0)
@@ -120,6 +141,7 @@ export function Map() {
               radiusMi={radius}
               permissionGranted={permissionState === 'granted'}
               fullScreen
+              focusDishId={focusDishId}
             />
           </Suspense>
         </ErrorBoundary>
@@ -191,7 +213,7 @@ export function Map() {
                       rank={i + 1}
                       highlighted={highlightedDishId === dish.dish_id}
                       showDistance
-                      onClick={function () { navigate('/dish/' + dish.dish_id) }}
+                      onClick={function () { handleListItemTap(dish.dish_id) }}
                     />
                   )
                 })}
@@ -212,7 +234,7 @@ export function Map() {
                     rank={i + 1}
                     highlighted={highlightedDishId === dish.dish_id}
                     showDistance
-                    onClick={function () { navigate('/dish/' + dish.dish_id) }}
+                    onClick={function () { handleListItemTap(dish.dish_id) }}
                   />
                 )
               })}

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { getRatingColor, formatScore10 } from '../../utils/ranking'
-import { CategoryIcon } from '../CategoryIcon'
+import { CategoryIcon } from '../home/CategoryIcons'
 
 /**
  * JournalCard — a single entry in the food journal feed.
@@ -56,7 +56,7 @@ export function JournalCard({ dish, variant = 'good-here', onTriedIt }) {
           {photoUrl ? (
             <img src={photoUrl} alt="" className="w-full h-full object-cover rounded-lg" />
           ) : (
-            <CategoryIcon category={categoryId} size={28} />
+            <CategoryIcon categoryId={categoryId} dishName={dishName} size={28} />
           )}
         </div>
 
@@ -125,7 +125,7 @@ export function JournalCard({ dish, variant = 'good-here', onTriedIt }) {
         {photoUrl ? (
           <img src={photoUrl} alt="" className="w-full h-full object-cover rounded-lg" />
         ) : (
-          <CategoryIcon category={categoryId} size={28} />
+          <CategoryIcon categoryId={categoryId} dishName={dishName} size={28} />
         )}
       </div>
 

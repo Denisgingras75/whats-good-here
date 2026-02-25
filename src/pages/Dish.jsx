@@ -444,10 +444,6 @@ export function Dish() {
   const distanceLabel = distanceMiles != null
     ? distanceMiles < 0.2 ? 'Right here' : distanceMiles < 1 ? distanceMiles.toFixed(1) + ' mi walk' : distanceMiles.toFixed(1) + ' mi'
     : null
-  const mapsUrl = dish.restaurant_address
-    ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dish.restaurant_address)
-    : null
-
   return (
     <div className="min-h-screen pb-20" style={{ background: 'var(--color-bg)' }}>
       {/* Header */}
@@ -692,30 +688,6 @@ export function Dish() {
               ═══════════════════════════════════════════ */}
           <div className="px-3 pt-3">
             <div className="flex gap-2">
-              {/* Directions button */}
-              {mapsUrl && (
-                <a
-                  href={mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => capture('directions_clicked', {
-                    dish_id: dish.dish_id,
-                    restaurant_id: dish.restaurant_id,
-                  })}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95"
-                  style={{
-                    background: 'var(--color-card)',
-                    color: 'var(--color-text-primary)',
-                    border: '1.5px solid var(--color-divider)',
-                  }}
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                  </svg>
-                  Directions
-                </a>
-              )}
               {/* Order online button */}
               {dish.website_url && (
                 <a

@@ -41,11 +41,7 @@ export function useMapDishes({ location, radius, town, category } = {}) {
     // Apply distance filter if we have radius
     var filtered = withDistance
     if (radius && withDistance[0] && withDistance[0].distance_miles != null) {
-      var nearby = withDistance.filter(function(d) { return d.distance_miles <= radius })
-      if (nearby.length > 0) {
-        filtered = nearby
-      }
-      // If nothing nearby, show all (fallback so page always has content)
+      filtered = withDistance.filter(function(d) { return d.distance_miles <= radius })
     }
 
     // Sort by rating desc

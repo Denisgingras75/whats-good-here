@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
-import { CategoryIcon } from './CategoryIcon'
+import { CategoryIcon } from './home/CategoryIcons'
 import { RestaurantAvatar } from './RestaurantAvatar'
 import { ThumbsUpIcon } from './ThumbsUpIcon'
 import { ThumbsDownIcon } from './ThumbsDownIcon'
@@ -114,7 +114,7 @@ export const DishListItem = memo(function DishListItem({
       {/* Category icon */}
       {!showPhoto && (
         <span className="flex-shrink-0">
-          <CategoryIcon category={category} size={28} />
+          <CategoryIcon categoryId={category} dishName={dishName} size={50} />
         </span>
       )}
 

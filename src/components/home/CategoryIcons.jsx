@@ -34,13 +34,20 @@ const posterIcons = {
 // More specific matches first (e.g. "fried chicken" before "chicken" category)
 // `solo` = only match when this word is the main dish, not a side (e.g. "Truffle Fries" yes, "Tenders and Fries" no)
 const dishNameIcons = [
+  { match: 'pizza', src: '/categories/poster/pizza.png' },
   { match: 'benedict', src: '/categories/poster/eggs-benedict.png' },
   { match: 'cauliflower', src: '/categories/poster/veggies.png' },
   { match: 'carrot', src: '/categories/poster/veggies.png' },
   { match: 'wing', src: '/categories/poster/wings.png' },
   { match: 'breakfast sandwich', src: '/categories/poster/breakfast-sandwich.png' },
   { match: 'breakfast sammy', src: '/categories/poster/breakfast-sandwich.png' },
+  { match: 'roasted chicken', src: '/categories/poster/chicken.png' },
+  { match: 'rotisserie chicken', src: '/categories/poster/chicken.png' },
+  { match: 'half chicken', src: '/categories/poster/chicken.png' },
   { match: 'fried chicken', src: '/categories/poster/fried-chicken.png' },
+  { match: 'salmon', src: '/categories/poster/seafood.png' },
+  { match: 'tuna', src: '/categories/poster/seafood.png' },
+  { match: 'swordfish', src: '/categories/poster/seafood.png' },
   { match: 'shrimp', src: '/categories/poster/shrimp.png' },
   { match: 'calamari', src: '/categories/poster/calamari.png' },
   { match: 'fish sandwich', src: '/categories/poster/fish-sandwich.png' },
@@ -290,4 +297,23 @@ export function CategoryIcon({ categoryId, dishName, size = 32, color = 'current
  */
 export function hasCategoryIcon(categoryId) {
   return !!icons[categoryId?.toLowerCase()]
+}
+
+/**
+ * Get poster PNG path for a category + optional dish name.
+ * Used by Leaflet map pins (raw HTML, not React).
+ */
+export function getPosterIconSrc(categoryId, dishName) {
+  var key = categoryId ? categoryId.toLowerCase() : ''
+  var nameLower = dishName ? dishName.toLowerCase() : ''
+  var nameMatch = dishName && dishNameIcons.find(function (d) {
+    if (!nameLower.includes(d.match)) return false
+    if (d.solo) {
+      var idx = nameLower.indexOf(d.match)
+      var before = nameLower.slice(0, idx).trim()
+      if (before.endsWith('and') || before.endsWith('with') || before.endsWith('&') || before.endsWith('w/')) return false
+    }
+    return true
+  })
+  return (nameMatch && nameMatch.src) || posterIcons[key] || null
 }

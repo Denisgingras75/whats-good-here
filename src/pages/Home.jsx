@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLocationContext } from '../context/LocationContext'
 import { useDishes } from '../hooks/useDishes'
-import { useMapDishes } from '../hooks/useMapDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { BROWSE_CATEGORIES } from '../constants/categories'
@@ -12,7 +11,6 @@ import { DishListItem } from '../components/DishListItem'
 import { CategoryChips } from '../components/CategoryChips'
 import { SectionHeader } from '../components/SectionHeader'
 import { EmptyState } from '../components/EmptyState'
-import { TopDishesNearYou } from '../components/restaurants/TopDishesNearYou'
 
 export function Home() {
   var navigate = useNavigate()
@@ -39,10 +37,6 @@ export function Home() {
   var dishes = dishData.dishes
   var loading = dishData.loading
   var error = dishData.error
-
-  // Map dishes for horizontal row
-  var mapData = useMapDishes({ location: location, radius: radius, town: town, category: null })
-  var mapDishes = mapData.dishes
 
   // Rank-sort function
   var rankSort = function (a, b) {
@@ -99,17 +93,6 @@ export function Home() {
           />
         }
       />
-
-      {/* Top dishes horizontal row */}
-      {!searchQuery && !selectedCategory && mapDishes && mapDishes.length > 0 && (
-        <div className="px-4 pt-3">
-          <TopDishesNearYou
-            dishes={mapDishes}
-            userLocation={location}
-            onSelectDish={function (dishId) { navigate('/dish/' + dishId) }}
-          />
-        </div>
-      )}
 
       {/* Section header */}
       <div className="px-4 pt-3 pb-2">

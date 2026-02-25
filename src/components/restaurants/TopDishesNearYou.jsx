@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { CategoryIcon } from '../CategoryIcon'
+import { CategoryIcon } from '../home/CategoryIcons'
 import { calculateDistance } from '../../utils/distance'
 
 export function TopDishesNearYou({ dishes, userLocation, onSelectDish }) {
@@ -65,7 +65,7 @@ export function TopDishesNearYou({ dishes, userLocation, onSelectDish }) {
             }}
           >
             <div className="flex items-center justify-between mb-1">
-              <CategoryIcon category={dish.category} size={28} />
+              <CategoryIcon categoryId={dish.category} dishName={dish.dish_name} size={28} />
               <span
                 className="font-bold"
                 style={{ fontSize: '15px', color: 'var(--color-rating)' }}

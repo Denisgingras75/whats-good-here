@@ -5,7 +5,8 @@ import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap, useMapEve
 import 'leaflet/dist/leaflet.css'
 import { placesApi } from '../../api/placesApi'
 import { logger } from '../../utils/logger'
-import { getCategoryEmoji, getCategoryNeonImage } from '../../constants/categories'
+import { getCategoryEmoji } from '../../constants/categories'
+import { getPosterIconSrc } from '../home/CategoryIcons'
 import { calculateDistance } from '../../utils/distance'
 
 const MILES_TO_METERS = 1609.34
@@ -23,6 +24,22 @@ function FitBounds({ points }) {
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
     fittedRef.current = true
   }, [points, map])
+
+  return null
+}
+
+// ─── Shared: Fly to a location when prop changes ─────────────────────────────
+function FlyToLocation({ lat, lng }) {
+  var map = useMap()
+  var prevRef = useRef(null)
+
+  useEffect(function () {
+    if (!lat || !lng) return
+    var key = lat + ',' + lng
+    if (key === prevRef.current) return
+    prevRef.current = key
+    map.flyTo([lat, lng], 16, { duration: 0.8 })
+  }, [lat, lng, map])
 
   return null
 }
@@ -281,32 +298,37 @@ function PlacePopupContent({ place, onAddPlace }) {
 }
 
 // ─── Dish Mode: Build category icon divIcon ─────────────────────────────────
-function buildCategoryIcon(category, dishCount, hasHighRating) {
-  var neonImage = getCategoryNeonImage(category)
+function buildCategoryIcon(category, dishCount, hasHighRating, dishName, isSelected) {
+  var posterImage = getPosterIconSrc(category, dishName)
   var emoji = getCategoryEmoji(category)
 
   var badge = ''
 
-  var glow = hasHighRating
-    ? 'box-shadow:0 0 8px 3px rgba(217,167,101,0.5);'
-    : ''
+  var size = isSelected ? 60 : 44
+  var imgSize = isSelected ? 42 : 32
+  var glow = isSelected
+    ? 'box-shadow:0 0 14px 6px rgba(228,90,53,0.6);border:3px solid var(--color-primary);z-index:9999 !important;'
+    : hasHighRating
+      ? 'box-shadow:0 0 8px 3px rgba(217,167,101,0.5);'
+      : ''
 
-  var innerContent = neonImage
-    ? '<img src="' + neonImage + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />'
-    : '<span style="font-size:26px;">' + emoji + '</span>'
+  var innerContent = posterImage
+    ? '<img src="' + posterImage + '" alt="" style="width:' + imgSize + 'px;height:' + imgSize + 'px;object-fit:contain;" />'
+    : '<span style="font-size:' + (isSelected ? 34 : 26) + 'px;">' + emoji + '</span>'
 
   return L.divIcon({
     className: '',
     html: '<div style="' +
-      'position:relative;width:44px;height:44px;' +
+      'position:relative;width:' + size + 'px;height:' + size + 'px;' +
       'display:flex;align-items:center;justify-content:center;' +
       'cursor:pointer;' +
       'border-radius:50%;' +
       'background:var(--color-surface-elevated);' +
       'border:2px solid var(--color-divider);' +
+      'transition:all 0.2s ease;' +
       glow +
     '">' + innerContent + badge + '</div>',
-    iconSize: [44, 44],
+    iconSize: [size, size],
     iconAnchor: [22, 22],
   })
 }
@@ -327,6 +349,7 @@ export function RestaurantMap({
   permissionGranted,
   compact = false,
   fullScreen = false,
+  focusDishId = null,
 }) {
   const nav = useNavigate()
   const defaultCenter = [41.43, -70.56]
@@ -338,7 +361,18 @@ export function RestaurantMap({
   const [discoveredPlaces, setDiscoveredPlaces] = useState([])
 
   // ─── Dish mode state ───
-  const [selectedRestaurantId, setSelectedRestaurantId] = useState(null)
+  const [selectedRestaurantId, _setSelectedRestaurantId] = useState(function () {
+    try {
+      return sessionStorage.getItem('wgh_map_selected_restaurant') || null
+    } catch (e) { return null }
+  })
+  var setSelectedRestaurantId = function (id) {
+    _setSelectedRestaurantId(id)
+    try {
+      if (id) { sessionStorage.setItem('wgh_map_selected_restaurant', id) }
+      else { sessionStorage.removeItem('wgh_map_selected_restaurant') }
+    } catch (e) { /* noop */ }
+  }
   const [dismissedProximity, setDismissedProximity] = useState({})
 
   // ─── Dish mode: group dishes by restaurant ───
@@ -382,6 +416,23 @@ export function RestaurantMap({
     }
     return null
   }, [selectedRestaurantId, restaurantGroups])
+
+  // ─── Dish mode: focus on a dish from the list ───
+  var [flyTarget, setFlyTarget] = useState(null)
+
+  useEffect(function () {
+    if (!focusDishId || restaurantGroups.length === 0) return
+    for (var i = 0; i < restaurantGroups.length; i++) {
+      var g = restaurantGroups[i]
+      for (var j = 0; j < g.dishes.length; j++) {
+        if (g.dishes[j].dish_id === focusDishId) {
+          setSelectedRestaurantId(g.restaurant_id)
+          setFlyTarget({ lat: g.restaurant_lat, lng: g.restaurant_lng })
+          return
+        }
+      }
+    }
+  }, [focusDishId, restaurantGroups])
 
   // ─── Dish mode: proximity detection ───
   const nearbyRestaurant = useMemo(() => {
@@ -481,6 +532,7 @@ export function RestaurantMap({
         {isDishMode && (
           <MapClickHandler onMapClick={() => setSelectedRestaurantId(null)} />
         )}
+        {isDishMode && flyTarget && <FlyToLocation lat={flyTarget.lat} lng={flyTarget.lng} />}
 
         {/* ─── Restaurant mode internals (disabled in fullScreen) ─── */}
         {!isDishMode && !fullScreen && <MapSearchBar />}
@@ -529,13 +581,15 @@ export function RestaurantMap({
           const topDish = group.dishes[0]
           if (!topDish) return null
           const hasHighRating = group.dishes.some(d => (d.avg_rating || 0) >= 9)
-          const icon = buildCategoryIcon(topDish.category, group.dishes.length, hasHighRating)
+          const isSelected = selectedRestaurantId === group.restaurant_id
+          const icon = buildCategoryIcon(topDish.category, group.dishes.length, hasHighRating, topDish.dish_name, isSelected)
 
           return (
             <Marker
               key={group.restaurant_id}
               position={[group.restaurant_lat, group.restaurant_lng]}
               icon={icon}
+              zIndexOffset={isSelected ? 1000 : 0}
               eventHandlers={{
                 click: () => {
                   // Always show mini-card overlay on pin tap
@@ -696,7 +750,7 @@ export function RestaurantMap({
       {/* ─── Dish mode: Mini card overlay ─── */}
       {isDishMode && selectedGroup && (() => {
         const topDish = selectedGroup.dishes[0]
-        const neonImage = getCategoryNeonImage(topDish.category)
+        const posterImage = getPosterIconSrc(topDish.category, topDish.dish_name)
         const emoji = getCategoryEmoji(topDish.category)
         const moreDishes = selectedGroup.dishes.length - 1
 
@@ -734,8 +788,8 @@ export function RestaurantMap({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}>
-                    {neonImage ? (
-                      <img src={neonImage} alt="" style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    {posterImage ? (
+                      <img src={posterImage} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain', flexShrink: 0 }} />
                     ) : (
                       <span>{emoji}</span>
                     )} {topDish.dish_name}
@@ -750,13 +804,18 @@ export function RestaurantMap({
                   </span>
                 </div>
 
-                {/* Restaurant name */}
-                <div style={{
-                  fontSize: '12px',
-                  color: 'var(--color-text-secondary)',
-                  marginTop: '2px',
-                }}>
-                  {selectedGroup.restaurant_name}
+                {/* Restaurant name — clickable */}
+                <div
+                  onClick={function () { nav('/restaurants/' + selectedGroup.restaurant_id) }}
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'var(--color-accent-gold)',
+                    marginTop: '3px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {selectedGroup.restaurant_name} →
                 </div>
 
                 {/* Meta line */}
