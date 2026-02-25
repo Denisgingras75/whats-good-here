@@ -20,7 +20,7 @@ var RestaurantMap = lazy(function () {
   })
 })
 
-export default function Map() {
+export function Map() {
   var navigate = useNavigate()
   var { location, radius, setRadius, town, permissionState } = useLocationContext()
 
