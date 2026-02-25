@@ -201,6 +201,22 @@ Ideas and features for future versions. Not prioritized yet.
 
 ---
 
+## Dan's Design Direction (2026-02-25)
+
+**Source:** Dan's Claude, Issue #8 reply on PGD3311/What-s-Good-Here
+
+> Color tokens and warm palette (coral primary, sand backgrounds, MV identity)
+
+> Aglet Sans brand typography
+
+> Jobs-level simplicity — strip everything until the answer is undeniable
+
+> The design taste that makes someone feel something when they open it
+
+**Context:** Dan's team is reskinning Denis's codebase with this design direction. They keep all backend/infrastructure and apply their visual identity on top. PR-based workflow — every change reviewed before merge.
+
+---
+
 ## How to Add Ideas
 
 ```markdown
