@@ -37,7 +37,7 @@ function parseQuickSpecial(text) {
   return result
 }
 
-export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDeactivate }) {
+export function SpecialsManager({ restaurantId, specials, viewCounts = {}, onAdd, onUpdate, onDeactivate }) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [dealName, setDealName] = useState('')
@@ -267,6 +267,11 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
                     {special.expires_at && (
                       <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                         Expires {new Date(special.expires_at).toLocaleDateString()}
+                      </span>
+                    )}
+                    {viewCounts[special.id] > 0 && (
+                      <span className="text-xs font-medium" style={{ color: 'var(--color-accent-gold)' }}>
+                        {viewCounts[special.id]} {viewCounts[special.id] === 1 ? 'view' : 'views'} this week
                       </span>
                     )}
                   </div>

@@ -524,4 +524,28 @@ export const restaurantManagerApi = {
       throw createClassifiedError(error)
     }
   },
+
+  /**
+   * Get view counts for all specials at a restaurant (last 7 days)
+   * @param {string} restaurantId
+   * @returns {Promise<Object>} Map of { specialId: viewCount }
+   */
+  async getSpecialViewCounts(restaurantId) {
+    try {
+      const { data, error } = await supabase.rpc('get_special_view_counts', {
+        p_restaurant_id: restaurantId
+      })
+      if (error) throw createClassifiedError(error)
+      const counts = {}
+      for (const row of (data || [])) {
+        counts[row.special_id] = row.view_count
+      }
+      return counts
+    } catch (error) {
+      logger.error('Error fetching view counts:', error)
+      throw error.type ? error : createClassifiedError(error)
+    }
+  },
 }
+
+export default restaurantManagerApi

@@ -1,18 +1,44 @@
-import { memo } from 'react'
+import { memo, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RestaurantAvatar } from './RestaurantAvatar'
+import { specialsApi } from '../api/specialsApi'
+
+// Deduplicate views per session — one view per special per page load
+const viewedSpecials = new Set()
 
 /**
  * Card displaying a restaurant special/deal
  */
 export const SpecialCard = memo(function SpecialCard({ special, promoted }) {
   const navigate = useNavigate()
+  const cardRef = useRef(null)
   const {
+    id,
     deal_name,
     description,
     price,
     restaurants: restaurant
   } = special
+
+  // Track view when card enters viewport
+  useEffect(() => {
+    if (!id || viewedSpecials.has(id)) return
+    const el = cardRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          viewedSpecials.add(id)
+          specialsApi.recordView(id)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.5 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [id])
 
   const handleClick = () => {
     if (restaurant?.id) {
@@ -22,6 +48,7 @@ export const SpecialCard = memo(function SpecialCard({ special, promoted }) {
 
   return (
     <button
+      ref={cardRef}
       onClick={handleClick}
       className="w-full rounded-xl p-4 text-left card-press"
       style={{

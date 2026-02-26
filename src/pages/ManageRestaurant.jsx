@@ -15,6 +15,7 @@ export function ManageRestaurant() {
   const [specials, setSpecials] = useState([])
   const [dishes, setDishes] = useState([])
   const [events, setEvents] = useState([])
+  const [viewCounts, setViewCounts] = useState({})
   const [dataLoading, setDataLoading] = useState(true)
   const [message, setMessage] = useState(null)
 
@@ -27,15 +28,17 @@ export function ManageRestaurant() {
     async function fetchData() {
       setDataLoading(true)
       try {
-        const [specialsData, dishesData, eventsData] = await Promise.all([
+        const [specialsData, dishesData, eventsData, viewCountsData] = await Promise.all([
           restaurantManagerApi.getRestaurantSpecials(restaurant.id),
           restaurantManagerApi.getRestaurantDishes(restaurant.id),
           restaurantManagerApi.getRestaurantEvents(restaurant.id),
+          restaurantManagerApi.getSpecialViewCounts(restaurant.id).catch(() => ({})),
         ])
         if (cancelled) return
         setSpecials(specialsData)
         setDishes(dishesData)
         setEvents(eventsData)
+        setViewCounts(viewCountsData)
       } catch (error) {
         if (cancelled) return
         logger.error('Error fetching restaurant data:', error)
@@ -282,6 +285,7 @@ export function ManageRestaurant() {
           <SpecialsManager
             restaurantId={restaurant.id}
             specials={specials}
+            viewCounts={viewCounts}
             onAdd={handleAddSpecial}
             onUpdate={handleUpdateSpecial}
             onDeactivate={handleDeactivateSpecial}
