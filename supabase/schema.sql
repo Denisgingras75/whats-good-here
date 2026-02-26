@@ -425,14 +425,14 @@ ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY;
 -- restaurants: public read, admin write (+ manager policies below)
 CREATE POLICY "Public read access" ON restaurants FOR SELECT USING (true);
 CREATE POLICY "Authenticated users can insert restaurants" ON restaurants FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
-CREATE POLICY "Admins can update restaurants" ON restaurants FOR UPDATE USING (is_admin());
+CREATE POLICY "Admin or manager update restaurants" ON restaurants FOR UPDATE USING (is_admin() OR is_restaurant_manager(id));
 CREATE POLICY "Admins can delete restaurants" ON restaurants FOR DELETE USING (is_admin());
 
 -- dishes: public read, admin + manager write
 CREATE POLICY "Public read access" ON dishes FOR SELECT USING (true);
 CREATE POLICY "Authenticated users can insert dishes" ON dishes FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Admin or manager update dishes" ON dishes FOR UPDATE USING (is_admin() OR is_restaurant_manager(restaurant_id));
-CREATE POLICY "Admins can delete dishes" ON dishes FOR DELETE USING (is_admin());
+CREATE POLICY "Admin or manager delete dishes" ON dishes FOR DELETE USING (is_admin() OR is_restaurant_manager(restaurant_id));
 
 -- votes: public read, users manage own (optimized auth.uid())
 CREATE POLICY "Public read access" ON votes FOR SELECT USING (true);

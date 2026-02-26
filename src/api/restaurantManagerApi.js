@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { createClassifiedError } from '../utils/errorHandler'
 import { logger } from '../utils/logger'
+import { validateUserContent } from '../lib/reviewBlocklist'
 
 export const restaurantManagerApi = {
   /**
@@ -295,6 +296,14 @@ export const restaurantManagerApi = {
   async createSpecial({ restaurantId, dealName, description, price, expiresAt }) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw createClassifiedError(new Error('Not authenticated'))
+
+    // Content moderation
+    const nameError = validateUserContent(dealName, 'Special name')
+    if (nameError) throw createClassifiedError(new Error(nameError))
+    if (description) {
+      const descError = validateUserContent(description, 'Description')
+      if (descError) throw createClassifiedError(new Error(descError))
+    }
 
     const { data, error } = await supabase
       .from('specials')
