@@ -97,3 +97,5 @@ export const SpecialCard = memo(function SpecialCard({ special, promoted }) {
     </button>
   )
 })
+
+export default SpecialCard

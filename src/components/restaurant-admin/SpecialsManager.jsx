@@ -282,7 +282,7 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
                   <button
                     onClick={() => onDeactivate(special.id)}
                     className="text-xs font-medium px-2 py-1 rounded"
-                    style={{ color: 'var(--color-red)' }}
+                    style={{ color: 'var(--color-danger)' }}
                   >
                     Deactivate
                   </button>
@@ -335,3 +335,5 @@ export function SpecialsManager({ restaurantId, specials, onAdd, onUpdate, onDea
     </div>
   )
 }
+
+export default SpecialsManager

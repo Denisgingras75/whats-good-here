@@ -233,6 +233,14 @@ CREATE TABLE IF NOT EXISTS specials (
   created_by UUID REFERENCES auth.users(id)
 );
 
+-- 1o2. special_views — anonymous view tracking for specials
+CREATE TABLE IF NOT EXISTS special_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  special_id UUID NOT NULL REFERENCES specials(id) ON DELETE CASCADE,
+  viewed_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_special_views_special ON special_views(special_id, viewed_at DESC);
+
 -- 1p. restaurant_managers
 CREATE TABLE IF NOT EXISTS restaurant_managers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -493,6 +501,22 @@ CREATE POLICY "Read specials" ON specials FOR SELECT USING (is_active = true OR 
 CREATE POLICY "Admin or manager insert specials" ON specials FOR INSERT WITH CHECK (is_admin() OR is_restaurant_manager(restaurant_id));
 CREATE POLICY "Admin or manager update specials" ON specials FOR UPDATE USING (is_admin() OR is_restaurant_manager(restaurant_id));
 CREATE POLICY "Admin or manager delete specials" ON specials FOR DELETE USING (is_admin() OR is_restaurant_manager(restaurant_id));
+
+-- special_views: anyone can insert (anonymous tracking), managers read own restaurant views
+ALTER TABLE special_views ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert views" ON special_views
+  FOR INSERT WITH CHECK (true);
+CREATE POLICY "Managers read own restaurant views" ON special_views
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM specials s
+      JOIN restaurant_managers rm ON rm.restaurant_id = s.restaurant_id
+      WHERE s.id = special_views.special_id
+        AND rm.user_id = (select auth.uid())
+        AND rm.accepted_at IS NOT NULL
+    )
+    OR is_admin()
+  );
 
 -- restaurant_managers: admins + own rows
 CREATE POLICY "Admins read all managers" ON restaurant_managers FOR SELECT USING (is_admin());
@@ -2340,6 +2364,20 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+
+-- 17b. get_special_view_counts — aggregated view counts per special (last 7 days)
+CREATE OR REPLACE FUNCTION get_special_view_counts(p_restaurant_id UUID)
+RETURNS TABLE(special_id UUID, view_count BIGINT) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT sv.special_id, COUNT(*)::BIGINT as view_count
+  FROM special_views sv
+  JOIN specials s ON s.id = sv.special_id
+  WHERE s.restaurant_id = p_restaurant_id
+    AND sv.viewed_at > NOW() - INTERVAL '7 days'
+  GROUP BY sv.special_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public;
 
 -- 18. CLEANUP: Duplicate production-only policies have been dropped.
 -- See supabase/migrations/cleanup_rls_policies.sql for the migration that was run.
