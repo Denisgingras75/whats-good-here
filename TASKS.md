@@ -584,3 +584,20 @@
 - Dark mode now works correctly for restaurant dish cards
 
 **Files:** `src/components/restaurants/TopDishCard.jsx`
+
+---
+
+## ~~T41: Homepage Toggle — Kill BottomSheet, Add List/Map Modes~~ DONE
+
+**Why:** The BottomSheet half-state was always a compromise — neither map nor list got full attention. Users couldn't commit to either mode.
+
+**What was done:**
+- Replaced BottomSheet with two committed full-screen modes (List default, Map toggle)
+- Floating pill FAB (bottom-right) toggles between modes
+- List mode: search + category chips + ranked dish list
+- Map mode: search + zoom/radius + full-screen Leaflet with pins
+- Scroll position preserved across mode switches
+- Dish detail "See on map" button navigates to homepage in map mode
+- BottomNav center tab renamed from "Map" to "Home"
+
+**Files:** `src/pages/Map.jsx`, `src/components/ModeFAB.jsx`, `src/components/BottomNav.jsx`, `src/pages/Dish.jsx`

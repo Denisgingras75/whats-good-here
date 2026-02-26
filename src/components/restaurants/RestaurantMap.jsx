@@ -307,23 +307,43 @@ function PlacePopupContent({ place, onAddPlace }) {
 }
 
 // ─── Dish Mode: Build category icon divIcon ─────────────────────────────────
-function buildCategoryIcon(category, dishCount, hasHighRating, dishName, isSelected) {
+function buildCategoryIcon(category, dishCount, hasHighRating, dishName, isSelected, ranks) {
   var posterImage = getPosterIconSrc(category, dishName)
   var emoji = getCategoryEmoji(category)
+  var bestRank = (ranks && ranks.length > 0) ? ranks[0] : null
 
   var badge = ''
 
-  var size = isSelected ? 60 : 44
-  var imgSize = isSelected ? 42 : 32
+  var medalBg = bestRank === 1 ? 'var(--color-medal-gold)'
+    : bestRank === 2 ? 'var(--color-medal-silver)'
+    : bestRank === 3 ? 'var(--color-medal-bronze)'
+    : null
+  var size = isSelected ? 60 : (medalBg ? 50 : 44)
+  var imgSize = isSelected ? 42 : (medalBg ? 36 : 32)
+
   var glow = isSelected
     ? 'box-shadow:0 0 14px 6px rgba(228,90,53,0.6);border:3px solid var(--color-primary);z-index:9999 !important;'
-    : hasHighRating
-      ? 'box-shadow:0 0 8px 3px rgba(217,167,101,0.5);'
-      : ''
+    : medalBg
+      ? 'box-shadow:0 0 10px 4px rgba(0,0,0,0.15);border:2.5px solid ' + medalBg + ';'
+      : hasHighRating
+        ? 'box-shadow:0 0 8px 3px rgba(217,167,101,0.5);'
+        : ''
+
+  var bg = medalBg || 'var(--color-surface-elevated)'
+  var borderStyle = medalBg && !isSelected
+    ? 'border:2.5px solid ' + medalBg + ';'
+    : 'border:2px solid var(--color-divider);'
 
   var innerContent = posterImage
     ? '<img src="' + posterImage + '" alt="" style="width:' + imgSize + 'px;height:' + imgSize + 'px;object-fit:contain;" />'
-    : '<span style="font-size:' + (isSelected ? 34 : 26) + 'px;">' + emoji + '</span>'
+    : '<span style="font-size:' + (isSelected ? 34 : (medalBg ? 30 : 26)) + 'px;">' + emoji + '</span>'
+
+  // Small rank badge top-right for top 10
+  var rankBadge = ''
+  if (bestRank && bestRank <= 10 && !isSelected) {
+    var badgeBg = medalBg || 'var(--color-text-primary)'
+    rankBadge = '<div style="position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;padding:0 3px;background:' + badgeBg + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:1.5px solid #fff;">' + bestRank + '</div>'
+  }
 
   return L.divIcon({
     className: '',
@@ -332,11 +352,11 @@ function buildCategoryIcon(category, dishCount, hasHighRating, dishName, isSelec
       'display:flex;align-items:center;justify-content:center;' +
       'cursor:pointer;' +
       'border-radius:50%;' +
-      'background:var(--color-surface-elevated);' +
-      'border:2px solid var(--color-divider);' +
+      'background:' + bg + ';' +
+      borderStyle +
       'transition:all 0.2s ease;' +
       glow +
-    '">' + innerContent + badge + '</div>',
+    '">' + innerContent + badge + rankBadge + '</div>',
     iconSize: [size, size],
     iconAnchor: [22, 22],
   })
@@ -432,20 +452,30 @@ export function RestaurantMap({
 
   // ─── Dish mode: focus on a dish from the list ───
   var [flyTarget, setFlyTarget] = useState(null)
+  var [focusedSingleDish, setFocusedSingleDish] = useState(null)
+  var handledFocusRef = useRef(null)
 
   useEffect(function () {
     if (!focusDishId || restaurantGroups.length === 0) return
+    // Don't re-process the same focusDishId
+    if (handledFocusRef.current === focusDishId) return
     for (var i = 0; i < restaurantGroups.length; i++) {
       var g = restaurantGroups[i]
       for (var j = 0; j < g.dishes.length; j++) {
         if (g.dishes[j].dish_id === focusDishId) {
+          handledFocusRef.current = focusDishId
           setSelectedRestaurantId(g.restaurant_id)
+          setFocusedSingleDish(g.dishes[j])
           setFlyTarget({ lat: g.restaurant_lat, lng: g.restaurant_lng })
+          if (onSelectDish) onSelectDish(g.dishes[j].dish_id)
           return
         }
       }
     }
-  }, [focusDishId, restaurantGroups])
+  }, [focusDishId, restaurantGroups, onSelectDish])
+
+  // Clear focused single dish when user taps background
+  // (tapping a different pin goes through the marker click handler which also clears it)
 
   // ─── Dish mode: proximity detection ───
   const nearbyRestaurant = useMemo(() => {
@@ -548,6 +578,7 @@ export function RestaurantMap({
         {isDishMode && (
           <MapClickHandler onMapClick={() => {
             setSelectedRestaurantId(null)
+            setFocusedSingleDish(null)
             if (onMapClick) onMapClick()
           }} />
         )}
@@ -601,7 +632,14 @@ export function RestaurantMap({
           if (!topDish) return null
           const hasHighRating = group.dishes.some(d => (d.avg_rating || 0) >= 9)
           const isSelected = selectedRestaurantId === group.restaurant_id
-          const icon = buildCategoryIcon(topDish.category, group.dishes.length, hasHighRating, topDish.dish_name, isSelected)
+          // Collect all ranks at this restaurant, sorted ascending
+          var ranks = []
+          for (var ri = 0; ri < group.dishes.length; ri++) {
+            var dr = dishRanks[group.dishes[ri].dish_id]
+            if (dr) ranks.push(dr)
+          }
+          ranks.sort(function (a, b) { return a - b })
+          const icon = buildCategoryIcon(topDish.category, group.dishes.length, hasHighRating, topDish.dish_name, isSelected, ranks)
 
           return (
             <Marker
@@ -611,6 +649,8 @@ export function RestaurantMap({
               zIndexOffset={isSelected ? 1000 : 0}
               eventHandlers={{
                 click: () => {
+                  // Clear single-dish focus when user taps any pin manually
+                  setFocusedSingleDish(null)
                   // Always show mini-card overlay on pin tap
                   setSelectedRestaurantId(group.restaurant_id)
                   // In fullScreen (Home page): also signal to parent for sheet scroll
@@ -768,10 +808,24 @@ export function RestaurantMap({
 
       {/* ─── Dish mode: Mini card overlay ─── */}
       {isDishMode && selectedGroup && (() => {
-        const topDish = selectedGroup.dishes[0]
-        const posterImage = getPosterIconSrc(topDish.category, topDish.dish_name)
-        const emoji = getCategoryEmoji(topDish.category)
-        const rank = dishRanks[topDish.dish_id]
+        // If we're focusing on a single dish (from "See on map"), show only that dish
+        var rankedDishes = []
+        if (focusedSingleDish) {
+          var fr = dishRanks[focusedSingleDish.dish_id] || null
+          rankedDishes.push({ dish: focusedSingleDish, rank: fr })
+        } else {
+          // Get all ranked dishes at this restaurant, sorted by rank
+          for (var mi = 0; mi < selectedGroup.dishes.length; mi++) {
+            var md = selectedGroup.dishes[mi]
+            var mr = dishRanks[md.dish_id]
+            if (mr) rankedDishes.push({ dish: md, rank: mr })
+          }
+          rankedDishes.sort(function (a, b) { return a.rank - b.rank })
+          // If no ranked dishes, show top dish as fallback
+          if (rankedDishes.length === 0) {
+            rankedDishes.push({ dish: selectedGroup.dishes[0], rank: null })
+          }
+        }
 
         return (
           <div
@@ -788,104 +842,145 @@ export function RestaurantMap({
               border: '1px solid var(--color-divider)',
               boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
               padding: '12px 14px',
+              maxHeight: '280px',
+              overflowY: 'auto',
             }}
           >
-            {/* Ranking badge */}
-            {rank && (
-              <div style={{
-                fontSize: '12px',
-                fontWeight: 700,
-                color: rank <= 3 ? 'var(--color-medal-gold)' : 'var(--color-accent-gold)',
-                marginBottom: '6px',
-                letterSpacing: '-0.01em',
-              }}>
-                #{rank} {rankingContext}
-              </div>
-            )}
-
-            {/* Top dish row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '6px',
-                }}>
-                  <span style={{
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    color: 'var(--color-text-primary)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {posterImage ? (
-                      <img src={posterImage} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain', flexShrink: 0 }} />
-                    ) : (
-                      <span>{emoji}</span>
-                    )} {topDish.dish_name}
-                  </span>
-                  <span style={{
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    color: 'var(--color-rating)',
-                    flexShrink: 0,
-                  }}>
-                    {topDish.avg_rating != null ? Number(topDish.avg_rating).toFixed(1) : '--'}
-                  </span>
-                </div>
-
-                {/* Restaurant name — clickable */}
-                <div
-                  onClick={function () { nav('/restaurants/' + selectedGroup.restaurant_id) }}
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    color: 'var(--color-accent-gold)',
-                    marginTop: '3px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {selectedGroup.restaurant_name} →
-                </div>
-
-                {/* Meta line */}
-                <div style={{
-                  fontSize: '11px',
-                  color: 'var(--color-text-tertiary)',
-                  marginTop: '2px',
-                }}>
-                  {selectedGroupDistance != null ? `${selectedGroupDistance} mi` : ''}
-                  {selectedGroupDistance != null && selectedGroupVotes > 0 ? ' \u00b7 ' : ''}
-                  {selectedGroupVotes > 0 ? `${selectedGroupVotes} vote${selectedGroupVotes !== 1 ? 's' : ''}` : ''}
-                </div>
-              </div>
-            </div>
-
-            {/* View Dish button */}
-            <button
-              onClick={() => {
-                nav('/dish/' + topDish.dish_id)
-              }}
+            {/* Restaurant name — clickable */}
+            <div
+              onClick={function () { nav('/restaurants/' + selectedGroup.restaurant_id) }}
               style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '7px 0',
-                marginTop: '10px',
-                borderRadius: '8px',
-                fontSize: '12px',
+                fontSize: '14px',
                 fontWeight: 600,
+                color: 'var(--color-accent-gold)',
                 cursor: 'pointer',
-                background: 'var(--color-primary)',
-                color: 'white',
-                border: 'none',
+                marginBottom: '2px',
               }}
             >
-              View Dish
-            </button>
+              {selectedGroup.restaurant_name} →
+            </div>
+
+            {/* Meta line */}
+            <div style={{
+              fontSize: '11px',
+              color: 'var(--color-text-tertiary)',
+              marginBottom: '8px',
+            }}>
+              {selectedGroupDistance != null ? selectedGroupDistance + ' mi' : ''}
+              {selectedGroupDistance != null && selectedGroupVotes > 0 ? ' \u00b7 ' : ''}
+              {selectedGroupVotes > 0 ? selectedGroupVotes + ' vote' + (selectedGroupVotes !== 1 ? 's' : '') : ''}
+            </div>
+
+            {/* Dish list */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+              {rankedDishes.map(function (item) {
+                var dish = item.dish
+                var rank = item.rank
+                var pi = getPosterIconSrc(dish.category, dish.dish_name)
+                var em = getCategoryEmoji(dish.category)
+                var medalColor = rank === 1 ? 'var(--color-medal-gold)'
+                  : rank === 2 ? 'var(--color-medal-silver)'
+                  : rank === 3 ? 'var(--color-medal-bronze)'
+                  : 'var(--color-text-tertiary)'
+
+                var pct = dish.percent_worth_it || 0
+                var barColor = pct >= 80 ? 'var(--color-rating)'
+                  : pct >= 60 ? 'var(--color-accent-gold)'
+                  : 'var(--color-text-tertiary)'
+
+                return (
+                  <button
+                    key={dish.dish_id}
+                    onClick={function () { nav('/dish/' + dish.dish_id) }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '8px',
+                      padding: '10px 4px',
+                      background: 'none',
+                      border: 'none',
+                      borderTop: '1px solid var(--color-divider)',
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {/* Rank number */}
+                    {rank && (
+                      <span style={{
+                        fontSize: '12px',
+                        fontWeight: 800,
+                        color: medalColor,
+                        width: '22px',
+                        textAlign: 'center',
+                        flexShrink: 0,
+                        paddingTop: '1px',
+                      }}>
+                        #{rank}
+                      </span>
+                    )}
+
+                    {/* Icon */}
+                    <span style={{ fontSize: '18px', flexShrink: 0, paddingTop: '1px' }}>
+                      {pi ? (
+                        <img src={pi} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                      ) : em}
+                    </span>
+
+                    {/* Name + progress bar */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <span style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: 'var(--color-text-primary)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {dish.dish_name}
+                        </span>
+                        <span style={{
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          color: 'var(--color-rating)',
+                          flexShrink: 0,
+                        }}>
+                          {dish.avg_rating != null ? Number(dish.avg_rating).toFixed(1) : '--'}
+                        </span>
+                      </div>
+
+                      {/* Would order again bar */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                        <div style={{
+                          flex: 1,
+                          height: '4px',
+                          borderRadius: '2px',
+                          background: 'var(--color-divider)',
+                          overflow: 'hidden',
+                        }}>
+                          <div style={{
+                            width: pct + '%',
+                            height: '100%',
+                            borderRadius: '2px',
+                            background: barColor,
+                          }} />
+                        </div>
+                        <span style={{
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          color: barColor,
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {pct}% would reorder
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
 
           </div>
         )

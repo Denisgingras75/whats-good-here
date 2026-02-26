@@ -670,7 +670,9 @@ RETURNS TABLE (
   value_score DECIMAL,
   value_percentile DECIMAL,
   search_score DECIMAL,
-  featured_photo_url TEXT
+  featured_photo_url TEXT,
+  restaurant_lat DECIMAL,
+  restaurant_lng DECIMAL
 ) AS $$
 DECLARE
   lat_delta DECIMAL := radius_miles / 69.0;
@@ -812,7 +814,9 @@ BEGIN
       fr.distance,
       COALESCE(rvc.recent_votes, 0)
     ) AS search_score,
-    bp.photo_url AS featured_photo_url
+    bp.photo_url AS featured_photo_url,
+    fr.lat AS restaurant_lat,
+    fr.lng AS restaurant_lng
   FROM dishes d
   INNER JOIN filtered_restaurants fr ON d.restaurant_id = fr.id
   LEFT JOIN votes v ON d.id = v.dish_id
@@ -823,7 +827,7 @@ BEGIN
   WHERE (filter_category IS NULL OR d.category = filter_category)
     AND d.parent_dish_id IS NULL
   GROUP BY d.id, d.name, fr.id, fr.name, fr.town, d.category, d.tags, fr.cuisine,
-           d.price, d.photo_url, fr.distance,
+           d.price, d.photo_url, fr.distance, fr.lat, fr.lng,
            vs.total_child_votes, vs.total_child_yes, vs.child_count,
            bv.best_name, bv.best_rating,
            d.value_score, d.value_percentile,

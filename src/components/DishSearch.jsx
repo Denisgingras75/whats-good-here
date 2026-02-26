@@ -29,9 +29,9 @@ const BROWSE_CATEGORIES = [
   { id: 'tendys', label: 'Tenders' },
 ]
 
-export function DishSearch({ loading = false, placeholder = "Find What's Good near you", town = null, onSearchChange = null }) {
+export function DishSearch({ loading = false, placeholder = "Find What's Good near you", town = null, onSearchChange = null, rightSlot = null, initialQuery = '' }) {
   const navigate = useNavigate()
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery)
   const [isFocused, setIsFocused] = useState(false)
   const [searchResults, setSearchResults] = useState([])
   const [searching, setSearching] = useState(false)
@@ -239,6 +239,8 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
             </svg>
           </button>
         )}
+
+        {rightSlot}
       </div>
 
       {/* Autocomplete Dropdown */}

@@ -614,22 +614,33 @@ export function Dish() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-              {distanceLabel && (
-                <>
-                  <span style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>&middot;</span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
-                    {distanceLabel}
-                  </span>
-                </>
-              )}
-              {dish.restaurant_town && (
-                <>
-                  <span style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>&middot;</span>
-                  <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
-                    {dish.restaurant_town}
-                  </span>
-                </>
-              )}
+              {(dish.restaurant_lat && dish.restaurant_lng) ? (
+                <button
+                  onClick={function () {
+                    navigate('/', { state: { focusDish: dish.dish_id } })
+                  }}
+                  className="flex items-center gap-1"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: 'var(--color-accent-gold)',
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                  </svg>
+                  {distanceLabel ? distanceLabel + ' \u00b7 ' : ''}{dish.restaurant_town || 'See on map'}
+                </button>
+              ) : dish.restaurant_town ? (
+                <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
+                  {dish.restaurant_town}
+                </span>
+              ) : null}
             </div>
 
             {/* Score Block — the whole point */}

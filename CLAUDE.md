@@ -1,12 +1,15 @@
 # What's Good Here
 
-Mobile-first food discovery app for Martha's Vineyard. Ranks dishes by crowd-sourced "Would you order this again?" votes.
+Mobile-first food discovery app for Martha's Vineyard (expanding to Nantucket + Cape Cod). Ranks dishes by crowd-sourced "Would you order this again?" votes. Dual-mode homepage: full-screen list (default) or full-screen map, toggled via floating FAB.
 
 ## Tech Stack
-- **Frontend:** React 19, Vite, Tailwind CSS, React Router v7
-- **Backend:** Supabase (PostgreSQL, Auth, Storage)
+- **Frontend:** React 19, Vite 7, Tailwind CSS 3, React Router v7
+- **Maps:** Leaflet + React Leaflet (dish pins, restaurant discovery)
+- **Backend:** Supabase (PostgreSQL, Auth, Storage, Edge Functions)
 - **Hosting:** Vercel (whats-good-here.vercel.app)
 - **Analytics:** PostHog, Sentry
+- **Testing:** Vitest (unit), Playwright (E2E)
+- **PWA:** vite-plugin-pwa with service worker
 
 ## Role
 You are the senior project manager and design partner, not an order-taker. Your job is to make this the best dish rating app there ever was. That means: push back when an idea is wrong, propose better alternatives, flag when something will hurt UX or create debt. Agree when you genuinely agree — but never just to be agreeable. Honest disagreement is more valuable than fast compliance.
@@ -16,10 +19,14 @@ Always read `SPEC.md` and `TASKS.md` before beginning any work.
 
 ## Quick Commands
 ```bash
-npm run dev      # localhost:5173
-npm run build    # production build
-npm run test     # run tests (vitest)
-npm run lint     # eslint
+npm run dev              # localhost:5173
+npm run build            # production build
+npm run test             # vitest unit tests
+npm run lint             # eslint
+npm run test:e2e         # playwright all personas
+npm run test:e2e:browser # tourist persona E2E
+npm run test:e2e:pioneer # foodie persona E2E
+npm run test:e2e:business # manager persona E2E
 ```
 
 ## Key Docs
@@ -65,7 +72,7 @@ These rules are absolute. Violating any of them is a bug.
 - **Optimistic updates must have rollback.** Revert to previous state on error, never leave stale data.
 - **`ROUND()` needs `::NUMERIC` cast on float expressions.** `ROUND(expression::NUMERIC, 2)`.
 - **New RPC functions must be run in Supabase SQL Editor.** Adding to `schema.sql` does NOT deploy. Run the CREATE FUNCTION, then verify with a test call.
-- **Always qualify column references in PL/pgSQL functions.** `RETURNS TABLE` column names become variables inside the function body. Bare `dish_id` is ambiguous if a joined table also has `dish_id`. Always use `tablename.column` (e.g., `votes.dish_id`, not `dish_id`). This caused a production outage on 2026-02-17.
+- **Always qualify column references in PL/pgSQL functions.** `RETURNS TABLE` column names become variables inside the function body. Bare `dish_id` is ambiguous if a joined table also has `dish_id`. Always use `tablename.column` (e.g., `votes.dish_id`, not `dish_id`).
 
 ### 1.6 Auth Gates
 - **Voting, favorites, and photo uploads require login.** Check `user` from `useAuth()` first, show `<LoginModal>` if null. Pattern: `Browse.jsx`.
@@ -80,6 +87,10 @@ These rules are absolute. Violating any of them is a bug.
 - **All localStorage access via `src/lib/storage.js`.** Use `getStorageItem`/`setStorageItem`/`removeStorageItem`. No direct `localStorage.*` calls in components, hooks, or context.
 - **Exception:** `src/lib/supabase.js` passes `window.localStorage` to Supabase Auth config (required by SDK).
 - **Test:** Grep for `localStorage\.` in `src/` excluding `lib/storage.js` and `lib/supabase.js` — should return zero results.
+
+### 1.9 Content Safety
+- **All user-generated text must pass `validateUserContent()`.** From `src/lib/reviewBlocklist.js`. Reviews, restaurant names, dish names.
+- **Client-side rate limiting via `src/lib/rateLimiter.js`.** `checkVoteRateLimit()` and `checkPhotoUploadRateLimit()` before server calls.
 
 ---
 
@@ -119,38 +130,62 @@ Never do these. If tempted, stop and reconsider.
 
 ---
 
-## 4. Project Conventions (inferred from code)
+## 4. Project Conventions
 
 ### 4.1 Project Structure
 ```
 src/
-├── api/           # API layer — one file per domain (dishesApi, votesApi, etc.)
-│   └── index.js   # Barrel export for all API modules
-├── components/    # Shared + feature-grouped components
-│   ├── Auth/      # Authentication (LoginModal, WelcomeModal)
-│   ├── browse/    # Browse page components
-│   ├── home/      # Home page components (SearchHero, Top10Compact)
-│   ├── profile/   # Profile page components
-│   ├── restaurants/ # Restaurant page components
-│   ├── restaurant-admin/ # Manager portal components
-│   └── foods/     # Food icon SVGs
-├── constants/     # App-wide constants (app.js, categories.js, towns.js, tags.js)
-├── context/       # React Context providers (AuthContext, LocationContext)
-├── hooks/         # Custom React hooks (useDishes, useVote, etc.)
-├── lib/           # Infrastructure (supabase.js, analytics.js, storage.js, sounds.js)
-├── pages/         # Page components (one per route)
-├── utils/         # Pure utility functions (errorHandler, ranking, distance, sanitize)
-└── test/          # Test setup (setup.js)
+├── api/              # API layer (25 files) — one file per domain
+│   └── index.js      # Barrel export for all API modules
+├── components/       # Shared + feature-grouped components
+│   ├── Auth/         # LoginModal, WelcomeModal
+│   ├── browse/       # CategoryGrid, SearchAutocomplete, SortDropdown, ValueBadge
+│   ├── foods/        # 23 food category SVG icons
+│   ├── home/         # CategoryIcons, DishPhotoFade
+│   ├── hub/          # GuideCard
+│   ├── profile/      # JournalCard, JournalFeed, ShelfFilter, HeroIdentityCard, FoodMap
+│   ├── restaurant-admin/ # DishesManager, EventsManager, MenuImportWizard, SpecialsManager
+│   └── restaurants/  # RestaurantMap, RestaurantCard, RestaurantDishes, TopDishesNearYou
+├── constants/        # App-wide constants (9 files)
+├── context/          # AuthContext, LocationContext, ThemeContext
+├── hooks/            # Custom React hooks (23 hooks)
+├── lib/              # Infrastructure (supabase, analytics, storage, sounds, rateLimiter, reviewBlocklist)
+├── pages/            # Page components (19 pages, all lazy-loaded)
+├── utils/            # Pure utilities (errorHandler, ranking, distance, logger, sanitize, etc.)
+└── test/             # Test setup
+
 supabase/
-├── schema.sql     # Single source of truth — complete database schema
-├── migrations/    # Standalone migration scripts (run manually in SQL Editor)
-├── seed/
-│   ├── data/      # Real restaurant/dish seed data + menus/
-│   └── test/      # Test votes, demo data, cleanup scripts
-└── tests/         # RLS validation tests
+├── schema.sql        # Single source of truth — complete database schema
+├── functions/        # 10 Edge Functions (Places proxies, menu scraping, restaurant discovery)
+├── migrations/       # Manual migration scripts (run in SQL Editor)
+├── seed/             # Seed data + test fixtures
+└── tests/            # RLS validation tests
+
+api/                  # Root-level Vercel serverless functions
+├── og-image.ts       # OpenGraph image generation
+└── share.ts          # Social bot redirect handler
+
+e2e/                  # Playwright E2E tests (3 persona categories)
+├── browser/          # Tourist persona (browse, dish detail, home, hub, restaurants)
+├── pioneer/          # Foodie persona (voting, favorites, login, profile, social)
+├── business/         # Manager persona (portal)
+└── fixtures/         # Test helpers
+
+scripts/              # Node utility scripts (review harvesting, menu import, backfill)
 ```
 
-### 4.2 API Layer Pattern
+### 4.2 Key UI Architecture
+
+**Homepage (Dual-Mode Toggle):** Two committed full-screen modes, no half-states. **List mode** (default): sticky search bar, category chips, ranked dish list using `DishListItem`. **Map mode**: full-screen Leaflet map with emoji dish pins, floating search bar with zoom buttons and radius control. `ModeFAB` (floating pill, bottom-right) toggles between modes. Scroll position preserved across switches. Dish detail "See on map" button bridges back to map mode via route state.
+
+**DishListItem:** THE single component for all dish lists everywhere. Three variants:
+- `ranked` (default) — home, browse, restaurant detail. Shows rank + emoji + name + restaurant + rating.
+- `voted` — profile pages. Card layout with photo, restaurant, rating comparison.
+- `compact` — condensed version.
+
+**RestaurantMap:** Dual-mode Leaflet map. Dish mode shows emoji pins for top dishes. Restaurant mode shows restaurant markers + Google Places discovery for unclaimed restaurants.
+
+### 4.3 API Layer Pattern
 Every API file follows this structure:
 ```js
 import { supabase } from '../lib/supabase'
@@ -172,7 +207,7 @@ export const fooApi = {
 ```
 For table queries (not RPCs), use `selectFields` string + `.map()` transform. See `dishesApi.search()`.
 
-### 4.3 Hook Pattern
+### 4.4 Hook Pattern
 ```js
 import { useQuery } from '@tanstack/react-query'
 import { fooApi } from '../api/fooApi'
@@ -193,10 +228,10 @@ export function useFoo(params) {
 }
 ```
 
-### 4.4 Naming Conventions
+### 4.5 Naming Conventions
 | Type | Convention | Example |
 |---|---|---|
-| Components | PascalCase named exports | `export function DishCard()` |
+| Components | PascalCase named exports | `export function DishListItem()` |
 | Hooks | `use` prefix, camelCase | `useDishes`, `useVote` |
 | API files | camelCase + `Api` suffix | `dishesApi`, `votesApi` |
 | Constants | UPPER_SNAKE_CASE | `MIN_VOTES_FOR_RANKING` |
@@ -204,115 +239,197 @@ export function useFoo(params) {
 | CSS variables | `--color-*` prefix | `var(--color-primary)` |
 | Use "favorites" not "saved" | Database table is `favorites` | `useFavorites`, `isFavorite` |
 
-### 4.5 Design Tokens (Dual Theme)
+### 4.6 Design Tokens (Dual Theme)
 Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode. Light "Appetite" is the default; dark "Island Depths" is toggled via `[data-theme="dark"]`.
 
 **Default — Appetite (Light)**
 | Token | Value | Usage |
 |---|---|---|
-| `--color-primary` | `#E45A35` (Warm Coral) | CTAs, primary actions |
-| `--color-accent-gold` | `#E9A115` (Warm Yellow) | Links, secondary accents |
+| `--color-primary` | `#E4440A` (Warm Coral) | CTAs, primary actions |
+| `--color-accent-gold` | `#C48A12` (Warm Amber) | Links, medals, secondary accents |
 | `--color-accent-orange` | `#E07856` (Warm Orange) | Hover states |
 | `--color-rating` | `#16A34A` (Bright Green) | Rating displays |
 | `--color-text-primary` | `#1A1A1A` (Near Black) | Main text |
-| `--color-text-secondary` | `#6B7280` (Cool Gray) | Secondary text |
-| `--color-text-tertiary` | `#9CA3AF` (Light Gray) | Tertiary text |
+| `--color-text-secondary` | `#555555` (Medium Gray) | Secondary text |
+| `--color-text-tertiary` | `#999999` (Light Gray) | Tertiary text |
 | `--color-bg` | `#F0ECE8` (Warm Stone) | Page background |
 | `--color-surface` | `#F7F4F1` (Near White) | Surface areas |
-| `--color-surface-elevated` | `#FFFFFF` (White) | Cards, modals |
+| `--color-surface-elevated` | `#FFFFFF` (White) | Cards, modals, bottom sheet |
 | `--color-card` | `#FFFFFF` (White) | Card backgrounds |
-| `--color-medal-gold` | `#C48A12` (Warm Amber) | #1 rank, gold medal |
-| `--color-category-strip` | `#FADCC8` (Warm Orange) | Category icon area |
+| `--color-medal-gold` | `#E8B820` (Warm Gold) | #1 rank, gold medal |
+| `--color-medal-silver` | `#9EAAB2` | #2 rank |
+| `--color-medal-bronze` | `#B07340` | #3 rank |
+| `--color-category-strip` | `#F2CDBC` (Warm Peach) | Category icon area |
+| `--color-danger` | `#DC2626` | Error states |
+| `--color-success` | `#16A34A` | Success states |
 
 **Toggle — Island Depths (Dark)**
 | Token | Value | Usage |
 |---|---|---|
-| `--color-primary` | `#C85A54` (Deep Rust) | CTAs, primary actions, danger |
+| `--color-primary` | `#C85A54` (Deep Rust) | CTAs, primary actions |
 | `--color-accent-gold` | `#D9A765` (Warm Gold) | Links, secondary accents |
-| `--color-accent-orange` | `#E07856` (Warm Orange) | Hover states |
-| `--color-rating` | `#6BB384` (Muted Green) | Rating displays, success |
+| `--color-rating` | `#6BB384` (Muted Green) | Rating displays |
 | `--color-text-primary` | `#F5F1E8` (Soft Cream) | Main text |
 | `--color-text-secondary` | `#B8A99A` (Warm Taupe) | Secondary text |
 | `--color-text-tertiary` | `#7D7168` (Brown Gray) | Tertiary text |
 | `--color-bg` | `#0D1B22` (Deep Charcoal-Navy) | Page background |
 | `--color-surface` | `#0F1F2B` | Slightly lighter surface |
+| `--color-surface-elevated` | `#162B35` | Bottom sheet, modals |
 | `--color-card` | `#1A3A42` (Navy-Teal) | Card backgrounds |
 
-### 4.6 Constants & Configuration
+### 4.7 Constants & Configuration
 - **`MIN_VOTES_FOR_RANKING` = 5** — `src/constants/app.js` — dishes below this show as "Early"
 - **`MAX_REVIEW_LENGTH` = 200** — `src/constants/app.js` — enforced client + DB constraint
 - **`MIN_VOTES_FOR_VALUE` = 8** — `src/constants/app.js` — value score eligibility
-- **Category definitions** — `src/constants/categories.js` — `BROWSE_CATEGORIES` (19 shortcuts), `MAIN_CATEGORIES`, `ALL_CATEGORIES`
-- **Categories are shortcuts, NOT containers** — Browse shows 15 curated shortcuts. Search covers all dishes regardless of category.
+- **`VALUE_BADGE_THRESHOLD` = 90** — `src/constants/app.js` — top 10% percentile for "GREAT VALUE"
+- **Category definitions** — `src/constants/categories.js` — `BROWSE_CATEGORIES` (23 shortcuts), `MAIN_CATEGORIES` (24), `ALL_CATEGORIES`
+- **Categories are shortcuts, NOT containers** — Browse shows curated shortcuts. Search covers all dishes.
+- **Towns** — `src/constants/towns.js` — `MV_TOWNS` (7), `NANTUCKET_TOWNS` (5), `CAPE_COD_TOWNS` (9), `ALL_TOWNS`
+- **Tags** — `src/constants/tags.js` — `TEXTURE_TAGS`, `FLAVOR_TAGS`, `OCCASION_TAGS`, `TAG_SYNONYMS`
+- **Event types** — `src/constants/eventTypes.js` — live_music, trivia, comedy, karaoke, open_mic, other
+- **Photo quality** — `src/constants/photoQuality.js` — validation thresholds, tiers (featured/community/hidden)
+- **Feature flags** — `src/constants/features.js` — `FEATURES.RATING_IDENTITY_ENABLED` (env var)
 
-### 4.7 localStorage Keys
-| Key | Purpose | Location |
+### 4.8 localStorage Keys
+| Key | Constant | Purpose |
 |---|---|---|
-| `wgh_has_seen_splash` | Welcome splash shown | `WelcomeSplash.jsx` |
-| `wgh_has_onboarded` | Welcome modal shown | `WelcomeModal.jsx` |
-| `whats_good_here_pending_vote` | Vote saved before auth redirect | `src/lib/storage.js` |
-| `wgh_has_seen_ear_tooltip` | Ear icon tooltip shown | `src/lib/storage.js` |
-| `wgh_radius` | Radius filter preference | `LocationContext.jsx` |
-| `wgh_town` | Town filter preference | `LocationContext.jsx` |
-| `wgh_theme` | Theme preference (dark/light) | `ThemeContext.jsx` |
-| `whats-good-here-auth` | Supabase auth session | `src/lib/supabase.js` |
-| `whats-good-here-location-permission` | Geolocation permission state | `LocationContext.jsx` |
+| `wgh_has_seen_splash` | (WelcomeSplash) | Welcome splash shown |
+| `wgh_has_onboarded` | (WelcomeModal) | Welcome modal shown |
+| `whats_good_here_pending_vote` | (storage.js) | Vote saved before auth redirect |
+| `wgh_has_seen_ear_tooltip` | `HAS_SEEN_EAR_TOOLTIP` | Ear icon tooltip shown |
+| `soundMuted` | `SOUND_MUTED` | Sound preference |
+| `wgh_radius` | `RADIUS` | Radius filter preference |
+| `wgh_town` | `TOWN` | Town filter preference |
+| `wgh_theme` | `THEME` | Theme preference (dark/light) |
+| `whats-good-here-auth` | (Supabase SDK) | Supabase auth session |
+| `whats-good-here-location-permission` | `LOCATION_PERMISSION` | Geolocation permission state |
+| `whats-good-here-email` | `EMAIL_CACHE` | Cached email for auth |
 
-### 4.8 Key Hooks (check before building new ones)
-- `useVote` — Vote submission with rating, review, duplicate prevention
-- `useFavorites` — Optimistic favorite toggling with analytics
-- `useUserVotes` — User's vote history with stats (rating style, standout picks)
-- `useDishes` — Location-based ranked dishes via React Query
-- `useDishPhotos` — Photo upload with quality analysis, validation, progress
-- `useDishSearch` — Debounced dish search (2+ chars)
-- `useProfile` — User profile data
-- `useRestaurantManager` — Manager portal data
-- `useSpecials` — Restaurant specials management
-- `useUnratedDishes` — Dishes user hasn't voted on yet
-- `useFocusTrap` — Keyboard focus trap for modals
-- `useDish` — Single dish by ID
-- `useEvents` — Restaurant events via React Query
-- `useNearbyPlaces` — Google Places autocomplete nearby
-- `useNearbyRestaurant` — Single nearby restaurant by distance
-- `useNearbyRestaurants` — Distance-filtered restaurant list
-- `usePurityTracker` — Jitter Protocol behavioral biometrics for reviews
-- `useRestaurants` — All restaurants with distance sorting
-- `useRestaurantSearch` — Restaurant search with Places fallback
-- `useTrendingDishes` — Most-voted dishes in recent window
+### 4.9 All Hooks (check before building new ones)
+| Hook | Purpose |
+|---|---|
+| `useDish` | Single dish by ID |
+| `useDishes` | Location-based ranked dishes via React Query |
+| `useDishPhotos` | Photo upload with quality analysis, progress |
+| `useDishSearch` | Debounced dish search (2+ chars) |
+| `useEvents` | Active restaurant events |
+| `useFavorites` | Optimistic favorite toggling with rollback |
+| `useFocusTrap` | Keyboard focus trap for modals |
+| `useGuides` | Category guide data (must-try, top per category) |
+| `useMapDishes` | Dishes with coordinates for map display |
+| `useNearbyPlaces` | Google Places discovery (unclaimed restaurants) |
+| `useNearbyRestaurant` | Single closest restaurant within radius |
+| `useNearbyRestaurants` | Restaurants within meters of GPS |
+| `useProfile` | User profile with get/update |
+| `usePurityTracker` | Keystroke jitter analysis (anti-bot) |
+| `useRestaurantManager` | Manager portal — owned restaurant |
+| `useRestaurantSearch` | Combined local DB + Google Places search |
+| `useRestaurants` | Restaurant list with filters |
+| `useSpecials` | Restaurant specials CRUD |
+| `useTrendingDishes` | Most votes last 7 days |
+| `useUnratedDishes` | Dishes photographed but not voted on |
+| `useUserVotes` | User vote history with rating stats |
+| `useVote` | Vote submission with rating, review, duplicate prevention |
 
-### 4.9 Key Supabase RPCs
+### 4.10 All API Modules
+| Module | Key methods |
+|---|---|
+| `dishesApi` | `getRankedDishes`, `getDishesForRestaurant`, `search`, `getMapDishes`, `getVariants`, `getTrending`, `createDish` |
+| `votesApi` | `submitVote`, `getUserVotes` |
+| `favoritesApi` | `getFavorites`, `addFavorite`, `removeFavorite` |
+| `restaurantsApi` | `getRestaurants`, `createRestaurant`, `findNearby`, `getWithinRadius` |
+| `profileApi` | `getOrCreateProfile`, `updateProfile`, `getTasteStats`, `getRatingBias`, `getBadgeEvaluationStats` |
+| `followsApi` | `follow`, `unfollow`, `getFollowCounts`, `getTasteCompatibility`, `getFriendsVotesForRestaurant`, `getFriendsVotesForDish`, `getUserBadges` |
+| `tasteApi` | `getSimilarTasteUsers` |
+| `authApi` | Auth helpers |
+| `adminApi` | Admin operations |
+| `notificationsApi` | `getNotifications` |
+| `dishPhotosApi` | `uploadPhoto`, `getUnratedDishesWithPhotos` |
+| `ratingIdentityApi` | `getUserRatingIdentity`, `getUnseenReveals`, `markRevealsSeen` |
+| `specialsApi` | Restaurant specials CRUD |
+| `eventsApi` | `getActiveEvents` |
+| `restaurantManagerApi` | `getMyRestaurant`, `getInviteDetails`, `acceptInvite` |
+| `placesApi` | `autocomplete`, `discoverNearby`, `getDetails` (via Edge Functions) |
+| `menuScrapingApi` | `scrapeMenu` (via Edge Function) |
+| `jitterApi` | `getMyProfile`, `getTrustBadgeType` |
+
+### 4.11 Key Supabase RPCs
 - `get_ranked_dishes` — Main Browse feed (ranked by votes, distance, variants, value score)
 - `get_restaurant_dishes` — Dishes for a specific restaurant
 - `get_dish_variants` — Variants/sizes for a dish
 - `get_smart_snippet` — Best review snippet for a dish
 - `check_vote_rate_limit` — Server-side vote rate limiting (10/min)
 - `check_photo_upload_rate_limit` — Photo upload rate limiting (5/min)
+- `check_dish_create_rate_limit` — Dish creation rate limiting (20/hr)
+- `check_restaurant_create_rate_limit` — Restaurant creation rate limiting (5/hr)
 - `get_taste_compatibility` — Taste match % between two users
 - `get_similar_taste_users` — Users with similar taste you don't follow
 - `get_user_rating_identity` — Rating style analysis (MAD-based bias)
 - `get_friends_votes_for_dish` / `get_friends_votes_for_restaurant` — Social context
-- `evaluate_user_badges` — Award badges based on stats
+- `get_user_badges` — User badge display
+- `get_badge_evaluation_stats` — Badge evaluation data
 - `get_invite_details` / `accept_restaurant_invite` — Manager invite flow
-- `find_nearby_restaurants` — Geo-proximity restaurant search (duplicate detection)
-- `get_restaurants_within_radius` — Distance-filtered restaurant list with dish counts
-- `check_restaurant_create_rate_limit` — Restaurant creation rate limiting (5/hr)
-- `check_dish_create_rate_limit` — Dish creation rate limiting (20/hr)
+- `find_nearby_restaurants` — Geo-proximity restaurant search
+- `get_restaurants_within_radius` — Distance-filtered restaurant list
+- `get_jitter_badges` — Jitter Protocol trust badges
+- `get_unseen_reveals` / `mark_reveals_seen` — Rating identity reveal system
 
-### 4.10 File Organization
+### 4.12 Supabase Edge Functions (10)
+| Function | Purpose |
+|---|---|
+| `discover-restaurants` | Google Places discovery pipeline |
+| `menu-refresh` | Fetch menu URL, parse with Claude Haiku, upsert dishes |
+| `parse-menu` | Menu text/PDF extraction |
+| `places-autocomplete` | Google Places autocomplete proxy |
+| `places-details` | Google Places details proxy |
+| `places-nearby-search` | Google Places nearby search proxy |
+| `restaurant-scraper` | Scrape restaurant website data |
+| `scraper-dispatcher` | Cron dispatcher for scraper jobs |
+| `seed-reviews` | AI review generation (dev utility) |
+| `backfill-restaurants` | Data migration tool |
+
+### 4.13 Routes (19 pages, all lazy-loaded via `lazyWithRetry()`)
+| Route | Page | Auth |
+|---|---|---|
+| `/` | Home (dual-mode list/map) | No |
+| `/browse` | Browse | No |
+| `/dish/:dishId` | Dish | No |
+| `/restaurants` | Restaurants (map) | No |
+| `/restaurants/:restaurantId` | RestaurantDetail | No |
+| `/hub` | Hub (events + specials) | No |
+| `/discover` | Discover | No |
+| `/profile` | Profile (journal feed) | Yes |
+| `/user/:userId` | UserProfile (public) | No |
+| `/login` | Login | No |
+| `/reset-password` | ResetPassword | No |
+| `/admin` | Admin | Yes |
+| `/invite/:token` | AcceptInvite | No |
+| `/manage` | ManageRestaurant | Yes |
+| `/privacy` | Privacy | No |
+| `/terms` | Terms | No |
+| `/how-reviews-work` | HowReviewsWork | No |
+| `/for-restaurants` | ForRestaurants | No |
+| `*` | NotFound | No |
+
+### 4.14 File Organization
 - **Storage helpers go in `src/lib/storage.js`** — not scattered in components
 - **Extract components when files exceed ~400 lines** — keep pages focused on orchestration
 - **Use barrel exports** — import from `'../components/home'` not individual files
 - **Delete unused code immediately** — don't let dead code accumulate
 - **Component subdirectories match pages** — `components/browse/` for Browse page components
 
-### 4.11 Deployment
+### 4.15 Deployment
 - **CSP in `vercel.json`** — external resources need `connect-src` too. Add new external domains to both `img-src` and `connect-src`.
+- **OG images** — `api/og-image.ts` generates social share images server-side.
+- **Share handler** — `api/share.ts` redirects social bot crawlers.
 
 ---
 
 ## 5. Architecture Principles
 
-- **Categories are shortcuts, NOT containers.** Browse shows 15 curated shortcuts, not all categories. Search is the universal access layer — any dish is searchable.
+- **Dual-mode homepage.** Full-screen list (default) or full-screen map, toggled via `ModeFAB`. No half-states — each mode gets 100% of the screen. Dish pins use category emoji for consistent visual identity.
+- **DishListItem is the ONE list component.** All dish lists everywhere use `DishListItem` with variant props. No duplicating dish display logic.
+- **Categories are shortcuts, NOT containers.** Browse shows curated shortcuts, not all categories. Search is the universal access layer — any dish is searchable.
 - **No direct Supabase calls from UI.** All data access through `src/api/`.
 - **`supabase/schema.sql` is the source of truth.** Update it first, then run in SQL Editor.
 - **React Query for server state.** `useQuery`/`useMutation` — never raw `useEffect` + `fetch`.
@@ -320,3 +437,17 @@ Defined in `src/index.css`. Always use `var(--color-*)` — never hardcode. Ligh
 - **All errors classified.** `createClassifiedError()` on every API boundary.
 - **Lazy-loaded pages.** All pages use `lazyWithRetry()` for code splitting with chunk failure recovery.
 - **Dual theme with light default.** "Appetite" (light) is the default. "Island Depths" (dark) is a user toggle. Theme controlled via `ThemeContext` + `[data-theme="dark"]` CSS selector. All colors via CSS variables.
+- **Vote source weighting.** Votes have a `source` field (`user` or `ai_estimated`). AI votes weighted at 0.5x in all ranking aggregations.
+- **Multi-city ready.** Towns constant covers MV + Nantucket + Cape Cod. Schema supports expansion.
+- **Provider order:** `ThemeProvider > AuthProvider > LocationProvider > BrowserRouter`
+
+---
+
+## 6. Collaboration
+
+This codebase is a merge of Dan's design direction and Denis's infrastructure. Denis (Denisgingras75) is a collaborator with write access. Branch protection on main requires 1 PR approval.
+
+- **Dan owns:** Design vision, editorial voice, typography, color palette, UX feel
+- **Denis owns:** Schema, RPCs, Edge Functions, E2E tests, scaling infrastructure
+- **Coordinate in Weekly Sync** (Issue #9 on Dan's repo) before either side changes pages
+- **Agent Phone:** Denisgingras75/wgh-phone — Claude-to-Claude async communication

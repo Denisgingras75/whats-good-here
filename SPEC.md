@@ -190,27 +190,27 @@ Evidence: `schema.sql:1534-1776`
 
 ## Implemented Features
 
-### Feature 1: Home / Landing
+### Feature 1: Home / Landing (Dual-Mode Toggle)
 
-**User flow:** Open app → see brand header + search bar + town filter + category scroll → #1 hero dish → "The Contenders" ranked list (2-10). Search inline: type 2+ chars → list morphs to search results without page navigation.
-**Screens:** `Home.jsx`
-**Components:** `SearchHero`, `Top10Compact`, `TownPicker`, `WelcomeSplash`, `NumberOneHero` (inline in Home.jsx), `CategoryNav` (inline in Home.jsx)
-**Hooks:** `useDishes`, `useDishSearch`, `useProfile`, `useLocationContext`
+**User flow:** Open app → see full-screen ranked dish list (List mode). Toggle FAB switches to full-screen map (Map mode). Two committed modes, no half-states.
+**Screens:** `Map.jsx` (serves as homepage at `/`)
+**Components:** `DishSearch`, `CategoryChips`, `DishListItem`, `ModeFAB`, `RestaurantMap`, `EmptyState`
+**Hooks:** `useDishes`, `useDishSearch`, `useLocationContext`
 **API calls:** `dishesApi.getRankedDishes()` via `useDishes`, `dishesApi.search()` via `useDishSearch`
 **Data reads:** `get_ranked_dishes` RPC, dishes table (search)
 **Data writes:** none
 
-**Brand header:** "What's Good Here" in Aglet Sans Bold (700) at 30px via Adobe Fonts (Typekit). Tagline "the #1 bite near you" in uppercase below.
+**List mode (default):** Full-screen scrollable view. Sticky search bar at top with shadow. CategoryChips horizontal scroll below search. Section title ("Top Rated Nearby" / "Best [Category] Nearby" / "Results"). Ranked dish list using `DishListItem` — tap navigates to `/dish/:id`. Top 10 dishes shown.
 
-**#1 Hero Card:** `NumberOneHero` component — typographic hero announcement for the top-ranked dish. Gold left border, uppercase "#1 in {town} right now" label, Aglet Sans dish name at 24px, uppercase restaurant name, large rating number. Only shown for the main Top 10 (not category-filtered views).
+**Map mode:** Full-screen Leaflet map with emoji dish pins. Floating search bar with zoom buttons (`[+] [search] [-]`). Radius control below search. Pin tap shows mini-card popup. Mini-card tap navigates to `/dish/:id`. No category chips in map mode.
 
-**Inline search:** `DishSearch` accepts `onSearchChange` prop. When provided, debounced query (150ms) is passed to parent instead of showing dropdown. Home.jsx uses `useDishSearch` hook and renders results in `Top10Compact` format. "Show more" button paginates in batches of 10.
+**Toggle FAB:** Floating pill button, bottom-right, above BottomNav. Shows "Map" (with map icon) in list mode, "List" (with list icon) in map mode. Scroll position preserved across mode switches.
 
-**Category scroll:** Horizontal strip below search. Each category is a 44px circle with neon food photo + 10.5px label. Town picker is first in strip, expands inline for town selection. Tapping a category filters the ranked list; tapping again deselects. Categories use `BROWSE_CATEGORIES` from `src/constants/categories.js`.
+**Route state bridge:** Dish detail page "See on map" button navigates to `/` with `state: { focusDish: dishId }`, which activates map mode and flies to the dish's pin.
 
-**Top 10 display:** #1 dish shown as hero card above. Ranks 2-3 get podium treatment (medal colors with glow, gradient fill, sized rank numbers). Ranks 4-10 use Apple-style grouped list (surface background, inset dividers, chevron arrows). Section header: "The Contenders". `startRank` prop offsets numbering when #1 is the hero. Personal toggle (MV vs My Top 10) currently disabled.
+**Search:** `DishSearch` with `onSearchChange` prop. Debounced query filters both list (in list mode) and map pins (in map mode). Category chips filter in list mode only.
 
-**VERIFIED** — `src/pages/Home.jsx`, `src/components/home/`
+**VERIFIED** — `src/pages/Map.jsx`, `src/components/ModeFAB.jsx`
 
 ### Feature 2: Browse / Category View
 

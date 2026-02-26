@@ -35,8 +35,6 @@ export const dishesApi = {
         throw createClassifiedError(error)
       }
 
-      // Return all dishes - don't limit on client side
-      // The database function handles filtering by radius
       return data || []
     } catch (error) {
       logger.error('Error fetching ranked dishes:', error)
