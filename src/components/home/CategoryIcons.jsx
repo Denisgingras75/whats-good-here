@@ -35,6 +35,10 @@ const posterIcons = {
 // `solo` = only match when this word is the main dish, not a side (e.g. "Truffle Fries" yes, "Tenders and Fries" no)
 const dishNameIcons = [
   { match: 'pizza', src: '/categories/poster/pizza.png' },
+  { match: 'shrimp taco', src: '/categories/poster/shrimp-taco.png' },
+  { match: 'chicken taco', src: '/categories/poster/chicken-taco.png' },
+  { match: 'clam strip', src: '/categories/poster/clam-strips.png' },
+  { match: 'fried clam', src: '/categories/poster/clams.png' },
   { match: 'benedict', src: '/categories/poster/eggs-benedict.png' },
   { match: 'cauliflower', src: '/categories/poster/veggies.png' },
   { match: 'carrot', src: '/categories/poster/veggies.png' },
