@@ -11,6 +11,7 @@ import { DishListItem } from '../components/DishListItem'
 import { CategoryChips } from '../components/CategoryChips'
 import { SectionHeader } from '../components/SectionHeader'
 import { EmptyState } from '../components/EmptyState'
+import { CuratorListSection } from '../components/home'
 
 export function Home() {
   var navigate = useNavigate()
@@ -92,6 +93,11 @@ export function Home() {
             onToggle={setTownPickerOpen}
           />
         }
+      />
+
+      {/* Local Picks — curator cards */}
+      <CuratorListSection
+        onCuratorClick={function (curator) { navigate('/curator/' + curator.curator_id) }}
       />
 
       {/* Section header */}
