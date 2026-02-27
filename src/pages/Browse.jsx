@@ -8,7 +8,6 @@ import { useUserVotes } from '../hooks/useUserVotes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { useFavorites } from '../hooks/useFavorites'
 import { restaurantsApi } from '../api/restaurantsApi'
-import { dishesApi } from '../api/dishesApi'
 import { getStorageItem, setStorageItem } from '../lib/storage'
 import { BROWSE_CATEGORIES, CATEGORY_INFO } from '../constants/categories'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
@@ -64,7 +63,6 @@ export function Browse() {
   const [autocompleteOpen, setAutocompleteOpen] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
   const [autocompleteIndex, setAutocompleteIndex] = useState(-1)
-  const [dishSuggestions, setDishSuggestions] = useState([])
   const [restaurantSuggestions, setRestaurantSuggestions] = useState([])
 
   const { location, radius, setRadius, town, permissionState, requestLocation, isUsingDefault } = useLocationContext()
@@ -133,33 +131,32 @@ export function Browse() {
     setSortDropdownOpen(false)
   }
 
-  // Fetch autocomplete suggestions (dishes and restaurants)
+  // Dish suggestions from client-side search (instant, no network calls)
+  const dishSuggestions = useMemo(() => {
+    if (!searchQuery?.trim() || searchQuery.trim().length < 2) return []
+    return searchResults.slice(0, 5)
+  }, [searchResults, searchQuery])
+
+  // Fetch restaurant autocomplete suggestions
   useEffect(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
-      setDishSuggestions([])
       setRestaurantSuggestions([])
       return
     }
 
     const fetchSuggestions = async () => {
       try {
-        const [dishResults, restaurantResults] = await Promise.all([
-          dishesApi.search(searchQuery, 5, town),
-          restaurantsApi.search(searchQuery, 3),
-        ])
-        setDishSuggestions(dishResults)
+        const restaurantResults = await restaurantsApi.search(searchQuery, 3)
         setRestaurantSuggestions(restaurantResults)
       } catch (error) {
-        // Gracefully degrade - show no suggestions on error
-        logger.error('Search suggestions failed:', error)
-        setDishSuggestions([])
+        logger.error('Restaurant suggestions failed:', error)
         setRestaurantSuggestions([])
       }
     }
 
     const timer = setTimeout(fetchSuggestions, 150)
     return () => clearTimeout(timer)
-  }, [searchQuery, town])
+  }, [searchQuery])
 
   // Close autocomplete when clicking outside
   useEffect(() => {
