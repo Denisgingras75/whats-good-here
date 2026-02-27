@@ -1,5 +1,8 @@
+import { useState } from 'react'
+
 /**
  * Displays trust indicators on reviews and profiles.
+ * Optional popover shows cumulative stats when profileData is provided.
  *
  * Types:
  * - 'human_verified': Green check — reviewer has consistent jitter profile (5+ reviews)
@@ -8,7 +11,9 @@
  * - 'building': Gray — new reviewer, building verification
  * - null: No badge shown
  */
-export function TrustBadge({ type, size = 'sm' }) {
+export function TrustBadge({ type, size = 'sm', profileData }) {
+  const [showPopover, setShowPopover] = useState(false)
+
   if (!type) return null
 
   const configs = {
@@ -50,20 +55,64 @@ export function TrustBadge({ type, size = 'sm' }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap"
+      className="inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap relative"
       style={{
         fontSize,
         padding,
         background: config.bg,
         color: config.color,
         border: `1px solid ${config.border}`,
+        cursor: profileData ? 'pointer' : 'default',
       }}
       title={config.label}
+      onClick={() => profileData && setShowPopover(!showPopover)}
+      onMouseEnter={() => profileData && setShowPopover(true)}
+      onMouseLeave={() => setShowPopover(false)}
     >
       <span style={{ fontSize: size === 'sm' ? '10px' : '11px' }}>{config.icon}</span>
       {config.label}
+
+      {showPopover && profileData && (
+        <span
+          className="absolute left-0 top-full mt-1 p-3 rounded-lg shadow-lg z-50"
+          style={{
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-divider)',
+            minWidth: '160px',
+            fontSize: '11px',
+            display: 'block',
+          }}
+        >
+          <span className="block space-y-1.5">
+            {profileData.review_count != null && (
+              <PopoverRow label="Verified sessions" value={profileData.review_count} />
+            )}
+            {profileData.consistency_score != null && (
+              <PopoverRow label="Consistency" value={Number(profileData.consistency_score).toFixed(2)} />
+            )}
+            {profileData.created_at && (
+              <PopoverRow label="Member since" value={formatMemberSince(profileData.created_at)} />
+            )}
+            <PopoverRow label="Trust level" value={config.label} />
+          </span>
+        </span>
+      )}
     </span>
   )
+}
+
+function PopoverRow({ label, value }) {
+  return (
+    <span className="flex justify-between gap-3" style={{ display: 'flex' }}>
+      <span style={{ color: 'var(--color-text-tertiary)' }}>{label}</span>
+      <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{value}</span>
+    </span>
+  )
+}
+
+function formatMemberSince(dateStr) {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
 /**

@@ -11,14 +11,11 @@ export const jitterApi = {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return null
 
-      const { data, error } = await supabase
-        .from('jitter_profiles')
-        .select('confidence_level, consistency_score, review_count, flagged')
-        .eq('user_id', user.id)
-        .maybeSingle()
+      const { data, error } = await supabase.rpc('get_my_jitter_profile')
 
       if (error) throw createClassifiedError(error)
-      return data
+      // RPC returns an array (RETURNS TABLE) — take first row
+      return data?.[0] || null
     } catch (error) {
       logger.error('Failed to get jitter profile:', error)
       throw error.type ? error : createClassifiedError(error)

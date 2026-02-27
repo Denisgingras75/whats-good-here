@@ -282,6 +282,7 @@ CREATE TABLE IF NOT EXISTS jitter_profiles (
   confidence_level TEXT NOT NULL DEFAULT 'low' CHECK (confidence_level IN ('low', 'medium', 'high')),
   consistency_score DECIMAL(4, 3) DEFAULT 0,
   flagged BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -581,6 +582,22 @@ RETURNS TABLE (
   SELECT jp.user_id, jp.confidence_level, jp.consistency_score, jp.review_count, jp.flagged
   FROM jitter_profiles jp
   WHERE jp.user_id = ANY(p_user_ids);
+$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public;
+
+-- Get authenticated user's full jitter profile (for profile page + post-submission card)
+CREATE OR REPLACE FUNCTION get_my_jitter_profile()
+RETURNS TABLE (
+  confidence_level TEXT,
+  consistency_score DECIMAL,
+  review_count INT,
+  profile_data JSONB,
+  created_at TIMESTAMPTZ,
+  last_updated TIMESTAMPTZ
+) AS $$
+  SELECT jp.confidence_level, jp.consistency_score, jp.review_count,
+         jp.profile_data, jp.created_at, jp.last_updated
+  FROM jitter_profiles jp
+  WHERE jp.user_id = auth.uid();
 $$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public;
 
 CREATE POLICY "Users can insert own jitter samples" ON jitter_samples
@@ -2051,13 +2068,14 @@ BEGIN
 
   IF NOT FOUND THEN
     -- First sample: create profile directly from sample
-    INSERT INTO jitter_profiles (user_id, profile_data, review_count, confidence_level, consistency_score, last_updated)
+    INSERT INTO jitter_profiles (user_id, profile_data, review_count, confidence_level, consistency_score, created_at, last_updated)
     VALUES (
       NEW.user_id,
       new_sample,
       1,
       'low',
       0,
+      NOW(),
       NOW()
     );
   ELSE
@@ -2118,9 +2136,42 @@ BEGIN
           ) / sample_count, 2)
           ELSE existing_profile->'std_dwell'
         END,
+        'mean_dd_time', CASE
+          WHEN new_sample ? 'mean_dd_time' AND new_sample->>'mean_dd_time' IS NOT NULL
+          THEN ROUND((
+            COALESCE((existing_profile->>'mean_dd_time')::DECIMAL, (new_sample->>'mean_dd_time')::DECIMAL) * (sample_count - 1) +
+            (new_sample->>'mean_dd_time')::DECIMAL
+          ) / sample_count, 2)
+          ELSE existing_profile->'mean_dd_time'
+        END,
+        'std_dd_time', CASE
+          WHEN new_sample ? 'std_dd_time' AND new_sample->>'std_dd_time' IS NOT NULL
+          THEN ROUND((
+            COALESCE((existing_profile->>'std_dd_time')::DECIMAL, (new_sample->>'std_dd_time')::DECIMAL) * (sample_count - 1) +
+            (new_sample->>'std_dd_time')::DECIMAL
+          ) / sample_count, 2)
+          ELSE existing_profile->'std_dd_time'
+        END,
+        'per_key_dwell', COALESCE(existing_profile->'per_key_dwell', '{}'::JSONB) ||
+                         COALESCE(new_sample->'per_key_dwell', '{}'::JSONB),
         'bigram_signatures', COALESCE(existing_profile->'bigram_signatures', '{}'::JSONB) ||
                              COALESCE(new_sample->'bigram_signatures', '{}'::JSONB),
-        'fatigue_drift', new_sample->'fatigue_drift',
+        'edit_ratio', CASE
+          WHEN new_sample ? 'edit_ratio'
+          THEN ROUND((
+            COALESCE((existing_profile->>'edit_ratio')::DECIMAL, (new_sample->>'edit_ratio')::DECIMAL) * (sample_count - 1) +
+            (new_sample->>'edit_ratio')::DECIMAL
+          ) / sample_count, 3)
+          ELSE existing_profile->'edit_ratio'
+        END,
+        'pause_freq', CASE
+          WHEN new_sample ? 'pause_freq'
+          THEN ROUND((
+            COALESCE((existing_profile->>'pause_freq')::DECIMAL, (new_sample->>'pause_freq')::DECIMAL) * (sample_count - 1) +
+            (new_sample->>'pause_freq')::DECIMAL
+          ) / sample_count, 2)
+          ELSE existing_profile->'pause_freq'
+        END,
         'total_keystrokes', COALESCE((existing_profile->>'total_keystrokes')::INTEGER, 0) +
           COALESCE((new_sample->>'total_keystrokes')::INTEGER, 0)
       ),

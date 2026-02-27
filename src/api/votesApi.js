@@ -315,6 +315,7 @@ export const votesApi = {
         trust_badge: review.source === 'ai_estimated'
           ? 'ai_estimated'
           : jitterApi.getTrustBadgeType(jitterMap[review.user_id] || null),
+        jitter_profile: jitterMap[review.user_id] || null,
       }))
     } catch (error) {
       logger.error('Error fetching reviews for dish:', error)

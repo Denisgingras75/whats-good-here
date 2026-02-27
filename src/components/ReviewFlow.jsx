@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { capture } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
 import { useVote } from '../hooks/useVote'
-import { usePurityTracker } from '../hooks/usePurityTracker'
+import { JitterInput, SessionCard } from './jitter'
+import { jitterApi } from '../api/jitterApi'
 import { authApi } from '../api/authApi'
 import { FoodRatingSlider } from './FoodRatingSlider'
 import { ThumbsUpIcon } from './ThumbsUpIcon'
@@ -21,7 +22,7 @@ import { setBackButtonInterceptor, clearBackButtonInterceptor } from '../utils/b
 export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, category, price, totalVotes = 0, yesVotes = 0, percentWorthIt = 0, isRanked = false, hasPhotos = false, onVote, onLoginRequired, onPhotoUploaded, onToggleFavorite, isFavorite }) {
   const { user } = useAuth()
   const { submitVote, submitting } = useVote()
-  const { getPurity, getJitterProfile, attachToTextarea, reset: resetPurity } = usePurityTracker()
+  const jitterRef = useRef(null)
   const [userVote, setUserVote] = useState(null)
   const [userRating, setUserRating] = useState(null)
   const [userReviewText, setUserReviewText] = useState(null)
@@ -46,12 +47,8 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
   const [awaitingLogin, setAwaitingLogin] = useState(false)
   const [announcement, setAnnouncement] = useState('') // For screen reader announcements
   const [photoAdded, setPhotoAdded] = useState(false)
+  const [sessionCardData, setSessionCardData] = useState(null)
   const reviewTextareaRef = useRef(null)
-  // Combined ref: partner's focus ref + Denis's purity tracker ref
-  const combinedTextareaRef = (el) => {
-    reviewTextareaRef.current = el
-    attachToTextarea(el)
-  }
 
   const noVotes = localTotalVotes - localYesVotes
   const yesPercent = localTotalVotes > 0 ? Math.round((localYesVotes / localTotalVotes) * 100) : 0
@@ -195,8 +192,9 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     })
 
     // Capture purity and jitter before clearing state
-    const purityData = reviewTextToSubmit ? getPurity() : null
-    const jitterData = reviewTextToSubmit ? getJitterProfile() : null
+    const purityData = reviewTextToSubmit && jitterRef.current ? jitterRef.current.getPurity() : null
+    const jitterData = reviewTextToSubmit && jitterRef.current ? jitterRef.current.getJitterProfile() : null
+    const sessionStatsData = jitterRef.current?.getSessionStats() || null
 
     // Clear UI state immediately - instant feedback
     clearPendingVoteStorage()
@@ -205,7 +203,7 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
     setReviewText('')
     setReviewError(null)
     setPhotoAdded(false)
-    resetPurity()
+    jitterRef.current?.reset()
 
     // Haptic success feedback
     hapticSuccess()
@@ -219,7 +217,16 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
 
     // Submit to server in background (non-blocking)
     submitVote(dishId, pendingVote, sliderValue, reviewTextToSubmit, purityData, jitterData)
-      .then((result) => {
+      .then(async (result) => {
+        if (result.success && sessionStatsData?.isCapturing) {
+          try {
+            const profile = await jitterApi.getMyProfile()
+            setSessionCardData({ sessionStats: sessionStatsData, profileStats: profile })
+          } catch (e) {
+            // Non-critical — show card with session stats only
+            setSessionCardData({ sessionStats: sessionStatsData, profileStats: null })
+          }
+        }
         if (!result.success) {
           logger.error('Vote submission failed:', result.error)
         }
@@ -283,6 +290,14 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             </div>
           </div>
         )}
+        {sessionCardData && (
+          <SessionCard
+            sessionStats={sessionCardData.sessionStats}
+            profileStats={sessionCardData.profileStats}
+            onDismiss={() => setSessionCardData(null)}
+          />
+        )}
+
         <button
           onClick={() => {
             setPendingVote(userVote)
@@ -402,32 +417,25 @@ export function ReviewFlow({ dishId, dishName, restaurantId, restaurantName, cat
             category={category}
           />
 
-          {/* Review textarea — always visible, starts compact */}
+          {/* Review textarea with Jitter biometric capture */}
           <div className="relative">
             <label htmlFor="review-text" className="sr-only">Your review</label>
-            <textarea
-              ref={combinedTextareaRef}
+            <JitterInput
+              ref={jitterRef}
               id="review-text"
               value={reviewText}
-              onChange={(e) => {
-                setReviewText(e.target.value)
+              onChange={(val) => {
+                setReviewText(val)
                 if (reviewError) setReviewError(null)
               }}
-              onFocus={(e) => {
-                e.target.rows = 3
-              }}
               placeholder="What stood out?"
-              aria-label="Write your review"
-              aria-describedby={reviewError ? 'review-error' : 'review-char-count'}
-              aria-invalid={!!reviewError}
+              ariaLabel="Write your review"
+              ariaDescribedby={reviewError ? 'review-error' : 'review-char-count'}
+              ariaInvalid={!!reviewError}
               maxLength={MAX_REVIEW_LENGTH + 50}
               rows={1}
-              className="w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus-ring"
-              style={{
-                background: 'var(--color-surface-elevated)',
-                border: reviewError ? '2px solid var(--color-primary)' : '1px solid var(--color-divider)',
-                color: 'var(--color-text-primary)',
-              }}
+              showBadge={true}
+              style={reviewError ? { border: '2px solid var(--color-primary)' } : {}}
             />
             {reviewText.length > 0 && (
               <div id="review-char-count" className="absolute bottom-2 right-3 text-xs" style={{ color: reviewText.length > MAX_REVIEW_LENGTH ? 'var(--color-primary)' : 'var(--color-text-tertiary)' }}>

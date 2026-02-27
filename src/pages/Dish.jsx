@@ -944,7 +944,7 @@ export function Dish() {
                           </p>
                         )}
                         <div className="mt-2">
-                          <TrustBadge type={review.trust_badge} />
+                          <TrustBadge type={review.trust_badge} profileData={review.jitter_profile} />
                         </div>
                       </div>
                     )

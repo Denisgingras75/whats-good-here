@@ -32,6 +32,7 @@ import {
   YourTopList,
 } from '../components/profile'
 import { TrustBadge } from '../components/TrustBadge'
+import { ProfileJitterCard } from '../components/jitter'
 import { SimilarTasteUsers } from '../components/SimilarTasteUsers'
 
 const SHELVES = [
@@ -401,8 +402,15 @@ export function Profile() {
                     {jitterProfile.review_count} review{jitterProfile.review_count !== 1 ? 's' : ''} analyzed
                   </p>
                 </div>
-                <TrustBadge type={jitterApi.getTrustBadgeType(jitterProfile)} size="md" />
+                <TrustBadge type={jitterApi.getTrustBadgeType(jitterProfile)} size="md" profileData={jitterProfile} />
               </div>
+            </div>
+          )}
+
+          {/* Full Typing Identity Card */}
+          {jitterProfile && (
+            <div className="px-4 pt-3">
+              <ProfileJitterCard profile={jitterProfile} />
             </div>
           )}
 
