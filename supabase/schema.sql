@@ -2185,6 +2185,95 @@ CREATE TRIGGER curator_pick_auto_vote
   FOR EACH ROW
   EXECUTE FUNCTION create_vote_from_curator_pick();
 
+-- 13g. Get all active curators with pick counts
+CREATE OR REPLACE FUNCTION get_curators()
+RETURNS TABLE (
+  curator_id UUID,
+  curator_name TEXT,
+  photo_url TEXT,
+  bio TEXT,
+  specialty TEXT,
+  display_order INT,
+  pick_count BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    c.id AS curator_id,
+    c.name AS curator_name,
+    c.photo_url,
+    c.bio,
+    c.specialty,
+    c.display_order,
+    COUNT(cp.id) AS pick_count
+  FROM curators c
+  LEFT JOIN curator_picks cp ON cp.curator_id = c.id
+  WHERE c.is_active = true
+  GROUP BY c.id, c.name, c.photo_url, c.bio, c.specialty, c.display_order
+  ORDER BY c.display_order ASC;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+-- 13h. Get picks for a curator, optionally filtered by list category
+CREATE OR REPLACE FUNCTION get_curator_picks(p_curator_id UUID, p_list_category TEXT DEFAULT NULL)
+RETURNS TABLE (
+  pick_id UUID,
+  dish_id UUID,
+  dish_name TEXT,
+  category TEXT,
+  price DECIMAL,
+  photo_url TEXT,
+  restaurant_name TEXT,
+  restaurant_town TEXT,
+  rank_position INT,
+  blurb TEXT,
+  list_category TEXT,
+  avg_rating DECIMAL,
+  total_votes INT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    cp.id AS pick_id,
+    d.id AS dish_id,
+    d.name AS dish_name,
+    d.category,
+    d.price,
+    d.photo_url,
+    r.name AS restaurant_name,
+    r.town AS restaurant_town,
+    cp.rank_position,
+    cp.blurb,
+    cp.list_category,
+    d.avg_rating,
+    d.total_votes
+  FROM curator_picks cp
+  JOIN dishes d ON d.id = cp.dish_id
+  JOIN restaurants r ON r.id = d.restaurant_id
+  WHERE cp.curator_id = p_curator_id
+    AND (p_list_category IS NULL OR cp.list_category IS NOT DISTINCT FROM p_list_category)
+  ORDER BY cp.rank_position ASC;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+-- 13i. Get list categories for a curator with pick counts
+CREATE OR REPLACE FUNCTION get_curator_list_categories(p_curator_id UUID)
+RETURNS TABLE (
+  list_category TEXT,
+  pick_count BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    cp.list_category,
+    COUNT(*) AS pick_count
+  FROM curator_picks cp
+  WHERE cp.curator_id = p_curator_id
+  GROUP BY cp.list_category
+  ORDER BY cp.list_category NULLS FIRST;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
 -- Convenience: restaurant creation rate limiting (5 per hour)
 CREATE OR REPLACE FUNCTION check_restaurant_create_rate_limit()
 RETURNS JSONB LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
