@@ -1,34 +1,29 @@
-import { useQuery } from '@tanstack/react-query'
-import { dishesApi } from '../api/dishesApi'
-import { logger } from '../utils/logger'
+import { useMemo } from 'react'
+import { useAllDishes } from './useAllDishes'
+import { searchDishes } from '../utils/dishSearch'
 
 /**
- * Search dishes with React Query caching
- * Great for autocomplete - caches previous searches
+ * Search dishes with instant client-side filtering.
+ * Same API signature as previous server-based version.
  * @param {string} query - Search query
  * @param {number} limit - Max results (default 5)
- * @param {string|null} town - Optional town filter (e.g., 'Oak Bluffs')
+ * @param {string|null} town - Optional town filter
  * @returns {Object} { results, loading, error }
  */
 export function useDishSearch(query, limit = 5, town = null) {
+  const { dishes, loading: cacheLoading, error } = useAllDishes()
+
   const trimmedQuery = query?.trim() || ''
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['dishSearch', trimmedQuery, limit, town],
-    queryFn: () => dishesApi.search(trimmedQuery, limit, town),
-    enabled: trimmedQuery.length >= 2, // Only search with 2+ chars
-    staleTime: 1000 * 60 * 5, // Cache search results for 5 minutes
-    gcTime: 1000 * 60 * 15, // Keep in cache for 15 minutes
-  })
-
-  if (error) {
-    logger.error('Error searching dishes:', error)
-  }
+  const results = useMemo(() => {
+    if (trimmedQuery.length < 2) return []
+    if (!dishes.length) return []
+    return searchDishes(dishes, trimmedQuery, { town, limit })
+  }, [dishes, trimmedQuery, town, limit])
 
   return {
-    // Ensure we always return an array, even if API returns unexpected data
-    results: Array.isArray(data) ? data : [],
-    loading: isLoading && trimmedQuery.length >= 2,
+    results,
+    loading: cacheLoading && trimmedQuery.length >= 2,
     error,
   }
 }
