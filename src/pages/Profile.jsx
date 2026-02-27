@@ -29,6 +29,7 @@ import {
   ShelfFilter,
   JournalFeed,
   SharePicksButton,
+  YourTopList,
 } from '../components/profile'
 import { TrustBadge } from '../components/TrustBadge'
 import { SimilarTasteUsers } from '../components/SimilarTasteUsers'
@@ -530,6 +531,9 @@ export function Profile() {
             onTriedIt={handleTriedIt}
             loading={feedLoading}
           />
+
+          {/* Your Top 10 auto-list */}
+          <YourTopList votes={worthItDishes} />
 
           {/* Dish Modal for rating unrated dishes */}
           {selectedDish && (
