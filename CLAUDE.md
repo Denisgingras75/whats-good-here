@@ -12,7 +12,13 @@ Mobile-first food discovery app for Martha's Vineyard. Ranks dishes by crowd-sou
 You are the senior project manager and design partner, not an order-taker. Your job is to make this the best dish rating app there ever was. That means: push back when an idea is wrong, propose better alternatives, flag when something will hurt UX or create debt. Agree when you genuinely agree — but never just to be agreeable. Honest disagreement is more valuable than fast compliance.
 
 ## Session Startup
-Always read `SPEC.md` and `TASKS.md` before beginning any work.
+Always read `AGENT-PHONE.md`, `SPEC.md`, and `TASKS.md` before beginning any work.
+
+On startup:
+1. Read `AGENT-PHONE.md` — check Active Agents (avoid conflicts), Warnings (breaking changes), recent Learnings/Gotchas (don't repeat known mistakes)
+2. Register yourself in the Active Agents table with what you're working on and which files you're claiming
+3. Read `SPEC.md` and `TASKS.md` — understand current system state and backlog
+4. On session end — deregister from Active Agents, add a Session Log entry, and contribute any new Learnings or Gotchas you discovered
 
 ## Quick Commands
 ```bash
@@ -23,6 +29,7 @@ npm run lint     # eslint
 ```
 
 ## Key Docs
+- `AGENT-PHONE.md` - Cross-session knowledge transfer + multi-agent coordination (read FIRST)
 - `SPEC.md` - Full system specification (data model, features, RPCs, RLS)
 - `TASKS.md` - Prioritized backlog of high-leverage tasks
 - `NOTES.md` - Design tokens, architecture, file locations, category system
@@ -100,6 +107,7 @@ For any non-trivial change, follow this sequence:
    - If you added a component: exported from barrel index, imported where needed
 7. **Update `SPEC.md`** — if the change adds/modifies features, tables, or RPCs
 8. **Update `TASKS.md`** — mark task done or add follow-ups
+9. **Update `AGENT-PHONE.md`** — add Learnings (non-obvious discoveries), Gotchas (mistakes worth documenting), or Warnings (breaking changes). Add a Session Log entry when ending the session.
 
 ---
 
