@@ -312,6 +312,7 @@ export function Profile() {
             setNameStatus={setNameStatus}
             handleSaveName={handleSaveName}
             setFollowListModal={setFollowListModal}
+            jitterProfile={jitterProfile}
           />
 
           {/* Share My Picks */}

@@ -923,8 +923,11 @@ export function Dish() {
                               {review.profiles?.display_name?.charAt(0).toUpperCase() || '?'}
                             </div>
                             <div className="min-w-0">
-                              <span className="text-sm font-bold block truncate" style={{ color: 'var(--color-text-primary)' }}>
-                                @{review.profiles?.display_name || 'Anonymous'}
+                              <span className="flex items-center gap-1.5">
+                                <span className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                                  @{review.profiles?.display_name || 'Anonymous'}
+                                </span>
+                                <TrustBadge type={review.trust_badge} profileData={review.jitter_profile} />
                               </span>
                               <span className="text-[11px] block" style={{ color: 'var(--color-text-tertiary)' }}>
                                 {formatRelativeTime(review.review_created_at)}
@@ -943,9 +946,6 @@ export function Dish() {
                             {review.review_text}
                           </p>
                         )}
-                        <div className="mt-2">
-                          <TrustBadge type={review.trust_badge} profileData={review.jitter_profile} />
-                        </div>
                       </div>
                     )
                   })}

@@ -1,3 +1,6 @@
+import { TrustBadge } from '../TrustBadge'
+import { jitterApi } from '../../api/jitterApi'
+
 /**
  * Hero Identity Card for the Profile page
  * Shows user avatar, name, follow stats, and simple stats line
@@ -15,6 +18,7 @@ export function HeroIdentityCard({
   setNameStatus,
   handleSaveName,
   setFollowListModal,
+  jitterProfile,
 }) {
   return (
     <div
@@ -103,21 +107,30 @@ export function HeroIdentityCard({
               )}
             </div>
           ) : (
-            <button
-              onClick={() => setEditingName(true)}
-              className="font-bold transition-colors flex items-center gap-2"
-              style={{
-                color: 'var(--color-text-primary)',
-                fontSize: '22px',
-                letterSpacing: '-0.02em',
-                lineHeight: '1.2',
-              }}
-            >
-              {profile?.display_name || 'Set your name'}
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 flex-shrink-0 text-[color:var(--color-text-tertiary)]">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setEditingName(true)}
+                className="font-bold transition-colors flex items-center gap-2"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: '22px',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1.2',
+                }}
+              >
+                {profile?.display_name || 'Set your name'}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 flex-shrink-0 text-[color:var(--color-text-tertiary)]">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                </svg>
+              </button>
+              {jitterProfile && (
+                <TrustBadge
+                  type={jitterApi.getTrustBadgeType(jitterProfile)}
+                  size="md"
+                  profileData={jitterProfile}
+                />
+              )}
+            </div>
           )}
 
           {/* Follow Stats */}
