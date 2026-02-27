@@ -2311,7 +2311,8 @@ ON CONFLICT (key) DO UPDATE SET
 -- 17. AUTH TRIGGER: Auto-create profile on signup
 -- =============================================
 -- Ensures every auth.users entry gets a profiles row.
--- For OAuth users (Google), pulls display_name from metadata.
+-- For password signups, pulls display_name from metadata.
+-- For OAuth users (Google), pulls full_name/name from metadata.
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
@@ -2324,6 +2325,7 @@ BEGIN
   VALUES (
     NEW.id,
     COALESCE(
+      NEW.raw_user_meta_data->>'display_name',
       NEW.raw_user_meta_data->>'full_name',
       NEW.raw_user_meta_data->>'name',
       NULL

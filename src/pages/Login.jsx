@@ -73,7 +73,7 @@ export function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true)
-      await authApi.signInWithGoogle()
+      await authApi.signInWithGoogle(window.location.href)
     } catch (error) {
       setMessage({ type: 'error', text: error.message })
       setLoading(false)
@@ -121,6 +121,11 @@ export function Login() {
       setMessage(null)
 
       const result = await authApi.signUpWithPassword(email, password, username)
+
+      if (result.confirmed) {
+        // Auto-confirm is on — user is logged in, AuthContext will redirect
+        return
+      }
 
       if (result.success) {
         setMessage({

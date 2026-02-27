@@ -110,6 +110,12 @@ export function LoginModal({ isOpen, onClose, pendingAction = null }) {
 
       const result = await authApi.signUpWithPassword(email, password, username)
 
+      if (result.confirmed) {
+        // Auto-confirm is on — user is logged in, close modal
+        onClose()
+        return
+      }
+
       if (result.success) {
         setMessage({
           type: 'success',

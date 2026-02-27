@@ -122,7 +122,10 @@ export const authApi = {
         options: {
           data: {
             display_name: username,
+            name: username,
+            full_name: username,
           },
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       })
 
@@ -131,20 +134,14 @@ export const authApi = {
         throw createClassifiedError(error)
       }
 
-      // Update the profile with the display name
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ display_name: username })
-          .eq('id', data.user.id)
+      // Profile is created by the handle_new_user() trigger which reads
+      // display_name/full_name/name from raw_user_meta_data.
+      // No client-side profile update needed (would fail without a session
+      // when email confirmation is required).
 
-        if (profileError) {
-          throw createClassifiedError(profileError)
-        }
-      }
-
-      capture('signup_completed', { method: 'password' })
-      return { success: true, user: data.user }
+      const isAutoConfirmed = !!data.session
+      capture('signup_completed', { method: 'password', auto_confirmed: isAutoConfirmed })
+      return { success: true, user: data.user, confirmed: isAutoConfirmed }
     } catch (error) {
       logger.error('Error signing up:', error)
       throw error.type ? error : createClassifiedError(error)
