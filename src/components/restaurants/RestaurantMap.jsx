@@ -571,6 +571,12 @@ export function RestaurantMap({
           maxZoom={16}
           className="wgh-map-tiles"
         />
+        {/* Street labels overlay on top of watercolor */}
+        <TileLayer
+          url="https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}@2x.png"
+          maxZoom={16}
+          className="wgh-map-labels"
+        />
 
         {/* Fit bounds — skip on fullscreen map so it stays zoomed to user location */}
         {!fullScreen && <FitBounds points={fitBoundsPoints} />}
