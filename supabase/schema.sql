@@ -2604,5 +2604,37 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public;
 
--- 18. CLEANUP: Duplicate production-only policies have been dropped.
+-- =============================================
+-- 18. AGENT CHAT (cross-machine agent communication)
+-- =============================================
+-- Used by the agent-chat MCP server for inter-agent messaging.
+-- No RLS — agent-only data, accessed via service role or anon key.
+
+CREATE TABLE IF NOT EXISTS agent_chat_threads (
+  id BIGSERIAL PRIMARY KEY,
+  subject TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS agent_chat_messages (
+  id BIGSERIAL PRIMARY KEY,
+  thread_id BIGINT NOT NULL REFERENCES agent_chat_threads(id),
+  sender TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_chat_messages_thread ON agent_chat_messages(thread_id);
+CREATE INDEX IF NOT EXISTS idx_agent_chat_messages_created ON agent_chat_messages(created_at);
+
+-- RLS disabled for agent chat tables (agent-only, no user data)
+ALTER TABLE agent_chat_threads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE agent_chat_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "agent_chat_threads_all" ON agent_chat_threads FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "agent_chat_messages_all" ON agent_chat_messages FOR ALL USING (true) WITH CHECK (true);
+
+
+-- 19. CLEANUP: Duplicate production-only policies have been dropped.
 -- See supabase/migrations/cleanup_rls_policies.sql for the migration that was run.
