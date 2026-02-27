@@ -18,7 +18,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 -- =============================================
--- 1. TABLES (20 tables in dependency order)
+-- 1. TABLES (22 tables in dependency order)
 -- =============================================
 
 -- 1a. restaurants
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS votes (
   scored_at TIMESTAMPTZ,
   category_snapshot TEXT,
   purity_score DECIMAL(5, 2),
-  source TEXT NOT NULL DEFAULT 'user' CHECK (source IN ('user', 'ai_estimated')),
+  source TEXT NOT NULL DEFAULT 'user' CHECK (source IN ('user', 'ai_estimated', 'curator')),
   source_metadata JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT review_text_max_length CHECK (review_text IS NULL OR length(review_text) <= 200)
@@ -312,7 +312,32 @@ CREATE TABLE IF NOT EXISTS events (
   created_by UUID REFERENCES auth.users(id)
 );
 
--- 1v. category_median_prices (view)
+-- 1w. curators (hand-picked local experts who publish top 10 lists)
+CREATE TABLE IF NOT EXISTS curators (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  name TEXT NOT NULL,
+  photo_url TEXT,
+  bio TEXT,
+  specialty TEXT NOT NULL DEFAULT 'food',
+  is_active BOOLEAN DEFAULT true,
+  display_order INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 1x. curator_picks (ranked dish picks with personal blurbs)
+CREATE TABLE IF NOT EXISTS curator_picks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  curator_id UUID NOT NULL REFERENCES curators(id) ON DELETE CASCADE,
+  dish_id UUID NOT NULL REFERENCES dishes(id) ON DELETE CASCADE,
+  rank_position INT NOT NULL CHECK (rank_position >= 1 AND rank_position <= 10),
+  blurb TEXT,
+  list_category TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (curator_id, list_category, rank_position)
+);
+
+-- 1y. category_median_prices (view)
 -- SECURITY INVOKER ensures this runs with the querying user's permissions, not the creator's
 CREATE OR REPLACE VIEW category_median_prices
 WITH (security_invoker = true) AS
@@ -566,6 +591,32 @@ CREATE POLICY "Service role manages jitter" ON jitter_profiles
 
 CREATE POLICY "Service role manages jitter samples" ON jitter_samples
   FOR ALL USING (auth.role() = 'service_role');
+
+-- curators: public read (active only), admin-only write
+ALTER TABLE curators ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view active curators"
+  ON curators FOR SELECT
+  USING (is_active = true);
+
+CREATE POLICY "Admins can manage curators"
+  ON curators FOR ALL
+  USING (
+    EXISTS (SELECT 1 FROM auth.users WHERE id = auth.uid() AND raw_app_meta_data->>'role' = 'admin')
+  );
+
+-- curator_picks: public read, admin-only write
+ALTER TABLE curator_picks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view curator picks"
+  ON curator_picks FOR SELECT
+  USING (true);
+
+CREATE POLICY "Admins can manage curator picks"
+  ON curator_picks FOR ALL
+  USING (
+    EXISTS (SELECT 1 FROM auth.users WHERE id = auth.uid() AND raw_app_meta_data->>'role' = 'admin')
+  );
 
 
 -- =============================================
@@ -2099,6 +2150,40 @@ CREATE TRIGGER jitter_sample_merge
   AFTER INSERT ON jitter_samples
   FOR EACH ROW
   EXECUTE FUNCTION merge_jitter_sample();
+
+-- 13f. Auto-generate a vote when a curator pick is inserted
+CREATE OR REPLACE FUNCTION create_vote_from_curator_pick()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_rating DECIMAL(3,1);
+BEGIN
+  -- Rank 1 = 9.8, rank 2 = 9.5, rank 3 = 9.2, ..., rank 10 = 7.1
+  v_rating := 10.0 - (NEW.rank_position * 0.3) + 0.1;
+
+  -- Only insert if curator has a user_id linked
+  IF (SELECT user_id FROM curators WHERE id = NEW.curator_id) IS NOT NULL THEN
+    INSERT INTO votes (dish_id, user_id, would_order_again, rating_10, source, review_text)
+    VALUES (
+      NEW.dish_id,
+      (SELECT user_id FROM curators WHERE id = NEW.curator_id),
+      true,
+      v_rating,
+      'curator',
+      NEW.blurb
+    )
+    ON CONFLICT (dish_id, user_id) WHERE source = 'user'
+    DO NOTHING;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS curator_pick_auto_vote ON curator_picks;
+CREATE TRIGGER curator_pick_auto_vote
+  AFTER INSERT ON curator_picks
+  FOR EACH ROW
+  EXECUTE FUNCTION create_vote_from_curator_pick();
 
 -- Convenience: restaurant creation rate limiting (5 per hour)
 CREATE OR REPLACE FUNCTION check_restaurant_create_rate_limit()
