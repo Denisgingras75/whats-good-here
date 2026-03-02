@@ -9,6 +9,17 @@ const viewedSpecials = new Set()
 /**
  * Card displaying a restaurant special/deal
  */
+function getTimeRemaining(expiresAt) {
+  if (!expiresAt) return null
+  const diff = new Date(expiresAt).getTime() - Date.now()
+  if (diff <= 0) return null
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  if (hours > 24) return `${Math.floor(hours / 24)}d left`
+  if (hours > 0) return `${hours}h ${mins}m left`
+  return `${mins}m left`
+}
+
 export const SpecialCard = memo(function SpecialCard({ special, promoted }) {
   const navigate = useNavigate()
   const cardRef = useRef(null)
@@ -17,8 +28,10 @@ export const SpecialCard = memo(function SpecialCard({ special, promoted }) {
     deal_name,
     description,
     price,
+    expires_at,
     restaurants: restaurant
   } = special
+  const timeLeft = getTimeRemaining(expires_at)
 
   // Track view when card enters viewport
   useEffect(() => {
@@ -105,9 +118,9 @@ export const SpecialCard = memo(function SpecialCard({ special, promoted }) {
             </p>
           )}
 
-          {/* Price */}
-          {price && (
-            <div className="mt-2">
+          {/* Price + Countdown */}
+          <div className="flex items-center gap-2 mt-2">
+            {price && (
               <span
                 className="inline-block px-2 py-1 rounded-md text-sm font-bold"
                 style={{
@@ -117,8 +130,16 @@ export const SpecialCard = memo(function SpecialCard({ special, promoted }) {
               >
                 ${Number(price).toFixed(2)}
               </span>
-            </div>
-          )}
+            )}
+            {timeLeft && (
+              <span
+                className="text-xs font-medium"
+                style={{ color: 'var(--color-accent-orange)' }}
+              >
+                {timeLeft}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </button>

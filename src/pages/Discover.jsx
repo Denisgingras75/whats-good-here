@@ -18,7 +18,7 @@ const FILTER_CHIPS = [
   { value: 'other_events', label: 'Other Events' },
 ]
 
-export function Discover() {
+export default function Discover() {
   const navigate = useNavigate()
   const [filter, setFilter] = useState('all')
   const { specials, loading: specialsLoading, error: specialsError } = useSpecials()

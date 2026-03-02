@@ -17,7 +17,9 @@ export const specialsApi = {
             id,
             name,
             town,
-            address
+            address,
+            lat,
+            lng
           )
         `)
         .eq('is_active', true)

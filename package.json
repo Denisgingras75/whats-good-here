@@ -16,7 +16,10 @@
     "test:e2e:pioneer": "npx playwright test --project=pioneer-setup --project=pioneer-chromium",
     "test:e2e:business": "npx playwright test --project=business-setup --project=business-chromium",
     "test:e2e:report": "npx playwright show-report",
-    "test:e2e:ui": "npx playwright test --ui"
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:jitter-lab": "node e2e/jitter-lab/run-simulations.mjs",
+    "test:jitter-lab:capture": "npx playwright test --project=pioneer-setup --project=jitter-lab",
+    "prepare": "husky"
   },
   "dependencies": {
     "@sentry/react": "^10.34.0",
@@ -47,7 +50,9 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "husky": "^9.1.7",
     "jsdom": "^23.0.1",
+    "lint-staged": "^16.2.7",
     "postcss": "^8.5.6",
     "rollup-plugin-visualizer": "^6.0.5",
     "supabase": "^2.72.8",
@@ -55,5 +60,10 @@
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^1.1.0"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx}": [
+      "eslint"
+    ]
   }
 }

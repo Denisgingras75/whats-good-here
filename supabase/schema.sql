@@ -338,7 +338,46 @@ CREATE TABLE IF NOT EXISTS curator_picks (
   UNIQUE (curator_id, list_category, rank_position)
 );
 
--- 1y. category_median_prices (view)
+-- 1y. dish_logs (personal food diary entries)
+CREATE TABLE IF NOT EXISTS dish_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  dish_id UUID NOT NULL REFERENCES dishes(id) ON DELETE CASCADE,
+  note TEXT,
+  occasion TEXT,
+  dining_with TEXT,
+  photo_url TEXT,
+  rating_5 SMALLINT CHECK (rating_5 IS NULL OR (rating_5 >= 1 AND rating_5 <= 5)),
+  logged_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 1z. shelves (user-created collections: Tried, Want to Try, Top 10, custom)
+CREATE TABLE IF NOT EXISTS shelves (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  is_default BOOLEAN DEFAULT false,
+  is_public BOOLEAN DEFAULT false,
+  shelf_type TEXT NOT NULL DEFAULT 'custom'
+    CHECK (shelf_type IN ('tried', 'want_to_try', 'top_10', 'custom')),
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 1aa. shelf_items (dishes on a shelf)
+CREATE TABLE IF NOT EXISTS shelf_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shelf_id UUID NOT NULL REFERENCES shelves(id) ON DELETE CASCADE,
+  dish_id UUID NOT NULL REFERENCES dishes(id) ON DELETE CASCADE,
+  note TEXT,
+  sort_order INT DEFAULT 0,
+  added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(shelf_id, dish_id)
+);
+
+-- 1ab. category_median_prices (view)
 -- SECURITY INVOKER ensures this runs with the querying user's permissions, not the creator's
 CREATE OR REPLACE VIEW category_median_prices
 WITH (security_invoker = true) AS
@@ -430,6 +469,19 @@ CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type) WHERE is_active
 
 -- jitter_samples (keep only last 30 samples per user, rolling window)
 CREATE INDEX IF NOT EXISTS idx_jitter_samples_user ON jitter_samples (user_id, collected_at DESC);
+
+-- dish_logs
+CREATE INDEX IF NOT EXISTS idx_dish_logs_user ON dish_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_dish_logs_dish ON dish_logs(dish_id);
+CREATE INDEX IF NOT EXISTS idx_dish_logs_logged_at ON dish_logs(user_id, logged_at DESC);
+
+-- shelves
+CREATE INDEX IF NOT EXISTS idx_shelves_user ON shelves(user_id);
+CREATE INDEX IF NOT EXISTS idx_shelves_type ON shelves(user_id, shelf_type);
+
+-- shelf_items
+CREATE INDEX IF NOT EXISTS idx_shelf_items_shelf ON shelf_items(shelf_id);
+CREATE INDEX IF NOT EXISTS idx_shelf_items_dish ON shelf_items(dish_id);
 
 
 -- =============================================
@@ -634,6 +686,39 @@ CREATE POLICY "Admins can manage curator picks"
   USING (
     EXISTS (SELECT 1 FROM auth.users WHERE id = auth.uid() AND raw_app_meta_data->>'role' = 'admin')
   );
+
+
+-- dish_logs: public read (for social feed), users manage own
+ALTER TABLE dish_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "dish_logs_select" ON dish_logs FOR SELECT USING (true);
+CREATE POLICY "dish_logs_insert_own" ON dish_logs FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
+CREATE POLICY "dish_logs_update_own" ON dish_logs FOR UPDATE USING ((select auth.uid()) = user_id);
+CREATE POLICY "dish_logs_delete_own" ON dish_logs FOR DELETE USING ((select auth.uid()) = user_id);
+
+-- shelves: public shelves readable by all, private only by owner
+ALTER TABLE shelves ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "shelves_select" ON shelves FOR SELECT USING (is_public = true OR (select auth.uid()) = user_id);
+CREATE POLICY "shelves_insert_own" ON shelves FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
+CREATE POLICY "shelves_update_own" ON shelves FOR UPDATE USING ((select auth.uid()) = user_id);
+CREATE POLICY "shelves_delete_own" ON shelves FOR DELETE USING ((select auth.uid()) = user_id AND is_default = false);
+
+-- shelf_items: visible if shelf is visible, managed by shelf owner
+ALTER TABLE shelf_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "shelf_items_select" ON shelf_items FOR SELECT USING (
+  EXISTS (SELECT 1 FROM shelves s WHERE s.id = shelf_items.shelf_id AND (s.is_public = true OR (select auth.uid()) = s.user_id))
+);
+CREATE POLICY "shelf_items_insert_own" ON shelf_items FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM shelves s WHERE s.id = shelf_items.shelf_id AND (select auth.uid()) = s.user_id)
+);
+CREATE POLICY "shelf_items_update_own" ON shelf_items FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM shelves s WHERE s.id = shelf_items.shelf_id AND (select auth.uid()) = s.user_id)
+);
+CREATE POLICY "shelf_items_delete_own" ON shelf_items FOR DELETE USING (
+  EXISTS (SELECT 1 FROM shelves s WHERE s.id = shelf_items.shelf_id AND (select auth.uid()) = s.user_id)
+);
 
 
 -- =============================================
@@ -2601,6 +2686,25 @@ BEGIN
   WHERE s.restaurant_id = p_restaurant_id
     AND sv.viewed_at > NOW() - INTERVAL '7 days'
   GROUP BY sv.special_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public;
+
+-- 17c. get_platform_stats — homepage stat bar (dishes, restaurants, user votes)
+CREATE OR REPLACE FUNCTION get_platform_stats()
+RETURNS JSON AS $$
+DECLARE
+  v_dishes BIGINT;
+  v_restaurants BIGINT;
+  v_votes BIGINT;
+BEGIN
+  SELECT COUNT(*)::BIGINT INTO v_dishes FROM dishes;
+  SELECT COUNT(*)::BIGINT INTO v_restaurants FROM restaurants WHERE restaurants.is_open = true;
+  SELECT COUNT(*)::BIGINT INTO v_votes FROM votes WHERE votes.source = 'user';
+  RETURN json_build_object(
+    'dish_count', v_dishes,
+    'restaurant_count', v_restaurants,
+    'vote_count', v_votes
+  );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public;
 

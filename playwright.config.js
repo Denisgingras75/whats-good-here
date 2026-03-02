@@ -66,6 +66,18 @@ export default defineConfig({
         storageState: 'e2e/.auth/business.json',
       },
     },
+
+    // --- Jitter Lab: stress test capture pipeline ---
+    {
+      name: 'jitter-lab',
+      testDir: './e2e/jitter-lab/capture',
+      timeout: 120_000,
+      use: {
+        ...devices['Pixel 7'],
+        storageState: 'e2e/.auth/pioneer.json',
+      },
+      dependencies: ['pioneer-setup'],
+    },
   ],
 
   webServer: {

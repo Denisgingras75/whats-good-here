@@ -11,7 +11,7 @@ import { DishListItem } from '../components/DishListItem'
 import { CategoryChips } from '../components/CategoryChips'
 import { SectionHeader } from '../components/SectionHeader'
 import { EmptyState } from '../components/EmptyState'
-import { CuratorListSection } from '../components/home'
+import { CuratorListSection, StatBar, HowItWorks } from '../components/home'
 
 export function Home() {
   var navigate = useNavigate()
@@ -78,6 +78,14 @@ export function Home() {
         />
       </div>
 
+      {/* Trust line + stats */}
+      <div className="text-center px-4 pb-1">
+        <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+          Powered by real ratings from locals and visitors
+        </p>
+      </div>
+      <StatBar />
+
       {/* Category chips + town picker */}
       <CategoryChips
         selected={selectedCategory}
@@ -111,7 +119,7 @@ export function Home() {
       </div>
 
       {/* Ranked dish list */}
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-2">
         {searchQuery ? (
           searchLoading ? (
             <ListSkeleton />
@@ -163,7 +171,33 @@ export function Home() {
             title={selectedCategory ? 'No ' + (selectedCategoryLabel ? selectedCategoryLabel.label : '') + ' rated yet' : 'No dishes found'}
           />
         )}
+        {/* Best 50 CTA — shareable list */}
+        {!searchQuery && !loading && rankedDishes.length > 0 && (
+          <button
+            onClick={function () { navigate('/best') }}
+            className="w-full mt-4 px-4 py-3.5 rounded-xl text-left flex items-center justify-between active:scale-[0.98] transition-all"
+            style={{
+              background: 'var(--color-surface)',
+              border: '1.5px solid var(--color-divider)',
+            }}
+          >
+            <div>
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                The 50 Best Dishes on MV
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                See the full island ranking
+              </p>
+            </div>
+            <svg className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
       </div>
+
+      {/* How it works */}
+      <HowItWorks />
 
     </div>
   )

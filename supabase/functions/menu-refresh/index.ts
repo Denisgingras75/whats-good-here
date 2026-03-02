@@ -231,6 +231,7 @@ async function extractMenuWithClaude(content: string, restaurantName: string): P
       'Content-Type': 'application/json',
       'x-api-key': ANTHROPIC_API_KEY!,
       'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'prompt-caching-2024-07-31',
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
@@ -241,7 +242,13 @@ async function extractMenuWithClaude(content: string, restaurantName: string): P
           content: `Extract the full menu from "${restaurantName}":\n\n${content}`,
         },
       ],
-      system: MENU_EXTRACTION_PROMPT,
+      system: [
+        {
+          type: 'text',
+          text: MENU_EXTRACTION_PROMPT,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
     }),
   })
 

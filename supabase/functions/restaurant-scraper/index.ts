@@ -116,6 +116,7 @@ async function extractWithClaude(content: string, restaurantName: string): Promi
       'Content-Type': 'application/json',
       'x-api-key': ANTHROPIC_API_KEY!,
       'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'prompt-caching-2024-07-31',
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
@@ -126,7 +127,13 @@ async function extractWithClaude(content: string, restaurantName: string): Promi
           content: `Restaurant: ${restaurantName}\n\nToday's date: ${new Date().toISOString().split('T')[0]}\n\nWebpage content:\n${content}`,
         },
       ],
-      system: EXTRACTION_PROMPT,
+      system: [
+        {
+          type: 'text',
+          text: EXTRACTION_PROMPT,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
     }),
   })
 
