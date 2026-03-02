@@ -66,13 +66,17 @@ const ManageRestaurant = lazyWithRetry(() => import('./pages/ManageRestaurant'),
 const Hub = lazyWithRetry(() => import('./pages/Hub'), 'Hub')
 const CuratorDetail = lazyWithRetry(() => import('./pages/CuratorDetail'), 'CuratorDetail')
 const MapPage = lazyWithRetry(() => import('./pages/Map'), 'Map')
+const BestDishes = lazyWithRetry(() => import('./pages/BestDishes'), 'BestDishes')
 const HowReviewsWork = lazyWithRetry(() => import('./pages/HowReviewsWork'), 'HowReviewsWork')
 const ForRestaurants = lazyWithRetry(() => import('./pages/ForRestaurants'), 'ForRestaurants')
+const RestaurantPitch = lazyWithRetry(() => import('./pages/RestaurantPitch'), 'RestaurantPitch')
+const Activity = lazyWithRetry(() => import('./pages/Activity'), 'Activity')
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound')
 
 // Prefetch functions for smoother navigation - call on hover/focus
 export const prefetchRoutes = {
   home: () => import('./pages/Home'),
+  best: () => import('./pages/BestDishes'),
   browse: () => import('./pages/Browse'),
   dish: () => import('./pages/Dish'),
   map: () => import('./pages/Map'),
@@ -130,6 +134,7 @@ function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Layout><Home /></Layout>} />
+              <Route path="/best" element={<Layout><BestDishes /></Layout>} />
               <Route path="/browse" element={<Layout><Browse /></Layout>} />
               <Route path="/dish/:dishId" element={<Layout><Dish /></Layout>} />
               <Route path="/restaurants" element={<Layout><Restaurants /></Layout>} />
@@ -138,6 +143,7 @@ function App() {
               <Route path="/hub" element={<Layout><Hub /></Layout>} />
               <Route path="/curator/:curatorId" element={<Layout><CuratorDetail /></Layout>} />
               <Route path="/discover" element={<Layout><Discover /></Layout>} />
+              <Route path="/activity" element={<Layout><Activity /></Layout>} />
               <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
               <Route path="/user/:userId" element={<Layout><UserProfile /></Layout>} />
               <Route path="/login" element={<Login />} />
@@ -149,6 +155,7 @@ function App() {
               <Route path="/terms" element={<Terms />} />
               <Route path="/how-reviews-work" element={<Layout><HowReviewsWork /></Layout>} />
               <Route path="/for-restaurants" element={<ForRestaurants />} />
+              <Route path="/pitch/:restaurantId" element={<RestaurantPitch />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

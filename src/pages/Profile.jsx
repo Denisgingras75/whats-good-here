@@ -30,10 +30,16 @@ import {
   JournalFeed,
   SharePicksButton,
   YourTopList,
+  ShelvesGrid,
+  TastePersonalityCard,
+  DiaryHeatmap,
 } from '../components/profile'
 import { TrustBadge } from '../components/TrustBadge'
 import { ProfileJitterCard } from '../components/jitter'
 import { SimilarTasteUsers } from '../components/SimilarTasteUsers'
+import { useShelves } from '../hooks/useShelves'
+import { useTasteStats } from '../hooks/useTasteStats'
+import { useDiary } from '../hooks/useDiary'
 
 const SHELVES = [
   { id: 'all', label: 'All' },
@@ -60,6 +66,9 @@ export function Profile() {
   const { worthItDishes, avoidDishes, stats, loading: votesLoading, refetch: refetchVotes } = useUserVotes(user?.id)
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites(user?.id)
   const { dishes: unratedDishes, count: unratedCount, loading: unratedLoading, refetch: refetchUnrated } = useUnratedDishes(user?.id)
+  const { shelves, loading: shelvesLoading, createShelf, deleteShelf, removeFromShelf } = useShelves(user?.id)
+  const { stats: tasteStats } = useTasteStats(user?.id)
+  const { feed: diaryFeed } = useDiary(user?.id)
 
   const [selectedDish, setSelectedDish] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -469,6 +478,21 @@ export function Profile() {
               )}
             </div>
           )}
+
+          {/* Taste Personality */}
+          <TastePersonalityCard stats={tasteStats} />
+
+          {/* Diary Heatmap */}
+          <DiaryHeatmap entries={diaryFeed} />
+
+          {/* My Shelves */}
+          <ShelvesGrid
+            shelves={shelves}
+            loading={shelvesLoading}
+            onCreateShelf={createShelf}
+            onDeleteShelf={deleteShelf}
+            onRemoveItem={removeFromShelf}
+          />
 
           {/* Find Friends Section */}
           <div className="px-4 py-4 relative" style={{ background: 'var(--color-bg)' }}>
