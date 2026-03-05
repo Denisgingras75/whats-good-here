@@ -21,7 +21,7 @@ export const votesApi = {
    * @param {string} params.reviewText - Optional review text (max 200 chars)
    * @returns {Promise<Object>} Success status
    */
-  async submitVote({ dishId, wouldOrderAgain, rating10 = null, reviewText = null, purityData = null, jitterData = null }) {
+  async submitVote({ dishId, wouldOrderAgain, rating10 = null, reviewText = null, purityData = null, jitterData = null, jitterScore = null }) {
     // Quick client-side check first (better UX)
       const clientRateLimit = checkVoteRateLimit()
       if (!clientRateLimit.allowed) {
@@ -94,10 +94,15 @@ export const votesApi = {
       // Submit jitter profile data if available
       if (jitterData) {
         try {
-          await supabase.from('jitter_samples').insert({
+          const sampleRow = {
             user_id: user.id,
             sample_data: jitterData,
-          })
+          }
+          if (jitterScore) {
+            sampleRow.liveness_score = jitterScore.score
+            sampleRow.flags = jitterScore.flags
+          }
+          await supabase.from('jitter_samples').insert(sampleRow)
         } catch (jitterErr) {
           // Jitter submission is non-critical -- log but don't fail the vote
           logger.warn('Jitter sample submission failed:', jitterErr)
