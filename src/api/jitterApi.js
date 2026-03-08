@@ -63,6 +63,23 @@ export const jitterApi = {
     }
   },
 
+  /**
+   * Join the Jitter waitlist (public landing page).
+   * No auth required — anonymous insert.
+   */
+  async joinWaitlist(email, source) {
+    try {
+      var { error } = await supabase
+        .from('jitter_waitlist')
+        .insert({ email: email, source: source || 'general' })
+      if (error) throw createClassifiedError(error)
+      return true
+    } catch (err) {
+      logger.error('Waitlist insert failed:', err)
+      throw err.type ? err : createClassifiedError(err)
+    }
+  },
+
   getTrustBadgeType(jitterProfile) {
     if (!jitterProfile) return null
     if (jitterProfile.flagged) return null

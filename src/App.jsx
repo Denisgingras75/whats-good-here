@@ -64,6 +64,7 @@ const ResetPassword = lazyWithRetry(() => import('./pages/ResetPassword'), 'Rese
 const AcceptInvite = lazyWithRetry(() => import('./pages/AcceptInvite'), 'AcceptInvite')
 const ManageRestaurant = lazyWithRetry(() => import('./pages/ManageRestaurant'), 'ManageRestaurant')
 const Hub = lazyWithRetry(() => import('./pages/Hub'), 'Hub')
+const JitterLanding = lazyWithRetry(() => import('./pages/JitterLanding'))
 const CuratorDetail = lazyWithRetry(() => import('./pages/CuratorDetail'), 'CuratorDetail')
 const MapPage = lazyWithRetry(() => import('./pages/Map'), 'Map')
 const BestDishes = lazyWithRetry(() => import('./pages/BestDishes'), 'BestDishes')
@@ -151,6 +152,7 @@ function App() {
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
               <Route path="/invite/:token" element={<AcceptInvite />} />
               <Route path="/manage" element={<ProtectedRoute><ManageRestaurant /></ProtectedRoute>} />
+              <Route path="/jitter" element={<JitterLanding />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/how-reviews-work" element={<Layout><HowReviewsWork /></Layout>} />

@@ -39,6 +39,16 @@ export const CAPE_COD_TOWNS = [
 ]
 
 /**
+ * MV Season — restaurants open Memorial Day → Columbus Day
+ * Used for review freshness display and future decay scoring
+ */
+export const MV_SEASON = {
+  open: { month: 5, day: 22 },   // Memorial Day weekend (approx)
+  close: { month: 10, day: 15 }, // Columbus Day (approx)
+  label: 'May 22 – Oct 15',
+}
+
+/**
  * All towns across islands + Cape
  */
 export const ALL_TOWNS = [

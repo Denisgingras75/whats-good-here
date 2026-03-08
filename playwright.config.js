@@ -78,6 +78,16 @@ export default defineConfig({
       },
       dependencies: ['pioneer-setup'],
     },
+
+    // --- Bot Farm: 2-week adversarial test (no auth — bots are anonymous) ---
+    {
+      name: 'botfarm',
+      testDir: './e2e/jitter-lab/botfarm',
+      timeout: 120_000,
+      use: {
+        ...devices['Pixel 7'],
+      },
+    },
   ],
 
   webServer: {

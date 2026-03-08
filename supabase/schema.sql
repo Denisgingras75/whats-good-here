@@ -387,6 +387,18 @@ CREATE TABLE IF NOT EXISTS shelf_items (
   UNIQUE(shelf_id, dish_id)
 );
 
+-- 1z. Jitter waitlist (email capture from landing page)
+CREATE TABLE IF NOT EXISTS jitter_waitlist (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL,
+  source TEXT DEFAULT 'general',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE jitter_waitlist ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can join waitlist" ON jitter_waitlist FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service role reads waitlist" ON jitter_waitlist FOR SELECT USING (auth.role() = 'service_role');
+
 -- 1ab. category_median_prices (view)
 -- SECURITY INVOKER ensures this runs with the querying user's permissions, not the creator's
 CREATE OR REPLACE VIEW category_median_prices
