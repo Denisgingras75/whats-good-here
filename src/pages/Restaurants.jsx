@@ -37,8 +37,10 @@ export function Restaurants() {
 
   // Google Place IDs already in DB (to filter from discovery)
   var existingPlaceIds = useMemo(function () {
-    return []
-  }, [])
+    return restaurants
+      .filter(function (r) { return r.google_place_id })
+      .map(function (r) { return r.google_place_id })
+  }, [restaurants])
 
   // Discover nearby restaurants from Google Places (auth only)
   var nearbyData = useNearbyPlaces({
@@ -59,7 +61,10 @@ export function Restaurants() {
         return restaurantTab === 'open' ? r.is_open !== false : r.is_open === false
       })
       .filter(function (r) {
-        return r.name.toLowerCase().includes(searchQuery.toLowerCase())
+        var q = searchQuery.toLowerCase()
+        return r.name.toLowerCase().includes(q) ||
+          (r.cuisine && r.cuisine.toLowerCase().includes(q)) ||
+          (r.town && r.town.toLowerCase().includes(q))
       })
 
     if (!isDistanceFiltered) {

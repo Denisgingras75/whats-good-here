@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLocationContext } from '../context/LocationContext'
+import { useAuth } from '../context/AuthContext'
 import { useDishes } from '../hooks/useDishes'
 import { useDishSearch } from '../hooks/useDishSearch'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
@@ -13,15 +14,18 @@ import { SectionHeader } from '../components/SectionHeader'
 import { EmptyState } from '../components/EmptyState'
 import { CuratorListSection, StatBar, HowItWorks } from '../components/home'
 import { JitterBadge } from '../components/jitter/JitterBadge'
+import { AddRestaurantModal } from '../components/AddRestaurantModal'
 
 export function Home() {
   var navigate = useNavigate()
+  var { user } = useAuth()
   var { location, radius, town, setTown } = useLocationContext()
 
   var [selectedCategory, setSelectedCategory] = useState(null)
   var [townPickerOpen, setTownPickerOpen] = useState(false)
   var [searchQuery, setSearchQuery] = useState('')
   var [searchLimit, setSearchLimit] = useState(10)
+  var [addRestaurantOpen, setAddRestaurantOpen] = useState(false)
 
   var handleSearchChange = useCallback(function (q) {
     setSearchQuery(q)
@@ -201,6 +205,28 @@ export function Home() {
       {/* How it works */}
       <HowItWorks />
 
+      {/* Add Restaurant / Check In floating CTA */}
+      {user && (
+        <button
+          onClick={function () { setAddRestaurantOpen(true) }}
+          className="fixed bottom-20 right-4 z-10 flex items-center gap-2 px-4 py-3 rounded-full font-semibold text-sm shadow-lg transition-all active:scale-95"
+          style={{
+            background: 'var(--color-accent-gold)',
+            color: 'var(--color-bg)',
+            boxShadow: '0 4px 16px rgba(217, 167, 101, 0.4)',
+          }}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Add / Check In
+        </button>
+      )}
+
+      <AddRestaurantModal
+        isOpen={addRestaurantOpen}
+        onClose={function () { setAddRestaurantOpen(false) }}
+      />
     </div>
   )
 }

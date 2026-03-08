@@ -2,12 +2,14 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { capture } from '../lib/analytics'
 import { dishesApi } from '../api/dishesApi'
+import { restaurantsApi } from '../api/restaurantsApi'
 import { getCategoryNeonImage } from '../constants/categories'
 import { MIN_VOTES_FOR_RANKING } from '../constants/app'
 import { getRatingColor } from '../utils/ranking'
 import { logger } from '../utils/logger'
 const MIN_SEARCH_LENGTH = 2
 const MAX_DISH_RESULTS = 5
+const MAX_RESTAURANT_RESULTS = 3
 const MAX_CATEGORY_RESULTS = 2
 
 // Browse shortcuts - curated high-frequency categories only
@@ -34,6 +36,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [searchResults, setSearchResults] = useState([])
+  const [restaurantResults, setRestaurantResults] = useState([])
   const [searching, setSearching] = useState(false)
   const inputRef = useRef(null)
   const dropdownRef = useRef(null)
@@ -73,26 +76,31 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
     }
   }, [query, onSearchChange])
 
-  // Fetch search results from API (dropdown mode only)
+  // Fetch search results from API (dropdown mode only) — dishes + restaurants in parallel
   useEffect(() => {
     if (onSearchChange) return // Skip dropdown fetch in inline mode
     if (query.length < MIN_SEARCH_LENGTH) {
       setSearchResults([])
+      setRestaurantResults([])
       return
     }
 
     const fetchResults = async () => {
       setSearching(true)
       try {
-        const results = await dishesApi.search(query, MAX_DISH_RESULTS, town)
-        // Only update state if still mounted
+        const [dishResults, restResults] = await Promise.all([
+          dishesApi.search(query, MAX_DISH_RESULTS, town).catch(() => []),
+          restaurantsApi.search(query, MAX_RESTAURANT_RESULTS).catch(() => []),
+        ])
         if (mountedRef.current) {
-          setSearchResults(results)
+          setSearchResults(dishResults)
+          setRestaurantResults(restResults)
         }
       } catch (error) {
         logger.error('Search error:', error)
         if (mountedRef.current) {
           setSearchResults([])
+          setRestaurantResults([])
         }
       } finally {
         if (mountedRef.current) {
@@ -119,10 +127,11 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
 
   const results = {
     dishes: searchResults,
+    restaurants: restaurantResults,
     categories: matchingCategories,
   }
 
-  const hasResults = results.dishes.length > 0 || results.categories.length > 0
+  const hasResults = results.dishes.length > 0 || results.restaurants.length > 0 || results.categories.length > 0
   const showDropdown = !onSearchChange && isFocused && query.length >= MIN_SEARCH_LENGTH
   const isLoading = loading || searching
 
@@ -141,6 +150,20 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
     setIsFocused(false)
     // Navigate to dedicated dish page
     navigate(`/dish/${dish.dish_id}`)
+  }
+
+  // Handle restaurant selection
+  const handleRestaurantSelect = (restaurant) => {
+    capture('search_performed', {
+      query: query,
+      result_type: 'restaurant',
+      selected_restaurant_id: restaurant.id,
+      selected_restaurant_name: restaurant.name,
+      results_count: results.restaurants.length,
+    })
+    setQuery('')
+    setIsFocused(false)
+    navigate(`/restaurants/${restaurant.id}`)
   }
 
   // Handle category selection
@@ -264,7 +287,7 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
           ) : !hasResults ? (
             <div className="px-4 py-6 text-center">
               <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                No dishes found for "{query}"
+                No dishes or restaurants found for "{query}"
               </p>
               <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
                 Try a different search term
@@ -286,6 +309,30 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
                       dish={dish}
                       rank={index + 1}
                       onClick={() => handleDishSelect(dish)}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Restaurant Results */}
+              {results.restaurants.length > 0 && (
+                <div>
+                  <div
+                    className="px-4 py-2 border-b"
+                    style={{
+                      borderColor: 'var(--color-divider)',
+                      background: results.dishes.length > 0 ? 'var(--color-surface)' : 'transparent',
+                    }}
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                      Restaurants
+                    </span>
+                  </div>
+                  {results.restaurants.map((restaurant) => (
+                    <RestaurantResult
+                      key={restaurant.id}
+                      restaurant={restaurant}
+                      onClick={() => handleRestaurantSelect(restaurant)}
                     />
                   ))}
                 </div>
@@ -366,6 +413,50 @@ function DishResult({ dish, rank, onClick }) {
           </span>
         )}
       </div>
+    </button>
+  )
+}
+
+// Restaurant result row
+function RestaurantResult({ restaurant, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 py-2.5 px-4 transition-colors text-left"
+      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+    >
+      {/* Restaurant icon */}
+      <div
+        className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center"
+        style={{ background: 'rgba(217, 167, 101, 0.12)' }}
+      >
+        <svg className="w-4 h-4" style={{ color: 'var(--color-accent-gold)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+        </svg>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+          {restaurant.name}
+        </p>
+        {restaurant.address && (
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+            {restaurant.address}
+          </p>
+        )}
+      </div>
+
+      <svg
+        className="w-4 h-4 flex-shrink-0"
+        style={{ color: 'var(--color-text-tertiary)' }}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
     </button>
   )
 }

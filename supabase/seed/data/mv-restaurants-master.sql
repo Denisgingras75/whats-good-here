@@ -61,7 +61,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- EDGARTOWN
 -- ============================================
 INSERT INTO restaurants (name, address, lat, lng, town, cuisine) VALUES
-('Bad Martha Farmer''s Brewery', '270 Upper Main St, Edgartown, MA 02539', 41.3897, -70.5197, 'Edgartown', 'Brewery'),
+('Bad Martha Farmer''s Brewery', '270 Upper Main St, Edgartown, MA 02539', 41.3897, -70.5197, 'Edgartown', 'Brewery'), -- website: badmartha.com, online ordering, taproom
 ('Atria', '137 Main St, Edgartown, MA 02539', 41.3890, -70.5133, 'Edgartown', 'Fine Dining'),
 ('Alchemy Bistro & Bar', '71 Main St, Edgartown, MA 02539', 41.3895, -70.5130, 'Edgartown', 'Bistro'),
 ('Among The Flowers Cafe', '17 Mayhew Ln, Edgartown, MA 02539', 41.3885, -70.5125, 'Edgartown', 'Cafe'),
