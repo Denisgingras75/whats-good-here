@@ -1433,19 +1433,10 @@ input.outline-none:focus-visible {
    Stamen Watercolor — treasure map aesthetic
    =========================== */
 .wgh-map-tiles {
-  filter: brightness(1.02) contrast(1.05);
+  filter: brightness(1.0) contrast(1.02);
 }
 
 [data-theme="dark"] .wgh-map-tiles {
-  filter: sepia(0.35) brightness(0.6) contrast(1.15);
+  filter: brightness(0.7) contrast(1.1) saturate(0.8);
 }
 
-/* Street labels — softened to blend with watercolor */
-.wgh-map-labels {
-  opacity: 0.55;
-}
-
-[data-theme="dark"] .wgh-map-labels {
-  filter: invert(1);
-  opacity: 0.45;
-}
