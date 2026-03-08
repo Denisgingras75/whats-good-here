@@ -80,6 +80,7 @@ export const DishListItem = memo(function DishListItem({
   const toastSlug = dish.toast_slug || (dish.restaurants && dish.restaurants.toast_slug)
   const websiteUrl = dish.website_url || (dish.restaurants && dish.restaurants.website_url)
   const restaurantAddress = dish.restaurant_address || (dish.restaurants && dish.restaurants.address)
+  const restaurantPhone = dish.restaurant_phone || (dish.restaurants && dish.restaurants.phone)
 
   var handleClick = onClick || function () { navigate('/dish/' + dishId) }
 
@@ -214,7 +215,7 @@ export const DishListItem = memo(function DishListItem({
         <a
           href={dish.restaurant_lat && dish.restaurant_lng
             ? 'https://www.google.com/maps/dir/?api=1&destination=' + dish.restaurant_lat + ',' + dish.restaurant_lng
-            : 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent((restaurantAddress || restaurantName) + ', Martha\'s Vineyard, MA')
+            : 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent((restaurantAddress || (restaurantName + ', ' + (restaurantTown || ''))) + ', Martha\'s Vineyard, MA')
           }
           target="_blank"
           rel="noopener noreferrer"
@@ -227,6 +228,21 @@ export const DishListItem = memo(function DishListItem({
             <path d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
           </svg>
         </a>
+
+        {/* Call */}
+        {restaurantPhone && (
+          <a
+            href={'tel:' + restaurantPhone}
+            onClick={function (e) { e.stopPropagation() }}
+            className="flex-shrink-0 rounded-lg p-1.5"
+            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)' }}
+            aria-label="Call"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+            </svg>
+          </a>
+        )}
 
         {/* Rating */}
         <div className="text-right" style={{ minWidth: '28px' }}>

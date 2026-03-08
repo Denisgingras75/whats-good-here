@@ -635,7 +635,9 @@ export const dishesApi = {
             lng,
             cuisine,
             town,
-            toast_slug
+            toast_slug,
+            website_url,
+            phone
           )
         `)
         .eq('id', dishId)
