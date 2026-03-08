@@ -80,6 +80,19 @@ export const ALL_CATEGORIES = [
   { id: 'coffee', label: 'Coffee', emoji: '☕' },
   { id: 'cocktails', label: 'Cocktails', emoji: '🍸' },
   { id: 'ice cream', label: 'Ice Cream', emoji: '🍦' },
+  { id: 'bruschetta', label: 'Bruschetta', emoji: '🍞' },
+  { id: 'burrito', label: 'Burrito', emoji: '🌯' },
+  { id: 'calamari', label: 'Calamari', emoji: '🦑' },
+  { id: 'crab', label: 'Crab', emoji: '🦀' },
+  { id: 'curry', label: 'Curry', emoji: '🍛' },
+  { id: 'lobster', label: 'Lobster', emoji: '🦞' },
+  { id: 'mussels', label: 'Mussels', emoji: '🐚' },
+  { id: 'onion rings', label: 'Onion Rings', emoji: '🧅' },
+  { id: 'pancakes', label: 'Pancakes', emoji: '🥞' },
+  { id: 'scallops', label: 'Scallops', emoji: '🐚' },
+  { id: 'shrimp', label: 'Shrimp', emoji: '🦐' },
+  { id: 'waffles', label: 'Waffles', emoji: '🧇' },
+  { id: 'wrap', label: 'Wrap', emoji: '🌯' },
 ]
 
 // Fuzzy match a search term to existing categories
@@ -133,69 +146,46 @@ export function getCategoryEmoji(id) {
   return category?.emoji || '🍽️'
 }
 
-// Category image mappings — dark mode (Island Depths)
-const CATEGORY_IMAGES_DARK = {
-  pizza: '/categories/pizza.png',
-  burger: '/categories/burgers.png',
-  taco: '/categories/tacos.png',
-  wings: '/categories/wings.png',
-  sushi: '/categories/sushi.png',
-  breakfast: '/categories/breakfast.png',
-  'lobster roll': '/categories/lobster-rolls.png',
-  seafood: '/categories/seafood.png',
-  chowder: '/categories/chowder.png',
-  pasta: '/categories/pasta.png',
-  steak: '/categories/steak.png',
-  sandwich: '/categories/sandwiches.png',
-  salad: '/categories/salads.png',
-  tendys: '/categories/tendys.png',
-  dessert: '/categories/desserts.png',
-  fish: '/categories/fish.png',
-  clams: '/categories/clams.png',
-  chicken: '/categories/chicken.png',
-  pork: '/categories/pork.png',
+// Hand-drawn poster icons — WGH Icon System v1.0
+// Coral fill + black outlines + white details
+// See ICON-SPEC.md for the full spec
+const CATEGORY_IMAGES = {
+  pizza: '/categories/icons/pizza.png',
+  burger: '/categories/icons/burger.png',
+  wings: '/categories/icons/wings.png',
+  breakfast: '/categories/icons/breakfast.png',
+  'lobster roll': '/categories/icons/lobster-roll.png',
+  chowder: '/categories/icons/chowder.png',
+  steak: '/categories/icons/steak.png',
+  sandwich: '/categories/icons/sandwich.png',
+  salad: '/categories/icons/salad.png',
+  taco: '/categories/icons/taco.png',
+  pasta: '/categories/icons/pasta.png',
+  seafood: '/categories/icons/seafood.png',
+  sushi: '/categories/icons/sushi.png',
+  tendys: '/categories/icons/tendys.png',
+  dessert: '/categories/icons/dessert.png',
+  fish: '/categories/icons/fish.png',
+  clams: '/categories/icons/clams.png',
+  chicken: '/categories/icons/chicken.png',
+  pork: '/categories/icons/pork.png',
+  'fried chicken': '/categories/icons/fried-chicken.png',
+  'breakfast sandwich': '/categories/icons/breakfast-sandwich.png',
+  soup: '/categories/icons/soup.png',
+  fries: '/categories/icons/fries.png',
+  ribs: '/categories/icons/ribs.png',
+  quesadilla: '/categories/icons/quesadilla.png',
 }
 
-// Category image mappings — light mode (Appetite)
-// As light icons are generated, add them here. Falls back to dark if missing.
-const CATEGORY_IMAGES_LIGHT = {
-  pizza: '/categories/pizza-light.png',
-  burger: '/categories/burgers-light.png',
-  seafood: '/categories/seafood-light.png',
-  wings: '/categories/wings-light.png',
-  sushi: '/categories/sushi-light.png',
-  breakfast: '/categories/breakfast-light.png',
-  'lobster roll': '/categories/lobster-rolls-light.png',
-  chowder: '/categories/chowder-light.png',
-  pasta: '/categories/pasta-light.png',
-  steak: '/categories/steak-light.png',
-  sandwich: '/categories/sandwiches-light.png',
-  salad: '/categories/salads-light.png',
-  taco: '/categories/tacos-light.png',
-  tendys: '/categories/tendys-light.png',
-  dessert: '/categories/desserts-light.png',
-  fish: '/categories/fish-light.png',
-  clams: '/categories/clams-light.png',
-  chicken: '/categories/chicken-light.png',
-  pork: '/categories/pork-light.png',
-}
-
-// Get category image path for current theme
-// Checks document theme attribute, falls back to dark images
+// Get category image path (light mode only)
 export function getCategoryNeonImage(id) {
   if (!id) return null
-  const key = id.toLowerCase()
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
-  if (isDark && CATEGORY_IMAGES_DARK[key]) {
-    return CATEGORY_IMAGES_DARK[key]
-  }
-  return CATEGORY_IMAGES_LIGHT[key] || CATEGORY_IMAGES_DARK[key] || null
+  return CATEGORY_IMAGES[id.toLowerCase()] || null
 }
 
 // Preload category images for smooth Browse page loading
 export function preloadCategoryImages() {
-  const images = { ...CATEGORY_IMAGES_DARK, ...CATEGORY_IMAGES_LIGHT }
-  Object.values(images).forEach(src => {
+  Object.values(CATEGORY_IMAGES).forEach(src => {
     const img = new Image()
     img.src = src
   })
@@ -238,6 +228,19 @@ export const CATEGORY_INFO = {
   'coffee': { emoji: '☕', label: 'Coffee' },
   'cocktails': { emoji: '🍸', label: 'Cocktails' },
   'ice cream': { emoji: '🍦', label: 'Ice Cream' },
+  'bruschetta': { emoji: '🍞', label: 'Bruschetta' },
+  'burrito': { emoji: '🌯', label: 'Burrito' },
+  'calamari': { emoji: '🦑', label: 'Calamari' },
+  'crab': { emoji: '🦀', label: 'Crab' },
+  'curry': { emoji: '🍛', label: 'Curry' },
+  'lobster': { emoji: '🦞', label: 'Lobster' },
+  'mussels': { emoji: '🐚', label: 'Mussels' },
+  'onion rings': { emoji: '🧅', label: 'Onion Rings' },
+  'pancakes': { emoji: '🥞', label: 'Pancakes' },
+  'scallops': { emoji: '🐚', label: 'Scallops' },
+  'shrimp': { emoji: '🦐', label: 'Shrimp' },
+  'waffles': { emoji: '🧇', label: 'Waffles' },
+  'wrap': { emoji: '🌯', label: 'Wrap' },
 }
 
 // Get category info with fuzzy matching
