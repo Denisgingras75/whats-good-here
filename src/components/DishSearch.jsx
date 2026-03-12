@@ -161,11 +161,12 @@ export function DishSearch({ loading = false, placeholder = "Find What's Good ne
     <div className="relative w-full">
       {/* Search Input */}
       <div
-        className="relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
+        className="relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200"
         style={{
-          background: 'var(--color-surface-elevated)',
-          border: isFocused ? '2px solid var(--color-primary)' : '1.5px solid var(--color-divider)',
+          background: 'var(--color-surface)',
+          border: isFocused ? '1.5px solid var(--color-primary)' : '1.5px solid var(--color-divider)',
           minHeight: '48px',
+          boxShadow: isFocused ? '0 0 0 3px rgba(232, 163, 23, 0.1)' : 'none',
         }}
       >
         <svg

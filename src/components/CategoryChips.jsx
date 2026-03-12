@@ -1,19 +1,9 @@
 import { useRef, useEffect } from 'react'
 import { BROWSE_CATEGORIES } from '../constants/categories'
-import { CategoryIcon } from './home/CategoryIcons'
 
 /**
  * CategoryChips — horizontal scrollable category filter.
- *
- * Props:
- *   categories      - array of { id, label, emoji } (default: BROWSE_CATEGORIES)
- *   selected        - currently selected category id (null = "All")
- *   onSelect        - callback(categoryId | null)
- *   showAll         - show "All" chip (default: true)
- *   sticky          - add sticky positioning (default: false)
- *   maxVisible      - max categories to show (default: 12)
- *   townPicker      - optional ReactNode rendered as first item
- *   townPickerOpen  - when true, hides category chips (town pills take over the row)
+ * Uses emoji icons for clean, universal rendering on any theme.
  */
 export function CategoryChips({
   categories = BROWSE_CATEGORIES,
@@ -28,7 +18,6 @@ export function CategoryChips({
   var visibleCategories = categories.slice(0, maxVisible)
   var scrollRef = useRef(null)
 
-  // Scroll back to start when town picker closes
   useEffect(function () {
     if (!townPickerOpen && scrollRef.current) {
       scrollRef.current.scrollLeft = 0
@@ -47,9 +36,9 @@ export function CategoryChips({
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           WebkitOverflowScrolling: 'touch',
-          minHeight: '72px',
+          minHeight: '68px',
           touchAction: 'pan-x pan-y',
-          gap: '2px',
+          gap: '0',
         }}
       >
         {townPicker && (
@@ -65,26 +54,42 @@ export function CategoryChips({
               onClick={function () { onSelect(isActive ? null : cat.id) }}
               className="flex-shrink-0 flex flex-col items-center justify-center"
               style={{
-                padding: '4px 8px',
-                minWidth: '58px',
-                fontSize: '10px',
-                fontFamily: "'Outfit', sans-serif",
-                fontWeight: isActive ? 700 : 500,
-                letterSpacing: '0.02em',
+                padding: '6px 10px',
+                minWidth: '56px',
                 background: 'transparent',
-                color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                borderRadius: '12px',
-                transition: 'color 0.15s ease',
+                transition: 'opacity 0.15s ease',
+                opacity: selected && !isActive ? 0.4 : 1,
               }}
             >
-              <CategoryIcon categoryId={cat.id} size={46} />
+              {/* Emoji icon */}
               <span style={{
-                marginTop: 3,
+                fontSize: '28px',
+                lineHeight: 1,
+                display: 'block',
+              }}>
+                {cat.emoji || '🍽️'}
+              </span>
+              {/* Label */}
+              <span style={{
+                marginTop: '4px',
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: '10px',
+                fontWeight: isActive ? 700 : 500,
+                letterSpacing: '0.02em',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                 lineHeight: 1.2,
-                borderBottom: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
-                paddingBottom: '2px',
-                transition: 'border-color 0.15s ease',
+                whiteSpace: 'nowrap',
               }}>{cat.label}</span>
+              {/* Active indicator dot */}
+              {isActive && (
+                <div style={{
+                  width: '4px',
+                  height: '4px',
+                  borderRadius: '50%',
+                  background: 'var(--color-primary)',
+                  marginTop: '3px',
+                }} />
+              )}
             </button>
           )
         })}
