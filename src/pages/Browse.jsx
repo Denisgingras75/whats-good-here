@@ -1,3 +1,4 @@
+import { CaretLeft, CaretDown, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -458,9 +459,7 @@ export function Browse() {
               className="p-1 -ml-1 rounded-lg transition-opacity hover:opacity-70"
               aria-label="Back to home"
             >
-              <svg className="w-5 h-5" style={{ color: 'var(--color-text-secondary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
+              <CaretLeft size={20} weight="bold" style={{ color: 'var(--color-text-secondary)' }} />
             </button>
             {selectedCategory && !debouncedSearchQuery.trim() && (
               <>
@@ -536,16 +535,7 @@ export function Browse() {
                   border: searchFocused ? '2px solid var(--color-primary)' : '2px solid var(--color-divider)',
                 }}
               >
-                <svg
-                  className="w-5 h-5 flex-shrink-0"
-                  style={{ color: 'var(--color-text-tertiary)' }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <MagnifyingGlass size={20} weight="duotone" className="flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }} />
                 <input
                   ref={searchInputRef}
                   id="browse-search"
@@ -584,16 +574,7 @@ export function Browse() {
                     onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-elevated)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
-                    <svg
-                      className="w-4 h-4"
-                      style={{ color: 'var(--color-text-tertiary)' }}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X size={16} weight="bold" style={{ color: 'var(--color-text-tertiary)' }} />
                   </button>
                 )}
               </div>
@@ -686,16 +667,7 @@ export function Browse() {
                   }}
                 >
                   <span>{radius} mi</span>
-                  <svg
-                    aria-hidden="true"
-                    className="w-3 h-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    style={{ color: 'var(--color-text-tertiary)' }}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <CaretDown size={12} weight="bold" aria-hidden="true" style={{ color: 'var(--color-text-tertiary)' }} />
                 </button>
 
                 {/* Sort dropdown */}
