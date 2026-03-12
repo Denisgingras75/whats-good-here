@@ -31,29 +31,29 @@
    Coral primary, gold accents, quiet chrome, loud votes
    =========================== */
 :root {
-  --color-primary: #C2410C;
-  --color-primary-muted: rgba(194, 65, 12, 0.10);
-  --color-primary-glow: rgba(194, 65, 12, 0.20);
-  --color-rating: #15803D;
-  --color-accent-gold: #B8860B;
-  --color-accent-gold-muted: rgba(184, 134, 11, 0.12);
-  --color-link-secondary: #B8860B;
-  --color-accent-orange: #C2410C;
-  --color-accent-yellow: #B8860B;
-  --color-text-primary: #1C1917;
-  --color-text-secondary: #57534E;
-  --color-text-tertiary: #A8A29E;
-  --color-bg: #FAF7F2;
-  --color-surface: #F5F0E8;
-  --color-surface-elevated: #FFFBF5;
-  --color-divider: #E7E0D5;
-  --color-category-strip: #F5F0E8;
-  --color-card: #FFFBF5;
+  --color-primary: #B91C1C;
+  --color-primary-muted: rgba(185, 28, 28, 0.10);
+  --color-primary-glow: rgba(185, 28, 28, 0.20);
+  --color-rating: #16A34A;
+  --color-accent-gold: #A16207;
+  --color-accent-gold-muted: rgba(161, 98, 7, 0.12);
+  --color-link-secondary: #A16207;
+  --color-accent-orange: #B91C1C;
+  --color-accent-yellow: #A16207;
+  --color-text-primary: #0C0A09;
+  --color-text-secondary: #44403C;
+  --color-text-tertiary: #78716C;
+  --color-bg: #E8E0D4;
+  --color-surface: #DDD5C8;
+  --color-surface-elevated: #FFFFFF;
+  --color-divider: #C4B8A8;
+  --color-category-strip: #DDD5C8;
+  --color-card: #FFFFFF;
   --color-card-hover: #F5F0E8;
-  --color-card-border: #E7E0D5;
-  --color-medal-gold: #B8860B;
-  --color-medal-silver: #78716C;
-  --color-medal-bronze: #92400E;
+  --color-card-border: #C4B8A8;
+  --color-medal-gold: #A16207;
+  --color-medal-silver: #57534E;
+  --color-medal-bronze: #7C2D12;
   --color-danger: #B91C1C;
   --color-success: #15803D;
   --color-success-light: #F0FFF4;
@@ -109,26 +109,26 @@ body::after {
    Dark mode with ocean island vibes
    =========================== */
 [data-theme="dark"] {
-  --color-primary: #D97706;
-  --color-primary-muted: rgba(217, 119, 6, 0.15);
-  --color-primary-glow: rgba(217, 119, 6, 0.3);
-  --color-rating: #6BB384;
-  --color-accent-gold: #D4A853;
-  --color-accent-gold-muted: rgba(212, 168, 83, 0.15);
-  --color-link-secondary: #D4A853;
-  --color-accent-yellow: #F5B731;
-  --color-accent-orange: #D97706;
-  --color-text-primary: #F5F0E8;
-  --color-text-secondary: #BDB5A8;
-  --color-text-tertiary: #7D756A;
-  --color-bg: #12100E;
-  --color-surface: #1C1917;
-  --color-surface-elevated: #272420;
-  --color-divider: rgba(212, 168, 83, 0.12);
-  --color-category-strip: #1C1917;
-  --color-card: #272420;
-  --color-card-hover: #332E28;
-  --color-card-border: rgba(212, 168, 83, 0.15);
+  --color-primary: #EF4444;
+  --color-primary-muted: rgba(239, 68, 68, 0.15);
+  --color-primary-glow: rgba(239, 68, 68, 0.3);
+  --color-rating: #4ADE80;
+  --color-accent-gold: #FBBF24;
+  --color-accent-gold-muted: rgba(251, 191, 36, 0.15);
+  --color-link-secondary: #FBBF24;
+  --color-accent-yellow: #FBBF24;
+  --color-accent-orange: #EF4444;
+  --color-text-primary: #FAFAF9;
+  --color-text-secondary: #D6D3D1;
+  --color-text-tertiary: #78716C;
+  --color-bg: #0A0A0A;
+  --color-surface: #141414;
+  --color-surface-elevated: #1C1C1C;
+  --color-divider: rgba(251, 191, 36, 0.10);
+  --color-category-strip: #141414;
+  --color-card: #1C1C1C;
+  --color-card-hover: #262626;
+  --color-card-border: rgba(251, 191, 36, 0.15);
   --color-medal-gold: #D4A853;
   --color-medal-silver: #A8B5BF;
   --color-medal-bronze: #C4855C;
@@ -141,9 +141,9 @@ body::after {
   --color-muted: #6B7680;
   --color-text-tagline: #C08B7A;
   --color-text-on-primary: #F5F0E8;
-  --glow-primary: 0 0 20px rgba(217, 119, 6, 0.25), 0 0 40px rgba(217, 119, 6, 0.1);
-  --glow-gold: 0 0 15px rgba(212, 168, 83, 0.2);
-  --focus-ring: 0 0 0 3px rgba(217, 119, 6, 0.25);
+  --glow-primary: 0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.1);
+  --glow-gold: 0 0 15px rgba(251, 191, 36, 0.25);
+  --focus-ring: 0 0 0 3px rgba(239, 68, 68, 0.3);
 }
 
 @tailwind base;
@@ -200,7 +200,7 @@ body::after {
   }
 
   [data-theme="light"] .glass-header {
-    background: rgba(250, 247, 242, 0.95);
+    background: rgba(232, 224, 212, 0.95);
   }
 
   .card-elevated {
@@ -252,8 +252,8 @@ body::after {
   }
 
   [data-theme="light"] .top-bar {
-    background: #FFFBF5;
-    border-bottom: 1px solid #E7E0D5;
+    background: #FFFFFF;
+    border-bottom: 1px solid #C4B8A8;
     box-shadow: none;
   }
 
