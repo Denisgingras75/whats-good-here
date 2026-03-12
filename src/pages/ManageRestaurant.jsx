@@ -5,6 +5,7 @@ import { useRestaurantManager } from '../hooks/useRestaurantManager'
 import { restaurantManagerApi } from '../api/restaurantManagerApi'
 import { logger } from '../utils/logger'
 import { SpecialsManager, DishesManager, EventsManager, RestaurantInfoEditor } from '../components/restaurant-admin'
+import { CaretLeft } from '@phosphor-icons/react'
 
 export function ManageRestaurant() {
   const navigate = useNavigate()
@@ -223,9 +224,7 @@ export function ManageRestaurant() {
             className="w-10 h-10 rounded-full flex items-center justify-center"
             style={{ color: 'var(--color-text-primary)' }}
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <CaretLeft size={24} weight="bold" />
           </button>
           <div>
             <h1 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>

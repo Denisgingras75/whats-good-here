@@ -7,6 +7,7 @@ import { ThumbsUpIcon } from '../components/ThumbsUpIcon'
 import { ThumbsDownIcon } from '../components/ThumbsDownIcon'
 import { CameraIcon } from '../components/CameraIcon'
 import { WghLogo } from '../components/WghLogo'
+import { CaretLeft } from '@phosphor-icons/react'
 
 // SECURITY: Email is NOT persisted to storage to prevent XSS exposure of PII
 
@@ -182,9 +183,7 @@ export function Login() {
             className="flex items-center gap-2 text-sm font-medium"
             style={{ color: 'var(--color-text-secondary)' }}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <CaretLeft size={20} weight="bold" />
             Back
           </button>
         </header>

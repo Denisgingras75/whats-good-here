@@ -6,6 +6,7 @@ import { restaurantsApi } from '../api/restaurantsApi'
 import { adminApi } from '../api/adminApi'
 import { restaurantManagerApi } from '../api/restaurantManagerApi'
 import { ALL_CATEGORIES } from '../constants/categories'
+import { CaretLeft } from '@phosphor-icons/react'
 
 export function Admin() {
   const navigate = useNavigate()
@@ -333,9 +334,7 @@ export function Admin() {
               className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
               style={{ color: 'var(--color-text-primary)' }}
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
+              <CaretLeft size={24} weight="bold" />
             </button>
             <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
               Admin - {editingDishId ? 'Edit Dish' : 'Add Dishes'}

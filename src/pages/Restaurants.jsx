@@ -11,6 +11,7 @@ import { AddRestaurantModal } from '../components/AddRestaurantModal'
 import { getRatingColor } from '../utils/ranking'
 import { placesApi } from '../api/placesApi'
 import { logger } from '../utils/logger'
+import { MagnifyingGlass, CaretDown, CaretRight, Plus } from '@phosphor-icons/react'
 
 export function Restaurants() {
   var user = useAuth().user
@@ -92,18 +93,13 @@ export function Restaurants() {
       >
         {/* Search bar */}
         <div className="relative">
-          <svg
+          <MagnifyingGlass
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2"
+            size={20}
+            weight="duotone"
+            className="absolute left-3 top-1/2 -translate-y-1/2"
             style={{ color: 'var(--color-text-tertiary)' }}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-          </svg>
+          />
           <input
             id="restaurant-search"
             name="restaurant-search"
@@ -151,9 +147,7 @@ export function Restaurants() {
             }}
           >
             {radius} mi
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
+            <CaretDown size={10} weight="bold" />
           </button>
         </div>
 
@@ -304,9 +298,7 @@ export function Restaurants() {
                     </div>
 
                     {/* Chevron */}
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                    </svg>
+                    <CaretRight size={20} weight="bold" className="flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }} />
                   </div>
                 </button>
               )
@@ -400,9 +392,7 @@ export function Restaurants() {
             boxShadow: '0 4px 16px rgba(217, 167, 101, 0.4)',
           }}
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
+          <Plus size={16} weight="bold" />
           Add a restaurant
         </button>
       )}
@@ -477,9 +467,7 @@ function NearbyPlaceCard({ place, onAdd }) {
             border: '1px solid rgba(217, 167, 101, 0.2)',
           }}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
+          <Plus size={14} weight="bold" />
           Add to WGH
         </button>
       </div>

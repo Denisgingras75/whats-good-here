@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { CaretLeft } from '@phosphor-icons/react'
 
 export function Terms() {
   const navigate = useNavigate()
@@ -13,9 +14,7 @@ export function Terms() {
             className="flex items-center gap-1 text-sm font-medium"
             style={{ color: 'var(--color-primary)' }}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <CaretLeft size={20} weight="bold" />
             Back
           </button>
           <h1 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>

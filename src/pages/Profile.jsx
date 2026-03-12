@@ -21,6 +21,7 @@ import {
   JournalFeed,
   SharePicksButton,
 } from '../components/profile'
+import { CaretRight } from '@phosphor-icons/react'
 
 const SHELVES = [
   { id: 'all', label: 'All' },
@@ -378,9 +379,7 @@ export function Profile() {
                     Tap to rate your dishes
                   </p>
                 </div>
-                <svg className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--color-text-on-primary-muted, rgba(255, 255, 255, 0.6))' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <CaretRight size={20} weight="bold" className="flex-shrink-0" style={{ color: 'var(--color-text-on-primary-muted, rgba(255, 255, 255, 0.6))' }} />
               </button>
             </div>
           )}
