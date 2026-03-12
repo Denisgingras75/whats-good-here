@@ -85,7 +85,7 @@ export const DishListItem = memo(function DishListItem({
     <button
       data-dish-id={dishId}
       onClick={handleClick}
-      className={'w-full text-left active:scale-[0.98]' + (isPodium ? ' rounded-xl' : '')}
+      className={'w-full text-left active:opacity-85' + (isPodium ? ' rounded-xl' : '')}
       style={{
         background: highlighted
           ? 'var(--color-accent-gold-muted)'
@@ -95,6 +95,7 @@ export const DishListItem = memo(function DishListItem({
         padding: isPodium ? '14px 12px' : '10px 12px',
         cursor: 'pointer',
         transition: 'background 1s ease-out',
+        borderLeft: rank === 1 ? '3px solid var(--color-medal-gold)' : rank === 2 ? '3px solid var(--color-medal-silver)' : rank === 3 ? '3px solid var(--color-medal-bronze)' : 'none',
         borderBottom: !isPodium && !isLast ? '1px solid var(--color-divider)' : 'none',
       }}
     >
@@ -106,8 +107,9 @@ export const DishListItem = memo(function DishListItem({
           style={{
             width: isPodium ? '36px' : '32px',
             textAlign: 'center',
-            fontSize: isPodium ? '26px' : '16px',
-            fontWeight: 800,
+            fontFamily: isPodium ? "'Playfair Display', Georgia, serif" : 'inherit',
+            fontSize: isPodium ? '28px' : '16px',
+            fontWeight: isPodium ? 900 : 800,
             letterSpacing: '-0.02em',
             color: rank === 1
               ? 'var(--color-medal-gold)'
@@ -145,8 +147,9 @@ export const DishListItem = memo(function DishListItem({
         <p
           className="font-bold truncate"
           style={{
-            fontSize: isPodium ? '17px' : '15px',
-            fontWeight: isPodium ? 800 : 700,
+            fontFamily: isPodium ? "'Playfair Display', Georgia, serif" : 'inherit',
+            fontSize: isPodium ? '18px' : '15px',
+            fontWeight: isPodium ? 700 : 700,
             color: 'var(--color-text-primary)',
             lineHeight: 1.3,
             letterSpacing: '-0.01em',

@@ -550,7 +550,7 @@ export function Dish() {
             <div className="flex items-start justify-between gap-3">
               <h1
                 style={{
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "'Playfair Display', Georgia, serif",
                   fontWeight: 800,
                   fontSize: '22px',
                   letterSpacing: '-0.02em',
@@ -620,7 +620,7 @@ export function Dish() {
                 <div className="flex items-baseline gap-2">
                   <span
                     style={{
-                      fontFamily: "'DM Sans', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontWeight: 800,
                       fontSize: '40px',
                       lineHeight: 1,

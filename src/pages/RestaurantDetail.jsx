@@ -204,6 +204,8 @@ export function RestaurantDetail() {
             <h2
               className="font-bold truncate"
               style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontWeight: 700,
                 color: 'var(--color-text-primary)',
                 fontSize: '20px',
                 letterSpacing: '-0.02em',

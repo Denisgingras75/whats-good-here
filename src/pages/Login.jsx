@@ -198,7 +198,7 @@ export function Login() {
               </div>
               <h1
                 style={{
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "'Playfair Display', Georgia, serif",
                   fontSize: '32px',
                   fontWeight: 700,
                   color: 'var(--color-primary)',
